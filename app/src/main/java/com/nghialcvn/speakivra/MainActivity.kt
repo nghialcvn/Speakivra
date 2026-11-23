@@ -58,7 +58,7 @@ private val aiLines = listOf(
 )
 
 
-private const val APP_VERSION = "0.1.1"
+private const val APP_VERSION = "0.1.2"
 private const val RELEASE_API = "https://api.github.com/repos/nghialcvn/Speakivra/releases/latest"
 private const val RELEASE_URL = "https://github.com/nghialcvn/Speakivra/releases"
 private data class AppRelease(val version: String, val notes: String, val apkAvailable: Boolean)
@@ -232,7 +232,7 @@ private fun SpeakivraApp() {
                     Text("SPEAKIVRA", color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
                     Text("Listen. Speak. Improve.", color = Muted, fontSize = 12.sp)
                 }
-                Text("V0.1.1 • BETA", color = Mint, fontSize = 12.sp)
+                Text("V0.1.2 • BETA", color = Mint, fontSize = 12.sp)
             }
             Column(
                 modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),

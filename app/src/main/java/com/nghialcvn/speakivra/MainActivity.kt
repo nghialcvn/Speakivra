@@ -429,6 +429,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                         speech.speak("Hello! Welcome to Speakivra!", playbackSpeed, voiceChoice.copy(voiceId = id))
                                     } else status = "Không tìm thấy giọng này trên thiết bị."
                                 },
+                                onPreviewDefault = {
+                                    stopCapture(); speech.speak("Hello! How are you?", playbackSpeed, VoiceChoice())
+                                },
                                 onResetDefault = {
                                     stopCapture(); speech.stop()
                                     voiceChoice = VoiceChoices.resetBundled(preferences)

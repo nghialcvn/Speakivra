@@ -22,6 +22,21 @@ internal val DarkStudio = StudioColors(Color(0xFF211D24), Color(0xFF2C2730), Col
     Color(0xFFD0C5D2), Color(0xFF514750), Color(0xFF4B302A), Color(0xFF3C304F),
     Color(0xFF263F32), coral = Color(0xFFFF9A85), coralLight = Color(0xFFE77761),
     green = Color(0xFFA6E6BA), purple = Color(0xFFD3BDF5))
+/** Approved third appearance. Light/Dark palettes remain unchanged. */
+internal val NeonStudio = StudioColors(
+    background = Color(0xFF071126),
+    card = Color(0xFF13213C),
+    ink = Color(0xFFF3F6FF),
+    muted = Color(0xFFB2C1DE),
+    border = Color(0xFF34466A),
+    peach = Color(0xFF15365C),
+    lavender = Color(0xFF1B2C54),
+    mint = Color(0xFF103B48),
+    coral = Color(0xFF35B7FF),
+    coralLight = Color(0xFF5474FF),
+    green = Color(0xFF82EBC4),
+    purple = Color(0xFFB79CF5)
+)
 internal val LocalStudioColors = staticCompositionLocalOf { LightStudio }
 internal val studio: StudioColors @Composable get() = LocalStudioColors.current
 
@@ -48,9 +63,13 @@ private val StudioTypography = Typography(
     labelSmall = BaseTypography.labelSmall.copy(fontFamily = Nunito)
 )
 @Composable
-internal fun SpeakivraTheme(dark: Boolean, content: @Composable () -> Unit) {
-    val p = if (dark) DarkStudio else LightStudio
-    val scheme = if (dark) darkColorScheme(primary = p.coral, onPrimary = p.background,
+internal fun SpeakivraTheme(dark: Boolean, neon: Boolean = false, content: @Composable () -> Unit) {
+    val p = when {
+        neon -> NeonStudio
+        dark -> DarkStudio
+        else -> LightStudio
+    }
+    val scheme = if (dark || neon) darkColorScheme(primary = p.coral, onPrimary = p.background,
         secondary = p.green, background = p.background, onBackground = p.ink, surface = p.card,
         onSurface = p.ink, onSurfaceVariant = p.muted, outline = p.border)
     else lightColorScheme(primary = p.coral, onPrimary = Color.White, secondary = p.green,

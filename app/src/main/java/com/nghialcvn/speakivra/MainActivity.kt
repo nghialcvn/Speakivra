@@ -124,10 +124,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
             val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
             SpeakivraTheme(dark) {
                 val palette = studio
-                SideEffect { (context as? ComponentActivity)?.let {
-            val neon = page == "voice-settings"
-            updateSystemBars(it, dark || neon, if (neon) Color(0xFF071126) else palette.background)
-        } }
+                SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
                 Surface(color = palette.background, contentColor = palette.ink) {
                     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
@@ -311,7 +308,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     }
     SpeakivraTheme(dark) {
         val palette = studio
-        SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
+        SideEffect { (context as? ComponentActivity)?.let {
+            val neon = page == "voice-settings"
+            updateSystemBars(it, dark || neon, if (neon) Color(0xFF071126) else palette.background)
+        } }
         val available = updateState.release
         if (page == "home" && available != null && available.versionCode > installation.versionCode &&
             available.canInstallOver(installation) && dismissedUpdate != available.versionCode) {

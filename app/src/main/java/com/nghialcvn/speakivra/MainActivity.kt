@@ -124,7 +124,10 @@ private fun SpeakivraApp(updates: InAppUpdates) {
             val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
             SpeakivraTheme(dark) {
                 val palette = studio
-                SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
+                SideEffect { (context as? ComponentActivity)?.let {
+            val neon = page == "voice-settings"
+            updateSystemBars(it, dark || neon, if (neon) Color(0xFF071126) else palette.background)
+        } }
                 Surface(color = palette.background, contentColor = palette.ink) {
                     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
@@ -284,12 +287,28 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         playbackSpeed = value
         preferences.edit().putInt("playback_speed", value).apply()
     }
+    fun changeVoice(accent: String = voiceChoice.accent, gender: String = voiceChoice.gender) {
+        stopCapture(); speech.stop()
+        voiceChoice = VoiceChoices.select(preferences, accent, gender)
+        transcript = ""
+        status = ""
+    }
     fun navigate(destination: String) {
         stopCapture(); speech.stop()
         transcript = ""
         page = if (destination == "repeat") progress.phase else destination
     }
-    BackHandler(enabled = page != "home") { navigate(if (page in listOf("updates", "edit-profile")) "profile" else "home") }
+    fun openVoiceSettings() {
+        voiceReturnPage = page
+        navigate("voice-settings")
+    }
+    BackHandler(enabled = page != "home") {
+        navigate(when (page) {
+            "voice-settings" -> voiceReturnPage
+            "updates", "edit-profile" -> "profile"
+            else -> "home"
+        })
+    }
     SpeakivraTheme(dark) {
         val palette = studio
         SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }

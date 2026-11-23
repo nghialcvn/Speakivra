@@ -503,7 +503,13 @@ private fun SettingsRow(icon: String, label: String, value: String, onClick: (()
 @Composable
 internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onEditLearner: () -> Unit, onTheme: (Boolean) -> Unit,
                            onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit,
-                           voiceChoice: VoiceChoice = VoiceChoice()) {
+                           voiceChoice: VoiceChoice = VoiceChoice(),
+                           neon: Boolean = false, onNeon: () -> Unit = {}) {
+    if (neon) {
+        NeonProfileScreen(speed, goal, version, learner, voiceChoice, onSwitchLearner, onEditLearner,
+            onTheme, onNeon, onVoice, onSpeed, onGoal, onUpdates)
+        return
+    }
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         PageHeading("Cá nhân & cài đặt")

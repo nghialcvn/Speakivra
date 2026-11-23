@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -79,6 +80,14 @@ private fun UpdatesScreen(state: UpdateState, installation: Installation, onChec
                 } else Unit
                 else -> Unit
             }
+        }
+        if (state.release == null && !state.checking) {
+            val context = LocalContext.current
+            OutlinedButton(onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(RELEASES_URL))
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                runCatching { context.startActivity(intent) }
+            }) { Text("Mở GitHub Releases để tải thủ công") }
         }
         Text("Tải trực tiếp trong ứng dụng, kiểm tra APK và chữ ký rồi mở trình cài đặt Android. Bạn xác nhận cài đặt; không cần tìm file trong thư mục tải xuống. Không gỡ app để giữ tiến độ học.", color = p.muted, fontSize = 12.sp)
     }

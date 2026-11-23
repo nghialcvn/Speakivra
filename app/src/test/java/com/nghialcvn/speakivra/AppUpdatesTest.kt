@@ -13,6 +13,27 @@ class AppUpdatesTest {
         .put("applicationId", "com.nghialcvn.speakivra").put("signingCertificateSha256", certificate)
         .put("apkName", "Speakivra.apk").put("apkSha256", "cd".repeat(32))
 
+    @Test fun validatedFallbackIndexKeepsExactSignedReleaseIdentity() {
+        val raw = JSONObject().put("release", release()).put("metadata", metadata()).toString()
+        val item = parseFallbackIndex(raw)
+        assertEquals("0.1.3", item.version)
+        assertEquals(4L, item.versionCode)
+        assertTrue(item.apkUrl.contains("/v0.1.3-beta/"))
+        assertEquals(certificate, item.certificate)
+    }
+    @Test fun fallbackRejectsUnverifiedOrMismatchedRelease() {
+        val wrong = JSONObject().put("release", release("v0.1.99-beta")).put("metadata", metadata())
+        assertThrows(IllegalArgumentException::class.java) {
+            parseFallbackIndex(wrong.toString())
+        }
+        val fake = JSONObject().put("release", release(
+            url = "https://example.com/Speakivra.apk"
+        )).put("metadata", metadata())
+        assertThrows(IllegalArgumentException::class.java) {
+            parseFallbackIndex(fake.toString())
+        }
+    }
+
     @Test fun publicBetaCanBeUpdatedUsingAndroidVersionCode() {
         val item = releaseFromMetadata(release(), metadata())
         assertEquals(4L, item.versionCode)

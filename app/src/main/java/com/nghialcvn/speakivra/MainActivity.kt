@@ -359,13 +359,14 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, finalTranscript.orEmpty(), status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
-                                onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next)
+                                onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next,
+                                voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings)
                             "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, finalTranscript.orEmpty(), capturePhase, status, learner,
                                 nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
                                 }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
                                 onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
-                                onTranslation = { showTranslation = !showTranslation }, onNext = {
+                                onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings, onNext = {
                                     stopCapture(); speech.stop()
                                     if (progress.phase in listOf("repeat", "chat")) {
                                         saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase
@@ -437,7 +438,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
                                 onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
                                 onVoice = ::openVoiceSettings, onSpeed = { settingDialog = "speed" },
-                                onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() })
+                                onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() }, voiceChoice = voiceChoice)
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
                                 UpdatesScreen(updateState, installation, updates::check, ::beginUpdate, ::requestInstall, updates::cancel)

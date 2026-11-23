@@ -38,6 +38,17 @@ with zipfile.ZipFile(args.apk) as apk:
     for path in ["drawable-nodpi/speakivra_icon.webp", "mipmap-nodpi/ic_launcher.webp"]:
         expected_image = hashlib.sha256((root / "app/src/main/res" / path).read_bytes()).digest()
         assert expected_image in image_digests, f"Approved icon bytes missing from APK: {path}"
+# Generated neural lesson audio must survive release resource path optimization.
+speech_manifest = json.loads((root / "app/src/main/assets/speech/manifest.json").read_text())
+assert len(speech_manifest["clips"]) == 7, "Incomplete offline speech catalog"
+with zipfile.ZipFile(args.apk) as apk:
+    assert apk.read("assets/speech/manifest.json") == (root / "app/src/main/assets/speech/manifest.json").read_bytes()
+    audio_digests = {hashlib.sha256(apk.read(name)).hexdigest() for name in apk.namelist() if name.endswith(".ogg")}
+    for clip in speech_manifest["clips"]:
+        assert ":raw/" + clip["resource"] in resources, "Bundled speech resource missing"
+        source = root / "app/src/main/res/raw" / (clip["resource"] + ".ogg")
+        assert source.stat().st_size == clip["size"] and hashlib.sha256(source.read_bytes()).hexdigest() == clip["sha256"]
+        assert clip["sha256"] in audio_digests, "Bundled neural audio changed or missing"
 manifest = run("aapt", "dump", "xmltree", args.apk, "AndroidManifest.xml")
 for attribute in ["icon", "roundIcon"]:
     reference = re.search(r"android:" + attribute + r"\([^\n]*?\)=@(0x[0-9a-fA-F]+)", manifest)

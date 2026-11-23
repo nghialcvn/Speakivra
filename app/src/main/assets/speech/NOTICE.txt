@@ -1,0 +1,5 @@
+Speakivra bundled synthetic speech
+Generated locally from Speakivra lesson text with Kokoro-82M v1.0 (Apache-2.0), voice af_heart, via kokoro-onnx (MIT).
+Model: https://huggingface.co/hexgrad/Kokoro-82M
+Generation runtime: https://github.com/thewh1teagle/kokoro-onnx
+Only generated speech clips are bundled; neither model weights nor synthesis runtime are included.

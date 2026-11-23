@@ -1,0 +1,9 @@
+{
+  "voice_greeting": {"text":"Hello! How are you?", "context":"friendly greeting followed by a warm check-in", "parts":[{"text":"Hello!", "speed":1.02, "pause_ms":140},{"text":"How are you?", "speed":0.98}]},
+  "voice_thanks": {"text":"I'm fine, thank you.", "context":"warm and appreciative response", "parts":[{"text":"I'm fine, thank you.", "speed":0.98}]},
+  "voice_introduction": {"text":"My name is Alex.", "context":"clear and relaxed self-introduction", "parts":[{"text":"My name is Alex.", "speed":1.0}]},
+  "voice_welcome": {"text":"Nice to meet you!", "context":"pleased and welcoming", "parts":[{"text":"Nice to meet you!", "speed":1.0}]},
+  "voice_ask_name": {"text":"Hello! What's your name?", "context":"friendly opening then a curious question", "parts":[{"text":"Hello!", "speed":1.02, "pause_ms":160},{"text":"What's your name?", "speed":0.99}]},
+  "voice_ask_origin": {"text":"Nice to meet you! Where are you from?", "context":"welcoming someone before asking about their background", "parts":[{"text":"Nice to meet you!", "speed":1.0, "pause_ms":180},{"text":"Where are you from?", "speed":0.99}]},
+  "voice_ask_hobbies": {"text":"What do you like doing?", "context":"interested and relaxed conversation about hobbies", "parts":[{"text":"What do you like doing?", "speed":0.98}]}
+}

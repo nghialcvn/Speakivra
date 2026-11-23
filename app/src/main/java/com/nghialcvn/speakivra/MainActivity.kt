@@ -5,11 +5,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.activity.viewModels
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -151,28 +153,16 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
     var chatIndex by remember { mutableIntStateOf(0) }
-    var ttsReady by remember { mutableStateOf(false) }
-    val tts = remember {
-        TextToSpeech(context) { result ->
-            ttsReady = result == TextToSpeech.SUCCESS
+    val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
+    DisposableEffect(speech, context) {
+        val lifecycle = (context as? LifecycleOwner)?.lifecycle
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) speech.stop(true)
         }
+        lifecycle?.addObserver(observer)
+        onDispose { lifecycle?.removeObserver(observer); speech.close() }
     }
-    DisposableEffect(tts) {
-        onDispose { tts.stop(); tts.shutdown() }
-    }
-    fun speak(text: String) {
-        if (!ttsReady) {
-            val result = tts.setLanguage(Locale.US)
-            ttsReady = result >= TextToSpeech.LANG_AVAILABLE
-        }
-        if (ttsReady) {
-            // Keep the former 1x voice at the new 0.75x setting.
-            // Both lesson samples and scripted conversation use this calibrated rate.
-            tts.setSpeechRate(playbackSpeed / 75f)
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "speakivra")
-            status = "Đang phát câu mẫu"
-        } else status = "Thiết bị chưa có giọng đọc tiếng Anh-Mỹ. Kiểm tra cài đặt TTS."
-    }
+    fun speak(text: String) { speech.speak(text, playbackSpeed) }
     val speechLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val words = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
         transcript = words?.firstOrNull().orEmpty()
@@ -183,6 +173,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         else status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
+        speech.stop()
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             return
@@ -196,6 +187,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         catch (_: ActivityNotFoundException) { status = "Thiết bị chưa có dịch vụ nhận dạng giọng nói." }
     }
     fun next() {
+        speech.stop()
         if (index == phrases.lastIndex) {
             completed += 1
             preferences.edit().putInt("completed", completed).apply()

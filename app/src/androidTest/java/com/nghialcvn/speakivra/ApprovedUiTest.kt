@@ -41,7 +41,25 @@ class ApprovedUiTest {
         instrumentation.waitForIdleSync()
         // System UI uses a separate surface from Compose. Wait for its window events too.
         instrumentation.uiAutomation.waitForIdle(500, 5000)
-        val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        var bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        fun readableClock(image: Bitmap): Boolean {
+            if (name != "01-home" && name != "07-dark-settings") return true
+            val expectLight = name == "07-dark-settings"
+            var matching = 0
+            for (y in 10 until minOf(70, image.height)) for (x in 20 until image.width / 5) {
+                val pixel = image.getPixel(x, y)
+                val luma = (android.graphics.Color.red(pixel) + android.graphics.Color.green(pixel) + android.graphics.Color.blue(pixel)) / 3
+                if (if (expectLight) luma > 200 else luma < 128) matching++
+            }
+            return matching > 30
+        }
+        var attempts = 0
+        while (!readableClock(bitmap) && attempts++ < 4) {
+            bitmap.recycle()
+            instrumentation.uiAutomation.waitForIdle(500, 5000)
+            bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        }
+        check(readableClock(bitmap)) { "System clock contrast does not match the chosen theme: $name" }
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()

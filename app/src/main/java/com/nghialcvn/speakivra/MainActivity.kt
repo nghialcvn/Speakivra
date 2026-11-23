@@ -87,7 +87,16 @@ class MainActivity : ComponentActivity() {
     private val updates: InAppUpdates by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applySavedSystemBars()
         setContent { SpeakivraApp(updates) }
+    }
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) applySavedSystemBars()
+    }
+    private fun applySavedSystemBars() {
+        val dark = getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
+        updateSystemBars(this, dark, if (dark) DarkStudio.background else LightStudio.background)
     }
 }
 

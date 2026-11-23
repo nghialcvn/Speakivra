@@ -209,9 +209,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         preferences.edit().putInt("playback_speed", value).putInt("speed_calibration", 2).apply()
         mutableIntStateOf(value)
     }
+    var voiceChoice by remember(learner.id) { mutableStateOf(VoiceChoices.read(preferences)) }
+    var voiceReturnPage by rememberSaveable { mutableStateOf("profile") }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
-    var finalTranscript by remember(page, learner.name, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
+    var finalTranscript by remember(page, learner.name, voiceChoice.accent, voiceChoice.gender, voiceChoice.voiceId, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
     val wordMatch = matchWords(phrases[index].english, finalTranscript)
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
     var capturePhase by remember { mutableStateOf("idle") }
@@ -234,11 +236,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         lifecycle?.addObserver(observer)
         onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
-    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed) }
+    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed, voiceChoice) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
-        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start()
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag)
         else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
@@ -249,10 +251,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        } else capture.start()
+        } else capture.start(voiceChoice.languageTag)
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
-    DisposableEffect(page, lesson.id, progress.phrase, progress.turn, progress.review) {
+    DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review) {
         onDispose { stopCapture() }
     }
     fun next() {
@@ -388,7 +390,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             })
                             "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
                                 onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
-                                onVoice = { settingDialog = "voice" }, onSpeed = { settingDialog = "speed" },
+                                onVoice = ::openVoiceSettings, onSpeed = { settingDialog = "speed" },
                                 onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() })
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
@@ -397,7 +399,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         }
                     }
                 }
-                if (page !in listOf("repeat", "edit-profile")) StudioBottomNavigation(page, ::navigate)
+                if (page !in listOf("repeat", "edit-profile", "voice-settings")) StudioBottomNavigation(page, ::navigate)
             }
         }
     }

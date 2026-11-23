@@ -59,3 +59,7 @@ The avatar atlas has six equal 512px cells with centered faces, replacing tiny c
 Name templates are resolved from the selected learner for practice, conversations, translations and review content without changing lesson IDs or ordering. Renaming immediately updates these templates. Personalized sentences use the installed offline US-English TTS fallback rather than playing an Alex recording; other clips remain bundled. No new audio API or paid service is used. Matching folds Vietnamese diacritics and accepts I am / I'm as equivalent text for the personalized introduction.
 
 Final recognized words appear in a compact italic transcript row with a small square avatar below the practice microphone. Partial text is not shown in this row, and a new attempt/context clears it. The 60% rule remains unchanged and is not an acoustic pronunciation assessment.
+
+## Expanded A1 practice content (unreleased)
+
+The existing ten topics now include 120 practice phrases and 50 scripted conversation turns (12 phrases and 5 turns per topic). The original 80 phrases and first 30 turns retain their positions, lesson IDs, and original bundled neural speech clips. All 40 added practice lines and 20 new turn prompts use the existing on-device US-English TTS fallback until separately recorded neural clips are reviewed. The 30 meaning checks remain unchanged; no curriculum claims beyond A1. Existing learner preferences, completed rounds and update/signing settings are unchanged. This is source-only and is not yet a signed or Samsung-tested APK release.

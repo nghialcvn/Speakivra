@@ -4,7 +4,7 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.4 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
+**0.1.6 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
 The source version is not a claim that an APK has passed device testing or been released.
 
 Existing learning UI, approved logo and colors are preserved. The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. A1 sample lesson, US English TTS, Android speech recognition, Vietnamese translations and local progress are implemented. Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression, Light Mode, placement assessment and full curriculum remain incomplete.
@@ -12,9 +12,9 @@ Existing learning UI, approved logo and colors are preserved. The adaptive launc
 ## Updates and signing
 
 - Automatic startup check and manual check share update state.
-- Public beta releases are supported. The update dialog shows release notes and opens the official APK directly in the browser; Android requires installation confirmation.
-- Metadata checks package, versionCode and certificate before offering an update. Different signing keys block the install suggestion so users are not told to uninstall and lose data.
-- No install-packages permission, API keys or paid services.
+- Public beta releases are supported. The update dialog shows release notes, downloads the official APK inside the app with progress/cancel/retry, verifies its size, hash, package/version and signer, then opens the Android installer. Android requires source permission and installation confirmation.
+- Metadata checks package, versionCode and certificate before offering an update; downloaded bytes and actual APK identity are checked again before installation. Different signing keys block the install suggestion so users are not told to uninstall and lose data.
+- `REQUEST_INSTALL_PACKAGES` is used only for user-requested self-updates. A non-exported FileProvider grants read access only to the staged APK in `cache/updates/`. No storage permissions, API keys or paid services.
 - Fixed release signing uses GitHub Secrets. Releases fail closed when signing is absent or the certificate differs from the pinned fingerprint.
 - V0.1.2 used a runner debug key. Seamless migration to a different release key is **not verified or guaranteed**.
 

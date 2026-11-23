@@ -23,7 +23,7 @@ identity = re.search(r"package: name='([^']+)' versionCode='(\d+)' versionName='
 assert identity, "Cannot read APK identity"
 package, code, version = identity.groups()
 assert package == "com.nghialcvn.speakivra", "applicationId changed"
-assert "android.permission.REQUEST_INSTALL_PACKAGES" not in badging, "Unexpected installation permission"
+assert "android.permission.REQUEST_INSTALL_PACKAGES" in badging, "Native updater installation permission missing"
 assert "android.permission.RECORD_AUDIO" in badging and "android.permission.INTERNET" in badging
 resources = run("aapt", "dump", "resources", args.apk)
 # AAPT2 shortens release ZIP entry paths, while resource IDs and names stay stable.
@@ -42,6 +42,8 @@ manifest = run("aapt", "dump", "xmltree", args.apk, "AndroidManifest.xml")
 for attribute in ["icon", "roundIcon"]:
     reference = re.search(r"android:" + attribute + r"\([^\n]*?\)=@(0x[0-9a-fA-F]+)", manifest)
     assert reference and reference[1] in launcher_ids, f"Manifest {attribute} does not reference branded launcher"
+assert "androidx.core.content.FileProvider" in manifest, "Update FileProvider missing"
+assert ":xml/update_paths" in resources, "Update-only FileProvider path configuration missing"
 verification = run("apksigner", "verify", "--verbose", "--print-certs", args.apk)
 certificates = re.findall(r"Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)", verification)
 assert len(certificates) == 1, "Expected one APK signer"

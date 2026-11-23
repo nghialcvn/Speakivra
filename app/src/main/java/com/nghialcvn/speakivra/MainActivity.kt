@@ -1,11 +1,11 @@
 package com.nghialcvn.speakivra
 
 import android.Manifest
-import android.net.Uri
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import androidx.activity.viewModels
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -57,69 +57,90 @@ private val aiLines = listOf(
 
 private const val APP_VERSION = BuildConfig.VERSION_NAME
 
-private fun openApk(context: android.content.Context, url: String): Boolean {
-    if (!officialAsset(url)) return false
-    return try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        true
-    } catch (_: ActivityNotFoundException) { false }
-      catch (_: SecurityException) { false }
-}
-
 @Composable
-private fun UpdatesScreen(state: UpdateState, installation: Installation, onCheck: () -> Unit) {
-    val context = LocalContext.current
-    var downloadError by remember { mutableStateOf(false) }
+private fun UpdatesScreen(state: UpdateState, installation: Installation, onCheck: () -> Unit,
+                          onDownload: () -> Unit, onInstall: () -> Unit, onCancel: () -> Unit) {
     Panel {
         Text("Cập nhật ứng dụng", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Text("Phiên bản đang dùng: v$APP_VERSION", color = Mint)
         Text("Nguồn chính thức: github.com/nghialcvn/Speakivra/releases", color = Muted)
         Text(state.message, color = Muted)
-        PrimaryButton(if (state.checking) "Đang kiểm tra..." else "Kiểm tra bản cập nhật") {
-            if (!state.checking) onCheck()
+        if (state.phase in listOf("idle", "checking") && state.file == null) {
+            PrimaryButton(if (state.checking) "Đang kiểm tra..." else "Kiểm tra bản cập nhật") {
+                if (!state.checking) onCheck()
+            }
         }
         state.release?.let { item ->
             Text("Bản phát hành: v${item.version}", fontWeight = FontWeight.SemiBold)
             Text("Có gì mới:", color = Mint)
             Text(item.notes.ifBlank { "Chưa có ghi chú thay đổi." }, color = Muted)
-            if (item.versionCode > installation.versionCode && item.canInstallOver(installation)) {
-                PrimaryButton("Tải APK cập nhật") {
-                    downloadError = !openApk(context, item.apkUrl)
+            when (state.phase) {
+                "downloading" -> {
+                    val percent = (state.bytes * 100 / item.size.coerceAtLeast(1)).coerceIn(0, 100)
+                    LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth(), color = Mint)
+                    Text("Đang tải: $percent%", color = Mint)
+                    OutlinedButton(onClick = onCancel) { Text("Hủy tải") }
                 }
+                "verifying", "cancelling" -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Mint)
+                "permission" -> PrimaryButton("Cho phép và cài cập nhật", onInstall)
+                "downloaded" -> PrimaryButton("Cài cập nhật", onInstall)
+                "idle" -> if (item.versionCode > installation.versionCode && item.canInstallOver(installation)) {
+                    PrimaryButton("Tải và cập nhật", onDownload)
+                } else Unit
+                else -> Unit
             }
         }
-        if (downloadError) Text("Không mở được trình duyệt. Hãy kiểm tra trình duyệt mặc định rồi thử lại.", color = Muted)
-        Text("APK tải qua trình duyệt từ nguồn chính thức. Mở tệp tải xuống và xác nhận cài đặt trên Android. Không gỡ bản đang dùng để giữ tiến độ học.", color = Muted, fontSize = 12.sp)
+        Text("Tải trực tiếp trong ứng dụng, kiểm tra APK và chữ ký rồi mở trình cài đặt Android. Bạn xác nhận cài đặt; không cần tìm file trong thư mục tải xuống. Không gỡ app để giữ tiến độ học.", color = Muted, fontSize = 12.sp)
     }
 }
 
 class MainActivity : ComponentActivity() {
+    private val updates: InAppUpdates by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { SpeakivraApp() }
+        setContent { SpeakivraApp(updates) }
     }
 }
 
 @Composable
-private fun SpeakivraApp() {
+private fun SpeakivraApp(updates: InAppUpdates) {
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences("speakivra_progress", 0) }
     var page by rememberSaveable { mutableStateOf("home") }
-    val installation = remember { currentInstallation(context) }
+    val installation = updates.installation
+    val updateState = updates.state
     val updateScope = rememberCoroutineScope()
-    var updateState by remember { mutableStateOf(UpdateState()) }
     var dismissedUpdate by rememberSaveable { mutableLongStateOf(-1L) }
-    var updateDownloadError by remember { mutableStateOf(false) }
-    fun checkUpdates() {
-        if (updateState.checking) return
-        updateState = UpdateState(checking = true, message = "Đang kiểm tra cập nhật...")
+    val installLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        updates.installReturned()
+    }
+    fun launchInstaller() {
         updateScope.launch {
-            updateState = try { checkForUpdate(installation) }
+            try { installLauncher.launch(updates.prepareInstall()) }
             catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { UpdateState(message = "Không kiểm tra được cập nhật. Kiểm tra kết nối và thử lại.") }
+            catch (_: Exception) {
+                if (updates.state.file != null) updates.installReturned("Không mở được trình cài đặt. Bấm Cài cập nhật để thử lại.")
+            }
         }
     }
-    LaunchedEffect(Unit) { checkUpdates() }
+    val installPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (context.packageManager.canRequestPackageInstalls()) launchInstaller()
+        else updates.waitingForPermission()
+    }
+    fun requestInstall() {
+        page = "updates"
+        if (updateState.file == null) return
+        if (context.packageManager.canRequestPackageInstalls()) launchInstaller()
+        else {
+            updates.waitingForPermission()
+            try { installPermissionLauncher.launch(updates.permissionIntent()) }
+            catch (_: ActivityNotFoundException) { updates.installReturned("Không mở được cài đặt quyền. Vào Cài đặt Android → Cài ứng dụng không rõ nguồn → Speakivra.") }
+            catch (_: SecurityException) { updates.waitingForPermission() }
+        }
+    }
+    fun beginUpdate() { page = "updates"; updates.download() }
+    LaunchedEffect(Unit) { updates.checkOnce() }
+    LaunchedEffect(updateState.phase) { if (updateState.phase == "ready") requestInstall() }
     var index by remember { mutableIntStateOf(preferences.getInt("phrase", 0).coerceIn(0, phrases.lastIndex)) }
     var completed by remember { mutableIntStateOf(preferences.getInt("completed", 0)) }
     var automatic by remember { mutableStateOf(true) }
@@ -199,13 +220,12 @@ private fun SpeakivraApp() {
                     Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())) {
                         Text("Có gì mới", fontWeight = FontWeight.Bold)
                         Text(available.notes.ifBlank { "Cải tiến và sửa lỗi ứng dụng." })
-                        if (updateDownloadError) Text("Không mở được trình duyệt. Thử lại trong mục Cập nhật.")
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (openApk(context, available.apkUrl)) dismissedUpdate = available.versionCode
-                        else updateDownloadError = true
+                        dismissedUpdate = available.versionCode
+                        beginUpdate()
                     }) { Text("Cập nhật ngay") }
                 },
                 dismissButton = {
@@ -284,7 +304,7 @@ private fun SpeakivraApp() {
                         Text(status, color = Muted, fontSize = 13.sp)
                         PrimaryButton(if (index == phrases.lastIndex) "Hoàn thành • Sang hội thoại" else "Câu tiếp theo") { next() }
                     }
-                    "updates" -> { UpdatesScreen(updateState, installation, ::checkUpdates) }
+                    "updates" -> { UpdatesScreen(updateState, installation, updates::check, ::beginUpdate, ::requestInstall, updates::cancel) }
                     "chat" -> {
                         Panel {
                             Text("Emma • AI Tutor", fontSize = 21.sp, fontWeight = FontWeight.Bold)

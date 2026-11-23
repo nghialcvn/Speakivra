@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
@@ -23,17 +24,21 @@ internal data class AppRelease(
     val notes: String,
     val apkUrl: String,
     val packageName: String,
-    val certificate: String
+    val certificate: String,
+    val size: Long,
+    val sha256: String
 ) {
     fun canInstallOver(current: Installation): Boolean =
         packageName == current.packageName && certificate.equals(current.certificate, ignoreCase = true)
 }
 
 internal data class UpdateState(
-    val checking: Boolean = false,
+    val phase: String = "idle",
+    val bytes: Long = 0,
+    val file: File? = null,
     val message: String = "Chưa kiểm tra cập nhật.",
     val release: AppRelease? = null
-)
+) { val checking: Boolean get() = phase == "checking" }
 
 internal fun currentInstallation(context: Context): Installation {
     val manager = context.packageManager
@@ -71,11 +76,17 @@ internal fun releaseFromMetadata(release: JSONObject, metadata: JSONObject): App
     require(code > 0 && Regex("[0-9a-fA-F]{64}").matches(certificate)) { "Thông tin cập nhật không hợp lệ." }
     require(apkName.endsWith(".apk") && '/' !in apkName) { "Tên APK không hợp lệ." }
     val assets = release.getJSONArray("assets")
-    val apkUrl = (0 until assets.length()).map { assets.getJSONObject(it) }
-        .firstOrNull { it.optString("name") == apkName }?.optString("browser_download_url").orEmpty()
+    val asset = (0 until assets.length()).map { assets.getJSONObject(it) }
+        .singleOrNull { it.optString("name") == apkName } ?: error("Bản phát hành chưa có APK phù hợp.")
+    val apkUrl = asset.getString("browser_download_url")
+    val size = asset.getLong("size")
+    val sha256 = metadata.getString("apkSha256")
+    require(size in 1..UpdatePolicy.MAX_APK_BYTES && Regex("[0-9a-fA-F]{64}").matches(sha256)) { "Thiếu thông tin kiểm tra APK." }
+    val assetDigest = asset.optString("digest").removePrefix("sha256:")
+    require(assetDigest.isBlank() || assetDigest.equals(sha256, true)) { "Mã kiểm tra APK không khớp GitHub." }
     require(officialAsset(apkUrl) && apkUrl == "$ASSET_PREFIX$tag/$apkName") { "APK không thuộc nguồn chính thức." }
     return AppRelease(version, code, release.optString("body"), apkUrl,
-        metadata.getString("applicationId"), certificate)
+        metadata.getString("applicationId"), certificate, size, sha256.lowercase())
 }
 
 private fun requestJson(url: String): String? {

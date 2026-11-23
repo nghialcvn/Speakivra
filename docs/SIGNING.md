@@ -42,9 +42,15 @@ Sao lưu khóa và mật khẩu vào nơi riêng được mã hóa. SHA-256 ch�
 
 App kiểm tra danh sách release công khai khi mở, bao gồm prerelease beta. Có thể kiểm tra lại trong mục Cập nhật. Mất mạng không chặn học. Hộp thoại bản mới hiện ở Trang chủ để tránh ngắt lượt luyện nói.
 
-Metadata phải thuộc asset của chính repository và tag đó. App kiểm tra applicationId, versionCode và SHA-256 chứng thư theo metadata trước khi hiện nút cài đè. Đây là kiểm tra thông tin do nhà phát hành cung cấp, không phải xác minh mật mã tệp APK từ xa. Android xác minh chữ ký APK thực tế khi cài.
+Metadata phải thuộc asset của chính repository và tag đó. App kiểm tra applicationId, versionCode và SHA-256 chứng thư theo metadata trước khi hiện nút cập nhật. Từ V0.1.6, tệp tải về cũng được kiểm tra SHA-256 và đối chiếu danh tính APK/chứng thư với bản đang cài. Android xác minh mật mã chữ ký APK thực tế khi cài.
 
-Nút cập nhật mở trực tiếp URL APK trong trình duyệt. Sau khi tải, người dùng mở tệp và xác nhận cài đặt với Android. App không dùng `REQUEST_INSTALL_PACKAGES`, không cài ngầm. Không cần tìm hoặc giải nén ZIP trên GitHub.
+Từ V0.1.6, nút cập nhật tải APK trực tiếp vào `cache/updates/`, hiển thị phần trăm và cho hủy/thử lại. App đối chiếu dung lượng và SHA-256 với metadata, đọc applicationId/versionCode/versionName/chứng thư thực tế của APK để so với bản đang cài trước khi mở trình cài đặt.
+
+App dùng `REQUEST_INSTALL_PACKAGES` cho cập nhật do người dùng chủ động yêu cầu; không cài ngầm. Lần đầu Android có thể yêu cầu bật Cho phép từ nguồn này cho Speakivra. Sau khi quay về, app kiểm tra APK lại và mở trình cài đặt. Người dùng vẫn xác nhận cài đặt. FileProvider không export, chỉ chia sẻ quyền đọc tạm thời cho APK trong thư mục cập nhật; không xin quyền đọc/ghi bộ nhớ chung.
+
+Tải lỗi/hủy sẽ xóa tệp dở. APK đã tải và xác minh có thể được khôi phục sau khi process khởi động lại bằng nút Cài cập nhật; không tự mở installer lặp lại khi người dùng từ chối hoặc quay lại. Nếu cache bị Android dọn, app yêu cầu tải lại. Tải đang dở bị hệ thống dừng thì cần thử lại. Tiến độ học không bị xóa.
+
+V0.1.5 trở về trước cần tải V0.1.6 qua luồng trình duyệt cũ một lần; bản V0.1.6 không thay đổi ngược được app đã cài trước đó.
 
 ## Kiểm tra trên Samsung S24 Ultra
 

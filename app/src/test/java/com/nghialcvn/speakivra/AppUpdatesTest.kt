@@ -8,10 +8,10 @@ class AppUpdatesTest {
     private val certificate = "ab".repeat(32)
     private fun release(tag: String = "v0.1.3-beta", url: String = "https://github.com/nghialcvn/Speakivra/releases/download/$tag/Speakivra.apk") = JSONObject()
         .put("tag_name", tag).put("prerelease", true).put("body", "Cải tiến cập nhật")
-        .put("assets", org.json.JSONArray().put(JSONObject().put("name", "Speakivra.apk").put("browser_download_url", url)))
+        .put("assets", org.json.JSONArray().put(JSONObject().put("name", "Speakivra.apk").put("browser_download_url", url).put("size", 100)))
     private fun metadata() = JSONObject().put("versionName", "0.1.3").put("versionCode", 4)
         .put("applicationId", "com.nghialcvn.speakivra").put("signingCertificateSha256", certificate)
-        .put("apkName", "Speakivra.apk")
+        .put("apkName", "Speakivra.apk").put("apkSha256", "cd".repeat(32))
 
     @Test fun publicBetaCanBeUpdatedUsingAndroidVersionCode() {
         val item = releaseFromMetadata(release(), metadata())
@@ -42,4 +42,13 @@ class AppUpdatesTest {
             releaseFromMetadata(release(), metadata().put("signingCertificateSha256", "missing"))
         }
     }
+    @Test fun conflictingAssetDigestAndMissingSizeAreRejected() {
+        val conflicting = release()
+        conflicting.getJSONArray("assets").getJSONObject(0).put("digest", "sha256:" + "ef".repeat(32))
+        assertThrows(IllegalArgumentException::class.java) { releaseFromMetadata(conflicting, metadata()) }
+        val emptySize = release()
+        emptySize.getJSONArray("assets").getJSONObject(0).put("size", 0)
+        assertThrows(IllegalArgumentException::class.java) { releaseFromMetadata(emptySize, metadata()) }
+    }
+
 }

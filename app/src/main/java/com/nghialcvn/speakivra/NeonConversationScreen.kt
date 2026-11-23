@@ -169,7 +169,7 @@ internal fun NeonConversationScreen(
             ) {
                 StudioIcon("mic", Modifier.size(48.dp), Color.White)
             }
-            Text("🎤", fontSize = 22.sp, modifier = Modifier.clickable(onClick = onSpeak))
+            Spacer(Modifier.width(72.dp))
         }
         Text(captureLabel(capturePhase, "Nhấn để nói"),
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,

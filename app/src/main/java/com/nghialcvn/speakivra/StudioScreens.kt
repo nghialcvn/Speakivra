@@ -502,7 +502,8 @@ private fun SettingsRow(icon: String, label: String, value: String, onClick: (()
 }
 @Composable
 internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onEditLearner: () -> Unit, onTheme: (Boolean) -> Unit,
-                           onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit) {
+                           onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit,
+                           voiceChoice: VoiceChoice = VoiceChoice()) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         PageHeading("Cá nhân & cài đặt")
@@ -527,7 +528,7 @@ internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String
                 TwoChoices("Sáng", "Tối", !dark, { onTheme(!it) }, Modifier.width(130.dp))
             }
             HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("speaker", "Giọng mẫu", "Anh-Mỹ", onVoice)
+            SettingsRow("speaker", "Giọng đọc & Ngôn ngữ", "${voiceChoice.accentLabel} · ${voiceChoice.genderLabel}", onVoice)
             HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
             SettingsRow("gauge", "Tốc độ mặc định", speedLabel(speed), onSpeed)
             HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))

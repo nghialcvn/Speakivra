@@ -4,7 +4,7 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.11 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
+**0.1.12 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
 The source version is not a claim that an APK has passed device testing or been released.
 
 The user-approved warm light interface is implemented; the approved logo is preserved. See [approved design and behavior mapping](docs/design/APPROVED_LIGHT_UI.md). The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. Ten A1 practice lessons, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression and placement assessment and curricula beyond this initial A1 pack remain incomplete.
@@ -45,3 +45,9 @@ Repository stays public. Never commit signing keys, passwords, user data or API 
 Light mode is the default. The personal/settings page provides a saved warm dark option, speech rate and daily goal. Font and approved illustration assets are bundled; no new permissions or paid services.
 
 Speech capture uses SpeechRecognizer directly inside the approved learning screens, with partial/final transcripts, tap-to-stop and cancellation on navigation/background. No external recognition activity is opened. The configured Android provider may require network access; offline availability depends on its installed language models. Recognition does not save an audio recording or grade pronunciation.
+
+## Local learner profiles and word feedback (V0.1.12)
+
+Choose a learner at startup; add a name and one of the six approved avatars without a password. Each learner has a separate progress/settings preference file. The first learner uses the original progress file in place; no existing data is cleared. Appearance and update state remain app-wide. Switch learners from Personal/settings.
+
+Speaking Studio colors reference words using ordered matching of the final recognition result, with case/punctuation ignored. Extra recognized words cannot substitute for missing reference words. At least 60% unmatched reference words blocks Next; below 60% allows Next. No final result, an error, a new attempt, or a different phrase cannot reuse a previous pass. This is word recognition feedback, not acoustic pronunciation assessment. The approved legend and recognition transcript panel are absent.

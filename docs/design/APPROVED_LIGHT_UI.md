@@ -26,3 +26,9 @@ Font source: https://github.com/google/fonts/tree/main/ofl/nunito
 The optional `ui_check` manual workflow input runs instrumented UI checks on a disposable API 35 emulator before publishing. It captures real rendered screens, checks theme/speed controls and verifies that navigation preserves lesson position. It is off by default to avoid adding emulator cost to unrelated releases. Test fixture state is confined to the CI emulator; app update logic does not seed or clear learner data.
 
 A build with `ui_check` enabled intentionally stops at verified artifacts, so the rendered screens can be inspected before release. The separate manual Publish reviewed APK workflow reuses that exact APK without rebuilding; it requires a successful UI run at the current source commit, re-verifies the bytes and signing certificate, and publishes the direct APK. Ordinary small releases can still use the existing single build/publish path with `ui_check` off.
+
+## Approved extension — V0.1.12
+
+The revised four-screen demo, approved by the user, is bundled unchanged as approved_profiles_demo.png. Its exact six face regions are drawn by native Compose. The startup picker and name/avatar form use real profiles and saved progress; the sample people/progress from the demo are not seeded as fictitious data. Only the original learner Nghĩa is initialized to retain prior progress. The profile page provides Đổi người học.
+
+Speaking retains the existing composition, sample translation/controls, large mic, mint tip, result row and pinned Next. The color legend and recognized transcript card are removed per the revision. Reference words become green or red only after final recognition. The compact percentage/action row and honest word-recognition footer remain. Next is disabled at >=60% unmatched, until a final result exists, and while a capture is active. All other approved screens and branding remain unchanged.

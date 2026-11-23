@@ -15,6 +15,9 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +51,7 @@ internal fun CoralButton(label: String, modifier: Modifier = Modifier, enabled: 
         Text(label, color = if (enabled) Color.White else p.muted, fontSize = 17.sp,
             fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = if (chevron) 20.dp else 0.dp))
+        if (!enabled && label == "Cần nói lại") StudioIcon("lock", Modifier.size(19.dp).align(Alignment.CenterStart), p.muted)
         if (chevron) StudioIcon("chevron", Modifier.size(18.dp).align(Alignment.CenterEnd), if (enabled) Color.White else p.muted)
     }
 }
@@ -116,14 +120,14 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
     }
 }
 @Composable
-internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int,
+internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
                         onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Brand(Modifier.clickable(onClick = onProfile))
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Chào Nghĩa!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
+            Text("Chào $learnerName!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
             Text("Hôm nay, mình cùng luyện nói nhé.", color = p.muted, fontSize = 14.sp)
         }
         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(p.peach).padding(16.dp),
@@ -254,7 +258,7 @@ private fun DecorativeWave() {
 }
 @Composable
 internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic: Boolean, translation: Boolean,
-                            speed: Int, transcript: String, status: String, capturePhase: String, onBack: () -> Unit,
+                            speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,
                             onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
     val p = studio; val phrase = lesson.phrases[progress.phrase]
@@ -264,7 +268,13 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             TwoChoices("Tự động", "Thủ công", automatic, onMode, Modifier.fillMaxWidth())
             StudioCard {
-                Text(phrase.english, fontSize = 29.sp, lineHeight = 35.sp, textAlign = TextAlign.Center,
+                val colored = buildAnnotatedString {
+                    wordMatch.tokens.forEachIndexed { index, word ->
+                        if (index > 0) append(" ")
+                        withStyle(SpanStyle(color = if (!wordMatch.hasResult) p.ink else if (wordMatch.matched[index]) p.green else p.coral)) { append(word) }
+                    }
+                }
+                Text(colored, fontSize = 29.sp, lineHeight = 35.sp, textAlign = TextAlign.Center,
                     fontWeight = FontWeight.ExtraBold, modifier = Modifier.fillMaxWidth())
                 if (translation) Text(phrase.vietnamese, textAlign = TextAlign.Center, color = p.muted,
                     fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
@@ -308,16 +318,15 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                     }
                 }
             }
-            if (transcript.isNotBlank()) StudioCard {
-                Text("Máy nhận dạng được:", fontWeight = FontWeight.Bold)
-                Text(transcript)
-                val normalize: (String) -> String = { it.lowercase(java.util.Locale.US).replace(Regex("[^a-z ]"), "").trim() }
-                Text(if (normalize(phrase.english) == normalize(transcript)) "Nội dung khớp câu mẫu ✓" else "Nội dung khác câu mẫu. Thử nói lại nhé.", color = p.muted)
+            if (wordMatch.hasResult) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("Chưa khớp ${wordMatch.incorrect}/${wordMatch.tokens.size} từ · ${wordMatch.percent}%", color = p.coral, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.green else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
             }
-            Text("Nhận dạng lời nói, chưa chấm phát âm", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            if (status != "Nhấn Nghe mẫu để bắt đầu") Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            Text("Đối chiếu từ nhận dạng, chưa chấm phát âm.", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            if (capturePhase != "idle" || (!wordMatch.hasResult && status != "Nhấn Nghe mẫu để bắt đầu")) Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         }
-        CoralButton(if (progress.phrase == lesson.phrases.lastIndex) "Sang hội thoại" else "Câu tiếp theo", onClick = onNext)
+        val allowed = wordMatch.canContinue && capturePhase == "idle"
+        CoralButton(if (!allowed) "Cần nói lại" else if (progress.phrase == lesson.phrases.lastIndex) "Sang hội thoại" else "Câu tiếp theo", enabled = allowed, chevron = allowed, onClick = onNext)
     }
 }
 @Composable
@@ -425,20 +434,19 @@ private fun SettingsRow(icon: String, label: String, value: String, onClick: (()
     }
 }
 @Composable
-internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, onTheme: (Boolean) -> Unit,
+internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onTheme: (Boolean) -> Unit,
                            onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         PageHeading("Cá nhân & cài đặt")
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(17.dp)) {
-            Box(Modifier.size(76.dp).background(Brush.linearGradient(listOf(Color(0xFFFFA58D), Color(0xFFED725D))), CircleShape), Alignment.Center) {
-                Text("N", color = Color.White, fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
-            }
+            LearnerAvatar(learner.avatar, Modifier.size(76.dp))
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text("Nghĩa", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                Text(learner.name, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Học theo nhịp của bạn", color = p.muted, fontSize = 14.sp)
             }
         }
+        TextButton(onClick = onSwitchLearner) { Text("Đổi người học") }
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(p.card).border(1.dp, p.border, RoundedCornerShape(18.dp))) {
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StudioIcon("sun"); Text("Giao diện", Modifier.weight(1f), fontSize = 14.sp)

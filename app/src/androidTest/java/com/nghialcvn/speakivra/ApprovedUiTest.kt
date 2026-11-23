@@ -1,6 +1,8 @@
 package com.nghialcvn.speakivra
 
 import android.graphics.Bitmap
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -20,6 +22,7 @@ class ApprovedUiTest {
         override fun apply(base: Statement, description: Description) = object : Statement() {
             override fun evaluate() {
                 val context = InstrumentationRegistry.getInstrumentation().targetContext
+                context.getSharedPreferences("speakivra_learners", 0).edit().clear().commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
@@ -65,6 +68,9 @@ class ApprovedUiTest {
         bitmap.recycle()
     }
     @Test fun approvedScreensAndThemeAreInteractiveAndKeepLessonPosition() {
+        ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
+        shot("09-choose-learner")
+        ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
         ui.onNodeWithText("Câu 3/8").assertIsDisplayed()
         shot("01-home")
@@ -75,6 +81,8 @@ class ApprovedUiTest {
         ui.onNodeWithText("Chào hỏi").performScrollTo().performClick()
         ui.onNodeWithText("My name is Alex.").assertIsDisplayed()
         shot("03-speaking")
+        ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
+        ui.onNodeWithText("Máy nhận dạng được:").assertDoesNotExist()
         ui.onNodeWithText("Thủ công").performClick()
         ui.onNodeWithText("Thủ công").assertIsSelected()
         ui.onNodeWithText("1.25x").performClick()
@@ -110,5 +118,53 @@ class ApprovedUiTest {
         org.junit.Assert.assertEquals(2, preferences.getInt("lesson.greetings.phrase", -1))
         org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))
         org.junit.Assert.assertFalse(preferences.getBoolean("dark_theme", true))
+        // Add a real local learner, then verify both profiles remain isolated when switching.
+        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
+        ui.onNodeWithText("Thêm người học").performScrollTo().performClick()
+        ui.onNode(hasSetTextAction()).performTextInput("Linh")
+        ui.onNodeWithContentDescription("Avatar 2").assertIsSelected()
+        shot("10-create-learner")
+        ui.onNodeWithText("Lưu và bắt đầu").performClick()
+        ui.onNodeWithText("Chào Linh!").assertIsDisplayed()
+        ui.onNodeWithText("Câu 1/8").assertIsDisplayed()
+        val store = LearnerStore(ui.activity)
+        val newLearner = store.all().single { it.name == "Linh" }
+        org.junit.Assert.assertNotEquals("speakivra_progress", learnerPreferenceName(newLearner.id))
+        org.junit.Assert.assertEquals(2, preferences.getInt("lesson.greetings.phrase", -1))
+        ui.onNodeWithText("Cập nhật", substring = false).performClick()
+        ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
+        ui.onNodeWithText("Nghĩa", substring = false).performScrollTo().performClick()
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
+        ui.onNodeWithText("Câu 3/8").assertIsDisplayed()
+        org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))
+        // Recognition fixtures are confined to this test. The APK never supplies fake transcripts.
+        val result = mutableStateOf<String?>("my name is I like")
+        var nextCalls = 0
+        ui.runOnUiThread {
+            ui.activity.setContent {
+                SpeakivraTheme(false) {
+                    androidx.compose.material3.Surface {
+                        PracticeScreen(Lessons.all.first(), LessonProgress(phrase = 2), false, true,
+                            100, "", "", "idle", matchWords("My name is Alex.", result.value),
+                            onBack = {}, onMode = {}, onSpeed = {}, onTranslation = {}, onListen = {}, onSpeak = {}, onNext = { nextCalls++ })
+                    }
+                }
+            }
+        }
+        ui.onNodeWithText("Chưa khớp 1/4 từ · 25%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Câu tiếp theo").assertIsEnabled().performClick()
+        org.junit.Assert.assertEquals(1, nextCalls)
+        shot("11-speaking-pass")
+        ui.runOnIdle { result.value = "my family likes music" }
+        ui.onNodeWithText("Chưa khớp 3/4 từ · 75%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
+        ui.onNodeWithText("Máy nhận dạng được:").assertDoesNotExist()
+        shot("12-speaking-retry")
+        ui.runOnIdle { result.value = null }
+        ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
+        org.junit.Assert.assertEquals(1, nextCalls)
+
     }
 }

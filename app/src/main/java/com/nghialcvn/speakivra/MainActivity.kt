@@ -102,7 +102,40 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun SpeakivraApp(updates: InAppUpdates) {
     val context = LocalContext.current
-    val preferences = remember { context.getSharedPreferences("speakivra_progress", 0) }
+    val store = remember(context) { LearnerStore(context.applicationContext) }
+    var learners by remember { mutableStateOf(store.all()) }
+    var activeId by rememberSaveable { mutableStateOf<String?>(null) }
+    var lastId by rememberSaveable { mutableStateOf<String?>(null) }
+    var creating by rememberSaveable { mutableStateOf(false) }
+    val active = learners.firstOrNull { it.id == activeId }
+    if (active != null) {
+        key(active.id) { LearnerApp(updates, active) { lastId = active.id; activeId = null } }
+    } else {
+        val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
+        SpeakivraTheme(dark) {
+            val palette = studio
+            SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
+            Surface(color = palette.background, contentColor = palette.ink) {
+                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                    if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
+                        try {
+                            val learner = store.add(name, avatar)
+                            learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
+                            null
+                        } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
+                        catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
+                    }) else LearnerPicker(store, learners, lastId, onAdd = { creating = true }, onStart = { activeId = it.id; lastId = it.id })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner: () -> Unit) {
+    val context = LocalContext.current
+    val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
+    val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
     var page by rememberSaveable { mutableStateOf("home") }
     val installation = updates.installation
     val updateState = updates.state
@@ -166,14 +199,20 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
+    var finalTranscript by remember(page, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
+    val wordMatch = matchWords(phrases[index].english, finalTranscript)
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
     var capturePhase by remember { mutableStateOf("idle") }
     var pendingMicrophone by remember { mutableStateOf(false) }
-    val capture = remember(context) { SpeechCapture(context.applicationContext) { phase, words, message ->
+    val captureUpdate by rememberUpdatedState(newValue = { phase: String, words: String?, message: String ->
         capturePhase = phase
-        if (words != null) transcript = words
+        if (words != null) {
+            transcript = words
+            if (phase == "idle") finalTranscript = words.takeIf { it.isNotBlank() }
+        }
         status = message
-    } }
+    })
+    val capture = remember(context) { SpeechCapture(context.applicationContext) { phase, words, message -> captureUpdate(phase, words, message) } }
     fun stopCapture() { pendingMicrophone = false; capture.cancel() }
     DisposableEffect(speech, capture, context) {
         val lifecycle = (context as? LifecycleOwner)?.lifecycle
@@ -194,6 +233,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         if (capture.phase == "listening") { capture.stop(); return }
         if (capture.phase == "processing" || pendingMicrophone) return
         stopCapture(); speech.stop()
+        finalTranscript = null
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -204,6 +244,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         onDispose { stopCapture() }
     }
     fun next() {
+        if (!wordMatch.canContinue || capture.phase != "idle") return
         stopCapture(); speech.stop()
         saveProgress(progress.nextPhrase(lesson))
         transcript = ""
@@ -221,7 +262,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         page = saved.phase
         if (automatic && page == "repeat") speak(item.phrases[saved.phrase].english)
     }
-    var dark by rememberSaveable { mutableStateOf(preferences.getBoolean("dark_theme", false)) }
+    var dark by rememberSaveable { mutableStateOf(appearance.getBoolean("dark_theme", false)) }
     var goal by rememberSaveable { mutableIntStateOf(preferences.getInt("daily_goal", 20).takeIf { it in listOf(10, 15, 20, 30) } ?: 20) }
     var settingDialog by rememberSaveable { mutableStateOf("") }
     fun selectSpeed(value: Int) {
@@ -277,11 +318,11 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                     // Each screen owns its scroll area; speaking/review keep the next action visible.
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
                         when (page) {
-                            "home" -> HomeScreen(lesson, progress, goal, completed,
+                            "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onChat = { navigate("chat") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson)
-                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status, capturePhase,
+                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status, capturePhase, wordMatch,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next)
@@ -327,8 +368,8 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                                 if (following != null) CoralButton("Bài tiếp theo: ${lessonLabel(following)}", onClick = { openLesson(following) })
                                 TextButton(onClick = { navigate("lessons") }) { Text("Về danh sách bài học") }
                             }
-                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION,
-                                onTheme = { dark = it; preferences.edit().putBoolean("dark_theme", it).apply() },
+                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
+                                onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
                                 onVoice = { settingDialog = "voice" }, onSpeed = { settingDialog = "speed" },
                                 onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() })
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {

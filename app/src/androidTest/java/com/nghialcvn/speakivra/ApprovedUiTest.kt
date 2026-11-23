@@ -34,6 +34,11 @@ class ApprovedUiTest {
     private fun shot(name: String) {
         ui.waitForIdle()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        // Semantics can settle before the compositor submits the new screen. PixelCopy
+        // waits for a real Compose frame before the full-window screenshot is taken.
+        val rendered = ui.onRoot().captureToImage()
+        check(rendered.width > 0 && rendered.height > 0)
+        instrumentation.waitForIdleSync()
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -70,6 +75,10 @@ class ApprovedUiTest {
         shot("06-settings")
         ui.onNodeWithText("Tối", substring = false).performClick()
         ui.onNodeWithText("Tối", substring = false).assertIsSelected()
+        ui.runOnIdle {
+            val activity = ui.activity
+            org.junit.Assert.assertFalse(androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView).isAppearanceLightStatusBars)
+        }
         shot("07-dark-settings")
         ui.onNodeWithText("Sáng", substring = false).performClick()
         ui.onNodeWithText("Sáng", substring = false).assertIsSelected()

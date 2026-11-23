@@ -32,7 +32,7 @@ internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 
 @Composable
 internal fun StudioCard(modifier: Modifier = Modifier, color: Color = studio.card,
                         border: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.clip(RoundedCornerShape(18.dp)).background(color)
+    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(color)
         .then(if (border) Modifier.border(1.dp, studio.border, RoundedCornerShape(18.dp)) else Modifier)
         .padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
 }
@@ -79,7 +79,7 @@ private fun ApprovedArtwork(headphones: Boolean, modifier: Modifier = Modifier) 
     val bitmap = ImageBitmap.imageResource(R.drawable.approved_light_demo)
     Canvas(modifier) {
         drawImage(bitmap, srcOffset = if (headphones) IntOffset(319, 271) else IntOffset(123, 767),
-            srcSize = if (headphones) IntSize(79, 74) else IntSize(100, 85),
+            srcSize = if (headphones) IntSize(79, 74) else IntSize(128, 79),
             dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()), filterQuality = FilterQuality.High)
     }
 }
@@ -90,8 +90,10 @@ internal fun SectionPill(text: String, color: Color = studio.peach, ink: Color =
 }
 @Composable
 internal fun StudioProgress(value: Float, modifier: Modifier = Modifier) {
-    LinearProgressIndicator(progress = { value.coerceIn(0f, 1f) }, color = studio.coral,
-        trackColor = studio.border, modifier = modifier.fillMaxWidth().height(7.dp).clip(CircleShape))
+    val progress = value.coerceIn(0f, 1f)
+    Box(modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(studio.border).progressSemantics(progress)) {
+        Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(studio.coral, CircleShape))
+    }
 }
 @Composable
 internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) {
@@ -325,7 +327,7 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Emma • Luyện hội thoại", onBack = onBack)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { SectionPill("Mô phỏng theo kịch bản") }
-        ApprovedArtwork(false, Modifier.size(105.dp, 90.dp).clip(RoundedCornerShape(28.dp)))
+        ApprovedArtwork(false, Modifier.size(128.dp, 79.dp).clip(RoundedCornerShape(28.dp)))
         StudioCard(color = p.lavender, border = false) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {

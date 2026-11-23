@@ -71,16 +71,12 @@ private fun SpeakivraApp() {
     var chatIndex by remember { mutableIntStateOf(0) }
     var ttsReady by remember { mutableStateOf(false) }
     val tts = remember {
-        TextToSpeech(context) { /* initialization result is checked via language availability below */ }
+        TextToSpeech(context) { result ->
+            ttsReady = result == TextToSpeech.SUCCESS
+        }
     }
     DisposableEffect(tts) {
-        val listener = TextToSpeech.OnInitListener { }
-        // Keep the engine instance scoped to this screen.
         onDispose { tts.stop(); tts.shutdown() }
-    }
-    LaunchedEffect(tts) {
-        ttsReady = tts.isLanguageAvailable(Locale.US) >= TextToSpeech.LANG_AVAILABLE
-        if (ttsReady) tts.language = Locale.US
     }
     fun speak(text: String) {
         if (!ttsReady) {

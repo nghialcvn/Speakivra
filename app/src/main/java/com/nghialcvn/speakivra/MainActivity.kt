@@ -390,10 +390,15 @@ private fun updateSystemBars(activity: ComponentActivity, dark: Boolean, color: 
     val transparent = android.graphics.Color.TRANSPARENT
     val style = if (dark) SystemBarStyle.dark(transparent) else SystemBarStyle.light(transparent, transparent)
     activity.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+    // Keep the window behind transparent Android 15 system bars in the chosen theme,
+    // including when the learner picker is replaced by the learning composition.
+    activity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(color.toArgb()))
+    activity.window.decorView.setBackgroundColor(color.toArgb())
     activity.window.statusBarColor = color.toArgb()
     activity.window.navigationBarColor = color.toArgb()
     WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
         isAppearanceLightStatusBars = !dark
         isAppearanceLightNavigationBars = !dark
     }
+    activity.window.decorView.requestApplyInsets()
 }

@@ -2,6 +2,8 @@ package com.nghialcvn.speakivra
 
 import android.graphics.Bitmap
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -59,13 +61,15 @@ class ApprovedUiTest {
         var attempts = 0
         while (!readableClock(bitmap) && attempts++ < 4) {
             bitmap.recycle()
+            ui.onRoot().captureToImage()
             instrumentation.uiAutomation.waitForIdle(500, 5000)
             bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         }
-        check(readableClock(bitmap)) { "System clock contrast does not match the chosen theme: $name" }
+        val clockReadable = readableClock(bitmap)
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
+        check(clockReadable) { "System clock contrast does not match the chosen theme: $name" }
     }
     @Test fun approvedScreensAndThemeAreInteractiveAndKeepLessonPosition() {
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
@@ -123,6 +127,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithText("Thêm người học").performScrollTo().performClick()
         ui.onNode(hasSetTextAction()).performTextInput("Linh")
+        ui.onNode(hasSetTextAction()).performImeAction()
         ui.onNodeWithContentDescription("Avatar 2").assertIsSelected()
         shot("10-create-learner")
         ui.onNodeWithText("Lưu và bắt đầu").performClick()
@@ -145,7 +150,7 @@ class ApprovedUiTest {
         ui.runOnUiThread {
             ui.activity.setContent {
                 SpeakivraTheme(false) {
-                    androidx.compose.material3.Surface {
+                    androidx.compose.material3.Surface(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         PracticeScreen(Lessons.all.first(), LessonProgress(phrase = 2), false, true,
                             100, "", "", "idle", matchWords("My name is Alex.", result.value),
                             onBack = {}, onMode = {}, onSpeed = {}, onTranslation = {}, onListen = {}, onSpeak = {}, onNext = { nextCalls++ })

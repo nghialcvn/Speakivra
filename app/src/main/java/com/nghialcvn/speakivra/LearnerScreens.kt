@@ -3,6 +3,11 @@ package com.nghialcvn.speakivra
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -68,6 +73,8 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
 @Composable
 internal fun CreateLearnerScreen(onBack: () -> Unit, onSave: (String, Int) -> String?) {
     val p = studio
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
     var name by rememberSaveable { mutableStateOf("") }
     var avatar by rememberSaveable { mutableIntStateOf(1) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
@@ -77,6 +84,8 @@ internal fun CreateLearnerScreen(onBack: () -> Unit, onSave: (String, Int) -> St
             PageHeading("Tạo hồ sơ", onBack = onBack)
             Text("Tên người học", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
             OutlinedTextField(value = name, onValueChange = { if (it.length <= 30 && it.none { c -> c.isISOControl() }) name = it; error = null },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focus.clearFocus(); keyboard?.hide() }),
                 singleLine = true, label = { Text("Tên người học") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
             Text("Chọn avatar", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
             LearnerAvatar(avatar, Modifier.align(Alignment.CenterHorizontally).size(130.dp).border(2.dp, p.coral, CircleShape).padding(6.dp))
@@ -96,6 +105,6 @@ internal fun CreateLearnerScreen(onBack: () -> Unit, onSave: (String, Int) -> St
             Text("Mỗi hồ sơ có tiến độ riêng", color = p.muted, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
         }
-        CoralButton("Lưu và bắt đầu", enabled = name.isNotBlank(), onClick = { error = onSave(name, avatar) })
+        CoralButton("Lưu và bắt đầu", enabled = name.isNotBlank(), onClick = { focus.clearFocus(); keyboard?.hide(); error = onSave(name, avatar) })
     }
 }

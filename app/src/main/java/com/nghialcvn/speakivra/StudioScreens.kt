@@ -532,6 +532,9 @@ internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StudioIcon("sun"); Text("Giao diện", Modifier.weight(1f), fontSize = 14.sp)
                 TwoChoices("Sáng", "Tối", !dark, { onTheme(!it) }, Modifier.width(130.dp))
+                TextButton(onClick = onNeon) {
+                    Text("Neon", color = studio.coral, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                }
             }
             HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
             SettingsRow("speaker", "Giọng đọc & Ngôn ngữ", "${voiceChoice.accentLabel} · ${voiceChoice.genderLabel}", onVoice)

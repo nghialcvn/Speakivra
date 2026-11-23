@@ -25,16 +25,23 @@ package, code, version = identity.groups()
 assert package == "com.nghialcvn.speakivra", "applicationId changed"
 assert "android.permission.REQUEST_INSTALL_PACKAGES" not in badging, "Unexpected installation permission"
 assert "android.permission.RECORD_AUDIO" in badging and "android.permission.INTERNET" in badging
+resources = run("aapt", "dump", "resources", args.apk)
+# AAPT2 shortens release ZIP entry paths, while resource IDs and names stay stable.
+for name in ["mipmap/ic_launcher", "drawable/ic_launcher_foreground", "drawable/speakivra_icon"]:
+    assert ":" + name in resources, f"Missing branded resource: {name}"
+launcher_ids = set(re.findall(r"resource\s+(0x[0-9a-fA-F]+)\s+[^\s]*:mipmap/ic_launcher\b", resources))
+assert len(launcher_ids) == 1, "Cannot resolve launcher icon resource ID"
 with zipfile.ZipFile(args.apk) as apk:
-    for resource in ["res/mipmap-anydpi-v26/ic_launcher.xml", "res/drawable/ic_launcher_foreground.xml",
-                     "res/drawable-nodpi-v4/speakivra_icon.webp", "res/mipmap-nodpi-v4/ic_launcher.webp"]:
-        assert resource in apk.namelist(), f"Missing branded icon: {resource}"
+    image_digests = {hashlib.sha256(apk.read(name)).digest() for name in apk.namelist()
+                     if name.startswith("res/") and name.endswith(".webp")}
     root = Path(__file__).resolve().parents[1]
-    for path, resource in [("drawable-nodpi/speakivra_icon.webp", "res/drawable-nodpi-v4/speakivra_icon.webp"),
-                           ("mipmap-nodpi/ic_launcher.webp", "res/mipmap-nodpi-v4/ic_launcher.webp")]:
-        assert apk.read(resource) == (root / "app/src/main/res" / path).read_bytes(), "Icon bytes changed"
+    for path in ["drawable-nodpi/speakivra_icon.webp", "mipmap-nodpi/ic_launcher.webp"]:
+        expected_image = hashlib.sha256((root / "app/src/main/res" / path).read_bytes()).digest()
+        assert expected_image in image_digests, f"Approved icon bytes missing from APK: {path}"
 manifest = run("aapt", "dump", "xmltree", args.apk, "AndroidManifest.xml")
-assert 'android:icon' in manifest and 'android:roundIcon' in manifest, "Launcher icons not registered"
+for attribute in ["icon", "roundIcon"]:
+    reference = re.search(r"android:" + attribute + r"\([^\n]*?\)=@(0x[0-9a-fA-F]+)", manifest)
+    assert reference and reference[1] in launcher_ids, f"Manifest {attribute} does not reference branded launcher"
 verification = run("apksigner", "verify", "--verbose", "--print-certs", args.apk)
 certificates = re.findall(r"Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)", verification)
 assert len(certificates) == 1, "Expected one APK signer"

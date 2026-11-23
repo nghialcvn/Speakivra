@@ -4,10 +4,10 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.7 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
+**0.1.8 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
 The source version is not a claim that an APK has passed device testing or been released.
 
-Existing learning UI, approved logo and colors are preserved. The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. A1 sample lesson, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression, Light Mode, placement assessment and full curriculum remain incomplete.
+Existing learning UI, approved logo and colors are preserved. The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. Ten A1 practice lessons, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression, Light Mode, placement assessment and curricula beyond this initial A1 pack remain incomplete.
 
 ## Updates and signing
 
@@ -37,3 +37,7 @@ Application ID remains `com.nghialcvn.speakivra`. Progress remains in `speakivra
 Microphone permission is requested when practicing speech. Speech recognition providers may need a network connection and handle audio remotely. No AI backend is enabled. Update checks contact GitHub; the current installation certificate and progress are compared locally and are not uploaded.
 
 Repository stays public. Never commit signing keys, passwords, user data or API keys.
+
+## A1 lesson pack
+
+10 topics, 80 practice phrases, 30 scripted conversation turns, 30 meaning checks and 110 bundled voice clips. Each lesson saves its own progress. See [lesson content and migration](docs/LESSONS.md). Conversations remain scripted; review results are not pronunciation scores.

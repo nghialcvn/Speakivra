@@ -16,8 +16,8 @@ class SpeechProfilesTest {
         }
     }
     @Test fun allCurrentLessonAndConversationLinesHaveDistinctBundledResources() {
-        assertEquals(7, SpeechProfiles.catalog.size)
-        assertEquals(7, SpeechProfiles.catalog.map { it.clip }.distinct().size)
+        assertEquals(110, SpeechProfiles.catalog.size)
+        assertEquals(110, SpeechProfiles.catalog.map { it.clip }.distinct().size)
         assertTrue(SpeechProfiles.catalog.all { it.clip?.startsWith("voice_") == true })
     }
     @Test fun playbackSpeedsStayOrderedAndPreserveTheChosenRelativeSpeed() {

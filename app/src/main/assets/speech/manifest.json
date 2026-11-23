@@ -15,7 +15,8 @@
       "context": "friendly greeting followed by a warm check-in",
       "duration_seconds": 2.124,
       "size": 17085,
-      "sha256": "18c2198891161132f0d3ddeda7957085fa67673caf507656e8e57cabaad6d4e1"
+      "sha256": "18c2198891161132f0d3ddeda7957085fa67673caf507656e8e57cabaad6d4e1",
+      "profile_sha256": "48699cc5b043788c0b9e6113f1701fa54db8ebef1fc7cb8864741c377c3f6f59"
     },
     {
       "resource": "voice_thanks",
@@ -23,7 +24,8 @@
       "context": "warm and appreciative response",
       "duration_seconds": 1.444,
       "size": 13648,
-      "sha256": "b14edf7f9445532676d369de94fcf57f0332f0df18eb33bd84e6138aa4d60fcf"
+      "sha256": "b14edf7f9445532676d369de94fcf57f0332f0df18eb33bd84e6138aa4d60fcf",
+      "profile_sha256": "34845f122408cd52368f96283ddfc5f98b578ef64c30f360c38c30d18eb9634b"
     },
     {
       "resource": "voice_introduction",
@@ -31,7 +33,8 @@
       "context": "clear and relaxed self-introduction",
       "duration_seconds": 1.444,
       "size": 14161,
-      "sha256": "7bbb1480817e35abb0c6f630c36e5a085b0f3514b218b02974459b3d7f042015"
+      "sha256": "7bbb1480817e35abb0c6f630c36e5a085b0f3514b218b02974459b3d7f042015",
+      "profile_sha256": "68e003a7b7775653fb7d07da059c3e26e1161217d30b193494702df70d89674c"
     },
     {
       "resource": "voice_welcome",
@@ -39,7 +42,8 @@
       "context": "pleased and welcoming",
       "duration_seconds": 1.285,
       "size": 13065,
-      "sha256": "ebfcfcbc94bd2f00703c4f0c729e99552a80f8a69186decb1c81abda34c17a28"
+      "sha256": "ebfcfcbc94bd2f00703c4f0c729e99552a80f8a69186decb1c81abda34c17a28",
+      "profile_sha256": "6aff11c375fa2604c45e512531dec61772d0cd10b0877a1c4d85b91dd81e208a"
     },
     {
       "resource": "voice_ask_name",
@@ -47,7 +51,8 @@
       "context": "friendly opening then a curious question",
       "duration_seconds": 2.165,
       "size": 17536,
-      "sha256": "216137a9d95389c8d7f6172d25cda035ce8568e283a156242942dc5d3a96bf59"
+      "sha256": "216137a9d95389c8d7f6172d25cda035ce8568e283a156242942dc5d3a96bf59",
+      "profile_sha256": "e4e7a63e6fb9641fcbe5aea0f38dc7fad259992b08f84c11f32d3f2b07c10bf7"
     },
     {
       "resource": "voice_ask_origin",
@@ -55,7 +60,8 @@
       "context": "welcoming someone before asking about their background",
       "duration_seconds": 2.644,
       "size": 21165,
-      "sha256": "28da54a00478672a76cc2f42ea0906bf4394d03c79035811fdca6ecfe26f6bdd"
+      "sha256": "28da54a00478672a76cc2f42ea0906bf4394d03c79035811fdca6ecfe26f6bdd",
+      "profile_sha256": "a0f9319e8b8bd3188e0f3b1cd84606f31f4b52638ef8fab8c9a6e97a4786dfa8"
     },
     {
       "resource": "voice_ask_hobbies",
@@ -63,7 +69,935 @@
       "context": "interested and relaxed conversation about hobbies",
       "duration_seconds": 1.391,
       "size": 13183,
-      "sha256": "abd82d615b6ebcd29d9e808917d9d6915f0898c778b4de80118ea105603f6e77"
+      "sha256": "abd82d615b6ebcd29d9e808917d9d6915f0898c778b4de80118ea105603f6e77",
+      "profile_sha256": "51e21d5ea872c730399d96b6c6b417ab4e52e74d44beee2c5d91f4754a0866ef"
+    },
+    {
+      "resource": "voice_greetings_8",
+      "text": "I'm from Vietnam.",
+      "context": "Greetings & Introductions everyday conversation",
+      "duration_seconds": 1.454,
+      "size": 13872,
+      "sha256": "05620ad18ece077d7c1c6ec50e9f8b3728c8077219ea6e0e61bf2cf37a825d5d",
+      "profile_sha256": "95319fb2992e531e94ec1db2f1a01e8a2f89014fe93c824c7cbba967c97fae32"
+    },
+    {
+      "resource": "voice_greetings_9",
+      "text": "I live in Hanoi.",
+      "context": "Greetings & Introductions everyday conversation",
+      "duration_seconds": 1.266,
+      "size": 12635,
+      "sha256": "12e47a779617ea099e3d2bf07cde30ed060b45b3911c101c51ef0ad49edb21de",
+      "profile_sha256": "a4623a610593cbe8bc45bd605575417df8d9b565b1ee73c6b58caa43461bfd7c"
+    },
+    {
+      "resource": "voice_greetings_10",
+      "text": "I'm a student.",
+      "context": "Greetings & Introductions everyday conversation",
+      "duration_seconds": 1.223,
+      "size": 12799,
+      "sha256": "18df90a6bb9f13fb4286b406469427fa32cb14110c8854510120ce316d004376",
+      "profile_sha256": "3784f91a5a83c3947bb6c69e11aa5aa6a97ed3a12900eb02e95dd1570ee28303"
+    },
+    {
+      "resource": "voice_greetings_11",
+      "text": "See you tomorrow!",
+      "context": "Greetings & Introductions everyday conversation",
+      "duration_seconds": 1.222,
+      "size": 12075,
+      "sha256": "ccab36a44183deed1482008b700ba50f3f937019b17dba1803510fca0aeb6f56",
+      "profile_sha256": "53eade0a19563fb6007d04978a17502c6ef7654790100ce54f4b1916e4a72895"
+    },
+    {
+      "resource": "voice_greetings_12",
+      "text": "Where do you live?",
+      "context": "Greetings & Introductions everyday conversation",
+      "duration_seconds": 1.168,
+      "size": 11783,
+      "sha256": "7a8bcc0046e58c01fa9bcd4fdd0d8ad9c2f4095db52db4a816bb521487a69587",
+      "profile_sha256": "5fe58a4ba337691fdde56d024954d4743015dcd4e3e845c388a90baf62736559"
+    },
+    {
+      "resource": "voice_family_13",
+      "text": "This is my family.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.393,
+      "size": 14183,
+      "sha256": "88b71bfe84f4ac328ac040984cebe8c263990ca07ee57bef079f5e7a990dff03",
+      "profile_sha256": "631f57307ae7ab3a12f01262a781c6e53657a2a10c835eb4883d2b1b63502b92"
+    },
+    {
+      "resource": "voice_family_14",
+      "text": "I have one brother.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.403,
+      "size": 13626,
+      "sha256": "cc05e3c3aacd3ff94dbcec38dcebf4f29612aea6283c1c1281754c4551cbf986",
+      "profile_sha256": "1b424ef98541c0d6307135d3727bf102f5fc53b3f23c1f69281d8da9e6d261a8"
+    },
+    {
+      "resource": "voice_family_15",
+      "text": "I have two sisters.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.498,
+      "size": 14820,
+      "sha256": "59dcb71df12934b68dd99a5aecbfbb7f6fd989c7f63c7a443fc972f1e38e88fa",
+      "profile_sha256": "6ea5b25f1fb9993f223a0b6176b87e73e78c323fca6e67002d02700d50e903c5"
+    },
+    {
+      "resource": "voice_family_16",
+      "text": "My mother is a teacher.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.572,
+      "size": 15164,
+      "sha256": "f602f63962974600e7ea1f4412e857cf4f7e8a593b0dfbbe8077e56158f0fdef",
+      "profile_sha256": "febdd3c3ebca47312619f49e474a0765d6769e6d8e02346d8ef57454343b8f3f"
+    },
+    {
+      "resource": "voice_family_17",
+      "text": "My father is a doctor.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.625,
+      "size": 16054,
+      "sha256": "7f0deb15bc078ec3eb5787fb8dbbe908928e431977cf52da9026bc24ea002c0f",
+      "profile_sha256": "2d21ac405f71e359b8f6db0003657b93ee12f7c811e8ee8f9e82184708d31aca"
+    },
+    {
+      "resource": "voice_family_18",
+      "text": "We live together.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.213,
+      "size": 12685,
+      "sha256": "94085c23f975ec9782944a95e6eed5d84238ef5b69d98e48f2ec6984317483dd",
+      "profile_sha256": "013b539ec52d01595bebcd28d9a63f37e44857d5716471f7de7a3033dd574e26"
+    },
+    {
+      "resource": "voice_family_19",
+      "text": "My grandmother is very kind.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 2.009,
+      "size": 17930,
+      "sha256": "1ec5dcec711242eb44fe3bca91675c52e94bed4f07a7200079e089e51dce012e",
+      "profile_sha256": "e0457ab5b24b8d15c4b733155dc8c5e253b13663ce4f2dbdee29442c44b0087f"
+    },
+    {
+      "resource": "voice_family_20",
+      "text": "I love my family.",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.477,
+      "size": 14118,
+      "sha256": "d74ba5c4585146f794a01054622cd210b2a4b01c7670323fe6562afdd61e308c",
+      "profile_sha256": "21c80035fd5b60f40d759770a35aa5afab3d0748e83bfc52b76d52e7f61d4d27"
+    },
+    {
+      "resource": "voice_family_21",
+      "text": "Do you have any brothers?",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.495,
+      "size": 14403,
+      "sha256": "28ea1ae446471f8d235d635bfb651bf630eb08987488b5c9656f92261a69b3b3",
+      "profile_sha256": "76814774004b40d1bd57dc17df0839761c77de443315e46631865def64844db8"
+    },
+    {
+      "resource": "voice_family_22",
+      "text": "What does your mother do?",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.316,
+      "size": 12902,
+      "sha256": "3a9c2a6f6ccaa8cd6fa270e34afde5745d29dcc4347863d7bb5661f05e7d1c18",
+      "profile_sha256": "25dd2be76265912d829789ad3fceee403525bdcac5fbc20229f075460cb3001f"
+    },
+    {
+      "resource": "voice_family_23",
+      "text": "Do you live with your family?",
+      "context": "My Family everyday conversation",
+      "duration_seconds": 1.551,
+      "size": 14884,
+      "sha256": "5e4ba90e834e14a6944c8f5aa54f0711fa377ff475324dca3e8d662149dbadf1",
+      "profile_sha256": "31569af32001da3ca4008ad2e54ad7ea42bcb62b815f6987ded6140d1fe31a4a"
+    },
+    {
+      "resource": "voice_routine_24",
+      "text": "I wake up at seven.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.411,
+      "size": 13502,
+      "sha256": "b38a93484926275d87ad5cad6e839c46a199421a38f6edaff925856c5bf1c9e5",
+      "profile_sha256": "2a8bb1b8b630dc4c80612175c5dc7aa35ed97f217261c3237ac5ca351101b50e"
+    },
+    {
+      "resource": "voice_routine_25",
+      "text": "I brush my teeth.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.37,
+      "size": 13175,
+      "sha256": "8c780f3528ef37b1f0a50243c3412cd9a198026acc2b94fd919a2cc6cbd70522",
+      "profile_sha256": "667e3f037d3407e251fcd6d57cef6ac3140d2e93d90c9bd72ec6ae2fb2c75379"
+    },
+    {
+      "resource": "voice_routine_26",
+      "text": "I have breakfast at home.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.646,
+      "size": 15669,
+      "sha256": "d14eab06d55b47e45707b42e9cb7ed56dd26d17e70e6ee0f70f595ddbc1335b6",
+      "profile_sha256": "cc4ef04f2d62c819208520e76058c7952aaa9f12434a8fd1e716a24a5dc6d39a"
+    },
+    {
+      "resource": "voice_routine_27",
+      "text": "I go to school by bus.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.602,
+      "size": 15005,
+      "sha256": "e4babcc396ed4cc0e258348deae44e7045b2164f707747a209c028f3bc773038",
+      "profile_sha256": "a54f65be840a932b26aaa3778f6ba357758d6e26f3b2300ce86e031d0d4c9a24"
+    },
+    {
+      "resource": "voice_routine_28",
+      "text": "I start work at nine.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.487,
+      "size": 14286,
+      "sha256": "5fc284880bbc01605622d47781246f7e64a290e7d7a6b2610304e7a971d2b989",
+      "profile_sha256": "26db6efd90fd725d333c3dc9619c0ee4ec3e07de47174ea03cae009bf6f20d87"
+    },
+    {
+      "resource": "voice_routine_29",
+      "text": "I have lunch at noon.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.411,
+      "size": 13063,
+      "sha256": "a6bcb7c7638de1ca6526daef445eaf9302b8fa399ec41aaccb417dbafbbc1add",
+      "profile_sha256": "0ad144b963acc1fcf261165eedc5e35c57832a7d56bedeff4ec83dfb4f9ff22e"
+    },
+    {
+      "resource": "voice_routine_30",
+      "text": "I go home at five.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.42,
+      "size": 13261,
+      "sha256": "bc32bcee34fd20482cd390ad9ab90a42eb924b90fc6e3ea08c654a2a49ede8e6",
+      "profile_sha256": "b465780e53b0a587f97eead091dc49118574f4efd55149e9d2113bd0ec70b0c4"
+    },
+    {
+      "resource": "voice_routine_31",
+      "text": "I go to bed at ten.",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.4,
+      "size": 13378,
+      "sha256": "2e918e1008a8e9ba5119720ef670f444d536d519c5dcc5f596a44e571a88887f",
+      "profile_sha256": "bc3516df1ceb8e09d391d2e1ecba4113c64cdf41aed2a4f5a6c4b1378f9869ab"
+    },
+    {
+      "resource": "voice_routine_32",
+      "text": "What time do you wake up?",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.495,
+      "size": 13927,
+      "sha256": "ad89900a0ccb1d2a67cb9edd921e4d26b50b4415d62d80c5d9b726d916cec815",
+      "profile_sha256": "ecaca770bcd9ff972353c95e7e03f9760c645c23be554440596a889d0f329ed5"
+    },
+    {
+      "resource": "voice_routine_33",
+      "text": "How do you go to school?",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.424,
+      "size": 14160,
+      "sha256": "a9236d7a2b2912f5c46878c84532f067c0af7fb24d8902219b23dc694f8f9c75",
+      "profile_sha256": "aed7c74d79366b1899b991ff54c89501136f306d3a2c8913e09df2900f4cd5ed"
+    },
+    {
+      "resource": "voice_routine_34",
+      "text": "What time do you go to bed?",
+      "context": "Daily Routine everyday conversation",
+      "duration_seconds": 1.595,
+      "size": 15000,
+      "sha256": "3e679b79a21a6aaa2a3a69649a0c7da4ed8098210b76b48bba4c34e43320dd4d",
+      "profile_sha256": "d9a5ef05ced27188f4263938e08c4fcf3db6110c6fe0c7e2d0aa92e97f0dc42d"
+    },
+    {
+      "resource": "voice_food_35",
+      "text": "I'd like some water, please.",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.716,
+      "size": 16142,
+      "sha256": "5d694b35b240afa789796bf428a25a70f18a619de036cbfbdd77a805c84ffd14",
+      "profile_sha256": "c46a60a9aa8c53345c31830c4338908dfa3c4e3baa46a620cf234f1d03a91c37"
+    },
+    {
+      "resource": "voice_food_36",
+      "text": "Can I have the menu, please?",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.854,
+      "size": 17021,
+      "sha256": "e074e5cc0cf491de886acc98d6caf6018f18a3545c635a34ea87e4b1578cf5ed",
+      "profile_sha256": "cd2103bd49b272eaef48c30111bbdcd8c75aa38b378c33b7a0a97a899fc67971"
+    },
+    {
+      "resource": "voice_food_37",
+      "text": "I like chicken and rice.",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.676,
+      "size": 15462,
+      "sha256": "b985f1ecbcf1de6cd8f6503e34338315ef46a1cb7aedc5f2d823af317efc0d0b",
+      "profile_sha256": "090dd4cc56654f6b465b52953d4d97037482d798ca19c9fbcd1c12bacaf95c20"
+    },
+    {
+      "resource": "voice_food_38",
+      "text": "I don't eat meat.",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.275,
+      "size": 12794,
+      "sha256": "02c4feb225d5dfb9001c8f0c70a76bc163f8e3b861580511cf1dc9a077916342",
+      "profile_sha256": "100f89debac6a9295f5765fa4c95a20affd6d6a14c094ea5fe1fa6020ba17840"
+    },
+    {
+      "resource": "voice_food_39",
+      "text": "This soup is delicious!",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.603,
+      "size": 15813,
+      "sha256": "2b678a1669bb947c6515ccef37e848a6eb3eac7b08439c0c9e9b9c8ffb94e235",
+      "profile_sha256": "b570416615b884750c0d421d6acf8a3e6fdc8fa86bdffe4638a668dd86557fb0"
+    },
+    {
+      "resource": "voice_food_40",
+      "text": "I'd like a cup of tea.",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.517,
+      "size": 14366,
+      "sha256": "53f38179de0a92cebb2b7d2149d69ac6a691a322cfc9b9c00aacaee20390cc37",
+      "profile_sha256": "c92f1efd8be2ed9fa5613d488ea79b908c02b89feb19dd5eb1fb3d8b2ae9ea3c"
+    },
+    {
+      "resource": "voice_food_41",
+      "text": "No sugar, please.",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.567,
+      "size": 14483,
+      "sha256": "054503be34f0c840d6a7775429b9d2fc6732cca54b840a1fa0a4e860770be5b7",
+      "profile_sha256": "0a7dee067dbbe149f3aa9597dfedfc9e3c3dc97e96ce028cf9efe33512b1621d"
+    },
+    {
+      "resource": "voice_food_42",
+      "text": "Can I have the bill, please?",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.799,
+      "size": 15959,
+      "sha256": "79f3796108ba14c47223c8cbbccde97ea50cfbeb54800ab3527b2ab53994f8e8",
+      "profile_sha256": "085018eb241c4aed53bab2ccf6c99649d29436cac7d80fa0c45be52bd0324ec4"
+    },
+    {
+      "resource": "voice_food_43",
+      "text": "What would you like to drink?",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.423,
+      "size": 13762,
+      "sha256": "852a41f501115cb91596375851aeff7d308dc928ce90f8706feeac053c955044",
+      "profile_sha256": "d2523671d255dd4a05d6c477ddfea076b108e1508309fdd562975b76f449f60e"
+    },
+    {
+      "resource": "voice_food_44",
+      "text": "What food do you like?",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.401,
+      "size": 13398,
+      "sha256": "7a5d0a5b7c18d736c857ca9d427119f6bcf1151fe8c899c293a0d1fb334d3d87",
+      "profile_sha256": "0ea9ff25d01c46ef46f8f4d1edbf467f53b9f40aa3acf43be978280e7104c114"
+    },
+    {
+      "resource": "voice_food_45",
+      "text": "Would you like sugar in your tea?",
+      "context": "Food & Drinks everyday conversation",
+      "duration_seconds": 1.721,
+      "size": 15791,
+      "sha256": "80bc3a00a7cd6b982df5fa7d6afb4407114edb6bdb3e1a103d88bfa4b6b6b997",
+      "profile_sha256": "ec3357878f676c5fa0510af13625200ef3d895d649d1cba620a11bf9b9cf1023"
+    },
+    {
+      "resource": "voice_shopping_46",
+      "text": "How much is this shirt?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.454,
+      "size": 14249,
+      "sha256": "28b6935e2069054353503b652ef19ab05c1b789e80a8bf20901cd5f4dbd5d5a6",
+      "profile_sha256": "74eb624c51efa0cafa8847ab751eda2d33112f1e74bd0c381a5c19458b278b01"
+    },
+    {
+      "resource": "voice_shopping_47",
+      "text": "I'm looking for a blue shirt.",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.74,
+      "size": 15766,
+      "sha256": "9372ad8dcb6e72450938819b591be0c966537fe81c4e8aa3b380a098870fd681",
+      "profile_sha256": "6a2b93d73e9d5dbb9e535619365be2c3b844299ec7e6cf76ce81434929734f5e"
+    },
+    {
+      "resource": "voice_shopping_48",
+      "text": "Do you have a smaller size?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.719,
+      "size": 15122,
+      "sha256": "442777509ea4c81c6c3841a36d64f4b833c20f75e86986a6c2aa264b1bb04866",
+      "profile_sha256": "a168576f894cf7dddbe64e16379f2a7dd24659f94ea38e116855ec205483de1c"
+    },
+    {
+      "resource": "voice_shopping_49",
+      "text": "Can I try it on?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.285,
+      "size": 12339,
+      "sha256": "72a38b17b07496e968dcd30422714520d8e1f5bae2f83c5dd0d3c6ce1be9fa29",
+      "profile_sha256": "9405225ec239ea347956ed0f9b1346353c481db190fde8b3b07379ea4cad313b"
+    },
+    {
+      "resource": "voice_shopping_50",
+      "text": "It's too expensive.",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.424,
+      "size": 14205,
+      "sha256": "36bc3f0392292194ad66e34e76ffcf06e892b7b59495ce4af69903a156e6dd87",
+      "profile_sha256": "88df83feefa8e273d56f22c1c2f138b996df9ea58058a0a0565f2a7c48c40aba"
+    },
+    {
+      "resource": "voice_shopping_51",
+      "text": "I'll take this one.",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.339,
+      "size": 13173,
+      "sha256": "9639387c11aa5143f8d20d1383da79f4066fa2bd9f2c1f0ae37843659e60e772",
+      "profile_sha256": "30b9d1542226576cae1b3d5264a6995042c53b025995690ece837b59ab52de5f"
+    },
+    {
+      "resource": "voice_shopping_52",
+      "text": "Can I pay by card?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.538,
+      "size": 14435,
+      "sha256": "2b34a9dbdbc9a63dfe6f74c25e1f8b08098d2bdb69dbcf6a962a4c6cde2b5ef0",
+      "profile_sha256": "f1a2c1dea17e99226b1986b96f10099ae5ca45f3c42de5fd1e63408be4cf73d3"
+    },
+    {
+      "resource": "voice_shopping_53",
+      "text": "Thank you for your help.",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.39,
+      "size": 13438,
+      "sha256": "080e49b846c80b2d8747ccc6e6ece67f77cba00dd96c889d03458bd083b09776",
+      "profile_sha256": "b9bbe5b2ce7981d4071301911642b4cd6d97bca94368e6547b92fa80b034ca53"
+    },
+    {
+      "resource": "voice_shopping_54",
+      "text": "Can I help you?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.171,
+      "size": 11950,
+      "sha256": "25404ef16b9542fa0d01d2f4f3161b6d0c188fe5737665f8c529c6b3b85538f2",
+      "profile_sha256": "52e8478c249e79e1a8471226a69bb07ee9b5fd67efe5f7c365152f849c186c13"
+    },
+    {
+      "resource": "voice_shopping_55",
+      "text": "Is this size okay?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.465,
+      "size": 14276,
+      "sha256": "14d8fe2e8970e111ecfda52791a2eb48204afb3c9e7b97678a8aa5cf7e2a1cf7",
+      "profile_sha256": "d07a13950e7d900d8e0887be42dcb7ef38136d3c769fde91bc43f8a528d34b35"
+    },
+    {
+      "resource": "voice_shopping_56",
+      "text": "How would you like to pay?",
+      "context": "Shopping everyday conversation",
+      "duration_seconds": 1.454,
+      "size": 14013,
+      "sha256": "fcc8e28caccf5ec0f6da7ab10548dfddf84438d4de2dfad14819a03c52d51f4a",
+      "profile_sha256": "65219eb086b3683bca27d2cc173d6cae87364078057bdfacf0bc808b12dee0c5"
+    },
+    {
+      "resource": "voice_directions_57",
+      "text": "Excuse me, where is the station?",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 2.157,
+      "size": 19411,
+      "sha256": "ffc8d807e86238fcac38c84b0b2b96de8558cfcb37982bc8b762086e7ca54ee8",
+      "profile_sha256": "522ece9203b0773170b7747becc21416531ee95aae7b141a2544cbb5a8fb7aa3"
+    },
+    {
+      "resource": "voice_directions_58",
+      "text": "Go straight ahead.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.243,
+      "size": 12675,
+      "sha256": "8cddfc5b7e5655a93fd05502e5d40d44e0624c2a8a23d535c9355ed8c3850261",
+      "profile_sha256": "89fbe2aa61efe204e3732513e22cca10fcb252dda4e36c50d849721f443d416a"
+    },
+    {
+      "resource": "voice_directions_59",
+      "text": "Turn left at the traffic lights.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.837,
+      "size": 16518,
+      "sha256": "8ad6174afe401ca4ca14fe5f64290f2c382bb6b4ef6675285cba473193a5f8d8",
+      "profile_sha256": "4f1c0ae0d4486dc061b3fc7037358652d91f0ff91a463487a50bd61543e23d81"
+    },
+    {
+      "resource": "voice_directions_60",
+      "text": "Turn right at the bank.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.507,
+      "size": 14240,
+      "sha256": "b03bcaa86bccd9cdf11df93d98a8e09e65a50376b688e38ecb985e7a8d28feb3",
+      "profile_sha256": "f09a59ccf5f897371466b0e4b4796d20c4bd5e15724269bc4aee2c533d8551df"
+    },
+    {
+      "resource": "voice_directions_61",
+      "text": "It's next to the supermarket.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.785,
+      "size": 17071,
+      "sha256": "875429d697e1583c28368e2039a9a111548833ee5d91029dc63c3c712f7f2555",
+      "profile_sha256": "490df610cad14871467c2635943f0a08ff8daa7d4eaa68e93feed02c045365af"
+    },
+    {
+      "resource": "voice_directions_62",
+      "text": "It's across from the park.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.582,
+      "size": 15122,
+      "sha256": "dd682c4944774e5681d37267ca6ae5182a8ad4c28c947745a35f5bd9a3b60117",
+      "profile_sha256": "8cf09490e971754e1b815e15cb55b8929fab0d7a75628cf6798cbdddb974800d"
+    },
+    {
+      "resource": "voice_directions_63",
+      "text": "Is it far from here?",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.413,
+      "size": 14511,
+      "sha256": "d2759db527249508176d5267b99f91230c03163bc3d4a9f40db349be7b498676",
+      "profile_sha256": "bdeb56787fe2ef81b049d645ae0fca26cd02b3f62e22d2aa95b7716e5d0b80af"
+    },
+    {
+      "resource": "voice_directions_64",
+      "text": "Thank you. I understand.",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 2.313,
+      "size": 19230,
+      "sha256": "2be835af958a7433b23d4c2e93f5d0baea680c7c6a0736920225db7df0ba8572",
+      "profile_sha256": "78151d71d88783918118ca995bed519653b471ac2cc0e05103d32144de73ab97"
+    },
+    {
+      "resource": "voice_directions_65",
+      "text": "Excuse me, how do I get to the bank?",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 2.273,
+      "size": 20325,
+      "sha256": "cf75dec661e82a137757020813cd753e900489d7730aacf658673af8e330a24a",
+      "profile_sha256": "4af6be4c3136342a071437ee7f5702bd1d1610df60007f2bef096f21b38a2bc0"
+    },
+    {
+      "resource": "voice_directions_66",
+      "text": "Where do I turn?",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.202,
+      "size": 12389,
+      "sha256": "5290f10a8dded0e70421e19eaaa4ad0b786f60e9defbf84429753cfcefd95269",
+      "profile_sha256": "6d9ff6953112f48ee7ce300943045609cc97cdbf78f96d01449c361ff2552c4b"
+    },
+    {
+      "resource": "voice_directions_67",
+      "text": "Where is the supermarket?",
+      "context": "Directions everyday conversation",
+      "duration_seconds": 1.646,
+      "size": 15395,
+      "sha256": "24b636b4cfaef52f4f4ddd6a18c5a346a1a3a56f88bf99aaa9b0304df1d9ebb6",
+      "profile_sha256": "3273be440e1bfcddf4226c010cdb11735f7d8d8d2334ee01310f77c7675e28f6"
+    },
+    {
+      "resource": "voice_hobbies_68",
+      "text": "I like listening to music.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.743,
+      "size": 16942,
+      "sha256": "5594abef499246fd5d580ffdafbc5e95fe626ee3df91b17f4607cc7ee2c25207",
+      "profile_sha256": "ed8a67740cfaa717330c2d7b5a039ebf4022817449ee4576cb619dbf2acd5901"
+    },
+    {
+      "resource": "voice_hobbies_69",
+      "text": "I enjoy reading books.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.655,
+      "size": 14947,
+      "sha256": "1bd0916030f98dfd0990a2313d8198d8f9d17d89c4fecd5bf97299417c8993f7",
+      "profile_sha256": "ee59bd4374718b2ec2b4b9e8c3e6ad8b7769ff6bb87b669b0eefa1743a876a70"
+    },
+    {
+      "resource": "voice_hobbies_70",
+      "text": "I play football on Sundays.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.719,
+      "size": 15896,
+      "sha256": "6f1509c203bd5cb7231120a6151fa5a648fa14dc1945d2015de4eb75ddc546f4",
+      "profile_sha256": "aa98b189aa431bd29f19f1a985301b2bdea4c4ae702f317da0ce21291ac1618c"
+    },
+    {
+      "resource": "voice_hobbies_71",
+      "text": "I like cooking with my family.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.848,
+      "size": 16353,
+      "sha256": "6714bb887e71c937461572e218da913934b6b21448d896c38d7c90c6f0615c39",
+      "profile_sha256": "9fe585dd9e9c8a869cba889cb4b691fcc7b4c4abd019a8ba8110cb5d5f386809"
+    },
+    {
+      "resource": "voice_hobbies_72",
+      "text": "I watch movies at home.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.551,
+      "size": 14821,
+      "sha256": "4ada8527e194440283fc86b8b7b290f7c661484c3afe3a7386467229ac684f72",
+      "profile_sha256": "c0cb5bbb30651afcbb24942a90b3f5e833fe84e6c9759a352e845faad826a263"
+    },
+    {
+      "resource": "voice_hobbies_73",
+      "text": "I can swim.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.131,
+      "size": 11554,
+      "sha256": "2d6d13555dfef9697ef2a268d1664455c0bec6b59f4031eaee6c52ac1ff9f465",
+      "profile_sha256": "cd64c3fa2fe6fa341ca4154b357b26747fdf7093c933cdac1c0ba784d5cda3da"
+    },
+    {
+      "resource": "voice_hobbies_74",
+      "text": "I draw pictures in my free time.",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 2.051,
+      "size": 18979,
+      "sha256": "4762ec478db31c22fe02d02cb8a48af38d9d42fa14c7ead378db067d25634d58",
+      "profile_sha256": "1cb487428a4fe6c18735738aa93a0648d2e0c12d87a98f7cdcbb143be27ad621"
+    },
+    {
+      "resource": "voice_hobbies_75",
+      "text": "Let's play together!",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.401,
+      "size": 13744,
+      "sha256": "3ec56fab08d2979518fd2fdb3361406326b0d997c2c4bc906a2d75bf8b66bf20",
+      "profile_sha256": "7dfcf51d61eb68662b67f96f50c641029c715e1bb1eafa8ed9ab4fe23467a046"
+    },
+    {
+      "resource": "voice_hobbies_76",
+      "text": "What do you do on Sundays?",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.603,
+      "size": 15754,
+      "sha256": "c01b1941880df503c0c84340c679c7116b553cf1009d8fc81d33b9371a6da163",
+      "profile_sha256": "5da3d62ddb5b2534f896b83b7fe35ae0c6efb2c56cea3604e691dfb9df640846"
+    },
+    {
+      "resource": "voice_hobbies_77",
+      "text": "Can you swim?",
+      "context": "My Hobbies everyday conversation",
+      "duration_seconds": 1.098,
+      "size": 11512,
+      "sha256": "59d23a368865e90a0d7ea12a3510dd4bba06ea758f48fb9ac9d79686fd9d5323",
+      "profile_sha256": "4cf14c95a1b2a0dfba9842c17f107202ccc82eb1c6adf7079213c53296fd87fa"
+    },
+    {
+      "resource": "voice_time_78",
+      "text": "What time is it?",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.297,
+      "size": 13041,
+      "sha256": "c5f5730c53c8a35e9c4f821ff72e82fa3b1a8e099fc6212bb92d206d68c77baa",
+      "profile_sha256": "5e6251c5107705acf531318d179c6de56e71dbe18d3c9ed61de794ef97e506e6"
+    },
+    {
+      "resource": "voice_time_79",
+      "text": "It's half past eight.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.477,
+      "size": 14246,
+      "sha256": "822230cc3022901da1af6e82034bc0d80c256587a19c2580a08769fb7eed661b",
+      "profile_sha256": "d7d97cdaa4619429504feb1db95198cfaa7926dac9a420152e1dd68a6242abe3"
+    },
+    {
+      "resource": "voice_time_80",
+      "text": "Today is Monday.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.297,
+      "size": 13016,
+      "sha256": "37e3ab68f438a374a53835623655a432fcc3d9dd302b8fe0a79f4a1c55be12a9",
+      "profile_sha256": "9943eb2703c13330687785ef459debc1fd350f5a0ddfd5052e79281d4348c52b"
+    },
+    {
+      "resource": "voice_time_81",
+      "text": "My birthday is in June.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.667,
+      "size": 15737,
+      "sha256": "d84d7319cfd8da8983e39742ddf90ed83e684a6f9cf68471c043d7a01732a2fd",
+      "profile_sha256": "9630c942207356306cc1c78c43b3469d8e620dda7b29c67db5667dccb542f6c7"
+    },
+    {
+      "resource": "voice_time_82",
+      "text": "The meeting is at two.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.454,
+      "size": 13666,
+      "sha256": "8cadc0b0c6c9714b42aab6825ac3c3d3a332644d5dcb21b277e75bd8ab78060a",
+      "profile_sha256": "7428abdda82fe081b90fbbaf6537dca79683d16eb72fa0d3acf71ec59b660b9d"
+    },
+    {
+      "resource": "voice_time_83",
+      "text": "See you on Friday!",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.337,
+      "size": 13396,
+      "sha256": "9809ee3a180a159f66b6781e9bd31732cb4aec5858cceaa5e99d6579bdc52123",
+      "profile_sha256": "1c75d27ec9313a82d834eaaf2f2e7e9088936fd57a241baaec07f772eec80316"
+    },
+    {
+      "resource": "voice_time_84",
+      "text": "I'm free this afternoon.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.572,
+      "size": 15131,
+      "sha256": "07f706586af7943073b49854e9fad17888ff1c58dc69d63ea71d3ec596a0e0ee",
+      "profile_sha256": "1d9c6e64ab91d15ecfca656163cad09195f2e54ab2d2b6b078ba8f11a680606a"
+    },
+    {
+      "resource": "voice_time_85",
+      "text": "Let's meet at ten tomorrow.",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.679,
+      "size": 15266,
+      "sha256": "68dc68c356aa8ce4df912ea2122720dd3f3b7495ab82cee99781646abcb51b0e",
+      "profile_sha256": "c08fb24fbcf3f599c567722bc85ec1d1581cf4ba2c0442753ab5d97a5737e3bb"
+    },
+    {
+      "resource": "voice_time_86",
+      "text": "What time is it now?",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.379,
+      "size": 13350,
+      "sha256": "09fee711c8b31e7ebe74de87c07aca66c9ce705740f9d4f74cc5abfd8039b069",
+      "profile_sha256": "95eefae7ba7f77c00d75ce7313fbcdacc93bfef508c6f8dda8b99c183337d8a5"
+    },
+    {
+      "resource": "voice_time_87",
+      "text": "When is your birthday?",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.401,
+      "size": 13633,
+      "sha256": "4a9ae06f4e6c8f78684544daa2fbf0a2e29552a637901a64b6ae2561251c9676",
+      "profile_sha256": "7e3b54de3ab5cdd074430b0a50eba086b7d36e9068e523833aa47e63189111d6"
+    },
+    {
+      "resource": "voice_time_88",
+      "text": "When can we meet?",
+      "context": "Time & Dates everyday conversation",
+      "duration_seconds": 1.307,
+      "size": 13247,
+      "sha256": "e49f6b54fb8b165947510cef7bccf34d8366e5aac5c1d84944860633c52909f4",
+      "profile_sha256": "b99b414e3f21ee00cad43077c6016d1f1bc9eb99cdb4b892ede7a03ab563f23e"
+    },
+    {
+      "resource": "voice_travel_89",
+      "text": "I'd like a ticket to Hanoi.",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.721,
+      "size": 16271,
+      "sha256": "0d610514741f63da53f6e79ff9af6d3cc59bc1a41a3d39fe793338665d322799",
+      "profile_sha256": "5177c9bbdde36eda5bef7611a7d93564778d6302e63499f87708e52e5269dca2"
+    },
+    {
+      "resource": "voice_travel_90",
+      "text": "Is this seat free?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.36,
+      "size": 13366,
+      "sha256": "ff39ee600345cc452b33bb851f5c848b98cac461e064c28b0924bdd7f2517f19",
+      "profile_sha256": "ebe4759e8c3ba9dae3d25788d68e270bffeed18f1b2065a996076b3ff14ba16a"
+    },
+    {
+      "resource": "voice_travel_91",
+      "text": "I have a reservation.",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.538,
+      "size": 14527,
+      "sha256": "e3b1fb90892eee9cba83c65f7865db15f27af5463a6897f3afdb1e6eab3e0a88",
+      "profile_sha256": "8503621633f0ac6e2a7c605e60bd3a8f0e740c30d10bc94470139b1880ced42c"
+    },
+    {
+      "resource": "voice_travel_92",
+      "text": "Can I see your passport, please?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.897,
+      "size": 16694,
+      "sha256": "eaf03ce4262dfcbaedb659d39eaade25c6d4b8e584e5f9f4b8291ce49858ee5c",
+      "profile_sha256": "f488c7d2aac5b17b123da74333d702db11700f45132d2cd639b604eda9b834ef"
+    },
+    {
+      "resource": "voice_travel_93",
+      "text": "Where is the bus stop?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.421,
+      "size": 13798,
+      "sha256": "89b9b034e95241dae9d3b21b17ccf1bf75ba32f3059cb11fe1d993ed9d754135",
+      "profile_sha256": "bd0c46b70a43f53d8e8089f19a0e934225b8b52a9d13866ced414596cdc55657"
+    },
+    {
+      "resource": "voice_travel_94",
+      "text": "What time does the train leave?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.763,
+      "size": 16539,
+      "sha256": "03c9b3a01c6e1f8e13a74f087914433b2fd5c20fdd0b9da36d8b8e27561c9d21",
+      "profile_sha256": "ec7e059743bc466a17b769cd04cc8988de9a865e1d299d8ef30111e5f64ae8ac"
+    },
+    {
+      "resource": "voice_travel_95",
+      "text": "I'd like a room for two nights.",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.858,
+      "size": 17540,
+      "sha256": "a12d3bd052dbfc2541e2f06460005b2f552a8f1d12992b0e3f998473bba6fece",
+      "profile_sha256": "b7aa1bce06d2174e81358aed515b0731e52f9ae8c473751cfafa1f6478d648f1"
+    },
+    {
+      "resource": "voice_travel_96",
+      "text": "Have a nice trip!",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.295,
+      "size": 12757,
+      "sha256": "6366e979b3daf3d70daf33ff7d6eff91f3c8d429e1222b6094cfca735a673fca",
+      "profile_sha256": "3f451dc0d2e49d5d6163bba607004413afb553b2dea9e1c730cf8e203efb64f4"
+    },
+    {
+      "resource": "voice_travel_97",
+      "text": "Where would you like to go?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.423,
+      "size": 13824,
+      "sha256": "81a412a56e833ec4b5ecc18649b735bf9d91fdf6aab4639891d5837bfdf8b4c7",
+      "profile_sha256": "7b54ce065e4a39579d6837e6255ae8c5eb820773f9a3ebde13e51a279149d049"
+    },
+    {
+      "resource": "voice_travel_98",
+      "text": "Do you have a reservation?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.656,
+      "size": 14997,
+      "sha256": "9c6d8b20bcf62f4a91795fd2392614144cec37ffe446b9a1d7492f64162a6f2e",
+      "profile_sha256": "bd01032800528d59799904e003791645d4585f1514cf5651db1f338f90c96cee"
+    },
+    {
+      "resource": "voice_travel_99",
+      "text": "How long would you like to stay?",
+      "context": "Travel everyday conversation",
+      "duration_seconds": 1.679,
+      "size": 15146,
+      "sha256": "69c3808f306ee34817941ec2157edf8824bd38a72bb549435558ed09aed1fc1b",
+      "profile_sha256": "d33ac8c348d11e0a04099e2d8b20a2f9bdd5bd11a4d165d51fed2d8593877691"
+    },
+    {
+      "resource": "voice_conversation_100",
+      "text": "Could you say that again, please?",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.867,
+      "size": 16738,
+      "sha256": "9669ce23931268fffe2959158f9aae98517ccbf936b9eb7e344db480c5cc9889",
+      "profile_sha256": "45042e5c39c8811f116402a7a98f5455c98c21d1b9389eecdf52de674145f9a7"
+    },
+    {
+      "resource": "voice_conversation_101",
+      "text": "Please speak more slowly.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.657,
+      "size": 16129,
+      "sha256": "56dd79d8db08e0b6ef901e664efca9c9f381339c86c9e9eec72fa303cf88627f",
+      "profile_sha256": "0dd4d438516c48e510ff600848e2ecb29ff825023ed1d72869ec3e3b13560d26"
+    },
+    {
+      "resource": "voice_conversation_102",
+      "text": "I don't understand.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.337,
+      "size": 13191,
+      "sha256": "5bcd4cfd72f47d047260b0ca3ccea68a8a04dc0e1256e519f6a40ead68bd38f4",
+      "profile_sha256": "524ae2e279e626aec63e866b856b24283ed881eda2dc71484f05a334bb10ee1d"
+    },
+    {
+      "resource": "voice_conversation_103",
+      "text": "How do you spell your name?",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.445,
+      "size": 13745,
+      "sha256": "518c7f7a178b4dce32d736782bd56a6db3cb5648055c788102ac458ecc32167f",
+      "profile_sha256": "2b791c2c358082819108eefd846c77d9f760fd35900e64d1125b57534bb3c3e4"
+    },
+    {
+      "resource": "voice_conversation_104",
+      "text": "I'm learning English.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.391,
+      "size": 13833,
+      "sha256": "6bc74d14e75edd7a88b9d76f2f1f09dcad16b959c840d72a89b1a2e6901c2155",
+      "profile_sha256": "33db095f5ae83b1273d978e88cf87ef9a23569c3753235c3ba182c4a7ecbd36d"
+    },
+    {
+      "resource": "voice_conversation_105",
+      "text": "Can you help me, please?",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.454,
+      "size": 13649,
+      "sha256": "cea1d79c29c464b677fa597af53d40fd62be53715a88fa67d84810f4b9cd27fb",
+      "profile_sha256": "523c6bf99e6a1bc22d116d26b0df2395d42c4a747d8f853ca95d86cc34e07240"
+    },
+    {
+      "resource": "voice_conversation_106",
+      "text": "Sorry, I'm late.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.373,
+      "size": 13552,
+      "sha256": "66cfa6b04a39d49ea7260b71798a4b37f43efd87d8cdea5d71bb12bb00594d51",
+      "profile_sha256": "5985ea0f3e6d26d4768a914963a697f17167d3b3f8ac381594291ae82f3f54a9"
+    },
+    {
+      "resource": "voice_conversation_107",
+      "text": "It was nice talking to you.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.636,
+      "size": 15309,
+      "sha256": "932f97bec34bbe1a2c8da32ef148e013c3612540f550ba75e504c94421b1d66a",
+      "profile_sha256": "5364d57984adbeef400401d97a05b120884e246af9bfae90242e51cf6fd20b4f"
+    },
+    {
+      "resource": "voice_conversation_108",
+      "text": "Hi! How is your English class?",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 2.57,
+      "size": 20710,
+      "sha256": "dbe3828daafa26875255e234a8daefa101bf59cb9384d17f196d936968ba7bf7",
+      "profile_sha256": "aa06faa8b7f9c89d69ae08cfe567b703972944d7fb37cd300c472b1f103d7c5e"
+    },
+    {
+      "resource": "voice_conversation_109",
+      "text": "Let's meet at a quarter past nine.",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 1.945,
+      "size": 17508,
+      "sha256": "cf80bb6417b2740d726474a7c4fab392caddb84fb6ed654fef9328e51eb89575",
+      "profile_sha256": "541c5c15bfa97135c3d6521d2fa2a41325c11ab2af67b35cf016f1f64ad41e54"
+    },
+    {
+      "resource": "voice_conversation_110",
+      "text": "Thanks for the chat. See you soon!",
+      "context": "Real Conversation everyday conversation",
+      "duration_seconds": 2.544,
+      "size": 21044,
+      "sha256": "4bfeab1a7bf08dead6b1aa2e04ff83454e67db4007660077299d518b7ee83f2c",
+      "profile_sha256": "87567e8c855e43da29a24f134bb8bc8b166a28f4c6cad3488244caa7994b7d99"
     }
   ]
 }

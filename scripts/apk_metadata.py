@@ -40,7 +40,8 @@ with zipfile.ZipFile(args.apk) as apk:
         assert expected_image in image_digests, f"Approved icon bytes missing from APK: {path}"
 # Generated neural lesson audio must survive release resource path optimization.
 speech_manifest = json.loads((root / "app/src/main/assets/speech/manifest.json").read_text())
-assert len(speech_manifest["clips"]) == 7, "Incomplete offline speech catalog"
+expected_speech = json.loads((root / "scripts/speech_profiles.json").read_text())
+assert {c["resource"]: c["text"] for c in speech_manifest["clips"]} == {name: p["text"] for name, p in expected_speech.items()}, "Incomplete offline speech catalog"
 with zipfile.ZipFile(args.apk) as apk:
     assert apk.read("assets/speech/manifest.json") == (root / "app/src/main/assets/speech/manifest.json").read_bytes()
     audio_digests = {hashlib.sha256(apk.read(name)).hexdigest() for name in apk.namelist() if name.endswith(".ogg")}

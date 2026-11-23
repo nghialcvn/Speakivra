@@ -1,0 +1,672 @@
+[
+  {
+    "id": "greetings",
+    "title": "Greetings & Introductions",
+    "vietnamese": "Chào hỏi và giới thiệu",
+    "phrases": [
+      {
+        "english": "Hello! How are you?",
+        "vietnamese": "Xin chào! Bạn khỏe không?",
+        "tip": "Nối nhẹ how và are, lên giọng ở lời chào."
+      },
+      {
+        "english": "I'm fine, thank you.",
+        "vietnamese": "Tôi khỏe, cảm ơn bạn.",
+        "tip": "Đặt đầu lưỡi nhẹ giữa hai hàm răng ở âm /θ/ trong thank."
+      },
+      {
+        "english": "My name is Alex.",
+        "vietnamese": "Tên tôi là Alex.",
+        "tip": "Nối name và is; đừng bỏ âm /m/ cuối name."
+      },
+      {
+        "english": "Nice to meet you!",
+        "vietnamese": "Rất vui được gặp bạn!",
+        "tip": "Kéo dài âm /iː/ trong meet, giọng vui khi chào."
+      },
+      {
+        "english": "I'm from Vietnam.",
+        "vietnamese": "Tôi đến từ Việt Nam.",
+        "tip": "Giữ âm /m/ cuối from; nhấn Vietnam."
+      },
+      {
+        "english": "I live in Hanoi.",
+        "vietnamese": "Tôi sống ở Hà Nội.",
+        "tip": "Nối live và in, giữ âm /v/ bằng môi dưới và răng trên."
+      },
+      {
+        "english": "I'm a student.",
+        "vietnamese": "Tôi là học sinh.",
+        "tip": "Nhấn âm đầu của student, không thêm âm vào cụm /st/."
+      },
+      {
+        "english": "See you tomorrow!",
+        "vietnamese": "Hẹn gặp bạn ngày mai!",
+        "tip": "Nhấn âm giữa của tomorrow, nói thân thiện."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Hello! What's your name?",
+        "translation": "Xin chào! Bạn tên là gì?",
+        "reply": "My name is Alex.",
+        "replyTranslation": "Tên tôi là Alex."
+      },
+      {
+        "prompt": "Nice to meet you! Where are you from?",
+        "translation": "Rất vui được gặp bạn! Bạn đến từ đâu?",
+        "reply": "I'm from Vietnam.",
+        "replyTranslation": "Tôi đến từ Việt Nam."
+      },
+      {
+        "prompt": "Where do you live?",
+        "translation": "Bạn sống ở đâu?",
+        "reply": "I live in Hanoi.",
+        "replyTranslation": "Tôi sống ở Hà Nội."
+      }
+    ]
+  },
+  {
+    "id": "family",
+    "title": "My Family",
+    "vietnamese": "Gia đình tôi",
+    "phrases": [
+      {
+        "english": "This is my family.",
+        "vietnamese": "Đây là gia đình tôi.",
+        "tip": "Rung nhẹ cổ họng với âm /ð/ trong this; nhấn âm đầu family."
+      },
+      {
+        "english": "I have one brother.",
+        "vietnamese": "Tôi có một anh trai.",
+        "tip": "Giữ âm /v/ cuối have và /ð/ giữa brother."
+      },
+      {
+        "english": "I have two sisters.",
+        "vietnamese": "Tôi có hai chị gái.",
+        "tip": "Đọc rõ âm /z/ cuối sisters, không thêm một âm tiết."
+      },
+      {
+        "english": "My mother is a teacher.",
+        "vietnamese": "Mẹ tôi là giáo viên.",
+        "tip": "Nối mother và is; nhấn âm đầu teacher."
+      },
+      {
+        "english": "My father is a doctor.",
+        "vietnamese": "Bố tôi là bác sĩ.",
+        "tip": "Nhấn âm đầu doctor, giữ âm /ð/ trong father."
+      },
+      {
+        "english": "We live together.",
+        "vietnamese": "Chúng tôi sống cùng nhau.",
+        "tip": "Nhấn âm giữa together; nối live và together nhẹ nhàng."
+      },
+      {
+        "english": "My grandmother is very kind.",
+        "vietnamese": "Bà tôi rất tốt bụng.",
+        "tip": "Giữ âm /d/ cuối kind, nhấn very kind."
+      },
+      {
+        "english": "I love my family.",
+        "vietnamese": "Tôi yêu gia đình mình.",
+        "tip": "Đọc âm /v/ cuối love, giọng ấm áp."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Do you have any brothers?",
+        "translation": "Bạn có anh em trai không?",
+        "reply": "I have one brother.",
+        "replyTranslation": "Tôi có một anh trai."
+      },
+      {
+        "prompt": "What does your mother do?",
+        "translation": "Mẹ bạn làm nghề gì?",
+        "reply": "My mother is a teacher.",
+        "replyTranslation": "Mẹ tôi là giáo viên."
+      },
+      {
+        "prompt": "Do you live with your family?",
+        "translation": "Bạn có sống cùng gia đình không?",
+        "reply": "We live together.",
+        "replyTranslation": "Chúng tôi sống cùng nhau."
+      }
+    ]
+  },
+  {
+    "id": "routine",
+    "title": "Daily Routine",
+    "vietnamese": "Sinh hoạt hằng ngày",
+    "phrases": [
+      {
+        "english": "I wake up at seven.",
+        "vietnamese": "Tôi thức dậy lúc bảy giờ.",
+        "tip": "Nối wake up và up at; giữ âm /n/ cuối seven."
+      },
+      {
+        "english": "I brush my teeth.",
+        "vietnamese": "Tôi đánh răng.",
+        "tip": "Giữ âm /ʃ/ cuối brush và /θ/ cuối teeth."
+      },
+      {
+        "english": "I have breakfast at home.",
+        "vietnamese": "Tôi ăn sáng ở nhà.",
+        "tip": "Nhấn âm đầu breakfast; nối breakfast at."
+      },
+      {
+        "english": "I go to school by bus.",
+        "vietnamese": "Tôi đi học bằng xe buýt.",
+        "tip": "Giữ âm /s/ cuối bus; không thêm âm vào school."
+      },
+      {
+        "english": "I start work at nine.",
+        "vietnamese": "Tôi bắt đầu làm việc lúc chín giờ.",
+        "tip": "Giữ âm /t/ cuối start, nối work at."
+      },
+      {
+        "english": "I have lunch at noon.",
+        "vietnamese": "Tôi ăn trưa lúc mười hai giờ.",
+        "tip": "Kết thúc lunch bằng /tʃ/, kéo dài /uː/ trong noon."
+      },
+      {
+        "english": "I go home at five.",
+        "vietnamese": "Tôi về nhà lúc năm giờ.",
+        "tip": "Nối home at; đọc rõ âm /v/ cuối five."
+      },
+      {
+        "english": "I go to bed at ten.",
+        "vietnamese": "Tôi đi ngủ lúc mười giờ.",
+        "tip": "Giữ âm /d/ cuối bed; nhấn ten."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "What time do you wake up?",
+        "translation": "Bạn thức dậy lúc mấy giờ?",
+        "reply": "I wake up at seven.",
+        "replyTranslation": "Tôi thức dậy lúc bảy giờ."
+      },
+      {
+        "prompt": "How do you go to school?",
+        "translation": "Bạn đến trường bằng cách nào?",
+        "reply": "I go to school by bus.",
+        "replyTranslation": "Tôi đi học bằng xe buýt."
+      },
+      {
+        "prompt": "What time do you go to bed?",
+        "translation": "Bạn đi ngủ lúc mấy giờ?",
+        "reply": "I go to bed at ten.",
+        "replyTranslation": "Tôi đi ngủ lúc mười giờ."
+      }
+    ]
+  },
+  {
+    "id": "food",
+    "title": "Food & Drinks",
+    "vietnamese": "Đồ ăn và thức uống",
+    "phrases": [
+      {
+        "english": "I'd like some water, please.",
+        "vietnamese": "Cho tôi xin một ít nước.",
+        "tip": "Nói please nhẹ nhàng; giữ âm /d/ trong I'd."
+      },
+      {
+        "english": "Can I have the menu, please?",
+        "vietnamese": "Cho tôi xem thực đơn được không?",
+        "tip": "Nhấn âm đầu menu, lên giọng lịch sự ở câu hỏi."
+      },
+      {
+        "english": "I like chicken and rice.",
+        "vietnamese": "Tôi thích thịt gà và cơm.",
+        "tip": "Giữ âm /s/ cuối rice; and có thể đọc nhẹ."
+      },
+      {
+        "english": "I don't eat meat.",
+        "vietnamese": "Tôi không ăn thịt.",
+        "tip": "Giữ /t/ cuối don't và meat, kéo dài /iː/ trong eat."
+      },
+      {
+        "english": "This soup is delicious!",
+        "vietnamese": "Món súp này ngon quá!",
+        "tip": "Nhấn âm giữa delicious, giọng hài lòng."
+      },
+      {
+        "english": "I'd like a cup of tea.",
+        "vietnamese": "Tôi muốn một tách trà.",
+        "tip": "Nối cup of; giữ âm /p/ của cup."
+      },
+      {
+        "english": "No sugar, please.",
+        "vietnamese": "Không đường, làm ơn.",
+        "tip": "Sugar bắt đầu bằng /ʃ/, nhấn âm đầu."
+      },
+      {
+        "english": "Can I have the bill, please?",
+        "vietnamese": "Cho tôi xin hóa đơn được không?",
+        "tip": "Bill dùng âm /ɪ/ ngắn, giọng hỏi lịch sự."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "What would you like to drink?",
+        "translation": "Bạn muốn uống gì?",
+        "reply": "I'd like some water, please.",
+        "replyTranslation": "Cho tôi xin một ít nước."
+      },
+      {
+        "prompt": "What food do you like?",
+        "translation": "Bạn thích món ăn nào?",
+        "reply": "I like chicken and rice.",
+        "replyTranslation": "Tôi thích thịt gà và cơm."
+      },
+      {
+        "prompt": "Would you like sugar in your tea?",
+        "translation": "Bạn muốn thêm đường vào trà không?",
+        "reply": "No sugar, please.",
+        "replyTranslation": "Không đường, làm ơn."
+      }
+    ]
+  },
+  {
+    "id": "shopping",
+    "title": "Shopping",
+    "vietnamese": "Mua sắm",
+    "phrases": [
+      {
+        "english": "How much is this shirt?",
+        "vietnamese": "Chiếc áo sơ mi này giá bao nhiêu?",
+        "tip": "Nối much is, giữ cụm /ʃ/ đầu shirt."
+      },
+      {
+        "english": "I'm looking for a blue shirt.",
+        "vietnamese": "Tôi đang tìm một chiếc áo sơ mi màu xanh.",
+        "tip": "Giữ /ŋ/ cuối looking, kéo dài /uː/ trong blue."
+      },
+      {
+        "english": "Do you have a smaller size?",
+        "vietnamese": "Bạn có cỡ nhỏ hơn không?",
+        "tip": "Size kết thúc bằng /z/, không đọc thành /s/."
+      },
+      {
+        "english": "Can I try it on?",
+        "vietnamese": "Tôi có thể thử nó không?",
+        "tip": "Nối try it on thành một cụm liền mạch."
+      },
+      {
+        "english": "It's too expensive.",
+        "vietnamese": "Nó đắt quá.",
+        "tip": "Nhấn âm thứ hai của expensive, kéo dài too."
+      },
+      {
+        "english": "I'll take this one.",
+        "vietnamese": "Tôi sẽ lấy cái này.",
+        "tip": "Nối take this; giữ âm /ð/ trong this."
+      },
+      {
+        "english": "Can I pay by card?",
+        "vietnamese": "Tôi có thể trả bằng thẻ không?",
+        "tip": "Giữ /d/ cuối card, nhấn pay và card."
+      },
+      {
+        "english": "Thank you for your help.",
+        "vietnamese": "Cảm ơn bạn đã giúp đỡ.",
+        "tip": "Giữ âm /p/ cuối help, nói với giọng cảm ơn."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Can I help you?",
+        "translation": "Tôi có thể giúp gì cho bạn?",
+        "reply": "I'm looking for a blue shirt.",
+        "replyTranslation": "Tôi đang tìm một chiếc áo sơ mi màu xanh."
+      },
+      {
+        "prompt": "Is this size okay?",
+        "translation": "Cỡ này có vừa không?",
+        "reply": "Do you have a smaller size?",
+        "replyTranslation": "Bạn có cỡ nhỏ hơn không?"
+      },
+      {
+        "prompt": "How would you like to pay?",
+        "translation": "Bạn muốn thanh toán bằng cách nào?",
+        "reply": "Can I pay by card?",
+        "replyTranslation": "Tôi có thể trả bằng thẻ không?"
+      }
+    ]
+  },
+  {
+    "id": "directions",
+    "title": "Directions",
+    "vietnamese": "Hỏi và chỉ đường",
+    "phrases": [
+      {
+        "english": "Excuse me, where is the station?",
+        "vietnamese": "Xin lỗi, nhà ga ở đâu?",
+        "tip": "Nhấn âm đầu station, mở lời nhẹ nhàng."
+      },
+      {
+        "english": "Go straight ahead.",
+        "vietnamese": "Đi thẳng về phía trước.",
+        "tip": "Không thêm âm vào /str/ trong straight; nhấn ahead."
+      },
+      {
+        "english": "Turn left at the traffic lights.",
+        "vietnamese": "Rẽ trái ở đèn giao thông.",
+        "tip": "Giữ /t/ cuối left, nhấn âm đầu traffic."
+      },
+      {
+        "english": "Turn right at the bank.",
+        "vietnamese": "Rẽ phải ở ngân hàng.",
+        "tip": "Giữ /t/ cuối right, kết thúc bank bằng /ŋk/."
+      },
+      {
+        "english": "It's next to the supermarket.",
+        "vietnamese": "Nó ở cạnh siêu thị.",
+        "tip": "Đọc chậm cụm next to, nhấn âm đầu supermarket."
+      },
+      {
+        "english": "It's across from the park.",
+        "vietnamese": "Nó ở đối diện công viên.",
+        "tip": "Nhấn âm thứ hai across, giữ /k/ cuối park."
+      },
+      {
+        "english": "Is it far from here?",
+        "vietnamese": "Nó có xa đây không?",
+        "tip": "Nối is it; kéo dài nguyên âm trong far."
+      },
+      {
+        "english": "Thank you. I understand.",
+        "vietnamese": "Cảm ơn. Tôi hiểu rồi.",
+        "tip": "Ngắt nhẹ sau thank you; nhấn âm cuối understand."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Excuse me, how do I get to the bank?",
+        "translation": "Xin lỗi, tôi đến ngân hàng bằng cách nào?",
+        "reply": "Go straight ahead.",
+        "replyTranslation": "Đi thẳng về phía trước."
+      },
+      {
+        "prompt": "Where do I turn?",
+        "translation": "Tôi rẽ ở đâu?",
+        "reply": "Turn left at the traffic lights.",
+        "replyTranslation": "Rẽ trái ở đèn giao thông."
+      },
+      {
+        "prompt": "Where is the supermarket?",
+        "translation": "Siêu thị ở đâu?",
+        "reply": "It's across from the park.",
+        "replyTranslation": "Nó ở đối diện công viên."
+      }
+    ]
+  },
+  {
+    "id": "hobbies",
+    "title": "My Hobbies",
+    "vietnamese": "Sở thích của tôi",
+    "phrases": [
+      {
+        "english": "I like listening to music.",
+        "vietnamese": "Tôi thích nghe nhạc.",
+        "tip": "Listening có chữ t câm; nhấn âm đầu music."
+      },
+      {
+        "english": "I enjoy reading books.",
+        "vietnamese": "Tôi thích đọc sách.",
+        "tip": "Nhấn âm sau enjoy, giữ /s/ cuối books."
+      },
+      {
+        "english": "I play football on Sundays.",
+        "vietnamese": "Tôi chơi bóng đá vào các Chủ nhật.",
+        "tip": "Nhấn âm đầu football; Sundays kết thúc bằng /z/."
+      },
+      {
+        "english": "I like cooking with my family.",
+        "vietnamese": "Tôi thích nấu ăn cùng gia đình.",
+        "tip": "Cooking dùng âm /ʊ/ ngắn; giữ /ŋ/ cuối."
+      },
+      {
+        "english": "I watch movies at home.",
+        "vietnamese": "Tôi xem phim ở nhà.",
+        "tip": "Movies kết thúc bằng /z/; nối movies at."
+      },
+      {
+        "english": "I can swim.",
+        "vietnamese": "Tôi biết bơi.",
+        "tip": "Không thêm nguyên âm vào /sw/ đầu swim."
+      },
+      {
+        "english": "I draw pictures in my free time.",
+        "vietnamese": "Tôi vẽ tranh trong thời gian rảnh.",
+        "tip": "Nhấn âm đầu pictures, kéo dài /iː/ trong free."
+      },
+      {
+        "english": "Let's play together!",
+        "vietnamese": "Chúng ta cùng chơi nhé!",
+        "tip": "Giữ /s/ cuối let's; giọng mời thân thiện."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "What do you like doing?",
+        "translation": "Bạn thích làm gì?",
+        "reply": "I like listening to music.",
+        "replyTranslation": "Tôi thích nghe nhạc."
+      },
+      {
+        "prompt": "What do you do on Sundays?",
+        "translation": "Bạn làm gì vào các Chủ nhật?",
+        "reply": "I play football on Sundays.",
+        "replyTranslation": "Tôi chơi bóng đá vào các Chủ nhật."
+      },
+      {
+        "prompt": "Can you swim?",
+        "translation": "Bạn có biết bơi không?",
+        "reply": "I can swim.",
+        "replyTranslation": "Tôi biết bơi."
+      }
+    ]
+  },
+  {
+    "id": "time",
+    "title": "Time & Dates",
+    "vietnamese": "Giờ và ngày tháng",
+    "phrases": [
+      {
+        "english": "What time is it?",
+        "vietnamese": "Bây giờ là mấy giờ?",
+        "tip": "Nối time is it, giữ /t/ cuối câu."
+      },
+      {
+        "english": "It's half past eight.",
+        "vietnamese": "Bây giờ là tám giờ rưỡi.",
+        "tip": "Half có chữ l câm; nối past eight."
+      },
+      {
+        "english": "Today is Monday.",
+        "vietnamese": "Hôm nay là thứ Hai.",
+        "tip": "Nhấn âm đầu Monday, nối today is."
+      },
+      {
+        "english": "My birthday is in June.",
+        "vietnamese": "Sinh nhật tôi vào tháng Sáu.",
+        "tip": "Birthday có âm /θ/; June kết thúc bằng /n/."
+      },
+      {
+        "english": "The meeting is at two.",
+        "vietnamese": "Cuộc họp lúc hai giờ.",
+        "tip": "Nối meeting is at, kéo dài /uː/ trong two."
+      },
+      {
+        "english": "See you on Friday!",
+        "vietnamese": "Hẹn gặp bạn vào thứ Sáu!",
+        "tip": "Nhấn âm đầu Friday; giọng hẹn gặp vui vẻ."
+      },
+      {
+        "english": "I'm free this afternoon.",
+        "vietnamese": "Chiều nay tôi rảnh.",
+        "tip": "Nhấn âm cuối afternoon; giữ /ð/ trong this."
+      },
+      {
+        "english": "Let's meet at ten tomorrow.",
+        "vietnamese": "Hãy gặp nhau lúc mười giờ ngày mai.",
+        "tip": "Nối meet at; nhấn ten và âm giữa tomorrow."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "What time is it now?",
+        "translation": "Bây giờ là mấy giờ?",
+        "reply": "It's half past eight.",
+        "replyTranslation": "Bây giờ là tám giờ rưỡi."
+      },
+      {
+        "prompt": "When is your birthday?",
+        "translation": "Sinh nhật bạn vào khi nào?",
+        "reply": "My birthday is in June.",
+        "replyTranslation": "Sinh nhật tôi vào tháng Sáu."
+      },
+      {
+        "prompt": "When can we meet?",
+        "translation": "Khi nào chúng ta có thể gặp nhau?",
+        "reply": "Let's meet at ten tomorrow.",
+        "replyTranslation": "Hãy gặp nhau lúc mười giờ ngày mai."
+      }
+    ]
+  },
+  {
+    "id": "travel",
+    "title": "Travel",
+    "vietnamese": "Du lịch",
+    "phrases": [
+      {
+        "english": "I'd like a ticket to Hanoi.",
+        "vietnamese": "Tôi muốn một vé đến Hà Nội.",
+        "tip": "Nhấn âm đầu ticket; nối like a."
+      },
+      {
+        "english": "Is this seat free?",
+        "vietnamese": "Chỗ ngồi này còn trống không?",
+        "tip": "Seat dùng /iː/ dài; giữ /t/ cuối seat."
+      },
+      {
+        "english": "I have a reservation.",
+        "vietnamese": "Tôi đã đặt chỗ.",
+        "tip": "Nhấn âm tiết va trong reservation."
+      },
+      {
+        "english": "Can I see your passport, please?",
+        "vietnamese": "Cho tôi xem hộ chiếu của bạn được không?",
+        "tip": "Nhấn âm đầu passport, dùng giọng hỏi lịch sự."
+      },
+      {
+        "english": "Where is the bus stop?",
+        "vietnamese": "Trạm xe buýt ở đâu?",
+        "tip": "Giữ /s/ cuối bus và /p/ cuối stop."
+      },
+      {
+        "english": "What time does the train leave?",
+        "vietnamese": "Tàu khởi hành lúc mấy giờ?",
+        "tip": "Giữ /v/ cuối leave, nhấn train và leave."
+      },
+      {
+        "english": "I'd like a room for two nights.",
+        "vietnamese": "Tôi muốn một phòng trong hai đêm.",
+        "tip": "Nights kết thúc bằng /ts/; kéo dài /uː/ trong room."
+      },
+      {
+        "english": "Have a nice trip!",
+        "vietnamese": "Chúc bạn có chuyến đi vui vẻ!",
+        "tip": "Giữ /p/ cuối trip; giọng chúc thân thiện."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Where would you like to go?",
+        "translation": "Bạn muốn đi đâu?",
+        "reply": "I'd like a ticket to Hanoi.",
+        "replyTranslation": "Tôi muốn một vé đến Hà Nội."
+      },
+      {
+        "prompt": "Do you have a reservation?",
+        "translation": "Bạn đã đặt chỗ chưa?",
+        "reply": "I have a reservation.",
+        "replyTranslation": "Tôi đã đặt chỗ."
+      },
+      {
+        "prompt": "How long would you like to stay?",
+        "translation": "Bạn muốn ở bao lâu?",
+        "reply": "I'd like a room for two nights.",
+        "replyTranslation": "Tôi muốn một phòng trong hai đêm."
+      }
+    ]
+  },
+  {
+    "id": "conversation",
+    "title": "Real Conversation",
+    "vietnamese": "Giao tiếp thường ngày",
+    "phrases": [
+      {
+        "english": "Could you say that again, please?",
+        "vietnamese": "Bạn có thể nói lại được không?",
+        "tip": "Nối say that, giọng đề nghị lịch sự."
+      },
+      {
+        "english": "Please speak more slowly.",
+        "vietnamese": "Làm ơn nói chậm hơn.",
+        "tip": "Nhấn âm đầu slowly; không thêm âm trước speak."
+      },
+      {
+        "english": "I don't understand.",
+        "vietnamese": "Tôi không hiểu.",
+        "tip": "Nhấn âm cuối understand, giữ /d/ cuối."
+      },
+      {
+        "english": "How do you spell your name?",
+        "vietnamese": "Bạn đánh vần tên mình như thế nào?",
+        "tip": "Giữ cụm /sp/ đầu spell, nối spell your."
+      },
+      {
+        "english": "I'm learning English.",
+        "vietnamese": "Tôi đang học tiếng Anh.",
+        "tip": "Giữ /ŋ/ cuối learning; nhấn âm đầu English."
+      },
+      {
+        "english": "Can you help me, please?",
+        "vietnamese": "Bạn có thể giúp tôi không?",
+        "tip": "Giữ /p/ cuối help, dùng giọng nhờ giúp."
+      },
+      {
+        "english": "Sorry, I'm late.",
+        "vietnamese": "Xin lỗi, tôi đến muộn.",
+        "tip": "Giọng xin lỗi nhẹ; giữ /t/ cuối late."
+      },
+      {
+        "english": "It was nice talking to you.",
+        "vietnamese": "Rất vui được trò chuyện với bạn.",
+        "tip": "Nối talking to, giọng kết thúc thân thiện."
+      }
+    ],
+    "conversation": [
+      {
+        "prompt": "Hi! How is your English class?",
+        "translation": "Chào bạn! Lớp tiếng Anh của bạn thế nào?",
+        "reply": "I'm learning English.",
+        "replyTranslation": "Tôi đang học tiếng Anh."
+      },
+      {
+        "prompt": "Let's meet at a quarter past nine.",
+        "translation": "Hãy gặp nhau lúc chín giờ mười lăm.",
+        "reply": "Could you say that again, please?",
+        "replyTranslation": "Bạn có thể nói lại được không?"
+      },
+      {
+        "prompt": "Thanks for the chat. See you soon!",
+        "translation": "Cảm ơn cuộc trò chuyện. Hẹn sớm gặp lại!",
+        "reply": "It was nice talking to you.",
+        "replyTranslation": "Rất vui được trò chuyện với bạn."
+      }
+    ]
+  }
+]

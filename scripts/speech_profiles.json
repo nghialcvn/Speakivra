@@ -1,9 +1,1235 @@
 {
-  "voice_greeting": {"text":"Hello! How are you?", "context":"friendly greeting followed by a warm check-in", "parts":[{"text":"Hello!", "speed":1.02, "pause_ms":140},{"text":"How are you?", "speed":0.98}]},
-  "voice_thanks": {"text":"I'm fine, thank you.", "context":"warm and appreciative response", "parts":[{"text":"I'm fine, thank you.", "speed":0.98}]},
-  "voice_introduction": {"text":"My name is Alex.", "context":"clear and relaxed self-introduction", "parts":[{"text":"My name is Alex.", "speed":1.0}]},
-  "voice_welcome": {"text":"Nice to meet you!", "context":"pleased and welcoming", "parts":[{"text":"Nice to meet you!", "speed":1.0}]},
-  "voice_ask_name": {"text":"Hello! What's your name?", "context":"friendly opening then a curious question", "parts":[{"text":"Hello!", "speed":1.02, "pause_ms":160},{"text":"What's your name?", "speed":0.99}]},
-  "voice_ask_origin": {"text":"Nice to meet you! Where are you from?", "context":"welcoming someone before asking about their background", "parts":[{"text":"Nice to meet you!", "speed":1.0, "pause_ms":180},{"text":"Where are you from?", "speed":0.99}]},
-  "voice_ask_hobbies": {"text":"What do you like doing?", "context":"interested and relaxed conversation about hobbies", "parts":[{"text":"What do you like doing?", "speed":0.98}]}
+  "voice_greeting": {
+    "text": "Hello! How are you?",
+    "context": "friendly greeting followed by a warm check-in",
+    "parts": [
+      {
+        "text": "Hello!",
+        "speed": 1.02,
+        "pause_ms": 140
+      },
+      {
+        "text": "How are you?",
+        "speed": 0.98
+      }
+    ]
+  },
+  "voice_thanks": {
+    "text": "I'm fine, thank you.",
+    "context": "warm and appreciative response",
+    "parts": [
+      {
+        "text": "I'm fine, thank you.",
+        "speed": 0.98
+      }
+    ]
+  },
+  "voice_introduction": {
+    "text": "My name is Alex.",
+    "context": "clear and relaxed self-introduction",
+    "parts": [
+      {
+        "text": "My name is Alex.",
+        "speed": 1.0
+      }
+    ]
+  },
+  "voice_welcome": {
+    "text": "Nice to meet you!",
+    "context": "pleased and welcoming",
+    "parts": [
+      {
+        "text": "Nice to meet you!",
+        "speed": 1.0
+      }
+    ]
+  },
+  "voice_ask_name": {
+    "text": "Hello! What's your name?",
+    "context": "friendly opening then a curious question",
+    "parts": [
+      {
+        "text": "Hello!",
+        "speed": 1.02,
+        "pause_ms": 160
+      },
+      {
+        "text": "What's your name?",
+        "speed": 0.99
+      }
+    ]
+  },
+  "voice_ask_origin": {
+    "text": "Nice to meet you! Where are you from?",
+    "context": "welcoming someone before asking about their background",
+    "parts": [
+      {
+        "text": "Nice to meet you!",
+        "speed": 1.0,
+        "pause_ms": 180
+      },
+      {
+        "text": "Where are you from?",
+        "speed": 0.99
+      }
+    ]
+  },
+  "voice_ask_hobbies": {
+    "text": "What do you like doing?",
+    "context": "interested and relaxed conversation about hobbies",
+    "parts": [
+      {
+        "text": "What do you like doing?",
+        "speed": 0.98
+      }
+    ]
+  },
+  "voice_greetings_8": {
+    "text": "I'm from Vietnam.",
+    "context": "Greetings & Introductions everyday conversation",
+    "parts": [
+      {
+        "text": "I'm from Vietnam.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_greetings_9": {
+    "text": "I live in Hanoi.",
+    "context": "Greetings & Introductions everyday conversation",
+    "parts": [
+      {
+        "text": "I live in Hanoi.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_greetings_10": {
+    "text": "I'm a student.",
+    "context": "Greetings & Introductions everyday conversation",
+    "parts": [
+      {
+        "text": "I'm a student.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_greetings_11": {
+    "text": "See you tomorrow!",
+    "context": "Greetings & Introductions everyday conversation",
+    "parts": [
+      {
+        "text": "See you tomorrow!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_greetings_12": {
+    "text": "Where do you live?",
+    "context": "Greetings & Introductions everyday conversation",
+    "parts": [
+      {
+        "text": "Where do you live?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_13": {
+    "text": "This is my family.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "This is my family.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_14": {
+    "text": "I have one brother.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "I have one brother.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_15": {
+    "text": "I have two sisters.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "I have two sisters.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_16": {
+    "text": "My mother is a teacher.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "My mother is a teacher.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_17": {
+    "text": "My father is a doctor.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "My father is a doctor.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_18": {
+    "text": "We live together.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "We live together.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_19": {
+    "text": "My grandmother is very kind.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "My grandmother is very kind.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_20": {
+    "text": "I love my family.",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "I love my family.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_21": {
+    "text": "Do you have any brothers?",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "Do you have any brothers?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_22": {
+    "text": "What does your mother do?",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "What does your mother do?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_family_23": {
+    "text": "Do you live with your family?",
+    "context": "My Family everyday conversation",
+    "parts": [
+      {
+        "text": "Do you live with your family?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_24": {
+    "text": "I wake up at seven.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I wake up at seven.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_25": {
+    "text": "I brush my teeth.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I brush my teeth.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_26": {
+    "text": "I have breakfast at home.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I have breakfast at home.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_27": {
+    "text": "I go to school by bus.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I go to school by bus.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_28": {
+    "text": "I start work at nine.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I start work at nine.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_29": {
+    "text": "I have lunch at noon.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I have lunch at noon.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_30": {
+    "text": "I go home at five.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I go home at five.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_31": {
+    "text": "I go to bed at ten.",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "I go to bed at ten.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_32": {
+    "text": "What time do you wake up?",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "What time do you wake up?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_33": {
+    "text": "How do you go to school?",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "How do you go to school?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_routine_34": {
+    "text": "What time do you go to bed?",
+    "context": "Daily Routine everyday conversation",
+    "parts": [
+      {
+        "text": "What time do you go to bed?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_35": {
+    "text": "I'd like some water, please.",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "I'd like some water, please.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_36": {
+    "text": "Can I have the menu, please?",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "Can I have the menu, please?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_37": {
+    "text": "I like chicken and rice.",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "I like chicken and rice.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_38": {
+    "text": "I don't eat meat.",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "I don't eat meat.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_39": {
+    "text": "This soup is delicious!",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "This soup is delicious!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_40": {
+    "text": "I'd like a cup of tea.",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "I'd like a cup of tea.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_41": {
+    "text": "No sugar, please.",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "No sugar, please.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_42": {
+    "text": "Can I have the bill, please?",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "Can I have the bill, please?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_43": {
+    "text": "What would you like to drink?",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "What would you like to drink?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_44": {
+    "text": "What food do you like?",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "What food do you like?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_food_45": {
+    "text": "Would you like sugar in your tea?",
+    "context": "Food & Drinks everyday conversation",
+    "parts": [
+      {
+        "text": "Would you like sugar in your tea?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_46": {
+    "text": "How much is this shirt?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "How much is this shirt?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_47": {
+    "text": "I'm looking for a blue shirt.",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "I'm looking for a blue shirt.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_48": {
+    "text": "Do you have a smaller size?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Do you have a smaller size?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_49": {
+    "text": "Can I try it on?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Can I try it on?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_50": {
+    "text": "It's too expensive.",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "It's too expensive.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_51": {
+    "text": "I'll take this one.",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "I'll take this one.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_52": {
+    "text": "Can I pay by card?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Can I pay by card?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_53": {
+    "text": "Thank you for your help.",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Thank you for your help.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_54": {
+    "text": "Can I help you?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Can I help you?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_55": {
+    "text": "Is this size okay?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "Is this size okay?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_shopping_56": {
+    "text": "How would you like to pay?",
+    "context": "Shopping everyday conversation",
+    "parts": [
+      {
+        "text": "How would you like to pay?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_57": {
+    "text": "Excuse me, where is the station?",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Excuse me, where is the station?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_58": {
+    "text": "Go straight ahead.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Go straight ahead.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_59": {
+    "text": "Turn left at the traffic lights.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Turn left at the traffic lights.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_60": {
+    "text": "Turn right at the bank.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Turn right at the bank.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_61": {
+    "text": "It's next to the supermarket.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "It's next to the supermarket.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_62": {
+    "text": "It's across from the park.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "It's across from the park.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_63": {
+    "text": "Is it far from here?",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Is it far from here?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_64": {
+    "text": "Thank you. I understand.",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Thank you.",
+        "speed": 0.99,
+        "pause_ms": 160
+      },
+      {
+        "text": "I understand.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_65": {
+    "text": "Excuse me, how do I get to the bank?",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Excuse me, how do I get to the bank?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_66": {
+    "text": "Where do I turn?",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Where do I turn?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_directions_67": {
+    "text": "Where is the supermarket?",
+    "context": "Directions everyday conversation",
+    "parts": [
+      {
+        "text": "Where is the supermarket?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_68": {
+    "text": "I like listening to music.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I like listening to music.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_69": {
+    "text": "I enjoy reading books.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I enjoy reading books.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_70": {
+    "text": "I play football on Sundays.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I play football on Sundays.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_71": {
+    "text": "I like cooking with my family.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I like cooking with my family.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_72": {
+    "text": "I watch movies at home.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I watch movies at home.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_73": {
+    "text": "I can swim.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I can swim.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_74": {
+    "text": "I draw pictures in my free time.",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "I draw pictures in my free time.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_75": {
+    "text": "Let's play together!",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "Let's play together!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_76": {
+    "text": "What do you do on Sundays?",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "What do you do on Sundays?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_hobbies_77": {
+    "text": "Can you swim?",
+    "context": "My Hobbies everyday conversation",
+    "parts": [
+      {
+        "text": "Can you swim?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_78": {
+    "text": "What time is it?",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "What time is it?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_79": {
+    "text": "It's half past eight.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "It's half past eight.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_80": {
+    "text": "Today is Monday.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "Today is Monday.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_81": {
+    "text": "My birthday is in June.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "My birthday is in June.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_82": {
+    "text": "The meeting is at two.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "The meeting is at two.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_83": {
+    "text": "See you on Friday!",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "See you on Friday!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_84": {
+    "text": "I'm free this afternoon.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "I'm free this afternoon.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_85": {
+    "text": "Let's meet at ten tomorrow.",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "Let's meet at ten tomorrow.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_86": {
+    "text": "What time is it now?",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "What time is it now?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_87": {
+    "text": "When is your birthday?",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "When is your birthday?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_time_88": {
+    "text": "When can we meet?",
+    "context": "Time & Dates everyday conversation",
+    "parts": [
+      {
+        "text": "When can we meet?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_89": {
+    "text": "I'd like a ticket to Hanoi.",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "I'd like a ticket to Hanoi.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_90": {
+    "text": "Is this seat free?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Is this seat free?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_91": {
+    "text": "I have a reservation.",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "I have a reservation.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_92": {
+    "text": "Can I see your passport, please?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Can I see your passport, please?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_93": {
+    "text": "Where is the bus stop?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Where is the bus stop?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_94": {
+    "text": "What time does the train leave?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "What time does the train leave?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_95": {
+    "text": "I'd like a room for two nights.",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "I'd like a room for two nights.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_96": {
+    "text": "Have a nice trip!",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Have a nice trip!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_97": {
+    "text": "Where would you like to go?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Where would you like to go?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_98": {
+    "text": "Do you have a reservation?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "Do you have a reservation?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_travel_99": {
+    "text": "How long would you like to stay?",
+    "context": "Travel everyday conversation",
+    "parts": [
+      {
+        "text": "How long would you like to stay?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_100": {
+    "text": "Could you say that again, please?",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Could you say that again, please?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_101": {
+    "text": "Please speak more slowly.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Please speak more slowly.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_102": {
+    "text": "I don't understand.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "I don't understand.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_103": {
+    "text": "How do you spell your name?",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "How do you spell your name?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_104": {
+    "text": "I'm learning English.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "I'm learning English.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_105": {
+    "text": "Can you help me, please?",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Can you help me, please?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_106": {
+    "text": "Sorry, I'm late.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Sorry, I'm late.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_107": {
+    "text": "It was nice talking to you.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "It was nice talking to you.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_108": {
+    "text": "Hi! How is your English class?",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Hi!",
+        "speed": 0.99,
+        "pause_ms": 160
+      },
+      {
+        "text": "How is your English class?",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_109": {
+    "text": "Let's meet at a quarter past nine.",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Let's meet at a quarter past nine.",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  },
+  "voice_conversation_110": {
+    "text": "Thanks for the chat. See you soon!",
+    "context": "Real Conversation everyday conversation",
+    "parts": [
+      {
+        "text": "Thanks for the chat.",
+        "speed": 0.99,
+        "pause_ms": 160
+      },
+      {
+        "text": "See you soon!",
+        "speed": 0.99,
+        "pause_ms": 0
+      }
+    ]
+  }
 }

@@ -23,8 +23,16 @@ profiles = json.loads((root / "scripts/speech_profiles.json").read_text())
 model_path = args.model_directory / "kokoro-v1.0.int8.onnx"
 voices_path = args.model_directory / "voices-v1.0.bin"
 model = Kokoro(str(model_path), str(voices_path))
+old_manifest = json.loads((root / "app/src/main/assets/speech/manifest.json").read_text())
+cached = {clip["resource"]: clip for clip in old_manifest["clips"]}
 clips = []
 for name, profile in profiles.items():
+    path = root / "app/src/main/res/raw" / (name + ".ogg")
+    profile_hash = hashlib.sha256(json.dumps(profile, sort_keys=True).encode()).hexdigest()
+    previous = cached.get(name)
+    if previous and path.exists() and previous.get("profile_sha256") == profile_hash and hashlib.sha256(path.read_bytes()).hexdigest() == previous["sha256"]:
+        clips.append(previous)
+        continue
     chunks = []
     for part in profile["parts"]:
         samples, rate = model.create(part["text"], voice="af_heart", speed=part["speed"], lang="en-us")
@@ -45,7 +53,7 @@ for name, profile in profiles.items():
     assert decoded_rate == 24000 and np.isfinite(decoded).all() and np.max(np.abs(decoded)) < 1
     duration = len(decoded) / decoded_rate
     assert 0.5 < duration < 15
-    clips.append(dict(resource=name, text=profile["text"], context=profile["context"],
+    clips.append(dict(resource=name, text=profile["text"], context=profile["context"], profile_sha256=profile_hash,
                       duration_seconds=round(duration, 3), size=path.stat().st_size,
                       sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
     print(name, round(duration, 2), path.stat().st_size, flush=True)

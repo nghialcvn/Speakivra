@@ -75,6 +75,7 @@ internal fun VoiceSettingsScreen(
     onGender: (String) -> Unit,
     onAssign: (String) -> Unit,
     onPreview: (String) -> Unit,
+    onPreviewDefault: () -> Unit,
     onResetDefault: () -> Unit
 ) {
     Column(
@@ -121,6 +122,8 @@ internal fun VoiceSettingsScreen(
         VoicePanel("Nghe thử giọng trên máy") {
             if (choice.usesBundledAudio) {
                 Text("Đang dùng giọng nữ neural Anh-Mỹ gốc cho câu có âm thanh sẵn.", color = voiceText, fontSize = 13.sp)
+                OutlinedButton(onClick = onPreviewDefault, border = BorderStroke(1.dp, voiceAccent),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = voiceText)) { Text("▶ Nghe giọng mặc định") }
                 Text("Các câu mới hoặc có tên riêng dùng TTS ngoại tuyến trên điện thoại.", color = voiceMuted, fontSize = 12.sp)
             } else if (choice.voiceId == null) {
                 Text("Chưa gán giọng cho ${choice.accentLabel} · ${choice.genderLabel}. Chọn một giọng bên dưới rồi bấm Dùng giọng này.", color = Color(0xFFFFD18A), fontSize = 13.sp)

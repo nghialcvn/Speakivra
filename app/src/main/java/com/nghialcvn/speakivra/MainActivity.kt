@@ -1,6 +1,10 @@
 package com.nghialcvn.speakivra
 
 import android.Manifest
+import android.app.Activity
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.WindowCompat
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import android.content.ActivityNotFoundException
@@ -37,48 +41,43 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import java.util.Locale
 
-private val Navy = Color(0xFF101B32)
-private val SurfaceBlue = Color(0xFF20314D)
-private val Violet = Color(0xFF6856E8)
-private val Mint = Color(0xFF43D5A0)
-private val Muted = Color(0xFFB8C7DE)
-
 private const val APP_VERSION = BuildConfig.VERSION_NAME
 
 @Composable
 private fun UpdatesScreen(state: UpdateState, installation: Installation, onCheck: () -> Unit,
                           onDownload: () -> Unit, onInstall: () -> Unit, onCancel: () -> Unit) {
-    Panel {
+    val p = studio
+    StudioCard {
         Text("Cập nhật ứng dụng", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Text("Phiên bản đang dùng: v$APP_VERSION", color = Mint)
-        Text("Nguồn chính thức: github.com/nghialcvn/Speakivra/releases", color = Muted)
-        Text(state.message, color = Muted)
+        Text("Phiên bản đang dùng: v$APP_VERSION", color = p.coral)
+        Text("Nguồn chính thức: github.com/nghialcvn/Speakivra/releases", color = p.muted)
+        Text(state.message, color = p.muted)
         if (state.phase in listOf("idle", "checking") && state.file == null) {
-            PrimaryButton(if (state.checking) "Đang kiểm tra..." else "Kiểm tra bản cập nhật") {
+            CoralButton(if (state.checking) "Đang kiểm tra..." else "Kiểm tra bản cập nhật") {
                 if (!state.checking) onCheck()
             }
         }
         state.release?.let { item ->
             Text("Bản phát hành: v${item.version}", fontWeight = FontWeight.SemiBold)
-            Text("Có gì mới:", color = Mint)
-            Text(item.notes.ifBlank { "Chưa có ghi chú thay đổi." }, color = Muted)
+            Text("Có gì mới:", color = p.coral)
+            Text(item.notes.ifBlank { "Chưa có ghi chú thay đổi." }, color = p.muted)
             when (state.phase) {
                 "downloading" -> {
                     val percent = (state.bytes * 100 / item.size.coerceAtLeast(1)).coerceIn(0, 100)
-                    LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth(), color = Mint)
-                    Text("Đang tải: $percent%", color = Mint)
+                    LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth(), color = p.coral)
+                    Text("Đang tải: $percent%", color = p.coral)
                     OutlinedButton(onClick = onCancel) { Text("Hủy tải") }
                 }
-                "verifying", "cancelling" -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Mint)
-                "permission" -> PrimaryButton("Cho phép và cài cập nhật", onInstall)
-                "downloaded" -> PrimaryButton("Cài cập nhật", onInstall)
+                "verifying", "cancelling" -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = p.coral)
+                "permission" -> CoralButton("Cho phép và cài cập nhật", onClick = onInstall)
+                "downloaded" -> CoralButton("Cài cập nhật", onClick = onInstall)
                 "idle" -> if (item.versionCode > installation.versionCode && item.canInstallOver(installation)) {
-                    PrimaryButton("Tải và cập nhật", onDownload)
+                    CoralButton("Tải và cập nhật", onDownload)
                 } else Unit
                 else -> Unit
             }
         }
-        Text("Tải trực tiếp trong ứng dụng, kiểm tra APK và chữ ký rồi mở trình cài đặt Android. Bạn xác nhận cài đặt; không cần tìm file trong thư mục tải xuống. Không gỡ app để giữ tiến độ học.", color = Muted, fontSize = 12.sp)
+        Text("Tải trực tiếp trong ứng dụng, kiểm tra APK và chữ ký rồi mở trình cài đặt Android. Bạn xác nhận cài đặt; không cần tìm file trong thư mục tải xuống. Không gỡ app để giữ tiến độ học.", color = p.muted, fontSize = 12.sp)
     }
 }
 
@@ -148,8 +147,8 @@ private fun SpeakivraApp(updates: InAppUpdates) {
             .putInt(prefix + "review", progress.review).putInt(prefix + "correct", progress.correct)
             .putInt(prefix + "rounds", progress.rounds).putString(prefix + "phase", progress.phase).apply()
     }
-    var automatic by remember { mutableStateOf(true) }
-    var showTranslation by remember { mutableStateOf(true) }
+    var automatic by rememberSaveable { mutableStateOf(preferences.getBoolean("automatic_mode", true)) }
+    var showTranslation by rememberSaveable { mutableStateOf(true) }
     var playbackSpeed by rememberSaveable {
         val value = SpeechProfiles.initialSpeed(preferences.getInt("playback_speed", 100), preferences.getInt("speed_calibration", 0))
         preferences.edit().putInt("playback_speed", value).putInt("speed_calibration", 2).apply()
@@ -208,15 +207,26 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         page = saved.phase
         if (automatic && page == "repeat") speak(item.phrases[saved.phrase].english)
     }
-    val contentScroll = rememberScrollState()
-    LaunchedEffect(page, lesson.id, progress.phrase, progress.turn, progress.review) { contentScroll.scrollTo(0) }
-    val darkScheme = darkColorScheme(primary = Violet, secondary = Mint, background = Navy, surface = SurfaceBlue)
-    MaterialTheme(colorScheme = darkScheme) {
+    var dark by rememberSaveable { mutableStateOf(preferences.getBoolean("dark_theme", false)) }
+    var goal by rememberSaveable { mutableIntStateOf(preferences.getInt("daily_goal", 20).takeIf { it in listOf(10, 15, 20, 30) } ?: 20) }
+    var settingDialog by rememberSaveable { mutableStateOf("") }
+    fun selectSpeed(value: Int) {
+        playbackSpeed = value
+        preferences.edit().putInt("playback_speed", value).apply()
+    }
+    fun navigate(destination: String) {
+        speech.stop()
+        transcript = ""
+        page = if (destination == "repeat") progress.phase else destination
+    }
+    BackHandler(enabled = page != "home") { navigate(if (page == "updates") "profile" else "home") }
+    SpeakivraTheme(dark) {
+        val palette = studio
+        SideEffect { (context as? Activity)?.let { updateSystemBars(it, dark, palette.background) } }
         val available = updateState.release
         if (page == "home" && available != null && available.versionCode > installation.versionCode &&
             available.canInstallOver(installation) && dismissedUpdate != available.versionCode) {
-            AlertDialog(
-                onDismissRequest = { dismissedUpdate = available.versionCode },
+            AlertDialog(onDismissRequest = { dismissedUpdate = available.versionCode },
                 title = { Text("Speakivra v${available.version}") },
                 text = {
                     Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())) {
@@ -224,209 +234,108 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                         Text(available.notes.ifBlank { "Cải tiến và sửa lỗi ứng dụng." })
                     }
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        dismissedUpdate = available.versionCode
-                        beginUpdate()
-                    }) { Text("Cập nhật ngay") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { dismissedUpdate = available.versionCode }) { Text("Để sau") }
-                }
-            )
+                confirmButton = { TextButton(onClick = { dismissedUpdate = available.versionCode; beginUpdate() }) { Text("Cập nhật ngay") } },
+                dismissButton = { TextButton(onClick = { dismissedUpdate = available.versionCode }) { Text("Để sau") } })
         }
-        Column(
-            modifier = Modifier.fillMaxSize().background(Navy).windowInsetsPadding(WindowInsets.safeDrawing)
-        ) {
-            Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text("SPEAKIVRA", color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
-                    Text("Listen. Speak. Improve.", color = Muted, fontSize = 12.sp)
+        if (settingDialog.isNotBlank()) {
+            val title = when (settingDialog) { "speed" -> "Tốc độ mặc định"; "goal" -> "Mục tiêu mỗi ngày"; else -> "Giọng mẫu" }
+            AlertDialog(onDismissRequest = { settingDialog = "" }, title = { Text(title) }, text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    when (settingDialog) {
+                        "speed" -> listOf(75, 100, 125).forEach { value ->
+                            TextButton(onClick = { selectSpeed(value); settingDialog = "" }, modifier = Modifier.fillMaxWidth()) {
+                                Text(speedLabel(value) + if (playbackSpeed == value) " ✓" else "")
+                            }
+                        }
+                        "goal" -> listOf(10, 15, 20, 30).forEach { value ->
+                            TextButton(onClick = { goal = value; preferences.edit().putInt("daily_goal", value).apply(); settingDialog = "" }, modifier = Modifier.fillMaxWidth()) {
+                                Text("$value phút" + if (goal == value) " ✓" else "")
+                            }
+                        }
+                        else -> Text("Anh-Mỹ • Âm thanh có sẵn trong ứng dụng. Giọng của thiết bị được dùng dự phòng nếu không phát được âm thanh mẫu.")
+                    }
                 }
-                Text("V$APP_VERSION • BETA", color = Mint, fontSize = 12.sp)
-            }
-            Column(
-                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(contentScroll).padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                when (page) {
-                    "home" -> {
-                        Panel {
-                            Text("Chào mừng đến Speakivra 🎧", fontSize = 22.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("Luyện nghe và nói tiếng Anh-Mỹ mỗi ngày", color = Muted)
-                            Text("Mục tiêu: 20 phút/ngày • Bài học A1", color = Mint)
-                        }
-                        Panel {
-                            Text("Bài ${Lessons.all.indexOf(lesson) + 1}: ${lesson.title}", fontSize = 19.sp, fontWeight = FontWeight.Bold)
-                            Text(lesson.vietnamese, color = Muted)
-                            Text("Câu hiện tại: ${index + 1}/${phrases.size}", color = Muted)
-                            PrimaryButton(if (progress.phase == "summary") "Xem tổng kết bài" else "Tiếp tục bài học") { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) }
-                        }
-                        Panel {
-                            Text("AI Tutor (mô phỏng)", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text("Chưa kết nối API, hội thoại theo kịch bản cố định.", color = Muted)
-                            PrimaryButton("Mở hội thoại mẫu") { page = "chat" }
-                        }
-                        Panel {
-                            Text("10 CHỦ ĐỀ A1", color = Mint, fontWeight = FontWeight.Bold)
-                            Lessons.all.forEachIndexed { position, item ->
-                                val saved = loadProgress(item)
-                                OutlinedButton(onClick = { openLesson(item) }, modifier = Modifier.fillMaxWidth()) {
-                                    Column(Modifier.fillMaxWidth()) {
-                                        Text("${position + 1}. ${item.title}", color = if (item.id == lesson.id) Mint else Color.White)
-                                        Text("${item.vietnamese} • " + if (saved.rounds > 0) "Đã học ${saved.rounds} lượt" else "Câu ${saved.phrase + 1}/${item.phrases.size}", color = Muted, fontSize = 12.sp)
-                                    }
-                                }
-                            }
-                        }
-                        Text("Đã hoàn thành: $completed lượt bài • Lưu trên thiết bị", color = Mint)
-                    }
-                    "repeat" -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("${lesson.title} • ${index + 1}/${phrases.size}", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                            Text(if (automatic) "Tự động" else "Thủ công", color = Mint,
-                                modifier = Modifier.clickable { automatic = !automatic }.padding(8.dp))
-                        }
-                        LinearProgressIndicator(progress = { (index + 1f) / phrases.size }, modifier = Modifier.fillMaxWidth(), color = Mint)
-                        Panel {
-                            Text("NGHE VÀ NHẮC LẠI", color = Mint, fontSize = 12.sp)
-                            Spacer(Modifier.height(12.dp))
-                            Text(phrases[index].english, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                            if (showTranslation) Text(phrases[index].vietnamese, color = Muted, textAlign = TextAlign.Center)
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                TextButton(onClick = {
-                                    playbackSpeed = when (playbackSpeed) { 75 -> 100; 100 -> 125; else -> 75 }
-                                    preferences.edit().putInt("playback_speed", playbackSpeed).apply()
-                                }) {
-                                    Text("Tốc độ " + when (playbackSpeed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" })
-                                }
-                                TextButton(onClick = { showTranslation = !showTranslation }) { Text(if (showTranslation) "Ẩn dịch" else "Hiện dịch") }
-                            }
-                            PrimaryButton("🔊 Nghe mẫu") { speak(phrases[index].english) }
-                            PrimaryButton("🎙 Nói và nhận dạng") { listen() }
-                        }
-                        Text("Mẹo luyện âm: ${phrases[index].tip}", color = Mint, fontSize = 13.sp)
-                        if (transcript.isNotBlank()) {
-                            Panel {
-                                Text("Máy nhận dạng được:", color = Mint)
-                                Text(transcript, fontWeight = FontWeight.SemiBold)
-                                val expected = phrases[index].english.lowercase(Locale.US).replace(Regex("[^a-z ]"), "").trim()
-                                val actual = transcript.lowercase(Locale.US).replace(Regex("[^a-z ]"), "").trim()
-                                Text(if (expected == actual) "Nội dung khớp câu mẫu ✓" else "Nội dung khác câu mẫu. Thử nói lại nhé.", color = Muted)
-                                Text("Không chấm điểm phát âm: nhận dạng chữ không đo được chất lượng âm thanh.", color = Muted, fontSize = 12.sp)
-                            }
-                        }
-                        Text(status, color = Muted, fontSize = 13.sp)
-                        PrimaryButton(if (index == phrases.lastIndex) "Hoàn thành • Sang hội thoại" else "Câu tiếp theo") { next() }
-                    }
-                    "review" -> {
-                        val question = reviewQuestion(lesson, progress.review)
-                        Text("${lesson.title} • Ôn tập ${progress.review + 1}/3", color = Mint)
-                        Panel {
-                            Text("NGHE VÀ HIỂU", color = Mint, fontSize = 12.sp)
-                            Text(question.phrase.english, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                            PrimaryButton("🔊 Nghe lại câu") { speak(question.phrase.english) }
-                            Text("Chọn nghĩa phù hợp:", color = Muted)
-                            question.options.forEachIndexed { choice, label ->
-                                OutlinedButton(onClick = { if (reviewSelection == -1) reviewSelection = choice },
-                                    modifier = Modifier.fillMaxWidth(), enabled = reviewSelection == -1) { Text(label) }
-                            }
-                            if (reviewSelection != -1) {
-                                Text(if (reviewSelection == question.answer) "Đúng rồi ✓" else "Đáp án: ${question.phrase.vietnamese}", color = Mint)
-                                Text(question.phrase.tip, color = Muted)
-                                PrimaryButton("🎙 Nhắc lại câu này") { listen() }
-                                if (transcript.isNotBlank()) Text("Máy nhận dạng: $transcript", color = Muted)
-                                PrimaryButton(if (progress.review == 2) "Hoàn thành và tổng kết" else "Câu ôn tập tiếp theo") {
+            }, confirmButton = { TextButton(onClick = { settingDialog = "" }) { Text("Đóng") } })
+        }
+        Surface(color = palette.background, contentColor = palette.ink, modifier = Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    // Each screen owns its scroll area; speaking/review keep the next action visible.
+                    key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
+                        when (page) {
+                            "home" -> HomeScreen(lesson, progress, goal, completed,
+                                onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
+                                onLessons = { navigate("lessons") }, onChat = { navigate("chat") }, onProfile = { navigate("profile") })
+                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson)
+                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status,
+                                onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
+                                onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
+                                onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next)
+                            "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, transcript,
+                                nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
+                                    "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
+                                }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
+                                onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
+                                onTranslation = { showTranslation = !showTranslation }, onNext = {
                                     speech.stop()
-                                    val nextProgress = progress.answerReview(reviewSelection == question.answer)
-                                    if (nextProgress.rounds > progress.rounds) completed++
-                                    saveProgress(nextProgress)
-                                    reviewSelection = -1
+                                    if (progress.phase in listOf("repeat", "chat")) {
+                                        saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase
+                                    } else if (chatIndex < lesson.conversation.lastIndex) saveProgress(progress.copy(turn = chatIndex + 1))
+                                    else page = progress.phase
                                     transcript = ""
-                                    page = progress.phase
+                                    if (automatic && page == "chat") speak(lesson.conversation[progress.turn].prompt)
+                                })
+                            "review" -> ReviewScreen(lesson, progress, reviewSelection, transcript,
+                                onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate("home") },
+                                onListen = { speak(reviewQuestion(lesson, progress.review).phrase.english) }, onSpeak = ::listen,
+                                onNext = {
+                                    if (reviewSelection >= 0) {
+                                        speech.stop()
+                                        val question = reviewQuestion(lesson, progress.review)
+                                        val value = progress.answerReview(reviewSelection == question.answer)
+                                        if (value.rounds > progress.rounds) completed++
+                                        saveProgress(value); reviewSelection = -1; transcript = ""; page = progress.phase
+                                    }
+                                })
+                            "summary" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                PageHeading("Hoàn thành bài học", lessonLabel(lesson), onBack = { navigate("home") })
+                                StudioCard(color = palette.mint, border = false) {
+                                    Text(lesson.title, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
+                                    Text("${lesson.phrases.size} câu mẫu • ${lesson.conversation.size} lượt hội thoại • 3 câu ôn tập")
+                                    Text("Kết quả ôn nghĩa: ${progress.correct}/3", fontWeight = FontWeight.Bold)
+                                    Text("Tiến độ đã lưu trên thiết bị. Bạn có thể học lại bất cứ lúc nào.", color = palette.muted)
                                 }
+                                CoralButton("Học lại bài này", onClick = {
+                                    speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
+                                    if (automatic) speak(phrases[0].english)
+                                })
+                                val following = Lessons.all.getOrNull(Lessons.all.indexOf(lesson) + 1)
+                                if (following != null) CoralButton("Bài tiếp theo: ${lessonLabel(following)}", onClick = { openLesson(following) })
+                                TextButton(onClick = { navigate("lessons") }) { Text("Về danh sách bài học") }
+                            }
+                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION,
+                                onTheme = { dark = it; preferences.edit().putBoolean("dark_theme", it).apply() },
+                                onVoice = { settingDialog = "voice" }, onSpeed = { settingDialog = "speed" },
+                                onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() })
+                            "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
+                                UpdatesScreen(updateState, installation, updates::check, ::beginUpdate, ::requestInstall, updates::cancel)
                             }
                         }
-                        Text("Ôn nghĩa câu, không phải bài chấm điểm phát âm.", color = Muted, fontSize = 12.sp)
-                    }
-                    "summary" -> {
-                        Panel {
-                            Text("Hoàn thành: ${lesson.title}", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                            Text("${lesson.phrases.size} câu mẫu • ${lesson.conversation.size} lượt hội thoại • 3 câu ôn tập", color = Mint)
-                            Text("Kết quả ôn nghĩa: ${progress.correct}/3", color = Muted)
-                            Text("Tiến độ đã lưu trên thiết bị. Bạn có thể học lại bất cứ lúc nào.", color = Muted)
-                            PrimaryButton("Học lại bài này") {
-                                speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
-                                if (automatic) speak(phrases[0].english)
-                            }
-                            val nextLesson = Lessons.all.getOrNull(Lessons.all.indexOf(lesson) + 1)
-                            if (nextLesson != null) PrimaryButton("Bài tiếp theo: ${nextLesson.title}") { openLesson(nextLesson) }
-                            PrimaryButton("Về danh sách bài học") { page = "home" }
-                        }
-                    }
-                    "updates" -> { UpdatesScreen(updateState, installation, updates::check, ::beginUpdate, ::requestInstall, updates::cancel) }
-                    "chat" -> {
-                        val turn = lesson.conversation[chatIndex]
-                        Text("${lesson.title} • Hội thoại ${chatIndex + 1}/${lesson.conversation.size}", color = Mint)
-                        Panel {
-                            Text("Emma • AI Tutor", fontSize = 21.sp, fontWeight = FontWeight.Bold)
-                            Text("DEMO KỊCH BẢN • CHƯA CÓ AI", color = Color(0xFFFFC86A), fontSize = 12.sp)
-                            Spacer(Modifier.height(12.dp))
-                            Text("Emma: ${turn.prompt}", color = Mint, fontSize = 18.sp)
-                            if (showTranslation) Text(turn.translation, color = Muted)
-                            Text("Gợi ý trả lời: ${turn.reply}", color = Muted)
-                            if (showTranslation) Text(turn.replyTranslation, color = Muted)
-                            PrimaryButton("🔊 Nghe Emma") { speak(turn.prompt) }
-                            TextButton(onClick = { speak(turn.reply) }) { Text("Nghe câu trả lời mẫu") }
-                            TextButton(onClick = { showTranslation = !showTranslation }) { Text(if (showTranslation) "Ẩn dịch" else "Hiện dịch") }
-                            PrimaryButton("🎙 Nói câu trả lời") { listen() }
-                            if (transcript.isNotBlank()) Text("Máy nhận dạng: $transcript", color = Color.White)
-                            PrimaryButton(if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else if (progress.phase == "summary") "Về tổng kết" else if (progress.phase == "review") "Tiếp tục ôn tập" else "Sang ôn tập") {
-                                speech.stop()
-                                if (progress.phase in listOf("repeat", "chat")) {
-                                    saveProgress(progress.copy(phase = "chat").nextTurn(lesson))
-                                    page = progress.phase
-                                } else if (chatIndex < lesson.conversation.lastIndex) {
-                                    saveProgress(progress.copy(turn = chatIndex + 1))
-                                } else {
-                                    page = progress.phase
-                                }
-                                transcript = ""
-                                if (automatic && page == "chat") speak(lesson.conversation[progress.turn].prompt)
-                            }
-                        }
-                        Text("Không gửi bản ghi tới AI. Nhận dạng giọng nói có thể dùng dịch vụ của thiết bị.", color = Muted, fontSize = 12.sp)
                     }
                 }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().background(SurfaceBlue).padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                listOf("home" to "Trang chủ", "repeat" to "Luyện nói", "chat" to "Hội thoại", "updates" to "Cập nhật").forEach { (id, label) ->
-                    Text(label, color = if (page == id) Mint else Muted,
-                        modifier = Modifier.clickable {
-                            speech.stop(); transcript = ""
-                            page = if (id == "repeat") progress.phase else id
-                        }.padding(10.dp), fontSize = 13.sp)
-                }
+                if (page != "repeat") StudioBottomNavigation(page, ::navigate)
             }
         }
     }
 }
 
-@Composable
-private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().background(SurfaceBlue, RoundedCornerShape(18.dp)).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
-        content = content
-    )
-}
-
-@Composable
-private fun PrimaryButton(label: String, onClick: () -> Unit) {
-    Button(onClick = onClick, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Violet)) {
-        Text(label, modifier = Modifier.padding(vertical = 6.dp), color = Color.White)
+@Suppress("DEPRECATION")
+private fun updateSystemBars(activity: Activity, dark: Boolean, color: Color) {
+    activity.window.statusBarColor = color.toArgb()
+    activity.window.navigationBarColor = color.toArgb()
+    WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
+        isAppearanceLightStatusBars = !dark
+        isAppearanceLightNavigationBars = !dark
     }
 }

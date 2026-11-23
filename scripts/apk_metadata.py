@@ -38,6 +38,14 @@ with zipfile.ZipFile(args.apk) as apk:
     for path in ["drawable-nodpi/speakivra_icon.webp", "mipmap-nodpi/ic_launcher.webp"]:
         expected_image = hashlib.sha256((root / "app/src/main/res" / path).read_bytes()).digest()
         assert expected_image in image_digests, f"Approved icon bytes missing from APK: {path}"
+# The approved UI must include the original artwork, local font and its license.
+for name in ["drawable/approved_light_demo", "font/nunito"]:
+    assert ":" + name in resources, f"Missing approved interface asset: {name}"
+with zipfile.ZipFile(args.apk) as apk:
+    font_hash = hashlib.sha256((root / "app/src/main/res/font/nunito.ttf").read_bytes()).digest()
+    assert any(hashlib.sha256(apk.read(name)).digest() == font_hash for name in apk.namelist() if name.endswith(".ttf")), "Bundled font changed or missing"
+    assert apk.read("assets/fonts/Nunito-OFL.txt") == (root / "app/src/main/assets/fonts/Nunito-OFL.txt").read_bytes()
+
 # Generated neural lesson audio must survive release resource path optimization.
 speech_manifest = json.loads((root / "app/src/main/assets/speech/manifest.json").read_text())
 expected_speech = json.loads((root / "scripts/speech_profiles.json").read_text())

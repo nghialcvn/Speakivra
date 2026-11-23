@@ -1,0 +1,78 @@
+name: Publish reviewed APK
+on:
+  workflow_dispatch:
+    inputs:
+      reviewed_run:
+        description: 'Successful Android APK run with UI checks, reviewed before publishing; reuses the exact APK'
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: publish-reviewed-apk
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate the reviewed build and retrieve its APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_RUN: ${{ inputs.reviewed_run }}
+        run: |
+          [[ "$REVIEWED_RUN" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_RUN" > "$RUNNER_TEMP/reviewed-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_RUN/jobs" > "$RUNNER_TEMP/reviewed-jobs.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          run = json.loads((root / 'reviewed-run.json').read_text())
+          jobs = json.loads((root / 'reviewed-jobs.json').read_text())['jobs']
+          assert run['event'] == 'workflow_dispatch' and run['conclusion'] == 'success'
+          assert run['head_sha'] == os.environ['GITHUB_SHA'], 'Source changed after UI review; review the new source first.'
+          assert run['path'].split('@')[0] == '.github/workflows/android-debug.yml'
+          assert any(step['name'] == 'Review approved screens on Android emulator' and step['conclusion'] == 'success'
+                     for job in jobs for step in job['steps']), 'A successful UI check is required.'
+          PY
+          gh run download "$REVIEWED_RUN" --name Speakivra-release-verification --dir dist
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Reverify the same APK without building
+        env:
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          export ANDROID_HOME="$SDK_ROOT"
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;35.0.0"
+          cp dist/speakivra-update.json "$RUNNER_TEMP/reviewed-metadata.json"
+          mapfile -t APKS < <(find dist -maxdepth 1 -name '*.apk' -type f)
+          test "${#APKS[@]}" = 1
+          python3 scripts/apk_metadata.py "${APKS[0]}" dist --release
+          python3 - <<'PY'
+          import json, os, pathlib
+          original = json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'reviewed-metadata.json').read_text())
+          current = json.loads(pathlib.Path('dist/speakivra-update.json').read_text())
+          assert original == current, 'APK changed after UI review.'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('APP_VERSION=' + current['versionName'] + '\n')
+          PY
+      - name: Publish reviewed APK and update metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$APP_VERSION-beta"
+          test -f "docs/releases/$TAG.md"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::This version is already published; do not replace it."
+            exit 1
+          fi
+          gh release create "$TAG" --target "$GITHUB_SHA" --prerelease --draft --title "Speakivra $TAG" --notes-file "docs/releases/$TAG.md"
+          gh release upload "$TAG" dist/*.apk dist/speakivra-update.json
+          gh release edit "$TAG" --draft=false

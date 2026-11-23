@@ -6,6 +6,10 @@ on:
         description: 'Build and publish a beta using the fixed release key (requires signing secrets)'
         type: boolean
         default: false
+      ui_check:
+        description: 'Run optional emulator UI checks and capture screenshots before publishing'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -86,7 +90,11 @@ jobs:
           SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
           SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
           SPEAKIVRA_KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
-        run: gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}"
+          UI_CHECK: ${{ inputs.ui_check && inputs.release }}
+        run: |
+          UI_TASKS=()
+          if [ "$UI_CHECK" = true ]; then UI_TASKS=(:app:assembleReleaseAndroidTest); fi
+          gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}" "${UI_TASKS[@]}"
       - name: Verify APK and create update metadata
         env:
           SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
@@ -98,6 +106,43 @@ jobs:
           RELEASE_FLAG=()
           if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
           python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
+      - name: Enable emulator acceleration for UI review
+        if: inputs.ui_check && inputs.release
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Review approved screens on Android emulator
+        if: inputs.ui_check && inputs.release
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7_pro
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb shell wm size 1080x2340
+            adb shell wm density 420
+            adb install -r dist/*.apk
+            adb install -r -t app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            adb shell am instrument -w com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
+            mkdir -p ui-review
+            adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
+            python3 -c 'from pathlib import Path; s=Path("ui-test-output.txt").read_text(); assert "OK (1 test)" in s, s'
+      - name: Upload UI review screenshots and reports
+        if: always() && inputs.ui_check && inputs.release
+        uses: actions/upload-artifact@v4
+        with:
+          name: Speakivra-ui-review
+          path: |
+            ui-review/**
+            ui-test-output.txt
+            app/build/reports/androidTests/**
+            app/build/outputs/androidTest-results/**
+          if-no-files-found: warn
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: Speakivra-${{ env.VARIANT }}-verification
@@ -105,7 +150,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Publish verified beta APK directly
-        if: inputs.release
+        if: inputs.release && !inputs.ui_check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

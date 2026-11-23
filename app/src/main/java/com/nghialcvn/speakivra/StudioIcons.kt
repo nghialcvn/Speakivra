@@ -1,0 +1,51 @@
+package com.nghialcvn.speakivra
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.unit.dp
+
+/** Small native outline icons: no emoji glyphs, remote icon fonts or extra SDKs. */
+private val Shapes = mapOf(
+    "home" to "M3 10 L12 3 L21 10 L21 21 L15 21 L15 14 L9 14 L9 21 L3 21 Z",
+    "mic" to "M9 6 C9 2 15 2 15 6 L15 12 C15 16 9 16 9 12 Z M6 11 L6 12 C6 20 18 20 18 12 L18 11 M12 19 L12 23 M9 23 L15 23",
+    "chat" to "M5 4 L19 4 Q22 4 22 7 L22 15 Q22 18 19 18 L12 18 L6 22 L6 18 L5 18 Q2 18 2 15 L2 7 Q2 4 5 4 Z M7 11 L7.1 11 M12 11 L12.1 11 M17 11 L17.1 11",
+    "bell" to "M5 17 L19 17 L17 13 L17 9 C17 2 7 2 7 9 L7 13 Z M10 21 Q12 23 14 21 M12 2 L12 1",
+    "back" to "M20 12 L4 12 M10 6 L4 12 L10 18",
+    "chevron" to "M9 5 L16 12 L9 19",
+    "speaker" to "M3 9 L7 9 L12 5 L12 19 L7 15 L3 15 Z M16 8 Q20 12 16 16 M19 4 Q26 12 19 20",
+    "layers" to "M2 8 L12 2 L22 8 L12 14 Z M2 13 L12 19 L22 13 M2 18 L12 24 L22 18",
+    "bulb" to "M8 15 C1 8 8 3 12 3 C18 3 22 9 16 15 L16 18 L8 18 Z M9 21 L15 21 M12 0 L12 1 M2 3 L4 5 M0 11 L2 11 M22 11 L24 11 M20 4 L22 2",
+    "sun" to "M12 6 C20 6 20 18 12 18 C4 18 4 6 12 6 Z M12 0 L12 3 M12 21 L12 24 M0 12 L3 12 M21 12 L24 12 M3 3 L5 5 M19 19 L21 21 M3 21 L5 19 M19 5 L21 3",
+    "gauge" to "M3 20 C-3 7 6 0 12 2 C23 2 27 14 21 20 Z M12 14 L18 8 M6 10 L7 11 M12 6 L12 7 M18 16 L20 16 M5 16 L7 16",
+    "target" to "M19 5 C11 -3 0 4 2 14 C4 25 22 24 22 12 M16 8 C7 2 1 16 10 19 C15 21 19 17 18 12 M12 12 L23 1 M19 1 L23 1 L23 5",
+    "phone" to "M8 2 L16 2 Q18 2 18 4 L18 20 Q18 22 16 22 L8 22 Q6 22 6 20 L6 4 Q6 2 8 2 Z M10 19 L14 19",
+    "check" to "M5 12 L10 17 L20 6",
+    "close" to "M6 6 L18 18 M18 6 L6 18",
+    "calendar" to "M5 4 L19 4 Q21 4 21 6 L21 21 L3 21 L3 6 Q3 4 5 4 Z M3 9 L21 9 M7 1 L7 6 M17 1 L17 6 M7 13 L8 13 M12 13 L13 13 M17 13 L18 13 M7 17 L8 17 M12 17 L13 17",
+    "food" to "M3 2 L3 8 Q3 11 6 11 Q9 11 9 8 L9 2 M6 2 L6 23 M20 23 L20 2 Q13 3 14 13 L20 13",
+    "bag" to "M4 7 L20 7 L22 23 L2 23 Z M8 7 L8 5 C8 -1 16 -1 16 5 L16 7",
+    "map" to "M2 7 L8 4 L16 7 L22 4 L22 21 L16 24 L8 21 L2 24 Z M8 4 L8 21 M16 13 L16 24 M16 0 C8 0 12 9 16 13 C21 8 24 0 16 0 Z M16 4 L16 4.1",
+    "family" to "M5 4 C5 0 11 0 11 4 C11 8 5 8 5 4 Z M16 5 C16 1 22 1 22 5 C22 9 16 9 16 5 Z M1 17 L1 12 Q1 9 5 9 M11 10 L14 10 M23 18 L23 13 Q23 10 20 10 M9 14 C9 10 15 10 15 14 C15 18 9 18 9 14 Z M6 24 L6 21 Q6 18 12 18 Q18 18 18 21 L18 24 M4 15 L4 22 M21 15 L21 22",
+    "handshake" to "M1 8 L5 2 L10 5 L14 3 L22 8 L18 16 L14 21 L11 20 L8 21 L3 15 Z M5 5 L9 7 L7 10 Q7 12 10 11 L13 8 L20 14 M9 15 L14 20 M12 13 L17 18 M3 12 L1 10 M18 4 L23 7 L20 12",
+    "book" to "M2 3 Q7 1 12 5 Q17 1 22 3 L22 21 Q17 19 12 23 Q7 19 2 21 Z M12 5 L12 23",
+    "clock" to "M12 2 C25 2 25 22 12 22 C-1 22 -1 2 12 2 Z M12 6 L12 13 L17 16",
+    "plane" to "M2 11 L10 9 L16 2 Q21 -1 19 5 L16 11 L23 16 L21 19 L14 15 L10 23 L7 23 L8 14 L2 14 Z"
+)
+@Composable
+internal fun StudioIcon(name: String, modifier: Modifier = Modifier, color: Color = studio.ink) {
+    val path = remember(name) { PathParser().parsePathString(Shapes[name] ?: Shapes.getValue("chat")).toPath() }
+    Canvas(modifier.size(24.dp)) {
+        scale(size.width / 26f, size.height / 26f, pivot = androidx.compose.ui.geometry.Offset.Zero) {
+            drawPath(path, color, style = Stroke(1.65f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        }
+    }
+}

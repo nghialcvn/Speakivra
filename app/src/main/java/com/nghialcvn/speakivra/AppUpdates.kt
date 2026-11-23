@@ -16,6 +16,7 @@ import java.security.MessageDigest
 internal const val RELEASES_URL = "https://github.com/nghialcvn/Speakivra/releases"
 private const val ASSET_PREFIX = "$RELEASES_URL/download/"
 private const val RELEASE_API = "https://api.github.com/repos/nghialcvn/Speakivra/releases?per_page=10"
+private const val RELEASE_FALLBACK = "https://raw.githubusercontent.com/nghialcvn/Speakivra/main/updates/latest.json"
 
 internal data class Installation(val packageName: String, val versionCode: Long, val certificate: String)
 internal data class AppRelease(
@@ -112,26 +113,63 @@ private fun requestJson(url: String): String? {
     } finally { connection.disconnect() }
 }
 
-internal suspend fun checkForUpdate(current: Installation): UpdateState = withContext(Dispatchers.IO) {
-    // The list endpoint includes public beta releases; /latest excludes prereleases.
+private fun newestReleaseFromApi(): AppRelease? {
     val releases = JSONArray(requestJson(RELEASE_API) ?: "[]")
     val latest = (0 until releases.length()).map { releases.getJSONObject(it) }
-        .firstOrNull { !it.optBoolean("draft") }
-        ?: return@withContext UpdateState(message = "Chưa có bản phát hành GitHub Releases.")
+        .firstOrNull { !it.optBoolean("draft") } ?: return null
     val assets = latest.optJSONArray("assets") ?: JSONArray()
     val metadataUrl = (0 until assets.length()).map { assets.getJSONObject(it) }
         .firstOrNull { it.optString("name") == "speakivra-update.json" }
         ?.optString("browser_download_url").orEmpty()
-    if (!officialAsset(metadataUrl) || metadataUrl != "$ASSET_PREFIX${latest.optString("tag_name")}/speakivra-update.json") {
-        return@withContext UpdateState(message = "Bản phát hành chưa có thông tin xác minh cập nhật.")
+    require(officialAsset(metadataUrl)) { "Bản phát hành thiếu siêu dữ liệu hợp lệ." }
+    require(metadataUrl == "$ASSET_PREFIX${latest.optString("tag_name")}/speakivra-update.json") {
+        "Siêu dữ liệu cập nhật không thuộc phiên bản chính thức."
     }
     val metadata = requestJson(metadataUrl)
-        ?: return@withContext UpdateState(message = "Thông tin cập nhật chưa sẵn sàng.")
-    val item = releaseFromMetadata(latest, JSONObject(metadata))
+        ?: error("GitHub chưa cung cấp siêu dữ liệu cho bản phát hành.")
+    return releaseFromMetadata(latest, JSONObject(metadata))
+}
+
+internal fun parseFallbackIndex(raw: String): AppRelease {
+    val index = JSONObject(raw)
+    return releaseFromMetadata(index.getJSONObject("release"), index.getJSONObject("metadata"))
+}
+
+private fun newestReleaseFromFallback(): AppRelease? =
+    requestJson(RELEASE_FALLBACK)?.let(::parseFallbackIndex)
+
+private fun checkErrorMessage(primary: Throwable?, fallback: Throwable?): String {
+    val errors = listOfNotNull(primary, fallback)
+    return when {
+        errors.any { it is java.net.UnknownHostException } ->
+            "Không phân giải được GitHub. Kiểm tra DNS, VPN hoặc kết nối mạng."
+        errors.any { it is java.net.SocketTimeoutException } ->
+            "Kết nối GitHub quá thời gian. Hãy thử lại hoặc mở trang phát hành."
+        errors.any { it.message?.contains("HTTP 403") == true || it.message?.contains("HTTP 429") == true } ->
+            "GitHub đang giới hạn lượt kiểm tra. Hãy thử lại hoặc mở trang phát hành."
+        else -> "Không kết nối được nguồn cập nhật. Hãy mở GitHub Releases để tải APK chính thức."
+    }
+}
+
+internal suspend fun checkForUpdate(current: Installation): UpdateState = withContext(Dispatchers.IO) {
+    var primaryFailure: Throwable? = null
+    val primary = try { newestReleaseFromApi() } catch (error: Exception) {
+        primaryFailure = error
+        null
+    }
+    var fallbackFailure: Throwable? = null
+    val item = primary ?: try { newestReleaseFromFallback() } catch (error: Exception) {
+        fallbackFailure = error
+        null
+    }
+    if (item == null) return@withContext UpdateState(
+        message = checkErrorMessage(primaryFailure, fallbackFailure)
+    )
     val message = when {
         item.packageName != current.packageName -> "Bản phát hành không đúng ứng dụng Speakivra."
         item.versionCode <= current.versionCode -> "Bạn đang dùng bản mới nhất hoặc mới hơn (${item.version})."
-        !item.canInstallOver(current) -> "Có bản ${item.version}, nhưng khác khóa ký. Chưa thể cài đè giữ dữ liệu; đừng gỡ ứng dụng hiện tại."
+        !item.canInstallOver(current) ->
+            "Có bản ${item.version}, nhưng khác khóa ký. Chưa thể cài đè giữ dữ liệu; đừng gỡ ứng dụng hiện tại."
         else -> "Có bản mới: v${item.version}"
     }
     UpdateState(message = message, release = item)

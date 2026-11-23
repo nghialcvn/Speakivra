@@ -134,6 +134,11 @@ class ApprovedUiTest {
         shot("07-dark-settings")
         ui.onNodeWithText("Sáng", substring = false).performClick()
         ui.onNodeWithText("Sáng", substring = false).assertIsSelected()
+        // Neon is an opt-in third appearance, keeping the original light/dark options.
+        ui.onNodeWithText("Neon", substring = false).performClick()
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertIsDisplayed()
+        shot("16-neon-settings")
+        ui.onNodeWithText("Sáng", substring = false).performClick()
         ui.onNodeWithText("Kiểm tra cập nhật").performClick()
         ui.onNodeWithText("Phiên bản đang dùng: v${BuildConfig.VERSION_NAME}").assertIsDisplayed()
         shot("08-updates")

@@ -102,7 +102,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()
         ui.onNodeWithText("Tôi là Nghĩa.").assertIsDisplayed()
         shot("04-conversation")
-        repeat(2) { ui.onNodeWithText("Câu hội thoại tiếp theo").performScrollTo().performClick() }
+        repeat(4) { ui.onNodeWithText("Câu hội thoại tiếp theo").performScrollTo().performClick() }
         ui.onNodeWithText("Sang ôn tập").performScrollTo().performClick()
         ui.onNodeWithText("Xin chào! Bạn khỏe không?").performClick()
         ui.onNodeWithText("Đúng rồi!").assertIsDisplayed()

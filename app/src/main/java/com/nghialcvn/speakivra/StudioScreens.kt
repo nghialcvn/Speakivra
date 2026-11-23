@@ -257,14 +257,41 @@ private fun DecorativeWave() {
     }
 }
 @Composable
+@Composable
+internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+        listOf(
+            (if (choice.accent == "GB") "🇬🇧 English (UK)" else "🇺🇸 English (US)") to "Ngôn ngữ phát âm",
+            (if (choice.gender == "male") "🔊 Giọng nam" else "🔊 Giọng nữ") to "Giọng đọc"
+        ).forEach { (label, description) ->
+            Row(
+                Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
+                    .background(studio.lavender)
+                    .border(1.dp, studio.border, RoundedCornerShape(16.dp))
+                    .clickable(role = Role.Button, onClick = onOpen)
+                    .semantics { contentDescription = description }
+                    .padding(horizontal = 10.dp, vertical = 9.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = studio.ink, maxLines = 1)
+                Spacer(Modifier.width(4.dp))
+                Text("⌄", color = studio.purple, fontSize = 13.sp)
+            }
+        }
+    }
+}
+
 internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic: Boolean, translation: Boolean,
                             speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, learner: Learner, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,
-                            onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
+                            onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit,
+                            voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {}) {
     val p = studio; val phrase = lesson.phrases[progress.phrase]
     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Luyện nghe & nói", "${lessonLabel(lesson)} • Câu ${progress.phrase + 1}/${lesson.phrases.size}", onBack)
         StudioProgress((progress.phrase + 1f) / lesson.phrases.size)
+        VoiceSelectionChips(voiceChoice, onVoiceSettings)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             TwoChoices("Tự động", "Thủ công", automatic, onMode, Modifier.fillMaxWidth())
             StudioCard {
@@ -370,10 +397,12 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
 @Composable
 internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String, capturePhase: String, status: String, learner: Learner,
                                 nextLabel: String, onBack: () -> Unit, onPrompt: () -> Unit, onReply: () -> Unit,
-                                onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit) {
+                                onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit,
+                                voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {}) {
     val p = studio; val turn = lesson.conversation[turnIndex]
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Emma • Luyện hội thoại", onBack = onBack)
+        VoiceSelectionChips(voiceChoice, onVoiceSettings)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { SectionPill("Mô phỏng theo kịch bản") }
         ApprovedArtwork(false, Modifier.size(128.dp, 73.dp).clip(RoundedCornerShape(28.dp)))
         StudioCard(color = p.lavender, border = false) {

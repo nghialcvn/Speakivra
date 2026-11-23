@@ -8,13 +8,13 @@ internal object ExpandedLessons {
         val extra = when (base.id) {
             "greetings" -> Pair(
                 listOf(
-                    Phrase("Good morning! How did you sleep?", "Chào buổi sáng! Bạn ngủ ngon không?", "Nối did you nhẹ và lên giọng cuối câu."),
+                    Phrase("I slept well, thank you.", "Tôi ngủ ngon, cảm ơn bạn.", "Nhấn slept well và thank you."),
                     Phrase("It's good to see you again.", "Thật vui khi gặp lại bạn.", "Nhấn good và again tự nhiên."),
                     Phrase("What do you do for work?", "Bạn làm nghề gì?", "Nối do you, nhấn work."),
                     Phrase("I work at a hotel.", "Tôi làm việc ở một khách sạn.", "Nối work at, giữ âm /k/ trong work.")
                 ),
                 listOf(
-                    ConversationTurn("How did you sleep?", "Bạn ngủ có ngon không?", "Good morning! How did you sleep?", "Chào buổi sáng! Bạn ngủ ngon không?"),
+                    ConversationTurn("How did you sleep?", "Bạn ngủ có ngon không?", "I slept well, thank you.", "Tôi ngủ ngon, cảm ơn bạn."),
                     ConversationTurn("Where do you work?", "Bạn làm việc ở đâu?", "I work at a hotel.", "Tôi làm việc ở một khách sạn.")
                 )
             )

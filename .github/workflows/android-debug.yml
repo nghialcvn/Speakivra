@@ -51,6 +51,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Check fixed signing certificate before building
+        if: inputs.release
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          keytool -exportcert -keystore "$SPEAKIVRA_KEYSTORE_PATH" -alias "$SPEAKIVRA_KEY_ALIAS" -storepass:env SPEAKIVRA_STORE_PASSWORD -file "$RUNNER_TEMP/speakivra-cert.der"
+          python3 - <<'PY'
+          import hashlib, os, pathlib, re
+          expected = os.environ['SPEAKIVRA_SIGNING_SHA256'].lower().replace(':', '')
+          actual = hashlib.sha256((pathlib.Path(os.environ['RUNNER_TEMP']) / 'speakivra-cert.der').read_bytes()).hexdigest()
+          if not re.fullmatch(r'[0-9a-f]{64}', expected) or actual != expected:
+              raise SystemExit('Signing certificate mismatch. Keep the original release key; do not generate a replacement.')
+          print('Fixed signing certificate verified.')
+          PY
       - name: Prepare Android SDK
         run: |
           SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
@@ -104,4 +120,4 @@ jobs:
           gh release edit "$TAG" --draft=false
       - name: Remove temporary release key
         if: always()
-        run: rm -f "$RUNNER_TEMP/speakivra-release.jks"
+        run: rm -f "$RUNNER_TEMP/speakivra-release.jks" "$RUNNER_TEMP/speakivra-cert.der"

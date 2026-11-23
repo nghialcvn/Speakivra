@@ -13,8 +13,8 @@ android {
         applicationId = "com.nghialcvn.speakivra"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.1.3"
+        versionCode = 5
+        versionName = "0.1.4"
     }
     signingConfigs {
         if (signingPath != null) create("stableRelease") {
@@ -22,6 +22,9 @@ android {
             storePassword = providers.environmentVariable("SPEAKIVRA_STORE_PASSWORD").get()
             keyAlias = providers.environmentVariable("SPEAKIVRA_KEY_ALIAS").get()
             keyPassword = providers.environmentVariable("SPEAKIVRA_KEY_PASSWORD").get()
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
     buildTypes {

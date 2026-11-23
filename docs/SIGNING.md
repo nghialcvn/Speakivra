@@ -18,7 +18,7 @@ Chạy từ thư mục mã nguồn:
 powershell -File .\scripts\setup-signing.ps1
 ```
 
-Script hỏi mật khẩu bằng ô nhập ẩn; tạo một khóa RSA cố định ngoài repository, mặc định tại `%USERPROFILE%\Speakivra-Signing`. Nếu đã có khóa tại đó, script sử dụng lại và không ghi đè. Script lưu 5 GitHub Actions Secrets qua stdin, không in nội dung khóa hay mật khẩu:
+Script kiểm tra cấu hình Secrets hiện có trước; nếu đã có cấu hình nhưng thiếu khóa sao lưu tại máy, script dừng để tránh tạo nhầm khóa mới. Script hỏi mật khẩu bằng ô nhập ẩn; tạo một khóa RSA cố định ngoài repository, mặc định tại `%USERPROFILE%\Speakivra-Signing`. Nếu đã có khóa tại đó, script sử dụng lại và không ghi đè. Script lưu 5 GitHub Actions Secrets qua stdin, không in nội dung khóa hay mật khẩu:
 
 - `SPEAKIVRA_KEYSTORE_BASE64`
 - `SPEAKIVRA_STORE_PASSWORD`
@@ -32,7 +32,7 @@ Sao lưu khóa và mật khẩu vào nơi riêng được mã hóa. SHA-256 ch�
 
 1. Mỗi commit thay mã trên main chạy đúng một workflow kiểm tra debug: unit test, lint, build, xác minh APK.
 2. Sau khi cấu hình secrets, mở Actions → Android APK → Run workflow, bật `release`. Chỉ chạy sau khi cần một APK phát hành. Không push thêm tag để kích hoạt lượt build thứ hai.
-3. Release build kiểm tra secrets trước khi tải SDK, dùng cache Gradle, ký bằng khóa cố định, so khớp chứng thư với fingerprint đã ghim và kiểm tra icon/quyền.
+3. Release build kiểm tra secrets và chứng thư của keystore trước khi tải SDK, dùng cache Gradle, ký bằng khóa cố định, so khớp chứng thư với fingerprint đã ghim và kiểm tra icon/quyền.
 4. Workflow tạo release nháp, tải lên APK và `speakivra-update.json`, rồi mới công bố beta. Không thay thế APK của cùng một phiên bản.
 5. Người dùng tải trực tiếp tệp `.apk` trong Releases; artifact Actions vẫn là ZIP phục vụ kiểm tra.
 

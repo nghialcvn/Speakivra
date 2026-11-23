@@ -7,9 +7,17 @@ foreach ($command in @('keytool', 'gh')) {
 }
 & gh auth status
 if ($LASTEXITCODE -ne 0) { throw 'Run gh auth login before this script.' }
-New-Item -ItemType Directory -Force -Path $KeyDirectory | Out-Null
 $keyPath = Join-Path $KeyDirectory 'speakivra-release.jks'
 $alias = 'speakivra'
+# A missing local backup must never silently rotate an existing signing identity.
+$existingJson = & gh secret list --repo nghialcvn/Speakivra --json name
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect repository signing configuration.' }
+$existing = @($existingJson | ConvertFrom-Json)
+$signingAlreadyConfigured = @($existing | Where-Object { $_.name -like 'SPEAKIVRA_*' }).Count -gt 0
+if ($signingAlreadyConfigured -and -not (Test-Path $keyPath)) {
+    throw 'Signing secrets already exist. Restore the original local key backup; a replacement key would break updates.'
+}
+New-Item -ItemType Directory -Force -Path $KeyDirectory | Out-Null
 $secure = Read-Host 'Password for the fixed Speakivra signing key (keep a secure backup)' -AsSecureString
 $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try {

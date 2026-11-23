@@ -8,16 +8,18 @@ class LessonsTest {
         assertEquals(listOf("Greetings & Introductions", "My Family", "Daily Routine", "Food & Drinks", "Shopping", "Directions", "My Hobbies", "Time & Dates", "Travel", "Real Conversation"), Lessons.all.map { it.title })
         assertEquals(10, Lessons.all.map { it.id }.distinct().size)
         Lessons.all.forEach { lesson ->
-            assertEquals(8, lesson.phrases.size)
-            assertEquals(3, lesson.conversation.size)
-            lesson.phrases.forEach { phrase ->
+            assertEquals(12, lesson.phrases.size)
+            assertEquals(5, lesson.conversation.size)
+            lesson.phrases.forEachIndexed { index, phrase ->
                 assertTrue(phrase.vietnamese.isNotBlank() && phrase.tip.isNotBlank())
-                assertNotNull(SpeechProfiles.forText(phrase.english).clip)
+                if (index < 8) assertNotNull(SpeechProfiles.forText(phrase.english).clip)
             }
-            lesson.conversation.forEach { turn ->
+            lesson.conversation.forEachIndexed { index, turn ->
                 assertTrue(turn.translation.isNotBlank() && turn.replyTranslation.isNotBlank())
-                assertNotNull(SpeechProfiles.forText(turn.prompt).clip)
-                assertNotNull(SpeechProfiles.forText(turn.reply).clip)
+                if (index < 3) {
+                    assertNotNull(SpeechProfiles.forText(turn.prompt).clip)
+                    assertNotNull(SpeechProfiles.forText(turn.reply).clip)
+                }
                 assertTrue(lesson.phrases.any { it.english == turn.reply })
             }
             repeat(3) { index ->

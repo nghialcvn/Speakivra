@@ -27,6 +27,15 @@ internal fun decodeLearners(value: String): List<Learner> {
     require(learners.isNotEmpty() && learners.first().id == ORIGINAL_LEARNER && learners.distinctBy { it.id }.size == learners.size)
     return learners
 }
+/** Identity is immutable: editing a name/avatar must never select a different progress file. */
+internal fun updateLearnerList(existing: List<Learner>, id: String, name: String, avatar: Int): List<Learner> {
+    val clean = name.trim()
+    require(clean.isNotEmpty() && clean.length <= 30 && clean.none { it.isISOControl() } && avatar in 0..5) { "Tên không hợp lệ. Hãy thử lại." }
+    require(existing.any { it.id == id }) { "Không tìm thấy hồ sơ." }
+    require(existing.none { it.id != id && it.name.equals(clean, ignoreCase = true) }) { "Tên người học đã có. Hãy chọn tên khác." }
+    return existing.map { if (it.id == id) it.copy(name = clean, avatar = avatar) else it }
+}
+
 internal class LearnerStore(private val context: Context) {
     private val registry = context.getSharedPreferences("speakivra_learners", 0)
     fun all(): List<Learner> {
@@ -45,6 +54,10 @@ internal class LearnerStore(private val context: Context) {
         val learner = Learner(UUID.randomUUID().toString(), clean, avatar)
         check(registry.edit().putString("profiles", encodeLearners(existing + learner)).commit())
         return learner
+    }
+    fun update(id: String, name: String, avatar: Int) {
+        val updated = updateLearnerList(all(), id, name, avatar)
+        check(registry.edit().putString("profiles", encodeLearners(updated)).commit())
     }
     fun learned(learner: Learner): Pair<Int, Int> {
         val prefs = preferences(learner)

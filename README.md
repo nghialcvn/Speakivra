@@ -4,7 +4,7 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.12 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
+**0.1.13 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
 The source version is not a claim that an APK has passed device testing or been released.
 
 The user-approved warm light interface is implemented; the approved logo is preserved. See [approved design and behavior mapping](docs/design/APPROVED_LIGHT_UI.md). The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. Ten A1 practice lessons, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression and placement assessment and curricula beyond this initial A1 pack remain incomplete.
@@ -51,3 +51,11 @@ Speech capture uses SpeechRecognizer directly inside the approved learning scree
 Choose a learner at startup; add a name and one of the six approved avatars without a password. Each learner has a separate progress/settings preference file. The first learner uses the original progress file in place; no existing data is cleared. Appearance and update state remain app-wide. Switch learners from Personal/settings.
 
 Speaking Studio colors reference words using ordered matching of the final recognition result, with case/punctuation ignored. Extra recognized words cannot substitute for missing reference words. At least 60% unmatched reference words blocks Next; below 60% allows Next. No final result, an error, a new attempt, or a different phrase cannot reuse a previous pass. This is word recognition feedback, not acoustic pronunciation assessment. The approved legend and recognition transcript panel are absent.
+
+## Approved profile editing and personalization (V0.1.13)
+
+The avatar atlas has six equal 512px cells with centered faces, replacing tiny crops from the UI board; the app shares one decoded atlas. The approved brand mark is shown on the learner picker. Personal/settings has a pencil action opening the same name/avatar form in edit mode. Updating a registry entry retains its immutable ID and its preference file, so progress is unchanged.
+
+Name templates are resolved from the selected learner for practice, conversations, translations and review content without changing lesson IDs or ordering. Renaming immediately updates these templates. Personalized sentences use the installed offline US-English TTS fallback rather than playing an Alex recording; other clips remain bundled. No new audio API or paid service is used. Matching folds Vietnamese diacritics and accepts I am / I'm as equivalent text for the personalized introduction.
+
+Final recognized words appear in a compact italic transcript row with a small square avatar below the practice microphone. Partial text is not shown in this row, and a new attempt/context clears it. The 60% rule remains unchanged and is not an acoustic pronunciation assessment.

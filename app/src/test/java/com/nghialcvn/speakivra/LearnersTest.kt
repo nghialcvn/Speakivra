@@ -20,4 +20,17 @@ class LearnersTest {
     @Test(expected = IllegalArgumentException::class) fun duplicateIdentityCannotAliasTwoProfiles() {
         decodeLearners(encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0), Learner(ORIGINAL_LEARNER, "An", 1))))
     }
+    @Test fun editingKeepsStableIdentityAndOtherLearnersUnchanged() {
+        val original = Learner(ORIGINAL_LEARNER, "Nghĩa", 0)
+        val other = Learner("551c9a62-451d-43d5-8a44-9c619011689a", "Linh", 1)
+        val updated = updateLearnerList(listOf(original, other), original.id, "  Nghĩa An  ", 5)
+        assertEquals(original.id, updated.first().id)
+        assertEquals(learnerPreferenceName(original.id), learnerPreferenceName(updated.first().id))
+        assertEquals("Nghĩa An", updated.first().name)
+        assertEquals(5, updated.first().avatar)
+        assertEquals(other, updated.last())
+    }
+    @Test(expected = IllegalArgumentException::class) fun editingCannotTakeAnotherLearnersName() {
+        updateLearnerList(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0), Learner("551c9a62-451d-43d5-8a44-9c619011689a", "Linh", 1)), ORIGINAL_LEARNER, "Linh", 2)
+    }
 }

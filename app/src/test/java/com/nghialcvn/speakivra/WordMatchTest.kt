@@ -32,4 +32,9 @@ class WordMatchTest {
         assertEquals(1, matchWords("one two three", "three two one").matched.count { it })
         assertFalse(matchWords("", "hello").canContinue)
     }
+    @Test fun vietnameseNamesMatchWithoutProviderDiacriticsAndContractions() {
+        assertTrue(matchWords("I'm Nghĩa.", "I am Nghia").matched.all { it })
+        assertTrue(matchWords("I'm Đặng Minh.", "I'm Dang Minh").matched.all { it })
+        assertFalse(matchWords("I'm Nghĩa.", "I'm Linh").matched.last())
+    }
 }

@@ -144,7 +144,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                     StudioIcon("chat", Modifier.size(30.dp), p.purple)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Bài ${Lessons.all.indexOf(lesson) + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
                     Text(lesson.title, fontSize = 14.sp)
                 }
             }
@@ -178,13 +178,13 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
     }
 }
 @Composable
-internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit) {
+internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit, lessons: List<Lesson> = Lessons.all) {
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PageHeading("Chọn bài học", "10 chủ đề gần gũi mỗi ngày")
         Spacer(Modifier.height(3.dp))
-        Lessons.all.forEachIndexed { index, lesson ->
+        lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(if (selected == lesson.id) p.peach else p.card)
                 .border(1.dp, if (selected == lesson.id) Color.Transparent else p.border, RoundedCornerShape(16.dp))
@@ -258,7 +258,7 @@ private fun DecorativeWave() {
 }
 @Composable
 internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic: Boolean, translation: Boolean,
-                            speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, onBack: () -> Unit,
+                            speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, learner: Learner, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,
                             onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
     val p = studio; val phrase = lesson.phrases[progress.phrase]
@@ -307,8 +307,9 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                     DecorativeWave(); Microphone(onSpeak, large = true, active = capturePhase == "listening"); DecorativeWave()
                 }
-                Text(captureLabel(capturePhase, "Chạm để nói"), fontSize = 15.sp, color = p.muted)
+                Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
+            if (capturePhase == "idle" && wordMatch.hasResult && transcript.isNotBlank()) SpokenResult(learner, transcript)
             StudioCard(color = p.mint, border = false) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StudioIcon("bulb", Modifier.size(27.dp), p.green)
@@ -330,7 +331,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
     }
 }
 @Composable
-internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String, capturePhase: String, status: String,
+internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String, capturePhase: String, status: String, learner: Learner,
                                 nextLabel: String, onBack: () -> Unit, onPrompt: () -> Unit, onReply: () -> Unit,
                                 onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit) {
     val p = studio; val turn = lesson.conversation[turnIndex]
@@ -361,19 +362,19 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
             CoralButton(captureLabel(capturePhase, "Nói câu trả lời"), Modifier.widthIn(max = 270.dp).align(Alignment.BottomCenter), chevron = false, onClick = onSpeak)
             Microphone(onSpeak, Modifier.align(Alignment.TopCenter), active = capturePhase == "listening")
         }
+        if (capturePhase == "idle" && transcript.isNotBlank()) SpokenResult(learner, transcript)
         Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             SpeakerChip("Nghe trả lời mẫu", onReply)
             Text("Lượt ${turnIndex + 1}/${lesson.conversation.size}", color = p.muted, fontSize = 13.sp)
         }
         TextButton(onClick = onTranslation) { Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 12.sp) }
-        if (transcript.isNotBlank()) Text("Máy nhận dạng: $transcript", fontSize = 14.sp, color = p.muted)
         CoralButton(nextLabel, onClick = onNext)
         Text("Không gửi bản ghi tới AI. Nhận dạng giọng nói có thể dùng dịch vụ của thiết bị.", color = p.muted, fontSize = 11.sp)
     }
 }
 @Composable
-internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String, capturePhase: String, status: String,
+internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String, capturePhase: String, status: String, learner: Learner,
                           onSelect: (Int) -> Unit, onBack: () -> Unit, onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
     val p = studio; val question = reviewQuestion(lesson, progress.review)
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
@@ -416,7 +417,7 @@ internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: I
                 }
                 TextButton(onClick = onSpeak) { StudioIcon("mic", Modifier.size(19.dp), p.green); Spacer(Modifier.width(8.dp)); Text(captureLabel(capturePhase, "Nhắc lại câu này")) }
                 Text(status, color = p.muted, fontSize = 12.sp)
-                if (transcript.isNotBlank()) Text("Máy nhận dạng: $transcript", color = p.muted, fontSize = 13.sp)
+                if (capturePhase == "idle" && transcript.isNotBlank()) SpokenResult(learner, transcript)
             }
         }
         CoralButton(if (progress.review == 2) "Hoàn thành và tổng kết" else "Tiếp tục", enabled = selection >= 0, onClick = onNext)
@@ -434,13 +435,20 @@ private fun SettingsRow(icon: String, label: String, value: String, onClick: (()
     }
 }
 @Composable
-internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onTheme: (Boolean) -> Unit,
+internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onEditLearner: () -> Unit, onTheme: (Boolean) -> Unit,
                            onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         PageHeading("Cá nhân & cài đặt")
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(17.dp)) {
-            LearnerAvatar(learner.avatar, Modifier.size(76.dp))
+            Box(Modifier.size(76.dp)) {
+                LearnerAvatar(learner.avatar, Modifier.fillMaxSize())
+                Box(Modifier.align(Alignment.BottomEnd).size(30.dp).clip(CircleShape).background(p.coral)
+                    .border(2.dp, p.background, CircleShape).clickable(role = Role.Button, onClick = onEditLearner)
+                    .semantics { contentDescription = "Chỉnh sửa hồ sơ" }, Alignment.Center) {
+                    StudioIcon("pencil", Modifier.size(16.dp), Color.White)
+                }
+            }
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(learner.name, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Học theo nhịp của bạn", color = p.muted, fontSize = 14.sp)
@@ -481,4 +489,16 @@ internal fun captureLabel(phase: String, idle: String) = when (phase) {
     "listening" -> "Chạm để kết thúc"
     "processing" -> "Đang xử lý…"
     else -> idle
+}
+
+@Composable
+internal fun SpokenResult(learner: Learner, text: String) {
+    val p = studio
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).background(p.card)
+        .border(1.dp, p.border, RoundedCornerShape(6.dp)).padding(8.dp)
+        .semantics { liveRegion = LiveRegionMode.Polite }, verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        LearnerAvatar(learner.avatar, Modifier.size(28.dp), square = true)
+        Text(text, fontSize = 14.sp, fontStyle = FontStyle.Italic, lineHeight = 20.sp, modifier = Modifier.weight(1f))
+    }
 }

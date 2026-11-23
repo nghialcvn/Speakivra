@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.core.view.WindowCompat
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
@@ -108,23 +110,32 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var creating by rememberSaveable { mutableStateOf(false) }
     val active = learners.firstOrNull { it.id == activeId }
-    if (active != null) {
-        key(active.id) { LearnerApp(updates, active) { lastId = active.id; activeId = null } }
-    } else {
-        val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
-        SpeakivraTheme(dark) {
-            val palette = studio
-            SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
-            Surface(color = palette.background, contentColor = palette.ink) {
-                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                    if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
-                        try {
-                            val learner = store.add(name, avatar)
-                            learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
-                            null
-                        } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
-                        catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
-                    }) else LearnerPicker(store, learners, lastId, onAdd = { creating = true }, onStart = { activeId = it.id; lastId = it.id })
+    val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
+    CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
+        if (active != null) {
+            key(active.id) {
+                LearnerApp(updates, active, onSwitchLearner = { lastId = active.id; activeId = null }, onUpdateLearner = { name, avatar ->
+                    try { store.update(active.id, name, avatar); learners = store.all(); null }
+                    catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
+                    catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
+                })
+            }
+        } else {
+            val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
+            SpeakivraTheme(dark) {
+                val palette = studio
+                SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
+                Surface(color = palette.background, contentColor = palette.ink) {
+                    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                        if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
+                            try {
+                                val learner = store.add(name, avatar)
+                                learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
+                                null
+                            } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
+                            catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
+                        }) else LearnerPicker(store, learners, lastId, onAdd = { creating = true }, onStart = { activeId = it.id; lastId = it.id })
+                    }
                 }
             }
         }
@@ -132,7 +143,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner: () -> Unit) {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner: () -> Unit, onUpdateLearner: (String, Int) -> String?) {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
@@ -176,12 +187,13 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         { key, default -> preferences.getInt(key, default) },
         { key, default -> preferences.getString(key, default) ?: default })
     var selectedId by rememberSaveable { mutableStateOf(preferences.getString("active_lesson", "greetings") ?: "greetings") }
-    val lesson = Lessons.all.firstOrNull { it.id == selectedId } ?: Lessons.all.first()
+    val learnerLessons = remember(learner.name) { Lessons.all.map { personalizeLesson(it, learner.name) } }
+    val lesson = learnerLessons.firstOrNull { it.id == selectedId } ?: learnerLessons.first()
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
     val index = progress.phrase
     val phrases = lesson.phrases
     val chatIndex = progress.turn
-    var completed by remember { mutableIntStateOf(preferences.getInt("completed", 0).coerceAtLeast(0) + Lessons.all.sumOf { loadProgress(it).rounds }) }
+    var completed by remember { mutableIntStateOf(preferences.getInt("completed", 0).coerceAtLeast(0) + learnerLessons.sumOf { loadProgress(it).rounds }) }
     var reviewSelection by rememberSaveable(lesson.id, progress.review) { mutableIntStateOf(-1) }
     fun saveProgress(value: LessonProgress) {
         progress = value.sanitized(lesson)
@@ -199,7 +211,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
-    var finalTranscript by remember(page, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
+    var finalTranscript by remember(page, learner.name, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
     val wordMatch = matchWords(phrases[index].english, finalTranscript)
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
     var capturePhase by remember { mutableStateOf("idle") }
@@ -252,7 +264,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         status = "Sẵn sàng học câu mới"
         if (automatic && page == "repeat") speak(phrases[progress.phrase].english)
     }
-    fun openLesson(item: Lesson) {
+    fun openLesson(source: Lesson) {
+        val item = personalizeLesson(source, learner.name)
         stopCapture(); speech.stop()
         transcript = ""
         status = "Nhấn Nghe mẫu để bắt đầu"
@@ -274,7 +287,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         transcript = ""
         page = if (destination == "repeat") progress.phase else destination
     }
-    BackHandler(enabled = page != "home") { navigate(if (page == "updates") "profile" else "home") }
+    BackHandler(enabled = page != "home") { navigate(if (page in listOf("updates", "edit-profile")) "profile" else "home") }
     SpeakivraTheme(dark) {
         val palette = studio
         SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
@@ -321,12 +334,12 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onChat = { navigate("chat") }, onProfile = { navigate("profile") })
-                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson)
-                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status, capturePhase, wordMatch,
+                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson, learnerLessons)
+                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, finalTranscript.orEmpty(), status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next)
-                            "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, transcript, capturePhase, status,
+                            "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, finalTranscript.orEmpty(), capturePhase, status, learner,
                                 nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
                                 }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
@@ -340,7 +353,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                     transcript = ""
                                     if (automatic && page == "chat") speak(lesson.conversation[progress.turn].prompt)
                                 })
-                            "review" -> ReviewScreen(lesson, progress, reviewSelection, transcript, capturePhase, status,
+                            "review" -> ReviewScreen(lesson, progress, reviewSelection, finalTranscript.orEmpty(), capturePhase, status, learner,
                                 onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate("home") },
                                 onListen = { speak(reviewQuestion(lesson, progress.review).phrase.english) }, onSpeak = ::listen,
                                 onNext = {
@@ -364,11 +377,16 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                     stopCapture(); speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
                                     if (automatic) speak(phrases[0].english)
                                 })
-                                val following = Lessons.all.getOrNull(Lessons.all.indexOf(lesson) + 1)
+                                val following = learnerLessons.getOrNull(learnerLessons.indexOf(lesson) + 1)
                                 if (following != null) CoralButton("Bài tiếp theo: ${lessonLabel(following)}", onClick = { openLesson(following) })
                                 TextButton(onClick = { navigate("lessons") }) { Text("Về danh sách bài học") }
                             }
-                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
+                            "edit-profile" -> CreateLearnerScreen(initial = learner, onBack = { navigate("profile") }, onSave = { name, avatar ->
+                                val error = onUpdateLearner(name, avatar)
+                                if (error == null) navigate("profile")
+                                error
+                            })
+                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
                                 onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
                                 onVoice = { settingDialog = "voice" }, onSpeed = { settingDialog = "speed" },
                                 onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() })
@@ -379,7 +397,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         }
                     }
                 }
-                if (page != "repeat") StudioBottomNavigation(page, ::navigate)
+                if (page !in listOf("repeat", "edit-profile")) StudioBottomNavigation(page, ::navigate)
             }
         }
     }

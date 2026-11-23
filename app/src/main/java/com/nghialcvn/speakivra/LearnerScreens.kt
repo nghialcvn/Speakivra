@@ -18,18 +18,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 
-/** Draw the six exact approved faces from the demo artwork, rather than redesigning them. */
+internal val LocalLearnerArtwork = staticCompositionLocalOf<ImageBitmap?> { null }
+
+/** Equal 512px atlas cells, with safe margins around the full face and hair. */
 @Composable
-internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier) {
-    val artwork = ImageBitmap.imageResource(R.drawable.approved_profiles_demo)
-    val x = listOf(480, 585, 690)[avatar.coerceIn(0, 5) % 3]
-    val y = if (avatar < 3) 575 else 700
-    Canvas(modifier.clip(CircleShape)) {
-        drawImage(artwork, srcOffset = IntOffset(x - 43, y - 43), srcSize = IntSize(86, 86),
+internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier, square: Boolean = false) {
+    val artwork = LocalLearnerArtwork.current ?: ImageBitmap.imageResource(R.drawable.learner_avatars)
+    val value = avatar.coerceIn(0, 5)
+    val cell = artwork.width / 3
+    val row = artwork.height / 2
+    val side = minOf(cell, row)
+    Canvas(modifier.clip(if (square) RoundedCornerShape(4.dp) else CircleShape)) {
+        drawImage(artwork, srcOffset = IntOffset((value % 3) * cell + (cell - side) / 2, (value / 3) * row + (row - side) / 2), srcSize = IntSize(side, side),
             dstSize = IntSize(size.width.toInt(), size.height.toInt()))
     }
 }
@@ -40,7 +45,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
     var selected by rememberSaveable { mutableStateOf(initial ?: learners.first().id) }
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Speakivra", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.align(Alignment.CenterHorizontally).size(64.dp))
             Spacer(Modifier.height(8.dp))
             Text("Ai học hôm nay?", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.CenterHorizontally))
             Text("Chọn hồ sơ để tiếp tục", color = p.muted, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -71,17 +76,17 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
 }
 
 @Composable
-internal fun CreateLearnerScreen(onBack: () -> Unit, onSave: (String, Int) -> String?) {
+internal fun CreateLearnerScreen(onBack: () -> Unit, initial: Learner? = null, onSave: (String, Int) -> String?) {
     val p = studio
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
-    var name by rememberSaveable { mutableStateOf("") }
-    var avatar by rememberSaveable { mutableIntStateOf(1) }
+    var name by rememberSaveable(initial?.id) { mutableStateOf(initial?.name.orEmpty()) }
+    var avatar by rememberSaveable(initial?.id) { mutableIntStateOf(initial?.avatar ?: 1) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     BackHandler(onBack = onBack)
     Column(Modifier.fillMaxSize().imePadding().padding(18.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            PageHeading("Tạo hồ sơ", onBack = onBack)
+            PageHeading(if (initial == null) "Tạo hồ sơ" else "Chỉnh sửa hồ sơ", onBack = onBack)
             Text("Tên người học", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
             OutlinedTextField(value = name, onValueChange = { if (it.length <= 30 && it.none { c -> c.isISOControl() }) name = it; error = null },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -105,6 +110,6 @@ internal fun CreateLearnerScreen(onBack: () -> Unit, onSave: (String, Int) -> St
             Text("Mỗi hồ sơ có tiến độ riêng", color = p.muted, fontSize = 14.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
         }
-        CoralButton("Lưu và bắt đầu", enabled = name.isNotBlank(), onClick = { focus.clearFocus(); keyboard?.hide(); error = onSave(name, avatar) })
+        CoralButton(if (initial == null) "Lưu và bắt đầu" else "Lưu thay đổi", enabled = name.isNotBlank(), onClick = { focus.clearFocus(); keyboard?.hide(); error = onSave(name, avatar) })
     }
 }

@@ -39,7 +39,7 @@ with zipfile.ZipFile(args.apk) as apk:
         expected_image = hashlib.sha256((root / "app/src/main/res" / path).read_bytes()).digest()
         assert expected_image in image_digests, f"Approved icon bytes missing from APK: {path}"
 # The approved UI must include the original artwork, local font and its license.
-for name in ["drawable/approved_light_demo", "font/nunito"]:
+for name in ["drawable/approved_light_demo", "drawable/learner_avatars", "font/nunito"]:
     assert ":" + name in resources, f"Missing approved interface asset: {name}"
 with zipfile.ZipFile(args.apk) as apk:
     font_hash = hashlib.sha256((root / "app/src/main/res/font/nunito.ttf").read_bytes()).digest()

@@ -1,6 +1,7 @@
 package com.nghialcvn.speakivra
 
 import java.util.Locale
+import java.text.Normalizer
 
 internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean) {
     val incorrect get() = matched.count { !it }
@@ -13,10 +14,11 @@ internal data class WordMatch(val tokens: List<String>, val matched: List<Boolea
  * turn a missing reference word green. Repetitions cannot match the same spoken token twice. */
 internal fun matchWords(reference: String, finalTranscript: String?): WordMatch {
     val tokens = Regex("\\S+").findAll(reference).map { it.value }.toList()
-    fun normalize(value: String) = value.lowercase(Locale.US).replace(Regex("[^a-z0-9]"), "")
+    fun normalize(value: String) = Normalizer.normalize(value.lowercase(Locale.US), Normalizer.Form.NFD)
+        .replace(Regex("\\p{M}"), "").replace('đ', 'd').replace(Regex("[^\\p{L}\\p{N}]"), "")
     val expected = tokens.map(::normalize)
     // Bound unexpected provider output before allocating the alignment matrix.
-    val spoken = finalTranscript.orEmpty().split(Regex("\\s+")).map(::normalize).filter { it.isNotEmpty() }.take(512)
+    val spoken = finalTranscript.orEmpty().lowercase(Locale.US).replace(Regex("\\bi\\s+am\\b"), "im").split(Regex("\\s+")).map(::normalize).filter { it.isNotEmpty() }.take(512)
     val dp = Array(expected.size + 1) { IntArray(spoken.size + 1) }
     for (i in expected.indices.reversed()) for (j in spoken.indices.reversed()) {
         dp[i][j] = if (expected[i].isNotEmpty() && expected[i] == spoken[j]) 1 + dp[i + 1][j + 1]

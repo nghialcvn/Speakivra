@@ -163,6 +163,11 @@ jobs:
           gh release create "$TAG" --target "$GITHUB_SHA" --prerelease --draft --title "Speakivra $TAG" --notes-file "docs/releases/$TAG.md"
           gh release upload "$TAG" dist/*.apk dist/speakivra-update.json
           gh release edit "$TAG" --draft=false
+      - name: Refresh rate-limit-safe Android update index
+        if: inputs.release && !inputs.ui_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update_release_index.py
       - name: Remove temporary release key
         if: always()
         run: rm -f "$RUNNER_TEMP/speakivra-release.jks" "$RUNNER_TEMP/speakivra-cert.der"

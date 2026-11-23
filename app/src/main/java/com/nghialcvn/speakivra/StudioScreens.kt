@@ -257,7 +257,6 @@ private fun DecorativeWave() {
     }
 }
 @Composable
-@Composable
 internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         listOf(
@@ -282,6 +281,7 @@ internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
     }
 }
 
+@Composable
 internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic: Boolean, translation: Boolean,
                             speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, learner: Learner, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,

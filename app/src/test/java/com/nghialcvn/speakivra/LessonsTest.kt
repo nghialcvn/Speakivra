@@ -76,7 +76,7 @@ class LessonsTest {
         assertEquals(4, updated.getValue(a.id).phrase)
         val corrupted = LessonProgress(-4, 99, 99, 99, -5, "unknown").sanitized(a)
         assertEquals(0, corrupted.phrase)
-        assertEquals(2, corrupted.turn)
+        assertEquals(a.conversation.lastIndex, corrupted.turn)
         assertEquals(3, corrupted.correct)
         assertEquals(0, corrupted.rounds)
         assertEquals("repeat", corrupted.phase)

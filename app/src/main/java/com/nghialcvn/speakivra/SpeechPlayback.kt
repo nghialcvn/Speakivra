@@ -32,8 +32,21 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     private var closed = false
     private var session = 0L
     private var lastUtterance: String? = null
-    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long)
+    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long, val choice: VoiceChoice)
     private var pending: Request? = null
+    private var defaultVoice: Voice? = null
+
+    /** User confirms gender by listening; Android TTS does not report voice gender. */
+    fun installedVoices(accent: String): List<InstalledSpeechVoice> {
+        if (!initialized || closed) return emptyList()
+        return engine?.voices.orEmpty()
+            .filter { it.locale.language == "en" && it.locale.country == accent &&
+                !it.isNetworkConnectionRequired &&
+                TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features.orEmpty() }
+            .sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
+            .map { InstalledSpeechVoice(it.name, accent, it.quality) }
+    }
+
 
     init {
         engine = TextToSpeech(app) { result -> handler.post { initialize(result) } }
@@ -56,11 +69,11 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
                 voice.locale.language == "en" && voice.locale.country == "US" && !voice.isNetworkConnectionRequired &&
                     TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
             }.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
-            val chosen = candidates.firstOrNull() ?: tts.voice?.takeIf { voice ->
+            defaultVoice = candidates.firstOrNull() ?: tts.voice?.takeIf { voice ->
                 voice.locale.language == "en" && voice.locale.country == "US" && !voice.isNetworkConnectionRequired &&
                     TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
             }
-            chosen != null && tts.setVoice(chosen) == TextToSpeech.SUCCESS
+            defaultVoice != null && tts.setVoice(defaultVoice) == TextToSpeech.SUCCESS
         }.getOrDefault(false)
         tts.setAudioAttributes(attributes)
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -88,17 +101,18 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
         handler.post {
             if (!closed && id?.startsWith("speech-$session-") == true) {
                 engine?.stop(); lastUtterance = null; releaseFocus()
-                status("Không phát được giọng dự phòng. Kiểm tra giọng Anh-Mỹ trên thiết bị.")
+                status("Không phát được giọng đã chọn. Kiểm tra dữ liệu TTS ngoại tuyến.")
             }
         }
     }
-    fun speak(text: String, speed: Int) {
+    fun speak(text: String, speed: Int, choice: VoiceChoice = VoiceChoice()) {
         if (closed || text.isBlank()) return
         stop()
         val token = session
         hasFocus = runCatching { audio.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED }.getOrDefault(false)
         if (!hasFocus) { status("Chưa thể phát âm thanh lúc này. Hãy thử nghe lại."); return }
         val profile = SpeechProfiles.forText(text)
+        if (!choice.usesBundledAudio) { fallback(Request(profile, speed, token, choice)); return }
         val resource = when (profile.clip) {
             "voice_greeting" -> R.raw.voice_greeting
             "voice_thanks" -> R.raw.voice_thanks
@@ -212,7 +226,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             "voice_conversation_110" -> R.raw.voice_conversation_110
             else -> 0
         }
-        if (resource == 0) { fallback(Request(profile, speed, token)); return }
+        if (resource == 0) { fallback(Request(profile, speed, token, choice)); return }
         try {
             val created = MediaPlayer.create(app, resource, attributes, AudioManager.AUDIO_SESSION_ID_GENERATE)
                 ?: error("Cannot open bundled audio")
@@ -224,7 +238,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             }
             created.setOnErrorListener { failed, _, _ ->
                 if (!closed && token == session && player === failed) {
-                    releasePlayer(); fallback(Request(profile, speed, token))
+                    releasePlayer(); fallback(Request(profile, speed, token, choice))
                 }
                 true
             }
@@ -232,7 +246,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             created.start()
             status("Đang phát giọng hội thoại…", token)
         } catch (_: Exception) {
-            releasePlayer(); fallback(Request(profile, speed, token))
+            releasePlayer(); fallback(Request(profile, speed, token, choice))
         }
     }
     private fun fallback(request: Request) {
@@ -241,13 +255,28 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             pending = request; status("Đang chuẩn bị giọng đọc dự phòng…", request.session); return
         }
         val tts = engine
-        if (!fallbackAvailable || tts == null) {
-            releaseFocus(); status("Không phát được âm thanh. Hãy kiểm tra giọng Anh-Mỹ offline trong cài đặt TTS.", request.session); return
+        if (tts == null) {
+            releaseFocus()
+            status("Không có dịch vụ giọng đọc trên thiết bị.", request.session)
+            return
+        }
+        val selected = if (request.choice.usesBundledAudio) defaultVoice
+            else tts.voices.orEmpty().firstOrNull { voice ->
+                voice.name == request.choice.voiceId &&
+                    voice.locale.language == "en" && voice.locale.country == request.choice.accent &&
+                    !voice.isNetworkConnectionRequired &&
+                    TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
+            }
+        if (selected == null || (request.choice.usesBundledAudio && !fallbackAvailable)) {
+            releaseFocus()
+            status("Chưa chọn giọng ngoại tuyến phù hợp. Vào Giọng đọc & Ngôn ngữ để nghe thử.", request.session)
+            return
         }
         try {
             val prefix = "speech-${request.session}-"
             lastUtterance = prefix + request.profile.parts.lastIndex
             tts.stop()
+            check(tts.setVoice(selected) == TextToSpeech.SUCCESS)
             request.profile.parts.forEachIndexed { index, part ->
                 check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)
                 check(tts.setSpeechRate(SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)

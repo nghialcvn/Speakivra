@@ -278,28 +278,65 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                     fontWeight = FontWeight.ExtraBold, modifier = Modifier.fillMaxWidth())
                 if (translation) Text(phrase.vietnamese, textAlign = TextAlign.Center, color = p.muted,
                     fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
-                // Wrap controls at narrower widths or large accessibility fonts, instead of clipping.
+                // Approved compact row: sample audio, current speed dropdown and translation.
+                // Only wrap for very narrow layouts or accessibility font scaling.
+                var speedMenuOpen by remember { mutableStateOf(false) }
                 BoxWithConstraints {
-                    val split = maxWidth < 300.dp || androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.2f
-                    val controls: @Composable RowScope.() -> Unit = {
-                        listOf(75, 100, 125).forEach { value ->
-                            Box(Modifier.clip(RoundedCornerShape(9.dp)).background(if (speed == value) p.coral else p.card)
-                                .border(1.dp, p.border, RoundedCornerShape(9.dp)).clickable(role = Role.RadioButton, onClick = { onSpeed(value) })
-                                .semantics { selected = speed == value }.heightIn(min = 44.dp).padding(horizontal = 7.dp), Alignment.Center) {
-                                Text(speedLabel(value), color = if (speed == value) MaterialTheme.colorScheme.onPrimary else p.muted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    val split = maxWidth < 290.dp || androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+                    val controls: @Composable () -> Unit = {
+                        Box {
+                            Row(
+                                Modifier.clip(RoundedCornerShape(9.dp))
+                                    .border(1.dp, p.border, RoundedCornerShape(9.dp))
+                                    .clickable(role = Role.Button, onClick = { speedMenuOpen = true })
+                                    .semantics { contentDescription = "Tốc độ đọc: ${speedLabel(speed)}" }
+                                    .heightIn(min = 44.dp).padding(horizontal = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(speedLabel(speed), color = p.ink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("⌄", color = p.coral, fontSize = 16.sp)
+                            }
+                            DropdownMenu(expanded = speedMenuOpen, onDismissRequest = { speedMenuOpen = false }) {
+                                listOf(75, 100, 125).forEach { value ->
+                                    DropdownMenuItem(
+                                        text = { Text(speedLabel(value), color = p.ink) },
+                                        onClick = {
+                                            speedMenuOpen = false
+                                            onSpeed(value)
+                                        },
+                                        modifier = Modifier.semantics { selected = speed == value }
+                                    )
+                                }
                             }
                         }
-                        Box(Modifier.clip(RoundedCornerShape(9.dp)).border(1.dp, p.border, RoundedCornerShape(9.dp))
-                            .clickable(role = Role.Button, onClick = onTranslation).heightIn(min = 44.dp).padding(horizontal = 8.dp), Alignment.Center) {
-                            Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 11.sp)
+                        Box(Modifier.clip(RoundedCornerShape(9.dp))
+                            .border(1.dp, p.border, RoundedCornerShape(9.dp))
+                            .clickable(role = Role.Button, onClick = onTranslation)
+                            .heightIn(min = 44.dp).padding(horizontal = 12.dp), Alignment.Center) {
+                            Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 12.sp)
                         }
                     }
-                    if (split) Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        SpeakerChip("Nghe mẫu", onListen)
-                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), content = controls)
-                    } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                        SpeakerChip("Nghe mẫu", onListen)
-                        controls()
+                    if (split) {
+                        Column(
+                            Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            SpeakerChip("Nghe mẫu", onListen)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                controls()
+                            }
+                        }
+                    } else {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            SpeakerChip("Nghe mẫu", onListen)
+                            controls()
+                        }
                     }
                 }
             }

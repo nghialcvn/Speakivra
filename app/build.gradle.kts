@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val signingPath = providers.environmentVariable("SPEAKIVRA_KEYSTORE_PATH").orNull
+
 android {
     namespace = "com.nghialcvn.speakivra"
     compileSdk = 35
@@ -11,12 +13,21 @@ android {
         applicationId = "com.nghialcvn.speakivra"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 4
+        versionName = "0.1.3"
+    }
+    signingConfigs {
+        if (signingPath != null) create("stableRelease") {
+            storeFile = file(signingPath)
+            storePassword = providers.environmentVariable("SPEAKIVRA_STORE_PASSWORD").get()
+            keyAlias = providers.environmentVariable("SPEAKIVRA_KEY_ALIAS").get()
+            keyPassword = providers.environmentVariable("SPEAKIVRA_KEY_PASSWORD").get()
+        }
     }
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (signingPath != null) signingConfig = signingConfigs.getByName("stableRelease")
         }
     }
     compileOptions {
@@ -24,7 +35,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
@@ -38,4 +49,16 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
+}
+
+// Also guard local assembleRelease, which otherwise emits an unsigned APK.
+val requireReleaseSigning = tasks.register("requireReleaseSigning") {
+    doLast {
+        check(signingPath != null) { "Configure the fixed Speakivra release signing secrets first." }
+    }
+}
+tasks.configureEach {
+    if (name == "preReleaseBuild") dependsOn(requireReleaseSigning)
 }

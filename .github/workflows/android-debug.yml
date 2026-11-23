@@ -1,24 +1,52 @@
-name: Android debug APK
+name: Android APK
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'Build and publish a beta using the fixed release key (requires signing secrets)'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
       - 'app/**'
+      - 'scripts/apk_metadata.py'
       - '*.gradle.kts'
       - 'gradle.properties'
       - '.github/workflows/android-debug.yml'
 concurrency:
-  group: android-debug-${{ github.ref }}
-  cancel-in-progress: true
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write
+    env:
+      VARIANT: ${{ inputs.release && 'release' || 'debug' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate release secrets
+        if: inputs.release
+        env:
+          KEYSTORE: ${{ secrets.SPEAKIVRA_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+          CERTIFICATE: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          for value in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD CERTIFICATE; do
+            if [ -z "${!value}" ]; then
+              echo "::error::Missing signing secret: $value. Configure the fixed key before publishing."
+              exit 1
+            fi
+          done
+          umask 077
+          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/speakivra-release.jks"
+          echo "SPEAKIVRA_KEYSTORE_PATH=$RUNNER_TEMP/speakivra-release.jks" >> "$GITHUB_ENV"
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,11 +64,44 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-          cache-read-only: false
-      - name: Build debug APK
-        run: gradle --no-daemon :app:assembleDebug
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Test, lint and build once
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+        run: gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}"
+      - name: Verify APK and create update metadata
+        env:
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          mkdir -p dist
+          VERSION=$(python3 -c 'import json,os; print(json.load(open("app/build/outputs/apk/"+os.environ["VARIANT"]+"/output-metadata.json"))["elements"][0]["versionName"])')
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          cp "app/build/outputs/apk/$VARIANT/app-$VARIANT.apk" "dist/Speakivra-v$VERSION-$VARIANT.apk"
+          RELEASE_FLAG=()
+          if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
+          python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
       - uses: actions/upload-artifact@v4
         with:
-          name: Speakivra-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Speakivra-${{ env.VARIANT }}-verification
+          path: dist/*
+          if-no-files-found: error
           retention-days: 7
+      - name: Publish verified beta APK directly
+        if: inputs.release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$APP_VERSION-beta"
+          test -f "docs/releases/$TAG.md"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::This version already exists. Increase versionCode/versionName; never replace a published APK."
+            exit 1
+          fi
+          gh release create "$TAG" --target "$GITHUB_SHA" --prerelease --draft --title "Speakivra $TAG" --notes-file "docs/releases/$TAG.md"
+          gh release upload "$TAG" dist/*.apk dist/speakivra-update.json
+          gh release edit "$TAG" --draft=false
+      - name: Remove temporary release key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/speakivra-release.jks"

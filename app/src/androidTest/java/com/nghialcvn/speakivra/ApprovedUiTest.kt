@@ -111,6 +111,20 @@ class ApprovedUiTest {
         ui.onNodeWithText("Cập nhật", substring = false).performClick()
         ui.onNodeWithText("Cá nhân & cài đặt").assertIsDisplayed()
         shot("06-settings")
+        // Approved neon voice screen: language, voice label, preserved profile settings.
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performClick()
+        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").assertIsDisplayed()
+        shot("15-neon-voice-settings")
+        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performClick()
+        ui.onNodeWithText("Giọng nam", substring = false).performClick()
+        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Anh-Anh (UK) · Giọng nam").assertIsDisplayed()
+        // Restore original voice baseline so the rest of the existing UI test is unchanged.
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performClick()
+        ui.onNodeWithText("🇺🇸 Anh-Mỹ (US)").performClick()
+        ui.onNodeWithText("Giọng nữ", substring = false).performClick()
+        ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performClick()
+        ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.onNodeWithText("Tối", substring = false).performClick()
         ui.onNodeWithText("Tối", substring = false).assertIsSelected()
         ui.runOnIdle {

@@ -30,6 +30,17 @@ class LessonsTest {
             }
         }
     }
+    @Test fun expandedContentIsAppendOnlyAndUsesDeviceTtsForNewLines() {
+        assertEquals(120, Lessons.all.sumOf { it.phrases.size })
+        assertEquals(50, Lessons.all.sumOf { it.conversation.size })
+        Lessons.all.forEach { lesson ->
+            assertEquals(8, lesson.phrases.take(8).count { SpeechProfiles.forText(it.english).clip != null })
+            assertTrue(lesson.phrases.drop(8).all { SpeechProfiles.forText(it.english).clip == null })
+            assertTrue(lesson.conversation.drop(3).all { turn ->
+                lesson.phrases.drop(8).any { it.english == turn.reply }
+            })
+        }
+    }
     @Test fun oldFirstFourPhrasePositionsStillMeanTheSameContent() {
         assertEquals(listOf("Hello! How are you?", "I'm fine, thank you.", "My name is Alex.", "Nice to meet you!"), Lessons.all.first().phrases.take(4).map { it.english })
     }

@@ -53,3 +53,17 @@ Nút cập nhật mở trực tiếp URL APK trong trình duyệt. Sau khi tải
 - Với hai bản release liên tiếp cùng khóa: học đến một câu, ghi số lượt hoàn thành, cập nhật bằng nút trong app; kiểm tra cả hai giá trị vẫn còn.
 - Thử mất mạng, kiểm tra thủ công, Để sau và quay lại sau khi tải APK.
 - Với V0.1.2 khác khóa: xác nhận app báo không thể cài đè; không gỡ app. Chưa có luồng di chuyển dữ liệu sang khóa khác.
+
+## Baseline phát hành đã xác minh — V0.1.4 Beta
+
+Ngày 23/11/2026: đã lưu đủ 5 GitHub Actions Secrets và phát hành APK release được ký bằng khóa cố định.
+
+- Mã nguồn APK: `f994edaeec0b7143203149e1dcbdf80e83f7cf91`.
+- [Lượt build thành công](https://github.com/nghialcvn/Speakivra/actions/runs/45125309188): unit test, lint, build release, kiểm tra tài nguyên và xác minh chữ ký APK đều qua.
+- [Release chính thức dạng Beta](https://github.com/nghialcvn/Speakivra/releases/tag/v0.1.4-beta), `versionCode = 5`.
+- Chứng thư SHA-256 cố định: `e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35`.
+- SHA-256 APK: `0af53d038cc852a36a459944c297a177d4db883e21d45faef38659280a2b9f14`.
+- Chỉ APK và metadata cập nhật được công bố. Khóa riêng và mật khẩu không nằm trong repo, release hoặc artifact build.
+- Bản sao lưu khóa riêng đã được tạo ngoài repo. Không tạo khóa thay thế cho các bản tiếp theo.
+
+Icon giữ ảnh gốc, tăng inset Adaptive Icon từ 12dp lên 24dp. Chưa xác nhận hiển thị thực tế trên Samsung, Google Play Protect hoặc cài đè hai bản release liên tiếp trên thiết bị thật. Các bản debug cũ khác chữ ký; không gỡ app khi còn tiến độ cần giữ. Từ baseline này, mọi bản release tiếp theo phải dùng cùng khóa ký, cùng applicationId và versionCode tăng dần.

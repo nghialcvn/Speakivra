@@ -78,8 +78,8 @@ private fun Brand(modifier: Modifier = Modifier) {
 private fun ApprovedArtwork(headphones: Boolean, modifier: Modifier = Modifier) {
     val bitmap = ImageBitmap.imageResource(R.drawable.approved_light_demo)
     Canvas(modifier) {
-        drawImage(bitmap, srcOffset = if (headphones) IntOffset(319, 271) else IntOffset(123, 767),
-            srcSize = if (headphones) IntSize(79, 74) else IntSize(128, 79),
+        drawImage(bitmap, srcOffset = if (headphones) IntOffset(319, 271) else IntOffset(123, 773),
+            srcSize = if (headphones) IntSize(79, 74) else IntSize(128, 73),
             dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()), filterQuality = FilterQuality.High)
     }
 }
@@ -327,7 +327,7 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Emma • Luyện hội thoại", onBack = onBack)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { SectionPill("Mô phỏng theo kịch bản") }
-        ApprovedArtwork(false, Modifier.size(128.dp, 79.dp).clip(RoundedCornerShape(28.dp)))
+        ApprovedArtwork(false, Modifier.size(128.dp, 73.dp).clip(RoundedCornerShape(28.dp)))
         StudioCard(color = p.lavender, border = false) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {

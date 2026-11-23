@@ -13,6 +13,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -222,7 +224,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     BackHandler(enabled = page != "home") { navigate(if (page == "updates") "profile" else "home") }
     SpeakivraTheme(dark) {
         val palette = studio
-        SideEffect { (context as? Activity)?.let { updateSystemBars(it, dark, palette.background) } }
+        SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
         val available = updateState.release
         if (page == "home" && available != null && available.versionCode > installation.versionCode &&
             available.canInstallOver(installation) && dismissedUpdate != available.versionCode) {
@@ -331,7 +333,10 @@ private fun SpeakivraApp(updates: InAppUpdates) {
 }
 
 @Suppress("DEPRECATION")
-private fun updateSystemBars(activity: Activity, dark: Boolean, color: Color) {
+private fun updateSystemBars(activity: ComponentActivity, dark: Boolean, color: Color) {
+    val transparent = android.graphics.Color.TRANSPARENT
+    val style = if (dark) SystemBarStyle.dark(transparent) else SystemBarStyle.light(transparent, transparent)
+    activity.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
     activity.window.statusBarColor = color.toArgb()
     activity.window.navigationBarColor = color.toArgb()
     WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {

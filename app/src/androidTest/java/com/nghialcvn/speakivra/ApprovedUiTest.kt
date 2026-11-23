@@ -39,6 +39,8 @@ class ApprovedUiTest {
         val rendered = ui.onRoot().captureToImage()
         check(rendered.width > 0 && rendered.height > 0)
         instrumentation.waitForIdleSync()
+        // System UI uses a separate surface from Compose. Wait for its window events too.
+        instrumentation.uiAutomation.waitForIdle(500, 5000)
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

@@ -151,7 +151,9 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     var automatic by remember { mutableStateOf(true) }
     var showTranslation by remember { mutableStateOf(true) }
     var playbackSpeed by rememberSaveable {
-        mutableIntStateOf(preferences.getInt("playback_speed", 100).takeIf { it in listOf(75, 100, 125) } ?: 100)
+        val value = SpeechProfiles.initialSpeed(preferences.getInt("playback_speed", 100), preferences.getInt("speed_calibration", 0))
+        preferences.edit().putInt("playback_speed", value).putInt("speed_calibration", 2).apply()
+        mutableIntStateOf(value)
     }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }

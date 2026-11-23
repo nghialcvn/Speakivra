@@ -123,6 +123,9 @@ internal object SpeechProfiles {
             text.trimEnd().endsWith("!") -> SpeechPart(text, 1.04f, 1.01f)
             else -> SpeechPart(text)
         }))
-    fun playbackRate(speed: Int): Float = when (speed) { 75 -> 0.75f; 125 -> 1.25f; else -> 1f }
+    // V0.1.9: the former 0.75x delivery is the new normal speed.
+    fun playbackRate(speed: Int): Float = 0.75f * when (speed) { 75 -> 0.75f; 125 -> 1.25f; else -> 1f }
+    fun initialSpeed(saved: Int, calibration: Int): Int = if (calibration < 2) 100
+        else saved.takeIf { it in listOf(75, 100, 125) } ?: 100
     fun fallbackRate(speed: Int, part: SpeechPart): Float = (playbackRate(speed) / 0.75f * part.pace).coerceIn(0.7f, 2f)
 }

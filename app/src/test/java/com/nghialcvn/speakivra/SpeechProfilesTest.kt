@@ -25,7 +25,10 @@ class SpeechProfilesTest {
         assertTrue(SpeechProfiles.playbackRate(75) < SpeechProfiles.playbackRate(100))
         assertTrue(SpeechProfiles.playbackRate(100) < SpeechProfiles.playbackRate(125))
         assertEquals(1.25f, SpeechProfiles.playbackRate(125) / SpeechProfiles.playbackRate(100), 0.001f)
-        assertEquals(1f, SpeechProfiles.fallbackRate(75, part), 0.001f)
+        assertEquals(0.5625f, SpeechProfiles.playbackRate(75), 0.001f)
+        assertEquals(0.75f, SpeechProfiles.playbackRate(100), 0.001f)
+        assertEquals(0.9375f, SpeechProfiles.playbackRate(125), 0.001f)
+        assertEquals(1f, SpeechProfiles.fallbackRate(100, part), 0.001f)
         assertEquals(SpeechProfiles.playbackRate(100), SpeechProfiles.playbackRate(-1), 0.001f)
     }
     @Test fun unfamiliarTextFallsBackWithoutInventingExtraSpeech() {
@@ -35,4 +38,10 @@ class SpeechProfilesTest {
         assertEquals(text, profile.parts.single().text)
         for (speed in listOf(75, 100, 125)) assertTrue(SpeechProfiles.fallbackRate(speed, profile.parts.single()) in 0.7f..2f)
     }
+    @Test fun recalibrationStartsAtTheNewNormalOnceThenKeepsFutureChoices() {
+        for (old in listOf(75, 100, 125)) assertEquals(100, SpeechProfiles.initialSpeed(old, 0))
+        for (saved in listOf(75, 100, 125)) assertEquals(saved, SpeechProfiles.initialSpeed(saved, 2))
+        assertEquals(100, SpeechProfiles.initialSpeed(-1, 2))
+    }
+
 }

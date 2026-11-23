@@ -17,7 +17,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.speech.RecognizerIntent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -168,40 +167,44 @@ private fun SpeakivraApp(updates: InAppUpdates) {
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
-    DisposableEffect(speech, context) {
+    var capturePhase by remember { mutableStateOf("idle") }
+    var pendingMicrophone by remember { mutableStateOf(false) }
+    val capture = remember(context) { SpeechCapture(context.applicationContext) { phase, words, message ->
+        capturePhase = phase
+        if (words != null) transcript = words
+        status = message
+    } }
+    fun stopCapture() { pendingMicrophone = false; capture.cancel() }
+    DisposableEffect(speech, capture, context) {
         val lifecycle = (context as? LifecycleOwner)?.lifecycle
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) speech.stop(true)
+            if (event == Lifecycle.Event.ON_STOP) { stopCapture(); speech.stop(true) }
         }
         lifecycle?.addObserver(observer)
-        onDispose { lifecycle?.removeObserver(observer); speech.close() }
+        onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
-    fun speak(text: String) { speech.speak(text, playbackSpeed) }
-    val speechLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val words = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-        transcript = words?.firstOrNull().orEmpty()
-        status = if (transcript.isBlank()) "Chưa nhận được lời nói. Hãy thử lại." else "Đã nhận dạng lời nói. Đây chưa phải điểm phát âm."
-    }
+    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) status = "Đã cấp micro. Nhấn Nói để bắt đầu."
-        else status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
+        val requested = pendingMicrophone
+        pendingMicrophone = false
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start()
+        else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
-        speech.stop()
+        if (capture.phase == "listening") { capture.stop(); return }
+        if (capture.phase == "processing" || pendingMicrophone) return
+        stopCapture(); speech.stop()
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            return
-        }
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak English")
-        }
-        try { speechLauncher.launch(intent) }
-        catch (_: ActivityNotFoundException) { status = "Thiết bị chưa có dịch vụ nhận dạng giọng nói." }
+        } else capture.start()
+    }
+    // Changing the learning context invalidates pending permissions and old callbacks.
+    DisposableEffect(page, lesson.id, progress.phrase, progress.turn, progress.review) {
+        onDispose { stopCapture() }
     }
     fun next() {
-        speech.stop()
+        stopCapture(); speech.stop()
         saveProgress(progress.nextPhrase(lesson))
         transcript = ""
         page = progress.phase
@@ -209,7 +212,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         if (automatic && page == "repeat") speak(phrases[progress.phrase].english)
     }
     fun openLesson(item: Lesson) {
-        speech.stop()
+        stopCapture(); speech.stop()
         transcript = ""
         status = "Nhấn Nghe mẫu để bắt đầu"
         selectedId = item.id
@@ -226,7 +229,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
         preferences.edit().putInt("playback_speed", value).apply()
     }
     fun navigate(destination: String) {
-        speech.stop()
+        stopCapture(); speech.stop()
         transcript = ""
         page = if (destination == "repeat") progress.phase else destination
     }
@@ -278,17 +281,17 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onChat = { navigate("chat") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson)
-                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status,
+                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, transcript, status, capturePhase,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next)
-                            "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, transcript,
+                            "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, transcript, capturePhase, status,
                                 nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
                                 }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
                                 onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
                                 onTranslation = { showTranslation = !showTranslation }, onNext = {
-                                    speech.stop()
+                                    stopCapture(); speech.stop()
                                     if (progress.phase in listOf("repeat", "chat")) {
                                         saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase
                                     } else if (chatIndex < lesson.conversation.lastIndex) saveProgress(progress.copy(turn = chatIndex + 1))
@@ -296,12 +299,12 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                                     transcript = ""
                                     if (automatic && page == "chat") speak(lesson.conversation[progress.turn].prompt)
                                 })
-                            "review" -> ReviewScreen(lesson, progress, reviewSelection, transcript,
+                            "review" -> ReviewScreen(lesson, progress, reviewSelection, transcript, capturePhase, status,
                                 onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate("home") },
                                 onListen = { speak(reviewQuestion(lesson, progress.review).phrase.english) }, onSpeak = ::listen,
                                 onNext = {
                                     if (reviewSelection >= 0) {
-                                        speech.stop()
+                                        stopCapture(); speech.stop()
                                         val question = reviewQuestion(lesson, progress.review)
                                         val value = progress.answerReview(reviewSelection == question.answer)
                                         if (value.rounds > progress.rounds) completed++
@@ -317,7 +320,7 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                                     Text("Tiến độ đã lưu trên thiết bị. Bạn có thể học lại bất cứ lúc nào.", color = palette.muted)
                                 }
                                 CoralButton("Học lại bài này", onClick = {
-                                    speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
+                                    stopCapture(); speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
                                     if (automatic) speak(phrases[0].english)
                                 })
                                 val following = Lessons.all.getOrNull(Lessons.all.indexOf(lesson) + 1)

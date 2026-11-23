@@ -231,13 +231,14 @@ private fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier =
     }
 }
 @Composable
-internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, large: Boolean = false) {
+internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, large: Boolean = false, active: Boolean = false) {
     val size = if (large) 96.dp else 64.dp
     Box(modifier.size(size + 14.dp).background(studio.peach.copy(alpha = 0.7f), CircleShape).padding(7.dp)
         .shadow(3.dp, CircleShape).background(Brush.linearGradient(listOf(Color(0xFFFF9B82), Color(0xFFDA4B38))), CircleShape)
         .border(2.dp, Color.White.copy(alpha = 0.85f), CircleShape).clip(CircleShape)
-        .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = "Nói và nhận dạng" }, Alignment.Center) {
-        StudioIcon("mic", Modifier.size(if (large) 43.dp else 31.dp), Color.White)
+        .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" }, Alignment.Center) {
+        if (active) Box(Modifier.size(if (large) 25.dp else 19.dp).background(Color.White, RoundedCornerShape(4.dp)))
+        else StudioIcon("mic", Modifier.size(if (large) 43.dp else 31.dp), Color.White)
     }
 }
 @Composable
@@ -253,7 +254,7 @@ private fun DecorativeWave() {
 }
 @Composable
 internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic: Boolean, translation: Boolean,
-                            speed: Int, transcript: String, status: String, onBack: () -> Unit,
+                            speed: Int, transcript: String, status: String, capturePhase: String, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,
                             onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
     val p = studio; val phrase = lesson.phrases[progress.phrase]
@@ -294,9 +295,9 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    DecorativeWave(); Microphone(onSpeak, large = true); DecorativeWave()
+                    DecorativeWave(); Microphone(onSpeak, large = true, active = capturePhase == "listening"); DecorativeWave()
                 }
-                Text("Chạm để nói", fontSize = 15.sp, color = p.muted)
+                Text(captureLabel(capturePhase, "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
             StudioCard(color = p.mint, border = false) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -320,7 +321,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
     }
 }
 @Composable
-internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String,
+internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String, capturePhase: String, status: String,
                                 nextLabel: String, onBack: () -> Unit, onPrompt: () -> Unit, onReply: () -> Unit,
                                 onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit) {
     val p = studio; val turn = lesson.conversation[turnIndex]
@@ -348,9 +349,10 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
             if (translation) Text(turn.replyTranslation, fontSize = 14.sp, color = p.muted)
         }
         Box(Modifier.fillMaxWidth().height(114.dp), Alignment.Center) {
-            CoralButton("Nói câu trả lời", Modifier.widthIn(max = 270.dp).align(Alignment.BottomCenter), chevron = false, onClick = onSpeak)
-            Microphone(onSpeak, Modifier.align(Alignment.TopCenter))
+            CoralButton(captureLabel(capturePhase, "Nói câu trả lời"), Modifier.widthIn(max = 270.dp).align(Alignment.BottomCenter), chevron = false, onClick = onSpeak)
+            Microphone(onSpeak, Modifier.align(Alignment.TopCenter), active = capturePhase == "listening")
         }
+        Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             SpeakerChip("Nghe trả lời mẫu", onReply)
             Text("Lượt ${turnIndex + 1}/${lesson.conversation.size}", color = p.muted, fontSize = 13.sp)
@@ -362,7 +364,7 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
     }
 }
 @Composable
-internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String,
+internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String, capturePhase: String, status: String,
                           onSelect: (Int) -> Unit, onBack: () -> Unit, onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
     val p = studio; val question = reviewQuestion(lesson, progress.review)
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
@@ -403,7 +405,8 @@ internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: I
                         Text("Ôn nghĩa câu, không chấm phát âm.", color = p.muted, fontSize = 13.sp)
                     }
                 }
-                TextButton(onClick = onSpeak) { StudioIcon("mic", Modifier.size(19.dp), p.green); Spacer(Modifier.width(8.dp)); Text("Nhắc lại câu này") }
+                TextButton(onClick = onSpeak) { StudioIcon("mic", Modifier.size(19.dp), p.green); Spacer(Modifier.width(8.dp)); Text(captureLabel(capturePhase, "Nhắc lại câu này")) }
+                Text(status, color = p.muted, fontSize = 12.sp)
                 if (transcript.isNotBlank()) Text("Máy nhận dạng: $transcript", color = p.muted, fontSize = 13.sp)
             }
         }
@@ -464,4 +467,10 @@ internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String
             }
         }
     }
+}
+
+internal fun captureLabel(phase: String, idle: String) = when (phase) {
+    "listening" -> "Chạm để kết thúc"
+    "processing" -> "Đang xử lý…"
+    else -> idle
 }

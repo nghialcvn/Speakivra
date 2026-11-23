@@ -277,6 +277,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         page = saved.phase
         if (automatic && page == "repeat") speak(item.phrases[saved.phrase].english)
     }
+    var neon by rememberSaveable { mutableStateOf(appearance.getBoolean("neon_theme", false)) }
     var dark by rememberSaveable { mutableStateOf(appearance.getBoolean("dark_theme", false)) }
     var goal by rememberSaveable { mutableIntStateOf(preferences.getInt("daily_goal", 20).takeIf { it in listOf(10, 15, 20, 30) } ?: 20) }
     var settingDialog by rememberSaveable { mutableStateOf("") }
@@ -306,11 +307,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
             else -> "home"
         })
     }
-    SpeakivraTheme(dark) {
+    SpeakivraTheme(dark, neon = neon) {
         val palette = studio
         SideEffect { (context as? ComponentActivity)?.let {
-            val neon = page == "voice-settings"
-            updateSystemBars(it, dark || neon, if (neon) Color(0xFF071126) else palette.background)
+            val voiceScreen = page == "voice-settings"
+            updateSystemBars(it, dark || neon || voiceScreen, if (voiceScreen) Color(0xFF071126) else palette.background)
         } }
         val available = updateState.release
         if (page == "home" && available != null && available.versionCode > installation.versionCode &&
@@ -439,7 +440,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 }
                             )
                             "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
-                                onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
+                                onTheme = { dark = it; neon = false; appearance.edit().putBoolean("dark_theme", it).putBoolean("neon_theme", false).apply() },
+                                neon = neon, onNeon = {
+                                    neon = true
+                                    appearance.edit().putBoolean("neon_theme", true).apply()
+                                },
                                 onVoice = ::openVoiceSettings, onSpeed = { settingDialog = "speed" },
                                 onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() }, voiceChoice = voiceChoice)
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {

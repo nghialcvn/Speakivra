@@ -96,8 +96,11 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) applySavedSystemBars()
     }
     private fun applySavedSystemBars() {
-        val dark = getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
-        updateSystemBars(this, dark, if (dark) DarkStudio.background else LightStudio.background)
+        val prefs = getSharedPreferences("speakivra_progress", 0)
+        val dark = prefs.getBoolean("dark_theme", false)
+        val neon = prefs.getBoolean("neon_theme", false)
+        val palette = if (neon) NeonStudio else if (dark) DarkStudio else LightStudio
+        updateSystemBars(this, dark || neon, palette.background)
     }
 }
 
@@ -121,10 +124,12 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                 })
             }
         } else {
-            val dark = context.getSharedPreferences("speakivra_progress", 0).getBoolean("dark_theme", false)
-            SpeakivraTheme(dark) {
+            val prefs = context.getSharedPreferences("speakivra_progress", 0)
+            val dark = prefs.getBoolean("dark_theme", false)
+            val neon = prefs.getBoolean("neon_theme", false)
+            SpeakivraTheme(dark, neon = neon) {
                 val palette = studio
-                SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark, palette.background) } }
+                SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark || neon, palette.background) } }
                 Surface(color = palette.background, contentColor = palette.ink) {
                     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
@@ -367,7 +372,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
                                 }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
                                 onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
-                                onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings, onNext = {
+                                onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings, neon = neon, onNext = {
                                     stopCapture(); speech.stop()
                                     if (progress.phase in listOf("repeat", "chat")) {
                                         saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase

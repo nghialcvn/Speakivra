@@ -23,7 +23,8 @@ internal class SpeechCapture(
     private var timeout: Runnable? = null
     val phase get() = session.phase
 
-    fun start() {
+    fun start(languageTag: String = "en-US") {
+        require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
         update("listening", "", "Đang mở micro…")
         try {
@@ -61,7 +62,7 @@ internal class SpeechCapture(
                         SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Chưa nghe rõ. Chạm micro và thử nói lại nhé."
                         SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Dịch vụ nhận dạng cần kết nối mạng. Kiểm tra mạng rồi thử lại."
                         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Dịch vụ giọng nói đang bận. Chờ một chút rồi thử lại."
-                        SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED, SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "Dịch vụ chưa sẵn sàng cho tiếng Anh Mỹ. Kiểm tra ngôn ngữ nhận dạng trên thiết bị."
+                        SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED, SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "Dịch vụ chưa sẵn sàng cho $languageTag. Kiểm tra ngôn ngữ nhận dạng trên thiết bị."
                         else -> "Không nhận dạng được lời nói (mã $error). Chạm micro để thử lại."
                     }
                     finish(token, "", message)
@@ -71,7 +72,7 @@ internal class SpeechCapture(
             armTimeout(token, 60_000)
             engine.startListening(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             })

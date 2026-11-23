@@ -4,7 +4,7 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.13 beta development** based on verified V0.1.2 commit `09b73aa16e8e9fa0d7d944b757ce430bc1050f55`.
+**0.1.14 beta candidate source** based on verified V0.1.13 (`6a9076f8b478d28c6592aad13cf390efb4ed8aef`). The V0.1.14 signed APK has not yet been verified or published.
 The source version is not a claim that an APK has passed device testing or been released.
 
 The user-approved warm light interface is implemented; the approved logo is preserved. See [approved design and behavior mapping](docs/design/APPROVED_LIGHT_UI.md). The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. Ten A1 practice lessons, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression and placement assessment and curricula beyond this initial A1 pack remain incomplete.
@@ -60,6 +60,6 @@ Name templates are resolved from the selected learner for practice, conversation
 
 Final recognized words appear in a compact italic transcript row with a small square avatar below the practice microphone. Partial text is not shown in this row, and a new attempt/context clears it. The 60% rule remains unchanged and is not an acoustic pronunciation assessment.
 
-## Expanded A1 practice content (unreleased)
+## Expanded A1 practice and compact lesson controls (0.1.14 candidate)
 
-The existing ten topics now include 120 practice phrases and 50 scripted conversation turns (12 phrases and 5 turns per topic). The original 80 phrases and first 30 turns retain their positions, lesson IDs, and original bundled neural speech clips. All 40 added practice lines and 20 new turn prompts use the existing on-device US-English TTS fallback until separately recorded neural clips are reviewed. The 30 meaning checks remain unchanged; no curriculum claims beyond A1. Existing learner preferences, completed rounds and update/signing settings are unchanged. This is source-only and is not yet a signed or Samsung-tested APK release.
+The existing ten topics now include 120 practice phrases and 50 scripted conversation turns (12 phrases and 5 turns per topic). The original 80 phrases and first 30 turns retain their positions, lesson IDs, and original bundled neural speech clips. All 40 added practice lines and 20 new turn prompts use the existing on-device US-English TTS fallback until separately recorded neural clips are reviewed. The 30 meaning checks remain unchanged; no curriculum claims beyond A1. Existing learner preferences, completed rounds and update/signing settings are unchanged. The approved speaking phrase card now uses a single current-speed dropdown next to Nghe mẫu and Ẩn dịch/Hiện dịch on one row. This candidate is not yet a signed or Samsung-tested APK release.

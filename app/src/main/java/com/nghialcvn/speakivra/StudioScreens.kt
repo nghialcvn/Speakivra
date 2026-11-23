@@ -398,7 +398,13 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
 internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boolean, transcript: String, capturePhase: String, status: String, learner: Learner,
                                 nextLabel: String, onBack: () -> Unit, onPrompt: () -> Unit, onReply: () -> Unit,
                                 onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit,
-                                voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {}) {
+                                voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {},
+                                neon: Boolean = false) {
+    if (neon) {
+        NeonConversationScreen(lesson, turnIndex, translation, transcript, capturePhase, status, learner,
+            nextLabel, onBack, onPrompt, onReply, onSpeak, onTranslation, onNext, voiceChoice, onVoiceSettings)
+        return
+    }
     val p = studio; val turn = lesson.conversation[turnIndex]
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Emma • Luyện hội thoại", onBack = onBack)

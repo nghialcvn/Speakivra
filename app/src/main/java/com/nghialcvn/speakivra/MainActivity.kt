@@ -124,7 +124,9 @@ private fun SpeakivraApp() {
     var completed by remember { mutableIntStateOf(preferences.getInt("completed", 0)) }
     var automatic by remember { mutableStateOf(true) }
     var showTranslation by remember { mutableStateOf(true) }
-    var slow by remember { mutableStateOf(false) }
+    var playbackSpeed by rememberSaveable {
+        mutableIntStateOf(preferences.getInt("playback_speed", 100).takeIf { it in listOf(75, 100, 125) } ?: 100)
+    }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
     var chatIndex by remember { mutableIntStateOf(0) }
@@ -143,7 +145,9 @@ private fun SpeakivraApp() {
             ttsReady = result >= TextToSpeech.LANG_AVAILABLE
         }
         if (ttsReady) {
-            tts.setSpeechRate(if (slow) 0.75f else 1.0f)
+            // Keep the former 1x voice at the new 0.75x setting.
+            // Both lesson samples and scripted conversation use this calibrated rate.
+            tts.setSpeechRate(playbackSpeed / 75f)
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "speakivra")
             status = "Đang phát câu mẫu"
         } else status = "Thiết bị chưa có giọng đọc tiếng Anh-Mỹ. Kiểm tra cài đặt TTS."
@@ -255,7 +259,12 @@ private fun SpeakivraApp() {
                             Text(phrases[index].english, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             if (showTranslation) Text(phrases[index].vietnamese, color = Muted, textAlign = TextAlign.Center)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                TextButton(onClick = { slow = !slow }) { Text(if (slow) "Tốc độ 0.75x" else "Tốc độ 1.0x") }
+                                TextButton(onClick = {
+                                    playbackSpeed = when (playbackSpeed) { 75 -> 100; 100 -> 125; else -> 75 }
+                                    preferences.edit().putInt("playback_speed", playbackSpeed).apply()
+                                }) {
+                                    Text("Tốc độ " + when (playbackSpeed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" })
+                                }
                                 TextButton(onClick = { showTranslation = !showTranslation }) { Text(if (showTranslation) "Ẩn dịch" else "Hiện dịch") }
                             }
                             PrimaryButton("🔊 Nghe mẫu") { speak(phrases[index].english) }

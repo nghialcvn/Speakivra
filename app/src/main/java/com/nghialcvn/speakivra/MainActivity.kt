@@ -72,7 +72,7 @@ private fun UpdatesScreen(state: UpdateState, installation: Installation, onChec
                 "permission" -> CoralButton("Cho phép và cài cập nhật", onClick = onInstall)
                 "downloaded" -> CoralButton("Cài cập nhật", onClick = onInstall)
                 "idle" -> if (item.versionCode > installation.versionCode && item.canInstallOver(installation)) {
-                    CoralButton("Tải và cập nhật", onDownload)
+                    CoralButton("Tải và cập nhật", onClick = onDownload)
                 } else Unit
                 else -> Unit
             }

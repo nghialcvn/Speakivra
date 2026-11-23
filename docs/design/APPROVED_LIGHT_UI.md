@@ -36,3 +36,9 @@ Speaking retains the existing composition, sample translation/controls, large mi
 ## Approved correction — V0.1.13
 
 The user approved the profile-editing and spoken-result demo. Replace the picker wordmark with the existing logo, render avatars from the separate high-resolution learner_avatars atlas, and expose a pencil at the lower right of the profile avatar. The edit form preserves the creation form layout and changes only its title, prefilled values and save label. Show actual final spoken text in italic beside a square avatar in a compact 6dp-corner row directly below the mic. Learner introduction templates use the current profile name in English/Vietnamese; other lesson content stays intact. Matching colors and the 60% gate are retained. No other screen or brand changes are authorized.
+
+## Approved compact speaking controls and A1 expansion — V0.1.14
+
+The user's approved demo retains the original speaking composition, typography, background, micro, word-feedback row, tip and fixed bottom action. Inside the practice phrase card only, “Nghe mẫu”, one speed-selector displaying the current value and “Ẩn dịch/Hiện dịch” share one horizontal row. The three speed values 0.75x, 1x and 1.25x open from the selector; its selected underlying calibration remains unchanged. For narrow devices or high accessibility font scale, controls may wrap rather than clip. All other approved screens remain unchanged.
+
+Content is additive: keep the first eight phrases and first three scripted turns for each original A1 lesson in their original positions, then append four practice phrases and two scripted turns per lesson. This brings practice to 120 phrases and 50 turns across the same 10 IDs. Existing bundled neural clips are unchanged; appended lines use on-device US-English TTS. The 30 meaning review questions are retained. Do not reset any learner preferences/progress or imply real AI conversation/acoustic pronunciation scoring.

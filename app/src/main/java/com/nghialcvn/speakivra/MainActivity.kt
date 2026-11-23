@@ -407,6 +407,33 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 if (error == null) navigate("profile")
                                 error
                             })
+                            "voice-settings" -> VoiceSettingsScreen(
+                                choice = voiceChoice,
+                                available = speech.installedVoices(voiceChoice.accent),
+                                speed = playbackSpeed,
+                                message = status,
+                                onBack = { navigate(voiceReturnPage) },
+                                onAccent = { changeVoice(accent = it) },
+                                onGender = { changeVoice(gender = it) },
+                                onAssign = { id ->
+                                    stopCapture(); speech.stop()
+                                    if (speech.installedVoices(voiceChoice.accent).any { it.id == id }) {
+                                        voiceChoice = VoiceChoices.assign(preferences, voiceChoice.accent, voiceChoice.gender, id)
+                                        status = "Đã lưu giọng đọc ngoại tuyến được chọn."
+                                    } else status = "Không tìm thấy giọng này trên thiết bị."
+                                },
+                                onPreview = { id ->
+                                    stopCapture()
+                                    if (speech.installedVoices(voiceChoice.accent).any { it.id == id }) {
+                                        speech.speak("Hello! Welcome to Speakivra!", playbackSpeed, voiceChoice.copy(voiceId = id))
+                                    } else status = "Không tìm thấy giọng này trên thiết bị."
+                                },
+                                onResetDefault = {
+                                    stopCapture(); speech.stop()
+                                    voiceChoice = VoiceChoices.resetBundled(preferences)
+                                    status = "Đã khôi phục giọng nữ neural Anh-Mỹ gốc."
+                                }
+                            )
                             "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
                                 onTheme = { dark = it; appearance.edit().putBoolean("dark_theme", it).apply() },
                                 onVoice = ::openVoiceSettings, onSpeed = { settingDialog = "speed" },

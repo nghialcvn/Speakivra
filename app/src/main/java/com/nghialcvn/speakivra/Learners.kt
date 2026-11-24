@@ -45,7 +45,10 @@ internal class LearnerStore(private val context: Context) {
         // Legacy installs predating the registry had learning preferences in the
         // original file. Only those genuine legacy installs keep their old profile.
         val legacyPrefs = context.getSharedPreferences("speakivra_progress", 0)
-        val first = if (legacyPrefs.all.isNotEmpty())
+        val hasLegacyProgress = legacyPrefs.contains("active_lesson") ||
+            legacyPrefs.contains("completed") ||
+            legacyPrefs.all.keys.any { it.startsWith("lesson.") }
+        val first = if (hasLegacyProgress)
             listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)) else emptyList()
         check(registry.edit().putString("profiles", encodeLearners(first)).commit())
         return first // Fresh installs must explicitly create a named learner.

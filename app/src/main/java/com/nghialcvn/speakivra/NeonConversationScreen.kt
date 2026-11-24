@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,62 +23,65 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val navy = Color(0xFF071126)
-private val neon = Color(0xFF34B7FF)
+private val neon = Color(0xFF36B8FF)
 private val white = Color(0xFFF3F6FF)
 private val muted = Color(0xFFB2C1DE)
 private val bubble = Color(0xFF1D315B)
 
 @Composable
+private fun AiAvatar() {
+    Box(Modifier.size(47.dp), contentAlignment = Alignment.Center) {
+        LearnerAvatar(1, Modifier.size(40.dp))
+        Text("AI", color = Color.White, fontSize = 9.sp,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .background(Color(0xFF087CE5), RoundedCornerShape(7.dp))
+                .padding(horizontal = 4.dp, vertical = 2.dp))
+    }
+}
+
+@Composable
 private fun NeonMessage(
-    text: String, translation: String?, learner: Learner?, isReply: Boolean, onPlay: () -> Unit
+    text: String, translation: String?, learner: Learner?,
+    isReply: Boolean, onPlay: () -> Unit, showPlay: Boolean = true
 ) {
-    Row(
-        Modifier.fillMaxWidth(),
+    Row(Modifier.fillMaxWidth(),
         horizontalArrangement = if (isReply) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Bottom
-    ) {
+        verticalAlignment = Alignment.Bottom) {
         if (!isReply) {
-            Box(Modifier.size(40.dp).clip(CircleShape)
-                .background(Color(0xFF29436A)), Alignment.Center) {
-                StudioIcon("chat", Modifier.size(22.dp), neon)
-            }
-            Spacer(Modifier.width(9.dp))
+            AiAvatar()
+            Spacer(Modifier.width(7.dp))
         }
-        Column(Modifier.fillMaxWidth(0.82f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(17.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            if (isReply) listOf(Color(0xFF1973D6), Color(0xFF2556CA))
-                            else listOf(bubble, Color(0xFF142747))
-                        )
-                    )
-                    .border(1.dp, if (isReply) neon else Color(0xFF45628C), RoundedCornerShape(17.dp))
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    if (isReply) "Bạn trả lời" else "Câu hỏi mẫu · Mô phỏng",
-                    fontSize = 11.sp, color = Color(0xFFD5E7FF), fontWeight = FontWeight.Bold
-                )
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text, modifier = Modifier.weight(1f), fontSize = 19.sp,
-                        fontWeight = FontWeight.ExtraBold, color = white)
-                    IconButton(onClick = onPlay, modifier = Modifier.size(38.dp)
-                        .semantics { contentDescription = if (isReply) "Nghe câu trả lời" else "Nghe câu hỏi" }) {
-                        StudioIcon("speaker", Modifier.size(21.dp), Color(0xFFBCE7FF))
-                    }
+        Column(Modifier.fillMaxWidth(if (isReply) 0.79f else 0.81f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Brush.horizontalGradient(
+                    if (isReply) listOf(Color(0xFF0871D8), Color(0xFF214FC2))
+                    else listOf(bubble, Color(0xFF172643))))
+                .border(1.dp,
+                    if (isReply) neon else Color(0xFF3D5886),
+                    RoundedCornerShape(18.dp))
+                .padding(horizontal = 12.dp, vertical = 13.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(text, Modifier.weight(1f), fontSize = 17.sp,
+                    lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold, color = white)
+                if (showPlay) IconButton(onClick = onPlay, modifier = Modifier.size(35.dp)
+                    .semantics { contentDescription =
+                        if (isReply) "Nghe câu trả lời" else "Nghe câu hỏi" }) {
+                    StudioIcon("speaker", Modifier.size(20.dp), Color(0xFFBAE9FF))
                 }
             }
-            if (!translation.isNullOrBlank()) Text(
-                translation, fontSize = 13.sp, color = muted,
-                fontStyle = FontStyle.Italic,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            if (!translation.isNullOrBlank()) {
+                Text(translation, color = muted, fontSize = 12.sp,
+                    fontStyle = FontStyle.Italic, lineHeight = 17.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp))
+            }
         }
-        if (isReply) {
-            Spacer(Modifier.width(9.dp))
-            if (learner != null) LearnerAvatar(learner.avatar, Modifier.size(40.dp))
+        if (isReply && learner != null) {
+            Spacer(Modifier.width(7.dp))
+            LearnerAvatar(learner.avatar, Modifier.size(39.dp))
         }
     }
 }
@@ -99,86 +103,139 @@ internal fun NeonConversationScreen(
     onTranslation: () -> Unit,
     onNext: () -> Unit,
     voiceChoice: VoiceChoice,
-    onVoiceSettings: () -> Unit
+    onVoiceSettings: () -> Unit,
+    explanationLanguage: String = LearningOptions.VIETNAMESE,
+    onTypedText: (String) -> Unit = {}
 ) {
-    val turn = lesson.conversation[turnIndex]
-    Column(
-        Modifier.fillMaxSize().background(navy).padding(horizontal = 17.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(11.dp)
-    ) {
+    val current = lesson.conversation[turnIndex]
+    val englishOnly = explanationLanguage == LearningOptions.ENGLISH
+    var showKeyboard by rememberSaveable { mutableStateOf(false) }
+    var typedText by rememberSaveable(turnIndex) { mutableStateOf("") }
+    Column(Modifier.fillMaxSize().background(navy)
+        .padding(horizontal = 15.dp, vertical = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, Modifier.semantics { contentDescription = "Quay lại" }) {
                 StudioIcon("back", color = white)
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Speakivra", color = white, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-                Text("Hội thoại theo kịch bản", color = muted, fontSize = 12.sp)
+                Text("🎙 Speakivra", color = white, fontSize = 24.sp,
+                    fontWeight = FontWeight.ExtraBold)
+                Text("Mô phỏng theo kịch bản", color = muted, fontSize = 11.sp)
             }
-            Spacer(Modifier.width(48.dp))
+            StudioIcon("book", Modifier.size(24.dp), Color(0xFFFFD779))
+            Spacer(Modifier.width(10.dp))
         }
-        Text(lessonLabel(lesson), color = white, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-        Box(Modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(Color(0xFF26406D))) {
-            Box(Modifier.fillMaxWidth((turnIndex + 1f) / lesson.conversation.size)
-                .fillMaxHeight().background(Brush.horizontalGradient(listOf(neon, Color(0xFF597CFF))), CircleShape))
+        Text("Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1}: ${lessonLabel(lesson)}",
+            color = white, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.weight(1f).height(9.dp).clip(CircleShape)
+                .background(Color(0xFF233D6C))) {
+                Box(Modifier.fillMaxWidth((turnIndex + 1f) / lesson.conversation.size)
+                    .fillMaxHeight().background(Brush.horizontalGradient(
+                        listOf(neon, Color(0xFF597CFF))), CircleShape))
+            }
+            Text("${turnIndex + 1}/${lesson.conversation.size}",
+                color = white, fontSize = 12.sp)
         }
-        Text("Lượt ${turnIndex + 1}/${lesson.conversation.size} · Mô phỏng theo kịch bản",
-            color = muted, fontSize = 12.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
         VoiceSelectionChips(voiceChoice, onVoiceSettings)
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Spacer(Modifier.height(6.dp))
-            NeonMessage(turn.prompt, if (translation) turn.translation else null, null, false, onPrompt)
-            NeonMessage(turn.reply, if (translation) turn.replyTranslation else null, learner, true, onReply)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = onTranslation) {
+                Text(if (translation) "Ẩn hướng dẫn" else "Hiện hướng dẫn",
+                    color = neon, fontSize = 12.sp)
+            }
+        }
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(15.dp)) {
+            if (turnIndex > 0) {
+                val previous = lesson.conversation[turnIndex - 1]
+                Text("Lượt trước", color = muted, fontSize = 12.sp)
+                NeonMessage(previous.reply, null, learner, true, onPlay = {},
+                    showPlay = false)
+            }
+            NeonMessage(current.prompt,
+                if (!translation) null else if (englishOnly)
+                    EnglishStudy.explanation(current.prompt) else current.translation,
+                null, false, onPrompt)
+            NeonMessage(current.reply,
+                if (!translation) null else if (englishOnly)
+                    EnglishStudy.pronunciationTip(current.reply)
+                else current.replyTranslation,
+                learner, true, onReply)
             if (capturePhase == "idle" && transcript.isNotBlank()) {
-                Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF132747)).border(1.dp, Color(0xFF365582), RoundedCornerShape(12.dp))
-                        .padding(10.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    LearnerAvatar(learner.avatar, Modifier.size(34.dp), square = true)
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp))
+                    .background(Color(0xFF132747))
+                    .border(1.dp, Color(0xFF365582), RoundedCornerShape(13.dp))
+                    .padding(11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    LearnerAvatar(learner.avatar, Modifier.size(36.dp), square = true)
                     Column(Modifier.weight(1f)) {
-                        Text("Lời bạn vừa nói", color = muted, fontSize = 11.sp)
-                        Text(transcript, color = white, fontSize = 14.sp, fontStyle = FontStyle.Italic)
+                        Text("Câu trả lời của bạn", color = muted, fontSize = 11.sp)
+                        Text(transcript, color = white, fontSize = 14.sp,
+                            fontStyle = FontStyle.Italic)
                     }
                 }
             }
-            Text(status, color = muted, fontSize = 12.sp)
-            Text("Nhận dạng từ, chưa chấm phát âm chuyên sâu.",
-                color = muted, fontSize = 11.sp, textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth())
-        }
-        Row(
-            Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            OutlinedButton(
-                onClick = onTranslation,
-                border = BorderStroke(1.dp, Color(0xFF3D6195)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = white)
-            ) { Text(if (translation) "Ẩn dịch" else "Hiện dịch") }
-            Box(
-                Modifier.size(100.dp).shadow(10.dp, CircleShape)
-                    .background(Brush.linearGradient(listOf(Color(0xFF22C7FF), Color(0xFF315BEC))), CircleShape)
-                    .border(2.dp, Color(0xFFAAEBFF), CircleShape)
-                    .clickable(role = Role.Button, onClick = onSpeak)
-                    .semantics { contentDescription = if (capturePhase == "listening") "Kết thúc lượt nói" else "Nói và nhận dạng" },
-                Alignment.Center
-            ) {
-                StudioIcon("mic", Modifier.size(48.dp), Color.White)
+            if (showKeyboard) {
+                OutlinedTextField(
+                    value = typedText,
+                    onValueChange = { if (it.length <= 500) typedText = it },
+                    label = { Text("Nhập câu trả lời bằng tiếng Anh") },
+                    singleLine = false, minLines = 1, maxLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = white, unfocusedTextColor = white,
+                        focusedLabelColor = neon, unfocusedLabelColor = muted,
+                        focusedBorderColor = neon)
+                )
+                OutlinedButton(
+                    onClick = { onTypedText(typedText.trim()); showKeyboard = false },
+                    enabled = typedText.isNotBlank()) {
+                    Text("Gửi câu trả lời đã nhập")
+                }
             }
-            Spacer(Modifier.width(72.dp))
+            Text(status, color = muted, fontSize = 12.sp)
+            Text(if (englishOnly) "Scripted dialogue • Not phonetic scoring."
+                 else "Hội thoại theo kịch bản • Không chấm phát âm chuyên sâu.",
+                color = muted, fontSize = 11.sp)
         }
-        Text(captureLabel(capturePhase, "Nhấn để nói"),
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+            IconButton(
+                onClick = { showKeyboard = !showKeyboard },
+                modifier = Modifier.size(56.dp).background(
+                    Color(0xFF23345A), CircleShape)
+                    .semantics { contentDescription = "Nhập câu trả lời" }
+            ) { StudioIcon("keyboard", Modifier.size(28.dp), white) }
+            Box(Modifier.size(104.dp)
+                .shadow(13.dp, CircleShape)
+                .background(Brush.linearGradient(listOf(
+                    Color(0xFF27D0FF), Color(0xFF3058EE))), CircleShape)
+                .border(2.dp, Color(0xFFB3EEFF), CircleShape)
+                .clickable(role = Role.Button, onClick = onSpeak)
+                .semantics { contentDescription =
+                    if (capturePhase == "listening") "Kết thúc lượt nói" else "Nói và nhận dạng" },
+                contentAlignment = Alignment.Center) {
+                StudioIcon("mic", Modifier.size(56.dp), white)
+            }
+            IconButton(onClick = onNext,
+                modifier = Modifier.size(56.dp)
+                    .background(Color(0xFF23345A), CircleShape)
+                    .semantics { contentDescription = "Tiếp tục hội thoại" }) {
+                StudioIcon("next", Modifier.size(29.dp), white)
+            }
+        }
+        Text(captureLabel(capturePhase, "Nhấn và nói"),
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
             color = muted, fontSize = 13.sp)
-        Box(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
-                .background(Brush.horizontalGradient(listOf(Color(0xFF1174C7), Color(0xFF315DE5))))
-                .clickable(role = Role.Button, onClick = onNext).heightIn(min = 49.dp),
-            Alignment.Center
-        ) { Text(nextLabel, color = white, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp) }
+        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(19.dp))
+            .background(Brush.horizontalGradient(listOf(
+                Color(0xFF187ECF), Color(0xFF315BE8))))
+            .clickable(role = Role.Button, onClick = onNext)
+            .heightIn(min = 44.dp), contentAlignment = Alignment.Center) {
+            Text(nextLabel, color = white, fontWeight = FontWeight.ExtraBold)
+        }
     }
 }

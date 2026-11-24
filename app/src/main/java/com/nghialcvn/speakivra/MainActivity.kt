@@ -139,16 +139,22 @@ private fun SpeakivraApp(updates: InAppUpdates) {
             SpeakivraTheme(dark, neon = neon) {
                 val palette = studio
                 SideEffect { (context as? ComponentActivity)?.let { updateSystemBars(it, dark || neon, palette.background) } }
-                Surface(color = palette.background, contentColor = palette.ink) {
-                    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                        if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
+                Surface(color = if (neon) Color.Transparent else palette.background,
+                    contentColor = palette.ink) {
+                    Box(Modifier.fillMaxSize()) {
+                        if (neon) NeonWaveBackground(Modifier.matchParentSize())
+                        Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                            if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
                                 learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
                                 null
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
-                        }) else LearnerPicker(store, learners, lastId, onAdd = { creating = true }, onStart = { activeId = it.id; lastId = it.id })
+                            }) else LearnerPicker(store, learners, lastId,
+                                onAdd = { creating = true },
+                                onStart = { activeId = it.id; lastId = it.id })
+                        }
                     }
                 }
             }

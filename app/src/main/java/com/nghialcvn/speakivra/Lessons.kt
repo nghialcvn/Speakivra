@@ -147,5 +147,9 @@ internal object Lessons {
             ConversationTurn("Let's meet at a quarter past nine.", "Hãy gặp nhau lúc chín giờ mười lăm.", "Could you say that again, please?", "Bạn có thể nói lại được không?"),
             ConversationTurn("Thanks for the chat. See you soon!", "Cảm ơn cuộc trò chuyện. Hẹn sớm gặp lại!", "It was nice talking to you.", "Rất vui được trò chuyện với bạn.")
         )),
-    ).map(ExpandedLessons::append)
+    ).map(ExpandedLessons::append).map(MoreA1Practice::append) + A1NewTopics.all + A2Lessons.all
+
+    val a1: List<Lesson> get() = all.filterNot { it.id.startsWith("a2_") }
+    val a2: List<Lesson> get() = all.filter { it.id.startsWith("a2_") }
+    fun levelOf(lesson: Lesson): String = if (lesson.id.startsWith("a2_")) "A2" else "A1"
 }

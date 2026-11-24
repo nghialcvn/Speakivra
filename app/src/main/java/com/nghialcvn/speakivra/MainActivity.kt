@@ -356,8 +356,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     SpeakivraTheme(dark, neon = neon) {
         val palette = studio
         SideEffect { (context as? ComponentActivity)?.let {
-            val voiceScreen = page == "voice-settings"
-            updateSystemBars(it, dark || neon || voiceScreen, if (voiceScreen) Color(0xFF071126) else palette.background)
+            // Same system-bar appearance policy on every screen of the selected theme.
+            updateSystemBars(it, dark || neon, palette.background)
         } }
         val available = updateState.release
         if (page == "home" && available != null && available.versionCode > installation.versionCode &&

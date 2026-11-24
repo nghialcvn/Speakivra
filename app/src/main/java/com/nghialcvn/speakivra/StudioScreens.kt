@@ -62,14 +62,14 @@ internal fun CoralButton(label: String, modifier: Modifier = Modifier, enabled: 
     val brush = if (isNeon) NeonLook.crest
         else Brush.horizontalGradient(listOf(Color(0xFFEE7B65), Color(0xFFD84B38)))
     Box(modifier.fillMaxWidth()
-        .then(if (isNeon && enabled) Modifier.shadow(
+        .then(if (isNeon && enabled) Modifier.neonBloom(26).shadow(
             10.dp, RoundedCornerShape(26.dp),
             ambientColor = NeonLook.azure, spotColor = NeonLook.violet)
             else Modifier)
         .clip(RoundedCornerShape(26.dp))
         .background(if (enabled) brush else Brush.horizontalGradient(listOf(p.border, p.border)))
-        .then(if (isNeon && enabled) Modifier.border(1.5.dp,
-            NeonLook.cyan, RoundedCornerShape(26.dp)) else Modifier)
+        .then(if (isNeon && enabled) Modifier.border(1.dp,
+            NeonLook.edge, RoundedCornerShape(26.dp)) else Modifier)
         .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
         .heightIn(min = 50.dp).padding(horizontal = 20.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
         Text(label, color = if (enabled) Color.White else p.muted, fontSize = 17.sp,
@@ -326,7 +326,9 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
         .background(if (studio == NeonStudio) Brush.linearGradient(listOf(NeonLook.cyan, NeonLook.azure, NeonLook.violet),
             start = Offset.Zero, end = Offset(220f, 180f))
             else Brush.linearGradient(listOf(Color(0xFFFF9B82), Color(0xFFDA4B38))), CircleShape)
-        .border(2.dp, Color.White.copy(alpha = 0.85f), CircleShape).clip(CircleShape)
+        .then(if (studio == NeonStudio) Modifier.background(Brush.radialGradient(
+            listOf(Color(0x66FFFFFF), Color.Transparent), center = Offset(40f, 25f), radius = 190f), CircleShape) else Modifier)
+        .border(if (studio == NeonStudio) 1.2.dp else 2.dp, Color.White.copy(alpha = if (studio == NeonStudio) 0.92f else 0.85f), CircleShape).clip(CircleShape)
         .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" }, Alignment.Center) {
         if (active) Box(Modifier.size(if (large) 25.dp else 19.dp).background(Color.White, RoundedCornerShape(4.dp)))
         else StudioIcon("mic", Modifier.size(if (large) 43.dp else 31.dp), Color.White)

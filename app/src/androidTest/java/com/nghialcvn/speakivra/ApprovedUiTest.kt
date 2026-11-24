@@ -45,6 +45,18 @@ class ApprovedUiTest {
         // PixelCopy redraw. PixelCopy can time out on CI even when the view exists.
         ui.onRoot().assertExists()
         instrumentation.waitForIdleSync()
+        // Semantics can be ready one display frame before SurfaceFlinger receives it.
+        // Wait for two real frames, then allow the GPU submission to finish before
+        // capturing. Without this, the speaking screenshot can still be the home page.
+        val frames = java.util.concurrent.CountDownLatch(1)
+        ui.runOnUiThread {
+            ui.activity.window.decorView.invalidate()
+            android.view.Choreographer.getInstance().postFrameCallback {
+                android.view.Choreographer.getInstance().postFrameCallback { frames.countDown() }
+            }
+        }
+        check(frames.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "Display did not render: $name" }
+        android.os.SystemClock.sleep(350)
         // System UI uses a separate surface from Compose. Wait for its window events too.
         instrumentation.uiAutomation.waitForIdle(500, 5000)
         var bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot()) {
@@ -77,6 +89,12 @@ class ApprovedUiTest {
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
+        if (name == "19-neon-speaking") {
+            val home = File(directory, "18-neon-home.png")
+            check(!home.readBytes().contentEquals(File(directory, "$name.png").readBytes())) {
+                "Speaking capture is still the previous home frame"
+            }
+        }
         check(clockReadable) { "System clock contrast does not match the chosen theme: $name" }
     }
     @Test fun neonHomeAndPracticeUseApprovedReplayRow() {

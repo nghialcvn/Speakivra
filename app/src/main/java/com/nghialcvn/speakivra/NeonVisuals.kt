@@ -3,6 +3,7 @@ package com.nghialcvn.speakivra
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,49 +38,61 @@ internal object NeonLook {
     val text = Color(0xFFF6F8FF)
     val muted = Color(0xFFB6C5E7)
     val crest = Brush.horizontalGradient(listOf(cyan, azure, violet))
+    val edge = Brush.horizontalGradient(listOf(Color(0xFFB7FBFF), cyan, azure, violet, Color(0xFFFFCFFF)))
     val glossyPanel = Brush.linearGradient(listOf(
-        Color(0xEF193B71), Color(0xF0162759), Color(0xF2191F55)
+        Color(0xF20C2E60), Color(0xF20C1D48), Color(0xF215174B)
     ))
 }
 
 /** Use on a single entire card; no geometry changes to the approved layout. */
 internal fun Modifier.neonGlass(radius: Int = 18, strong: Boolean = false): Modifier {
     val shape = RoundedCornerShape(radius.dp)
-    return this.shadow(
+    return this.neonBloom(radius).shadow(
         if (strong) 13.dp else 7.dp, shape,
         ambientColor = Color(0xAA0C5DE4),
         spotColor = if (strong) NeonLook.violet else NeonLook.azure
     ).clip(shape)
         .background(NeonLook.glossyPanel)
         .drawWithCache {
-            val cyanGlow = Brush.radialGradient(listOf(Color(0x5000DFFF), Color.Transparent),
-                center = Offset.Zero, radius = size.width * .62f)
-            val violetGlow = Brush.radialGradient(listOf(Color(0x65A931FF), Color.Transparent),
-                center = Offset(size.width, size.height), radius = size.width * .57f)
-            val shine = Brush.verticalGradient(listOf(Color(0x35B3EDFF), Color.Transparent),
-                endY = size.height * .25f)
+            val cyanGlow = Brush.radialGradient(listOf(Color(0x2400DFFF), Color.Transparent),
+                center = Offset.Zero, radius = size.width * .48f)
+            val violetGlow = Brush.radialGradient(listOf(Color(0x38A931FF), Color.Transparent),
+                center = Offset(size.width, size.height), radius = size.width * .44f)
+            val shine = Brush.verticalGradient(listOf(Color(0x1DB3EDFF), Color.Transparent),
+                endY = size.height * .12f)
             onDrawWithContent {
                 drawRect(cyanGlow); drawRect(violetGlow); drawRect(shine)
                 drawContent()
             }
         }
-        .border(if (strong) 1.7.dp else 1.1.dp, NeonLook.crest, shape)
+        .border(if (strong) 1.2.dp else 0.9.dp, NeonLook.edge, shape)
 }
 
 /** Transparent speech symbol is painted natively. No white-square icon overlay. */
 @Composable
 internal fun NeonBrandMark(modifier: Modifier = Modifier) {
-    Image(painterResource(R.drawable.neon_brand_mark), "Logo Speakivra", modifier)
+    Image(painterResource(R.drawable.neon_brand_mark), "Logo Speakivra", modifier.graphicsLayer(scaleX = 1.2f, scaleY = 1.2f))
 }
 
 /** Sculpted headphones artwork without a pasted square or external image. */
 @Composable
 internal fun NeonHeadphones(modifier: Modifier = Modifier) {
-    Image(painterResource(R.drawable.neon_headphones), null, modifier)
+    Image(painterResource(R.drawable.neon_headphones), null, modifier.graphicsLayer(scaleX = 1.28f, scaleY = 1.28f))
 }
 
 /** Metallic studio microphone pictured in the approved five-tab reference. */
 @Composable
 internal fun NeonVintageTabMicrophone(modifier: Modifier = Modifier) {
-    Image(painterResource(R.drawable.neon_vintage_microphone), null, modifier)
+    Image(painterResource(R.drawable.neon_vintage_microphone), null, modifier.graphicsLayer(scaleX = 1.7f, scaleY = 1.7f))
+}
+
+/** Layered low-opacity rim light, painted outside the unchanged component bounds. */
+internal fun Modifier.neonBloom(radius: Int): Modifier = drawWithCache {
+    val corner = androidx.compose.ui.geometry.CornerRadius(radius.dp.toPx())
+    onDrawBehind {
+        listOf(20f to .025f, 12f to .045f, 6f to .08f, 3f to .14f).forEach { (width, opacity) ->
+            drawRoundRect(brush = NeonLook.crest, cornerRadius = corner,
+                style = Stroke(width.dp.toPx()), alpha = opacity)
+        }
+    }
 }

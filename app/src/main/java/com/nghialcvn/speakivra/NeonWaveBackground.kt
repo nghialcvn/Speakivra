@@ -23,10 +23,10 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
         val h = size.height
         drawRect(
             brush = Brush.verticalGradient(listOf(
-                Color(0xFF061124),
-                Color(0xFF06132C),
-                Color(0xFF071938),
-                Color(0xFF071129)
+                Color(0xFF041B3B),
+                Color(0xFF062049),
+                Color(0xFF0B1748),
+                Color(0xFF081134)
             )),
             size = size
         )
@@ -40,10 +40,10 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
         }
         drawPath(topRibbon, brush = Brush.horizontalGradient(
             listOf(Color(0xFF00E6FD), Color(0xFF3267FF), Color(0xFFC266F9))),
-            style = Stroke(width = 17f, cap = StrokeCap.Round), alpha = .12f)
+            style = Stroke(width = 17f, cap = StrokeCap.Round), alpha = .22f)
         drawPath(topRibbon, brush = Brush.horizontalGradient(
             listOf(Color(0xFF00DDF9), Color(0xFF3C8FFF), Color(0xFFD17CFF))),
-            style = Stroke(width = 2.2f, cap = StrokeCap.Round), alpha = .75f)
+            style = Stroke(width = 2.2f, cap = StrokeCap.Round), alpha = 1f)
 
         // Soft glow extends to screen edges, even under Android navigation.
         drawCircle(
@@ -115,7 +115,7 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
         drawPath(lowerCrest,
             brush = Brush.horizontalGradient(listOf(
                 Color(0xFF0378FC), Color(0xFF5B66FE), Color(0xFF874BFB))),
-            style = Stroke(width = 2.5f, cap = StrokeCap.Round), alpha = .75f
+            style = Stroke(width = 2.5f, cap = StrokeCap.Round), alpha = 1f
         )
     }
 }

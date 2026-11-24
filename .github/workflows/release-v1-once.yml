@@ -1,0 +1,75 @@
+name: One-time verified Speakivra V1.0.0 release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v1-once.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: speakivra-v1-once
+  cancel-in-progress: false
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify explicit V1.0.0 release approval and source version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          grep -Fq 'val approvedVersion = "1.0.0"' app/build.gradle.kts
+          grep -Eq 'versionCode = 20$' app/build.gradle.kts
+          test -f docs/releases/v1.0.0-beta.md
+          if gh release view v1.0.0-beta >/dev/null 2>&1; then
+            echo "::notice::Speakivra V1.0.0 is already published; no duplicate."
+            exit 0
+          fi
+          echo "Starting signed UI-reviewed V1.0.0 release from $GITHUB_SHA"
+      - name: Build, review on emulator, and publish the same verified APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.0.0-beta >/dev/null 2>&1; then
+            echo "::notice::Release already exists; skip."
+            exit 0
+          fi
+          START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          gh workflow run android-debug.yml --ref main -f release=true -f ui_check=true
+          BUILD_ID=""
+          for attempt in $(seq 1 40); do
+            BUILD_ID=$(gh run list --workflow android-debug.yml --event workflow_dispatch --limit 25 --json databaseId,headSha,createdAt | jq -r --arg sha "$GITHUB_SHA" --arg after "$START" '[.[] | select(.headSha == $sha and .createdAt >= $after)] | sort_by(.createdAt) | last | .databaseId // empty')
+            if [ -n "$BUILD_ID" ]; then break; fi
+            sleep 5
+          done
+          test -n "$BUILD_ID" || { echo "::error::Cannot locate triggered UI-reviewed release build"; exit 1; }
+          echo "Reviewed build: https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID"
+          gh run watch "$BUILD_ID" --exit-status --interval 20
+          test "$(gh run view "$BUILD_ID" --json conclusion --jq '.conclusion')" = success
+          # Publish-reviewed rechecks the exact source SHA, successful emulator step,
+          # signing certificate, APK digest, and release identity.
+          PUBLISH_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          gh workflow run publish-reviewed.yml --ref main -f reviewed_run="$BUILD_ID"
+          PUBLISH_ID=""
+          for attempt in $(seq 1 40); do
+            PUBLISH_ID=$(gh run list --workflow publish-reviewed.yml --event workflow_dispatch --limit 25 --json databaseId,headSha,createdAt | jq -r --arg sha "$GITHUB_SHA" --arg after "$PUBLISH_START" '[.[] | select(.headSha == $sha and .createdAt >= $after)] | sort_by(.createdAt) | last | .databaseId // empty')
+            if [ -n "$PUBLISH_ID" ]; then break; fi
+            sleep 5
+          done
+          test -n "$PUBLISH_ID" || { echo "::error::Cannot locate signed APK publication workflow"; exit 1; }
+          echo "Publication: https://github.com/$GITHUB_REPOSITORY/actions/runs/$PUBLISH_ID"
+          gh run watch "$PUBLISH_ID" --exit-status --interval 15
+          test "$(gh run view "$PUBLISH_ID" --json conclusion --jq '.conclusion')" = success
+          gh release view v1.0.0-beta --json assets --jq '.assets[].name' | grep -Fx 'Speakivra-v1.0.0-release.apk'
+          gh release view v1.0.0-beta --json assets --jq '.assets[].name' | grep -Fx 'speakivra-update.json'
+          echo "::notice::Verified APK published at https://github.com/$GITHUB_REPOSITORY/releases/download/v1.0.0-beta/Speakivra-v1.0.0-release.apk"

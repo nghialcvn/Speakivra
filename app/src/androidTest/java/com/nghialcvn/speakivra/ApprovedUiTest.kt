@@ -77,10 +77,16 @@ class ApprovedUiTest {
         shot("09-choose-learner")
         ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
-        ui.onNodeWithText("Câu 3/12").assertIsDisplayed()
+        ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         shot("01-home")
-        ui.onNodeWithText("10 chủ đề A1").performClick()
-        ui.onNodeWithText("Chọn bài học").assertIsDisplayed()
+        // New A2 catalogue is a real navigable level, not a placeholder.
+        ui.onNodeWithText("A2 • Sơ trung cấp").performScrollTo().performClick()
+        ui.onNodeWithText("Chọn bài học A2").assertIsDisplayed()
+        ui.onNodeWithText("Trải nghiệm").assertIsDisplayed()
+        shot("17-a2-lessons")
+        ui.onNodeWithText("Trang chủ", substring = false).performClick()
+        ui.onNodeWithText("15 chủ đề A1").performScrollTo().performClick()
+        ui.onNodeWithText("Chọn bài học A1").assertIsDisplayed()
         shot("02-lessons")
         ui.onNodeWithText("Giao tiếp thường ngày").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Chào hỏi").performScrollTo().performClick()
@@ -102,7 +108,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()
         ui.onNodeWithText("Tôi là Nghĩa.").assertIsDisplayed()
         shot("04-conversation")
-        repeat(4) { ui.onNodeWithText("Câu hội thoại tiếp theo").performScrollTo().performClick() }
+        repeat(6) { ui.onNodeWithText("Câu hội thoại tiếp theo").performScrollTo().performClick() }
         ui.onNodeWithText("Sang ôn tập").performScrollTo().performClick()
         ui.onNodeWithText("Xin chào! Bạn khỏe không?").performClick()
         ui.onNodeWithText("Đúng rồi!").assertIsDisplayed()
@@ -157,7 +163,7 @@ class ApprovedUiTest {
         shot("10-create-learner")
         ui.onNodeWithText("Lưu và bắt đầu").performClick()
         ui.onNodeWithText("Chào Linh!").assertIsDisplayed()
-        ui.onNodeWithText("Câu 1/12").assertIsDisplayed()
+        ui.onNodeWithText("Câu 1/20").assertIsDisplayed()
         val store = LearnerStore(ui.activity)
         val newLearner = store.all().single { it.name == "Linh" }
         org.junit.Assert.assertNotEquals("speakivra_progress", learnerPreferenceName(newLearner.id))
@@ -167,7 +173,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Nghĩa", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
-        ui.onNodeWithText("Câu 3/12").assertIsDisplayed()
+        ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))
         // Edit the original profile in place: name and avatar change, ID/progress do not.
         ui.onNodeWithText("Cập nhật", substring = false).performClick()

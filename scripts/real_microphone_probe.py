@@ -33,13 +33,15 @@ def tap(predicate, timeout=20):
         for node in root.iter('node'):
             if predicate(node.attrib) and node.get('enabled') == 'true':
                 values = list(map(int, re.findall(r'\d+', node.get('bounds'))))
-                adb('shell', 'input', 'tap', str((values[0] + values[2]) // 2), str((values[1] + values[3]) // 2))
+                x, y = str((values[0] + values[2]) // 2), str((values[1] + values[3]) // 2)
+                adb('shell', 'input', 'swipe', x, y, x, y, '120')
                 return
         time.sleep(.2)
     (OUT / 'failed-ui.xml').write_bytes(ET.tostring(root))
     raise AssertionError('Requested production UI control was not available')
 
 def text(value):
+    report['stage'] = value
     tap(lambda n: n.get('text') == value)
 
 def varint(value):
@@ -66,6 +68,14 @@ try:
     adb('shell', 'pm', 'grant', PACKAGE, 'android.permission.RECORD_AUDIO')
     adb('shell', 'am', 'start', '-n', PACKAGE + '/.MainActivity')
     text('+ Tạo hồ sơ mới')
+    # The first injected touch after launching a fresh activity can only focus
+    # its window. Read back the screen and retry this idempotent Open action.
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        root = nodes()
+        if any(n.get('class') == 'android.widget.EditText' for n in root.iter('node')): break
+        text('+ Tạo hồ sơ mới')
+    report['stage'] = 'Enter learner name'
     tap(lambda n: n.get('class') == 'android.widget.EditText')
     adb('shell', 'input', 'text', 'Probe')
     adb('shell', 'input', 'keyevent', '66')

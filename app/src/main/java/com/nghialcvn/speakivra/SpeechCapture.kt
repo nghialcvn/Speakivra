@@ -53,9 +53,17 @@ internal class SpeechCapture(
         beginRecognition(token, usePipe = Build.VERSION.SDK_INT >= 33)
     }
     private fun current(token: Long, attempt: Long) = session.accepts(token) && attempt == generation
-    private fun beginRecognition(token: Long, usePipe: Boolean) {
+    private fun beginRecognition(token: Long, usePipe: Boolean, settled: Boolean = false) {
         releaseEngine()
         val attempt = generation
+        if (!usePipe && !settled) {
+            // cancel/destroy crosses Binder. Allow the previous provider session to
+            // release its mic before starting the original direct microphone path.
+            handler.postDelayed({
+                if (current(token, attempt) && phase == "listening") beginRecognition(token, false, settled = true)
+            }, 200)
+            return
+        }
         var streamingStarted = false
         var providerReady = false
         try {

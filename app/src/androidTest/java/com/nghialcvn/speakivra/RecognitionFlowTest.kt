@@ -22,6 +22,7 @@ import java.io.File
 class RecognitionFlowTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()
     private var sawPartial = false
+    private var lastCaptureMessage = ""
     private fun fixture(method: String, argument: String? = null): android.os.Bundle = requireNotNull(
         InstrumentationRegistry.getInstrumentation().targetContext.contentResolver.call(
             android.net.Uri.parse("content://com.nghialcvn.speakivra.test.recognition-fixture"), method, argument, null))
@@ -95,7 +96,7 @@ class RecognitionFlowTest {
             fixture("answer", "Hello there.")
             ui.runOnUiThread { capture.start() }
             ui.waitUntil(15000) { capture.phase == "idle" }
-            assertEquals(1, fixture("stats").getInt("directStarts"))
+            assertEquals("Fallback state: $lastCaptureMessage", 1, fixture("stats").getInt("directStarts"))
             assertEquals("Unsupported input must not start a competing AudioRecord", 0, fixture("stats").getInt("liveBytes"))
             ui.onAllNodesWithText("Hello there.").assertCountEquals(2)
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
@@ -131,6 +132,7 @@ class RecognitionFlowTest {
             if (words != null) { live = words; if (state == "idle") final = words.takeIf(String::isNotBlank) }
             if (state == "listening" && words == "") final = null
             message = status
+            lastCaptureMessage = status
         }
         val lesson = Lessons.all.first().copy(phrases = listOf(Lessons.all.first().phrases.first().copy(english = "Hello there.")))
         ui.runOnUiThread {

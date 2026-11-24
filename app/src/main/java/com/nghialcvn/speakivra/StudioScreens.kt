@@ -488,8 +488,16 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
 }
 @Composable
 internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String, capturePhase: String, status: String, learner: Learner,
-                          onSelect: (Int) -> Unit, onBack: () -> Unit, onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit) {
-    val p = studio; val question = reviewQuestion(lesson, progress.review)
+                          onSelect: (Int) -> Unit, onBack: () -> Unit, onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit,
+                           explanationLanguage: String = LearningOptions.VIETNAMESE) {
+    val p = studio
+    val english = explanationLanguage == LearningOptions.ENGLISH
+    val bilingualQuestion = if (english) null else reviewQuestion(lesson, progress.review)
+    val englishQuestion = if (english) EnglishStudy.review(lesson, progress.review) else null
+    val reviewPrompt = englishQuestion?.prompt ?: bilingualQuestion!!.phrase.english
+    val options = englishQuestion?.options ?: bilingualQuestion!!.options
+    val answer = englishQuestion?.answer ?: bilingualQuestion!!.answer
+    val correctLabel = options[answer]
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
         PageHeading("Cùng ôn lại nhé", "${lessonLabel(lesson)} • Câu ${progress.review + 1}/3", onBack)
         StudioProgress((progress.review + 1f) / 3)
@@ -500,12 +508,13 @@ internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: I
                         .clickable(role = Role.Button, onClick = onListen).semantics { contentDescription = "Nghe lại câu" }, Alignment.Center) {
                         StudioIcon("speaker", color = p.coral)
                     }
-                    Text(question.phrase.english, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(reviewPrompt, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
-            Text("Chọn nghĩa phù hợp", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            question.options.forEachIndexed { index, label ->
-                val right = selection >= 0 && index == question.answer
+            Text(if (english) "Choose the best English reply" else "Chọn nghĩa phù hợp",
+                fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            options.forEachIndexed { index, label ->
+                val right = selection >= 0 && index == answer
                 val wrong = selection == index && !right
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(if (right) p.mint else if (wrong) p.peach else p.card)
                     .border(1.dp, if (right) p.mint else p.border, RoundedCornerShape(16.dp))
@@ -524,8 +533,11 @@ internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: I
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     StudioIcon("check", color = p.green)
                     Column {
-                        Text(if (selection == question.answer) "Đúng rồi!" else "Đáp án: ${question.phrase.vietnamese}", color = p.green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-                        Text("Ôn nghĩa câu, không chấm phát âm.", color = p.muted, fontSize = 13.sp)
+                        Text(if (selection == answer) (if (english) "Correct!" else "Đúng rồi!")
+                            else (if (english) "Correct answer: $correctLabel" else "Đáp án: $correctLabel"),
+                            color = p.green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                        Text(if (english) "English response practice, not phonetic scoring."
+                            else "Ôn nghĩa câu, không chấm phát âm.", color = p.muted, fontSize = 13.sp)
                     }
                 }
                 TextButton(onClick = onSpeak) { StudioIcon("mic", Modifier.size(19.dp), p.green); Spacer(Modifier.width(8.dp)); Text(captureLabel(capturePhase, "Nhắc lại câu này")) }

@@ -334,7 +334,6 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     fun navigate(destination: String) {
         stopCapture(); speech.stop()
         transcript = ""
-        if (destination == "lessons") selectedLevel = "A1"
         page = if (destination == "repeat") progress.phase else destination
     }
     fun openVoiceSettings() {

@@ -140,7 +140,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Giọng nữ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.onNodeWithText("Tối", substring = false).performClick()
+        ui.onNodeWithText("Tối", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Tối", substring = false).assertIsSelected()
         ui.runOnIdle {
             val activity = ui.activity
@@ -150,7 +150,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Sáng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Sáng", substring = false).assertIsSelected()
         // Neon is an opt-in third appearance, keeping the original light/dark options.
-        ui.onNodeWithText("Neon", substring = false).performClick()
+        ui.onNodeWithText("Neon", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertIsDisplayed()
         ui.onNodeWithText("Ngôn ngữ học").assertIsDisplayed()
         ui.onNodeWithText("Tùy chỉnh bài học").performScrollTo().assertIsDisplayed()

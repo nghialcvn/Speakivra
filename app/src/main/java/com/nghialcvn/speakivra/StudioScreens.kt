@@ -269,15 +269,23 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
 @Composable
 internal fun TwoChoices(first: String, second: String, selectedFirst: Boolean, onSelect: (Boolean) -> Unit,
                         modifier: Modifier = Modifier) {
-    Row(modifier.clip(RoundedCornerShape(13.dp)).background(studio.card)
-        .border(1.dp, studio.border, RoundedCornerShape(13.dp))) {
+    val isNeon = studio == NeonStudio
+    Row(modifier.clip(RoundedCornerShape(13.dp))
+        .background(if (isNeon) NeonLook.glossyPanel
+            else Brush.horizontalGradient(listOf(studio.card, studio.card)))
+        .border(1.dp, if (isNeon) NeonLook.violet else studio.border,
+            RoundedCornerShape(13.dp))) {
         listOf(first to true, second to false).forEach { (label, value) ->
             val active = value == selectedFirst
             Box(Modifier.weight(1f).clip(RoundedCornerShape(11.dp))
-                .background(if (active) studio.coral else Color.Transparent)
+                .background(if (active && isNeon) NeonLook.crest
+                    else Brush.horizontalGradient(listOf(
+                        if (active) studio.coral else Color.Transparent,
+                        if (active) studio.coral else Color.Transparent)))
                 .clickable(role = Role.RadioButton, onClick = { onSelect(value) }).semantics { selected = active }
                 .padding(horizontal = 12.dp, vertical = 9.dp), Alignment.Center) {
-                Text(label, color = if (active) MaterialTheme.colorScheme.onPrimary else studio.ink,
+                Text(label, color = if (active && isNeon) Color(0xFF071B3F)
+                    else if (active) MaterialTheme.colorScheme.onPrimary else studio.ink,
                     fontSize = 13.sp, fontWeight = if (active) FontWeight.ExtraBold else FontWeight.Normal)
             }
         }
@@ -285,7 +293,9 @@ internal fun TwoChoices(first: String, second: String, selectedFirst: Boolean, o
 }
 @Composable
 private fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier.clip(RoundedCornerShape(12.dp)).background(studio.peach)
+    Row(modifier.clip(RoundedCornerShape(12.dp))
+        .background(if (studio == NeonStudio) NeonLook.glossyPanel
+            else Brush.linearGradient(listOf(studio.peach, studio.peach)))
         .clickable(role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         StudioIcon("speaker", Modifier.size(19.dp), studio.coral)
@@ -296,7 +306,11 @@ private fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier =
 internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, large: Boolean = false, active: Boolean = false) {
     val size = if (large) 96.dp else 64.dp
     Box(modifier.size(size + 14.dp).background(studio.peach.copy(alpha = 0.7f), CircleShape).padding(7.dp)
-        .shadow(3.dp, CircleShape).background(Brush.linearGradient(listOf(Color(0xFFFF9B82), Color(0xFFDA4B38))), CircleShape)
+        .shadow(if (studio == NeonStudio) 13.dp else 3.dp, CircleShape,
+            ambientColor = if (studio == NeonStudio) NeonLook.azure else Color.Transparent,
+            spotColor = if (studio == NeonStudio) NeonLook.violet else Color.Transparent)
+        .background(if (studio == NeonStudio) NeonLook.crest
+            else Brush.linearGradient(listOf(Color(0xFFFF9B82), Color(0xFFDA4B38))), CircleShape)
         .border(2.dp, Color.White.copy(alpha = 0.85f), CircleShape).clip(CircleShape)
         .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" }, Alignment.Center) {
         if (active) Box(Modifier.size(if (large) 25.dp else 19.dp).background(Color.White, RoundedCornerShape(4.dp)))
@@ -322,9 +336,11 @@ internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
             (if (choice.gender == "male") "🔊 Giọng nam" else "🔊 Giọng nữ") to "Giọng đọc"
         ).forEach { (label, description) ->
             Row(
-                Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
-                    .background(studio.lavender)
-                    .border(1.dp, studio.border, RoundedCornerShape(16.dp))
+                Modifier.weight(1f)
+                    .then(if (studio == NeonStudio) Modifier.neonGlass(16)
+                          else Modifier.clip(RoundedCornerShape(16.dp))
+                              .background(studio.lavender)
+                              .border(1.dp, studio.border, RoundedCornerShape(16.dp)))
                     .clickable(role = Role.Button, onClick = onOpen)
                     .semantics { contentDescription = description }
                     .padding(horizontal = 10.dp, vertical = 9.dp),

@@ -119,7 +119,7 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
         listOf(
             Triple("home", "home", "Trang chủ"),
             Triple("lessons", "book", "Bài học"),
-            Triple("repeat", "mic", "Luyện nói"),
+            Triple("repeat", "tab-mic", "Luyện nói"),
             Triple("progress", "progress", "Tiến độ"),
             Triple("profile", "settings", "Cài đặt")
         ).forEach { (id, icon, label) ->

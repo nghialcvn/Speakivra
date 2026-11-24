@@ -50,8 +50,9 @@ internal fun ProgressScreen(
 private fun LessonProgressRow(lesson: Lesson, value: LessonProgress, onOpen: (Lesson) -> Unit) {
     val p = studio
     Row(Modifier.fillMaxWidth()
-        .background(p.card, RoundedCornerShape(15.dp))
-        .border(1.dp, p.border, RoundedCornerShape(15.dp))
+        .then(if (p == NeonStudio) Modifier.neonGlass(15)
+            else Modifier.background(p.card, RoundedCornerShape(15.dp))
+                .border(1.dp, p.border, RoundedCornerShape(15.dp)))
         .clickable { onOpen(lesson) }.padding(13.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {

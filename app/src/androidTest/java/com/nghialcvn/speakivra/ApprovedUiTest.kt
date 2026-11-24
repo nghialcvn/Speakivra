@@ -121,12 +121,14 @@ class ApprovedUiTest {
         ui.onNodeWithText("Đúng rồi!").assertIsDisplayed()
         shot("05-review")
         ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.onNodeWithText("Cập nhật", substring = false).performClick()
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Cá nhân & cài đặt").assertIsDisplayed()
         shot("06-settings")
         // Approved neon voice screen: language, voice label, preserved profile settings.
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performClick()
         ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").assertIsDisplayed()
+        ui.onNodeWithText("Anh – Việt").assertIsDisplayed()
+        ui.onNodeWithText("Anh – Anh").assertIsDisplayed()
         shot("15-neon-voice-settings")
         ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performClick()
         ui.onNodeWithText("Giọng nam", substring = false).performClick()
@@ -150,6 +152,9 @@ class ApprovedUiTest {
         // Neon is an opt-in third appearance, keeping the original light/dark options.
         ui.onNodeWithText("Neon", substring = false).performClick()
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertIsDisplayed()
+        ui.onNodeWithText("Ngôn ngữ học").assertIsDisplayed()
+        ui.onNodeWithText("Tùy chỉnh bài học").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Thông báo nhắc học").performScrollTo().assertIsDisplayed()
         shot("16-neon-settings")
         ui.onNodeWithText("Sáng", substring = false).performClick()
         ui.onNodeWithText("Kiểm tra cập nhật").performClick()
@@ -175,7 +180,7 @@ class ApprovedUiTest {
         val newLearner = store.all().single { it.name == "Linh" }
         org.junit.Assert.assertNotEquals("speakivra_progress", learnerPreferenceName(newLearner.id))
         org.junit.Assert.assertEquals(2, preferences.getInt("lesson.greetings.phrase", -1))
-        ui.onNodeWithText("Cập nhật", substring = false).performClick()
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithText("Nghĩa", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Bắt đầu học").performClick()
@@ -183,7 +188,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))
         // Edit the original profile in place: name and avatar change, ID/progress do not.
-        ui.onNodeWithText("Cập nhật", substring = false).performClick()
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithContentDescription("Chỉnh sửa hồ sơ").performClick()
         ui.onNode(hasSetTextAction()).assertTextContains("Nghĩa")
         shot("13-edit-profile")

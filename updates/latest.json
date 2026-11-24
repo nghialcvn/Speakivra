@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.0.5-beta",
+    "tag_name": "v1.0.6-beta",
     "draft": false,
-    "body": "# Speakivra V1.0.5 Beta — Sửa đường nhận dạng, khôi phục tô màu từ và xét chuyển câu\n\n**Bản Beta thử nghiệm, phát hành theo yêu cầu để cập nhật trực tiếp trong ứng dụng. Chưa xác minh micro trên Samsung.**\n\nĐã đạt build release có chữ ký, 62 kiểm thử logic, 8 kiểm thử chức năng/giao diện Emulator và nhận dạng mẫu tiếng Anh thật. Phép thử qua micro Emulator chưa đạt do lỗi đọc đầu vào âm thanh; không coi kết quả này là đã kiểm chứng micro trên điện thoại. APK là đúng bản thử đã gửi trước đó, không build lại và không thay khóa ký.\n\n- Sửa hồi quy của V1.0.3–V1.0.4: mở dịch vụ nhận dạng ngay khi bắt đầu lượt nói và truyền PCM trực tiếp trong lúc ghi, thay vì ghi xong mới mở nhận dạng. Giữ tự dừng và nút dừng sớm.\n- Hỗ trợ phiên PCM phân đoạn của Android: nhận các đoạn lời nói và chỉ chốt kết quả khi phiên kết thúc; đóng luồng khi tự dừng.\n- Kiểm tra dịch vụ thực sự đọc nguồn âm thanh ngoài trước khi mở micro ghi tạm. Nếu dịch vụ bỏ qua nguồn này, dùng lại đường nhận dạng micro gốc, không mở hai micro tranh chấp. Trên dịch vụ không hỗ trợ nguồn ngoài, nút nghe lại bị vô hiệu và có thông báo rõ; không tạo âm thanh hay lời nói giả.\n- Sửa màu đánh giá Neon đang dùng nhầm màu cyan của nút bấm: tách màu xanh/đỏ riêng cho từ khớp/chưa khớp, giữ nguyên bảng màu trang trí và nút bấm.\n- Kết quả cuối thật từ dịch vụ tiếp tục điều khiển chữ nhận dạng in nghiêng, tô xanh từ khớp/tô đỏ từ chưa khớp trên câu mẫu lớn, kết quả đạt/chưa đạt và nút chuyển câu. Lời nhận dạng tạm thời được hiển thị trong lúc xử lý; chưa dùng lời tạm để mở chuyển câu.\n- Bản ghi trên đường nhận dạng hỗ trợ PCM chỉ ở RAM, không tự phát, chỉ nghe khi nhấn loa; hủy khi đổi câu, thoát bài hoặc ghi lại.\n- Thêm kiểm thử giao thức Android qua dịch vụ chỉ có trong APK kiểm thử: truyền PCM sống, phản hồi từng phần/cuối, màu xanh–đỏ, khóa/mở chuyển câu và dịch vụ bỏ qua nguồn ngoài. Đây không phải phép thử nhận dạng tiếng Anh thực trên Samsung; chưa xác minh trên điện thoại Samsung.\n- Giữ giao diện, nội dung, dữ liệu và khóa ký. Version 1.0.5, versionCode 25; cài đè bản cũ.\n",
+    "body": "# Speakivra V1.0.6 Beta\n\n- Logo lớn hơn, nền trong suốt.\n- Sửa đối chiếu “I am” và “I'm”.\n- Đối chiếu số tuổi bằng chữ hoặc chữ số.\n- Gọn màn luyện nói; chọn giọng trong tùy chọn.\n- Cập nhật mới chỉ hiển thị tiêu đề.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.0.5-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.5-beta/Speakivra-v1.0.5-release.apk",
-        "size": 13251904,
-        "digest": "sha256:52f0d0a5480277db193a58f9e6e0a5ed1d8e5c8080bb926841b559b9b2a88848"
+        "name": "Speakivra-v1.0.6-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.6-beta/Speakivra-v1.0.6-release.apk",
+        "size": 13745405,
+        "digest": "sha256:e6c4b08ae909d29b7a552c21f40551f97537aa50443583a4e85fec5828efeb11"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 25,
-    "versionName": "1.0.5",
-    "apkName": "Speakivra-v1.0.5-release.apk",
-    "apkSha256": "52f0d0a5480277db193a58f9e6e0a5ed1d8e5c8080bb926841b559b9b2a88848",
+    "versionCode": 26,
+    "versionName": "1.0.6",
+    "apkName": "Speakivra-v1.0.6-release.apk",
+    "apkSha256": "e6c4b08ae909d29b7a552c21f40551f97537aa50443583a4e85fec5828efeb11",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

@@ -225,6 +225,31 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         mutableIntStateOf(value)
     }
     var voiceChoice by remember(learner.id) { mutableStateOf(VoiceChoices.read(preferences)) }
+    var explanationLanguage by rememberSaveable(learner.id) {
+        mutableStateOf(LearningOptions.language(preferences))
+    }
+    var sampleRepeats by rememberSaveable(learner.id) {
+        mutableIntStateOf(LearningOptions.repeats(preferences))
+    }
+    var reminderEnabled by remember { mutableStateOf(StudyReminders.isEnabled(context)) }
+    val reminderPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) runCatching { StudyReminders.setEnabled(context, true) }
+            .onSuccess { reminderEnabled = true }
+        else reminderEnabled = false
+    }
+    fun toggleReminder(enabled: Boolean) {
+        if (!enabled) {
+            StudyReminders.setEnabled(context, false)
+            reminderEnabled = false
+        } else if (StudyReminders.hasPermission(context)) {
+            StudyReminders.setEnabled(context, true)
+            reminderEnabled = true
+        } else {
+            reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     var voiceReturnPage by rememberSaveable { mutableStateOf("profile") }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
@@ -251,7 +276,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         lifecycle?.addObserver(observer)
         onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
-    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed, voiceChoice) }
+    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed, voiceChoice, sampleRepeats) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
@@ -309,6 +334,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     fun navigate(destination: String) {
         stopCapture(); speech.stop()
         transcript = ""
+        if (destination == "lessons") selectedLevel = "A1"
         page = if (destination == "repeat") progress.phase else destination
     }
     fun openVoiceSettings() {

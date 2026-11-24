@@ -140,6 +140,13 @@ class ApprovedUiTest {
         ui.onNodeWithText("Giọng nữ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.waitForIdle()
+        // Diagnostic only: capture the actual screen and semantics after returning
+        // from the voice picker. Do not silently skip the required settings UI.
+        val debugDir = File(InstrumentationRegistry.getInstrumentation()
+            .targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
+        File(debugDir, "after-voice-return-semantics.txt").writeText(ui.onRoot().printToString())
+        shot("18-after-voice-return")
         // Explicitly reselect the settings tab before theme checks.
         // This also verifies the new five-tab bottom navigation after returning
         // from the full-screen voice picker and resets the profile scroll.

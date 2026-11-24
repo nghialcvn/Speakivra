@@ -162,6 +162,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
     var page by rememberSaveable { mutableStateOf("home") }
+    var selectedLevel by rememberSaveable { mutableStateOf("A1") }
     val installation = updates.installation
     val updateState = updates.state
     val updateScope = rememberCoroutineScope()
@@ -369,8 +370,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         when (page) {
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
-                                onLessons = { navigate("lessons") }, onChat = { navigate("chat") }, onProfile = { navigate("profile") })
-                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson, learnerLessons)
+                                onLessons = { selectedLevel = "A1"; navigate("lessons") }, onChat = { navigate("chat") },
+                                onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") })
+                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
+                                learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, finalTranscript.orEmpty(), status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },

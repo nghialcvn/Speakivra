@@ -62,15 +62,13 @@ private fun NeonMessage(
         Column(Modifier.fillMaxWidth(if (isReply) 0.79f else 0.81f),
             verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(Brush.horizontalGradient(
-                    if (isReply && neonTheme) listOf(Color(0xFF0871D8), Color(0xFF214FC2))
-                    else if (isReply) listOf(p.coral, p.coralLight)
-                    else if (neonTheme) listOf(bubble, Color(0xFF172643))
-                    else listOf(p.card, p.card)))
-                .border(1.dp,
-                    if (isReply) p.coral else p.border,
-                    RoundedCornerShape(18.dp))
+                .then(if (neonTheme) Modifier.neonGlass(18, strong = isReply)
+                    else Modifier.clip(RoundedCornerShape(18.dp))
+                        .background(Brush.horizontalGradient(
+                            if (isReply) listOf(p.coral, p.coralLight)
+                            else listOf(p.card, p.card)))
+                        .border(1.dp, if (isReply) p.coral else p.border,
+                            RoundedCornerShape(18.dp)))
                 .padding(horizontal = 12.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -232,11 +230,13 @@ internal fun NeonConversationScreen(
                     .semantics { contentDescription = "Nhập câu trả lời" }
             ) { StudioIcon("keyboard", Modifier.size(28.dp), white) }
             Box(Modifier.size(104.dp)
-                .shadow(13.dp, CircleShape)
-                .background(Brush.linearGradient(
-                    if (neonTheme) listOf(Color(0xFF27D0FF), Color(0xFF3058EE))
-                    else listOf(p.coralLight, p.coral)), CircleShape)
-                .border(2.dp, if (neonTheme) Color(0xFFB3EEFF) else p.coralLight, CircleShape)
+                .shadow(if (neonTheme) 20.dp else 13.dp, CircleShape,
+                    ambientColor = if (neonTheme) NeonLook.azure else Color.Transparent,
+                    spotColor = if (neonTheme) NeonLook.violet else Color.Transparent)
+                .background(if (neonTheme) Brush.linearGradient(
+                    listOf(NeonLook.cyan, NeonLook.blue, NeonLook.violet))
+                    else Brush.linearGradient(listOf(p.coralLight, p.coral)), CircleShape)
+                .border(2.dp, if (neonTheme) NeonLook.cyan else p.coralLight, CircleShape)
                 .clickable(role = Role.Button, onClick = onSpeak)
                 .semantics { contentDescription =
                     if (capturePhase == "listening") "Kết thúc lượt nói" else "Nói và nhận dạng" },
@@ -254,9 +254,8 @@ internal fun NeonConversationScreen(
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
             color = muted, fontSize = 13.sp)
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(19.dp))
-            .background(Brush.horizontalGradient(
-                if (neonTheme) listOf(Color(0xFF187ECF), Color(0xFF315BE8))
-                else listOf(p.coral, p.coralLight)))
+            .background(if (neonTheme) NeonLook.crest else Brush.horizontalGradient(
+                listOf(p.coral, p.coralLight)))
             .clickable(role = Role.Button, onClick = onNext)
             .heightIn(min = 44.dp), contentAlignment = Alignment.Center) {
             Text(nextLabel, color = white, fontWeight = FontWeight.ExtraBold)

@@ -65,6 +65,7 @@ internal object StudyReminders {
         }
     }
 
+    @android.annotation.SuppressLint("MissingPermission") // Explicit runtime grant check below.
     fun deliver(context: Context) {
         if (!isEnabled(context) || !hasPermission(context)) return
         createChannel(context)

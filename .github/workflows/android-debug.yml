@@ -152,10 +152,7 @@ jobs:
             adb shell am instrument -w -e class com.nghialcvn.speakivra.RealSpeechProviderProbeTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee real-speech-provider-probe.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
-            if [ '${{ inputs.virtual_mic_check }}' = true ]; then
-              python3 scripts/real_microphone_probe.py
-              python3 -c 'import json; assert json.load(open("ui-review/real-microphone/result.json"))["passed"], "Real microphone recognition is unverified; do not publish"'
-            fi
+            if [ '${{ inputs.virtual_mic_check }}' = true ]; then python3 scripts/real_microphone_probe.py && python3 -c 'import json; assert json.load(open("ui-review/real-microphone/result.json"))["passed"], "Real microphone recognition is unverified; do not publish"'; fi
             python3 -c 'from pathlib import Path; s=Path("real-speech-provider-probe.txt").read_text(); assert "OK (1 test)" in s and "FAILURES!!!" not in s, s'
             python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 2 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports

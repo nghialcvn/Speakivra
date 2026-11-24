@@ -611,6 +611,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 reminderEnabled = reminderEnabled,
                                 onBack = { navigate("home") },
                                 onAccent = { changeVoice(accent = it) },
+                                onGender = { changeVoice(gender = it) },
                                 onExplanationLanguage = {
                                     LearningOptions.setLanguage(preferences, it)
                                     explanationLanguage = it

@@ -98,6 +98,7 @@ class ApprovedUiTest {
         check(clockReadable) { "System clock contrast does not match the chosen theme: $name" }
     }
     @Test fun neonHomeAndPracticeUseApprovedReplayRow() {
+        shot("26-neon-choose-learner")
         ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
         shot("18-neon-home")

@@ -122,9 +122,15 @@ class ApprovedUiTest {
         shot("05-review")
         ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
-        ui.onNodeWithText("Cá nhân & cài đặt").assertIsDisplayed()
+        ui.onNodeWithText("Học tập").assertIsDisplayed()
+        ui.onNodeWithText("Tùy chỉnh").assertIsDisplayed()
+        ui.onNodeWithText("Hồ sơ").assertIsDisplayed()
+        ui.onNodeWithText("Ứng dụng").assertIsDisplayed()
+        // All four groups are collapsed at first launch.
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertDoesNotExist()
         shot("06-settings")
-        // Approved neon voice screen: language, voice label, preserved profile settings.
+        // Only one accordion expands at a time.
+        ui.onNodeWithText("Học tập").performClick()
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().performClick()
         ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Anh – Việt").assertIsDisplayed()
@@ -133,18 +139,17 @@ class ApprovedUiTest {
         ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performClick()
         ui.onNodeWithText("Giọng nam", substring = false).performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick()
-        ui.onNodeWithText("Anh-Anh (UK) · Giọng nam").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Học tập").performScrollTo().performClick()
+        ui.onNodeWithText("Anh-Anh (UK) • Giọng nam").performScrollTo().assertIsDisplayed()
         // Restore original voice baseline so the rest of the existing UI test is unchanged.
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().performClick()
         ui.onNodeWithText("🇺🇸 Anh-Mỹ (US)").performScrollTo().performClick()
         ui.onNodeWithText("Giọng nữ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick()
-        // Explicitly reselect the settings tab before theme checks.
-        // This also verifies the new five-tab bottom navigation after returning
-        // from the full-screen voice picker and resets the profile scroll.
-        ui.onNodeWithText("Cài đặt", substring = false).performClick()
-        ui.onNodeWithText("Cá nhân & cài đặt").assertIsDisplayed()
+        ui.onNodeWithText("Học tập").assertIsDisplayed()
+        ui.onNodeWithText("Tùy chỉnh").performScrollTo().performClick()
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertDoesNotExist()
         ui.onNodeWithText("Tối", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Tối", substring = false).assertIsSelected()
         ui.runOnIdle {
@@ -156,12 +161,17 @@ class ApprovedUiTest {
         ui.onNodeWithText("Sáng", substring = false).assertIsSelected()
         // Neon is an opt-in third appearance, keeping the original light/dark options.
         ui.onNodeWithText("Neon", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").assertIsDisplayed()
-        ui.onNodeWithText("Ngôn ngữ học").assertIsDisplayed()
+        ui.onNodeWithText("Học tập").performScrollTo().performClick()
+        ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Ngôn ngữ học").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Tùy chỉnh bài học").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Thông báo nhắc học").performScrollTo().assertIsDisplayed()
         shot("16-neon-settings")
+        ui.onNodeWithText("Tùy chỉnh").performScrollTo().performClick()
         ui.onNodeWithText("Sáng", substring = false).performScrollTo().performClick()
+        ui.onNodeWithText("Ứng dụng").performScrollTo().performClick()
+        ui.onNodeWithText("Cập nhật thu gọn").assertDoesNotExist()
+        ui.onNodeWithText("Cập nhật mới", substring = true).performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Kiểm tra cập nhật").performScrollTo().performClick()
         ui.onNodeWithText("Phiên bản đang dùng: v${BuildConfig.VERSION_NAME}").assertIsDisplayed()
         shot("08-updates")
@@ -172,6 +182,7 @@ class ApprovedUiTest {
         org.junit.Assert.assertFalse(preferences.getBoolean("dark_theme", true))
         // Add a real local learner, then verify both profiles remain isolated when switching.
         ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Hồ sơ").performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithText("Thêm người học").performScrollTo().performClick()
         ui.onNode(hasSetTextAction()).performTextInput("Linh")
@@ -186,6 +197,7 @@ class ApprovedUiTest {
         org.junit.Assert.assertNotEquals("speakivra_progress", learnerPreferenceName(newLearner.id))
         org.junit.Assert.assertEquals(2, preferences.getInt("lesson.greetings.phrase", -1))
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.onNodeWithText("Hồ sơ").performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithText("Nghĩa", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Bắt đầu học").performClick()
@@ -194,7 +206,8 @@ class ApprovedUiTest {
         org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))
         // Edit the original profile in place: name and avatar change, ID/progress do not.
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
-        ui.onNodeWithContentDescription("Chỉnh sửa hồ sơ").performClick()
+        ui.onNodeWithText("Hồ sơ").performScrollTo().performClick()
+        ui.onNodeWithText("Sửa hồ sơ").performScrollTo().performClick()
         ui.onNode(hasSetTextAction()).assertTextContains("Nghĩa")
         shot("13-edit-profile")
         ui.onNode(hasSetTextAction()).performTextReplacement("Nghĩa An")

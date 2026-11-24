@@ -184,19 +184,7 @@ internal fun NeonConversationScreen(
                 else current.replyTranslation,
                 learner, true, onReply, neonTheme = neonTheme)
             if (capturePhase == "idle" && transcript.isNotBlank()) {
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp))
-                    .background(p.card)
-                    .border(1.dp, p.border, RoundedCornerShape(13.dp))
-                    .padding(11.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    LearnerAvatar(learner.avatar, Modifier.size(36.dp), square = true)
-                    Column(Modifier.weight(1f)) {
-                        Text("Câu trả lời của bạn", color = muted, fontSize = 11.sp)
-                        Text(transcript, color = white, fontSize = 14.sp,
-                            fontStyle = FontStyle.Italic)
-                    }
-                }
+                SpokenResult(learner, transcript, matchWords(current.reply, transcript).canContinue)
             }
             if (showKeyboard) {
                 OutlinedTextField(

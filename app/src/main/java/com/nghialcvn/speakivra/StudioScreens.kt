@@ -134,9 +134,9 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
         "updates", "voice-settings", "edit-profile" -> "profile"
         else -> page
     }
-    Row(Modifier.fillMaxWidth().background(
-        if (p == NeonStudio) p.card.copy(alpha = 0.72f) else p.card)
-        .border(BorderStroke(0.5.dp, p.border))
+    Row(Modifier.fillMaxWidth()
+        .then(if (p == NeonStudio) Modifier.padding(horizontal = 6.dp, vertical = 5.dp).neonGlass(22)
+            else Modifier.background(p.card).border(BorderStroke(0.5.dp, p.border)))
         .padding(horizontal = 4.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly) {
         listOf(
@@ -269,7 +269,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(lessonLabel(lesson), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                     Text(lesson.title, color = p.muted, fontSize = 11.sp)
-                    if (value.rounds > 0) Text("Đã học ${value.rounds} lượt", color = p.green, fontSize = 11.sp)
+                    if (value.rounds > 0) Text(if (value.phase == "summary") "Hoàn thành • ${value.rounds} lượt" else "Tiếp tục học • Đã học ${value.rounds} lượt", color = p.green, fontSize = 11.sp)
                 }
                 if (selected == lesson.id) Text("${value.phrase + 1}/${lesson.phrases.size} câu", fontSize = 11.sp, color = p.muted)
                 StudioIcon("chevron", Modifier.size(13.dp), p.muted)
@@ -323,7 +323,8 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
         .shadow(if (studio == NeonStudio) 13.dp else 3.dp, CircleShape,
             ambientColor = if (studio == NeonStudio) NeonLook.azure else Color.Transparent,
             spotColor = if (studio == NeonStudio) NeonLook.violet else Color.Transparent)
-        .background(if (studio == NeonStudio) NeonLook.crest
+        .background(if (studio == NeonStudio) Brush.linearGradient(listOf(NeonLook.cyan, NeonLook.azure, NeonLook.violet),
+            start = Offset.Zero, end = Offset(220f, 180f))
             else Brush.linearGradient(listOf(Color(0xFFFF9B82), Color(0xFFDA4B38))), CircleShape)
         .border(2.dp, Color.White.copy(alpha = 0.85f), CircleShape).clip(CircleShape)
         .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" }, Alignment.Center) {
@@ -333,11 +334,12 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
 }
 @Composable
 private fun DecorativeWave() {
-    val color = if (studio == NeonStudio) NeonLook.cyan else studio.coralLight.copy(alpha = 0.5f)
+    val neon = studio == NeonStudio
+    val color = if (neon) NeonLook.cyan else studio.coralLight.copy(alpha = 0.5f)
     Canvas(Modifier.width(64.dp).height(48.dp)) {
         listOf(.2f, .42f, .72f, 1f, .62f, .32f).forEachIndexed { i, h ->
             val x = size.width * (i + .5f) / 6
-            drawLine(color, Offset(x, size.height * (1 - h) / 2), Offset(x, size.height * (1 + h) / 2),
+            drawLine(if (neon) listOf(NeonLook.cyan, NeonLook.cyan, NeonLook.azure, NeonLook.azure, NeonLook.lilac, NeonLook.violet)[i] else color, Offset(x, size.height * (1 - h) / 2), Offset(x, size.height * (1 + h) / 2),
                 strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
         }
     }
@@ -464,7 +466,8 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
                 Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
-            if (capturePhase == "idle" && wordMatch.hasResult && transcript.isNotBlank()) SpokenResult(learner, transcript)
+            SpokenResult(learner, if (capturePhase == "listening") "Đang ghi âm…" else transcript,
+                if (wordMatch.hasResult && capturePhase == "idle") wordMatch.canContinue else null)
             StudioCard(color = p.mint, border = p == NeonStudio) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StudioIcon("bulb", Modifier.size(27.dp), if (p == NeonStudio) NeonLook.cyan else p.green)
@@ -610,13 +613,27 @@ internal fun captureLabel(phase: String, idle: String) = when (phase) {
 }
 
 @Composable
-internal fun SpokenResult(learner: Learner, text: String) {
+internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = null) {
     val p = studio
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).background(p.card)
-        .border(1.dp, p.border, RoundedCornerShape(6.dp)).padding(8.dp)
+    val replay = LocalSpeechReplay.current
+    Row(Modifier.fillMaxWidth()
+        .then(if (p == NeonStudio) Modifier.neonGlass(9, strong = true)
+            else Modifier.clip(RoundedCornerShape(9.dp)).background(p.card)
+                .border(1.dp, p.border, RoundedCornerShape(9.dp)))
+        .padding(8.dp)
         .semantics { liveRegion = LiveRegionMode.Polite }, verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         LearnerAvatar(learner.avatar, Modifier.size(28.dp), square = true)
-        Text(text, fontSize = 14.sp, fontStyle = FontStyle.Italic, lineHeight = 20.sp, modifier = Modifier.weight(1f))
+        IconButton(onClick = replay.play, enabled = replay.available,
+            modifier = Modifier.size(40.dp).semantics { contentDescription = "Nghe lại giọng vừa ghi" }) {
+            StudioIcon("speaker", Modifier.size(24.dp), if (replay.available) p.coral else p.muted.copy(alpha = .35f))
+        }
+        Text(text.ifBlank { "Chưa có lời nói nhận dạng" }, fontSize = 14.sp, fontStyle = FontStyle.Italic,
+            lineHeight = 20.sp, modifier = Modifier.weight(1f))
+        if (passed != null) Text(if (passed) "✅" else "❌", fontSize = 23.sp,
+            modifier = Modifier.semantics { contentDescription = if (passed) "Đạt đối chiếu lời nói" else "Cần nói lại" })
     }
 }
+
+internal data class SpeechReplay(val available: Boolean = false, val play: () -> Unit = {})
+internal val LocalSpeechReplay = androidx.compose.runtime.staticCompositionLocalOf { SpeechReplay() }

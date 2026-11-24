@@ -19,7 +19,7 @@ internal fun ProgressScreen(
     onOpen: (Lesson) -> Unit
 ) {
     val p = studio
-    val finished = lessons.count { load(it).rounds > 0 }
+    val finished = lessons.count { load(it).phase == "summary" }
     val totalRounds = lessons.sumOf { load(it).rounds }
     val touched = lessons.count { lesson ->
         val progress = load(lesson)
@@ -56,11 +56,11 @@ private fun LessonProgressRow(lesson: Lesson, value: LessonProgress, onOpen: (Le
         .clickable { onOpen(lesson) }.padding(13.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StudioIcon(if (value.rounds > 0) "check" else "book",
-            Modifier.size(23.dp), if (value.rounds > 0) p.green else p.coral)
+        StudioIcon(if (value.phase == "summary") "check" else "book",
+            Modifier.size(23.dp), if (value.phase == "summary") p.green else p.coral)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(lessonLabel(lesson), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text(if (value.rounds > 0) "${value.rounds} lượt hoàn thành"
+            Text(if (value.phase == "summary") "${value.rounds} lượt hoàn thành"
                  else "${value.phrase + 1}/${lesson.phrases.size} câu • ${value.phase}",
                 color = p.muted, fontSize = 12.sp)
             StudioProgress((value.phrase + 1f) / lesson.phrases.size)

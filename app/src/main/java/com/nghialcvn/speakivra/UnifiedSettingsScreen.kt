@@ -202,10 +202,10 @@ internal fun UnifiedSettingsScreen(
                         }
                         Text("V$version", color = p.muted, fontSize = 11.sp)
                     }
-                    UpdateMiniRow("sliders", "Cài đặt thu gọn",
-                        "Bốn nhóm, mỗi lần mở một nhóm")
-                    UpdateMiniRow("sun", "Giao diện đồng nhất",
-                        "Sáng • Tối • Neon cùng bố cục")
+                    UpdateMiniRow("speaker", "Nghe lại giọng vừa nói",
+                        "Nhấn loa cạnh avatar • bản ghi tạm")
+                    UpdateMiniRow("book", "Tiếp tục từ câu mới",
+                        "Giữ các câu và tiến độ đã học")
                     UpdateMiniRow("layers", "Neon 3D và nền sóng",
                         "Nền tràn màn hình, bóng kính xanh-tím")
                 }

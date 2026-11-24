@@ -221,7 +221,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         val prefix = "lesson.${lesson.id}."
         preferences.edit().putInt(prefix + "phrase", progress.phrase).putInt(prefix + "turn", progress.turn)
             .putInt(prefix + "review", progress.review).putInt(prefix + "correct", progress.correct)
-            .putInt(prefix + "rounds", progress.rounds).putString(prefix + "phase", progress.phase).apply()
+            .putInt(prefix + "rounds", progress.rounds).putString(prefix + "phase", progress.phase)
+            .putInt(prefix + "supplemental", if (progress.supplemental) 1 else 0)
+            .putString(prefix + "learned_phrases", progress.learnedPhrases.orEmpty().joinToString("|"))
+            .putString(prefix + "learned_turns", progress.learnedTurns.orEmpty().joinToString("|")).apply()
     }
     var automatic by rememberSaveable { mutableStateOf(preferences.getBoolean("automatic_mode", true)) }
     var showTranslation by rememberSaveable { mutableStateOf(true) }
@@ -272,8 +275,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         }
         status = message
     })
-    val capture = remember(context) { SpeechCapture(context.applicationContext) { phase, words, message -> captureUpdate(phase, words, message) } }
-    fun stopCapture() { pendingMicrophone = false; capture.cancel() }
+    var hasRecording by remember { mutableStateOf(false) }
+    val capture = remember(context) { SpeechCapture(context.applicationContext,
+        recordingChanged = { hasRecording = it }) { phase, words, message -> captureUpdate(phase, words, message) } }
+    fun stopCapture(discardRecording: Boolean = true) { pendingMicrophone = false; capture.cancel(discardRecording) }
     DisposableEffect(speech, capture, context) {
         val lifecycle = (context as? LifecycleOwner)?.lifecycle
         val observer = LifecycleEventObserver { _, event ->
@@ -282,7 +287,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         lifecycle?.addObserver(observer)
         onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
-    fun speak(text: String) { stopCapture(); speech.speak(text, playbackSpeed, voiceChoice, sampleRepeats) }
+    fun speak(text: String) { stopCapture(false); speech.speak(text, playbackSpeed, voiceChoice, sampleRepeats) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
@@ -353,6 +358,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
             else -> "home"
         })
     }
+    androidx.compose.runtime.CompositionLocalProvider(LocalSpeechReplay provides SpeechReplay(
+        hasRecording && capturePhase == "idle", { speech.stop(); capture.replay() }
+    )) {
     SpeakivraTheme(dark, neon = neon) {
         val palette = studio
         SideEffect { (context as? ComponentActivity)?.let {
@@ -509,6 +517,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 onVoiceSettings = ::openVoiceSettings, neon = neon,
                                 explanationLanguage = explanationLanguage,
                                 onTypedText = { typed ->
+                                    stopCapture()
                                     transcript = typed
                                     finalTranscript = typed
                                     status = "Câu trả lời bạn đã nhập, chưa qua nhận dạng giọng nói."
@@ -640,7 +649,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                     }
                 }
                 // All three appearances use the same full-screen scripted conversation.
-                if (page !in listOf("repeat", "edit-profile", "voice-settings", "chat"))
+                if (page !in listOf("edit-profile", "voice-settings", "chat"))
                     StudioBottomNavigation(page) { dest ->
                     if (dest == "lessons") selectedLevel = "A1"
                     navigate(dest)
@@ -649,6 +658,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
             }
         }
     }
+}
+
 }
 
 @Suppress("DEPRECATION")

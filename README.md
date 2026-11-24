@@ -4,7 +4,7 @@ Android app for English listening, repetition and speaking practice.
 
 ## Current source
 
-**0.1.15 beta candidate source** based on the verified V0.1.14 release (commit `0da86b3784a86319a705281779e6a20876898ea1`). The V0.1.15 APK has not yet been verified or published.
+**1.0.3 beta candidate**, continuing the published V1.0.2 release. This candidate adds current-sentence replay, stable content progress IDs and Neon artwork matching the approved reference. Publication requires signed release verification, emulator checks and screenshot review.
 The source version is not a claim that an APK has passed device testing or been released.
 
 The user-approved warm light interface is implemented; the approved logo is preserved. See [approved design and behavior mapping](docs/design/APPROVED_LIGHT_UI.md). The adaptive launcher foreground now uses 24dp insets (60dp artwork on the standard 108dp layer) to fit inside the 66dp safe zone. Ten A1 practice lessons, bundled offline US-English neural speech for current prompts, installed US-English TTS fallback, Android speech recognition, Vietnamese translations and local progress are implemented. See [speech provenance and generation](docs/SPEECH.md). Conversation is a fixed script, not real AI. Text recognition is not pronunciation scoring. Automatic listen-record-feedback progression and placement assessment and curricula beyond this initial A1 pack remain incomplete.
@@ -67,3 +67,11 @@ The existing ten topics now include 120 practice phrases and 50 scripted convers
 ## Reviewed neon voice extension (0.1.15 candidate)
 
 The user approved a dark-neon voice-settings experience in addition to existing study screens. The new optional selector offers US or UK pronunciation, shows user-selected male/female *labels* and lets learners listen to and explicitly assign installed offline Android TTS voices. Android does not expose authoritative voice gender; an unsupported/unassigned combination is not falsely announced as an available male/female voice. The original bundled US female neural voice remains the default, and the previously approved 110 Ogg files are unchanged. Microphone recognition requests the selected `en-US` or `en-GB` locale; provider support varies by device. The accent/voice selection is stored only inside each existing learner preferences file. The learning layout and progress data are unchanged; this is source code until a new Android build and UI review pass.
+
+## Current-sentence replay and content migration (V1.0.3)
+
+On Android 13+, the microphone captures up to 60 seconds of mono 16 kHz PCM in RAM. Tap again to finish. The same samples are passed to Android SpeechRecognizer through EXTRA_AUDIO_SOURCE; the configured provider may require network access. Replay uses AudioTrack only after the learner taps the speaker next to their avatar. It never uses TTS to imitate a recording. A new attempt, navigation, learner/context changes and backgrounding stop playback and discard the buffer. No replay file, media-library item or server sync is created. Android 8–12 retain the previous recognition path without replay.
+
+Content declarations have explicit immutable IDs, retained during name personalization. `LegacyContentIds.kt` freezes V1.0.2 ordering for migration of positional preferences; do not regenerate it when adding content. Learned ID sets are saved per learner and lesson. A completed lesson with new content resumes at its first unlearned ID, retaining old rounds. Keep IDs unchanged when editing or reordering existing lines. A1 remains 15 topics / 300 phrases / 100 scripted turns; A2 content is unchanged.
+
+The three transparent Neon raster assets were extracted from the user-approved home reference using image generation (background-extraction prompts preserving the pictured logo, headphones and silver classic microphone). No generated art implements speech, assessment or navigation behavior.

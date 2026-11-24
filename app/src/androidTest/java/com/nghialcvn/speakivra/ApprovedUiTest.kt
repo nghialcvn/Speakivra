@@ -27,6 +27,7 @@ class ApprovedUiTest {
                 context.getSharedPreferences("speakivra_learners", 0).edit().clear().commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
+                    .putBoolean("neon_theme", description.methodName == "neonHomeAndPracticeUseApprovedReplayRow")
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
@@ -77,6 +78,18 @@ class ApprovedUiTest {
         File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
         check(clockReadable) { "System clock contrast does not match the chosen theme: $name" }
+    }
+    @Test fun neonHomeAndPracticeUseApprovedReplayRow() {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
+        shot("18-neon-home")
+        ui.onNodeWithText("Tiếp tục học").performClick()
+        ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
+        ui.onNodeWithText("Chưa có lời nói nhận dạng").assertIsDisplayed()
+        shot("19-neon-speaking")
+        ui.onNodeWithText("Trang chủ", substring = false).performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
     @Test fun approvedScreensAndThemeAreInteractiveAndKeepLessonPosition() {
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()

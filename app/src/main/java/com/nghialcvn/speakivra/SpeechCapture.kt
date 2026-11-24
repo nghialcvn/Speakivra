@@ -5,6 +5,10 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.media.AudioFormat
+import kotlin.concurrent.thread
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,25 +19,49 @@ import android.speech.SpeechRecognizer
 /** Main-thread, foreground-only speech recognition. Never launches an external activity. */
 internal class SpeechCapture(
     private val context: Context,
+    private val recordingChanged: (Boolean) -> Unit = {},
     private val update: (phase: String, words: String?, message: String) -> Unit
 ) {
     private val session = CaptureSession()
     private val handler = Handler(Looper.getMainLooper())
     private var recognizer: SpeechRecognizer? = null
     private var timeout: Runnable? = null
+    private val audio = TemporarySpeechAudio()
+    private var source: ParcelFileDescriptor? = null
+    private var sink: ParcelFileDescriptor? = null
+    private var locale = "en-US"
+    val hasRecording get() = audio.available
+    fun replay() {
+        if (phase == "idle") audio.play { update("idle", null, "Không phát được bản ghi. Hãy nói lại.") }
+    }
     val phase get() = session.phase
 
     fun start(languageTag: String = "en-US") {
         require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
+        audio.clear(); recordingChanged(false)
+        locale = languageTag
         update("listening", "", "Đang mở micro…")
         try {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 finish(token, "", "Cần cấp quyền micro trong Cài đặt Android → Speakivra.")
                 return
             }
+            if (Build.VERSION.SDK_INT >= 33) {
+                audio.start()
+                timeout = Runnable { stop() }.also { handler.postDelayed(it, 60_000) }
+                update("listening", null, "Đang ghi âm… Chạm micro lần nữa để kết thúc.")
+                return
+            }
+            beginRecognition(token, languageTag)
+        } catch (_: Exception) {
+            finish(token, "", "Không mở được micro. Kiểm tra quyền và thử lại.")
+        }
+    }
+    private fun beginRecognition(token: Long, languageTag: String, bytes: ByteArray? = null) {
+        try {
             if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-                finish(token, null, "Thiết bị chưa có dịch vụ nhận dạng giọng nói. Kiểm tra cài đặt giọng nói Android.")
+                finish(token, "", "Thiết bị chưa có dịch vụ nhận dạng. Bạn vẫn có thể nghe lại bản ghi vừa nói.")
                 return
             }
             // Use the configured provider: it chooses available language models/network support.
@@ -69,13 +97,27 @@ internal class SpeechCapture(
                 }
                 override fun onEvent(eventType: Int, params: Bundle?) = Unit
             })
-            armTimeout(token, 60_000)
+            armTimeout(token, if (bytes == null) 60_000 else 15_000)
             engine.startListening(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                if (bytes != null && Build.VERSION.SDK_INT >= 33) {
+                    val pipe = ParcelFileDescriptor.createPipe()
+                    source = pipe[0]; sink = pipe[1]
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, pipe[0])
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
+                    putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, TemporarySpeechAudio.RATE)
+                }
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             })
+            if (bytes != null) {
+                val output = sink
+                thread(name = "speakivra-recognition-input") {
+                    runCatching { output?.let { ParcelFileDescriptor.AutoCloseOutputStream(it).use { stream -> stream.write(bytes) } } }
+                }
+            }
         } catch (_: Exception) {
             finish(token, "", "Không mở được dịch vụ giọng nói. Kiểm tra quyền micro và thử lại.")
         }
@@ -84,6 +126,13 @@ internal class SpeechCapture(
         if (phase != "listening") return
         val token = session.token
         processing(token)
+        if (Build.VERSION.SDK_INT >= 33) {
+            val bytes = audio.finish()
+            recordingChanged(audio.available)
+            if (bytes == null) finish(token, "", "Bản ghi quá ngắn. Chạm micro và nói lại.")
+            else beginRecognition(token, locale, bytes)
+            return
+        }
         try { recognizer?.stopListening() }
         catch (_: Exception) { finish(token, "", "Không kết thúc được lượt nói. Chạm micro để thử lại.") }
     }
@@ -106,14 +155,18 @@ internal class SpeechCapture(
     }
     private fun release() {
         timeout?.let(handler::removeCallbacks); timeout = null
+        runCatching { source?.close() }; source = null
+        runCatching { sink?.close() }; sink = null
         val engine = recognizer; recognizer = null
         runCatching { engine?.cancel() }
         runCatching { engine?.destroy() }
     }
-    fun cancel() {
+    fun cancel(discardRecording: Boolean = true) {
         val active = phase != "idle"
         session.cancel()
         release()
+        if (discardRecording || active) { audio.clear(); recordingChanged(false) }
+        else audio.stopPlayback()
         if (active) update("idle", null, "Đã dừng micro.")
     }
 }

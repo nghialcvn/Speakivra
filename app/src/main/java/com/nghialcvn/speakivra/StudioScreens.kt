@@ -40,17 +40,29 @@ internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 
 @Composable
 internal fun StudioCard(modifier: Modifier = Modifier, color: Color = studio.card,
                         border: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(color)
-        .then(if (border) Modifier.border(1.dp, studio.border, RoundedCornerShape(18.dp)) else Modifier)
+    val neon = studio == NeonStudio
+    Column(modifier.fillMaxWidth()
+        .then(if (neon) Modifier.neonGlass(strong = border) else Modifier
+            .clip(RoundedCornerShape(18.dp)).background(color)
+            .then(if (border) Modifier.border(1.dp, studio.border, RoundedCornerShape(18.dp)) else Modifier))
         .padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
 }
 @Composable
 internal fun CoralButton(label: String, modifier: Modifier = Modifier, enabled: Boolean = true,
                          chevron: Boolean = true, onClick: () -> Unit) {
     val p = studio
-    val brush = Brush.horizontalGradient(listOf(Color(0xFFEE7B65), Color(0xFFD84B38)))
-    Box(modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp))
+    val isNeon = p == NeonStudio
+    val brush = if (isNeon) NeonLook.crest
+        else Brush.horizontalGradient(listOf(Color(0xFFEE7B65), Color(0xFFD84B38)))
+    Box(modifier.fillMaxWidth()
+        .then(if (isNeon && enabled) Modifier.shadow(
+            10.dp, RoundedCornerShape(26.dp),
+            ambientColor = NeonLook.azure, spotColor = NeonLook.violet)
+            else Modifier)
+        .clip(RoundedCornerShape(26.dp))
         .background(if (enabled) brush else Brush.horizontalGradient(listOf(p.border, p.border)))
+        .then(if (isNeon && enabled) Modifier.border(1.5.dp,
+            NeonLook.cyan, RoundedCornerShape(26.dp)) else Modifier)
         .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
         .heightIn(min = 50.dp).padding(horizontal = 20.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
         Text(label, color = if (enabled) Color.White else p.muted, fontSize = 17.sp,
@@ -75,7 +87,8 @@ internal fun PageHeading(title: String, subtitle: String? = null, onBack: (() ->
 @Composable
 private fun Brand(modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.size(49.dp))
+        if (studio == NeonStudio) NeonBrandMark(Modifier.size(54.dp))
+        else Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.size(49.dp))
         Column {
             Text("Speakivra", fontWeight = FontWeight.ExtraBold, fontSize = 23.sp, color = studio.ink)
             Text("Listen. Speak. Improve.", color = studio.coral, fontStyle = FontStyle.Italic, fontSize = 11.sp)
@@ -131,7 +144,10 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
                 .padding(vertical = 5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                StudioIcon(icon, Modifier.size(22.dp), if (selected) p.coral else p.muted)
+                if (icon == "tab-mic" && p == NeonStudio) {
+                    NeonVintageTabMicrophone(Modifier.size(24.dp))
+                } else StudioIcon(icon, Modifier.size(22.dp),
+                    if (selected) p.coral else p.muted)
                 Text(label, color = if (selected) p.coral else p.ink,
                     fontSize = 10.sp, maxLines = 1,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
@@ -151,13 +167,17 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             Text("Chào $learnerName!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
             Text("Hôm nay, mình cùng luyện nói nhé.", color = p.muted, fontSize = 14.sp)
         }
-        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(p.peach).padding(16.dp),
+        Row(Modifier.fillMaxWidth()
+            .then(if (p == NeonStudio) Modifier.neonGlass(strong = true)
+                else Modifier.clip(RoundedCornerShape(18.dp)).background(p.peach))
+            .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text("$goal phút mỗi ngày", fontSize = 21.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
                 Text("Luyện nghe, luyện nói,\ntiến bộ từng chút mỗi ngày.", fontSize = 14.sp, color = p.ink, lineHeight = 20.sp)
             }
-            ApprovedArtwork(true, Modifier.size(94.dp, 88.dp).clip(RoundedCornerShape(14.dp)))
+            if (p == NeonStudio) NeonHeadphones(Modifier.size(100.dp, 91.dp))
+            else ApprovedArtwork(true, Modifier.size(94.dp, 88.dp).clip(RoundedCornerShape(14.dp)))
         }
         StudioCard(color = p.lavender, border = false) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -177,14 +197,18 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             if (completed > 0) Text("Đã hoàn thành: $completed lượt bài", color = p.muted, fontSize = 12.sp)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            Row(Modifier.weight(1f).heightIn(min = 76.dp).clip(RoundedCornerShape(16.dp)).background(p.mint)
+            Row(Modifier.weight(1f).heightIn(min = 76.dp)
+                .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
+                    .clip(RoundedCornerShape(16.dp)).background(p.mint))
                 .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StudioIcon("layers", Modifier.size(28.dp), p.green)
                 Text("15 chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
                 StudioIcon("chevron", Modifier.size(12.dp), p.green)
             }
-            Row(Modifier.weight(1f).heightIn(min = 76.dp).clip(RoundedCornerShape(16.dp)).background(p.lavender)
+            Row(Modifier.weight(1f).heightIn(min = 76.dp)
+                .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
+                    .clip(RoundedCornerShape(16.dp)).background(p.lavender))
                 .clickable(role = Role.Button, onClick = onChat).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StudioIcon("chat", Modifier.size(26.dp), p.purple)

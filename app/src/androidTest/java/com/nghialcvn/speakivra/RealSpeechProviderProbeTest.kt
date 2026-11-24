@@ -39,6 +39,7 @@ class RealSpeechProviderProbeTest {
         val pipe = RecognitionAudioPipe()
         val done = CountDownLatch(1)
         val result = AtomicReference("")
+        val segments = mutableListOf<String>()
         var engine: SpeechRecognizer? = null
         try {
             ui.runOnUiThread {
@@ -52,6 +53,12 @@ class RealSpeechProviderProbeTest {
                         override fun onPartialResults(partialResults: Bundle?) = Unit
                         override fun onEvent(eventType: Int, params: Bundle?) = Unit
                         override fun onError(error: Int) { result.set("ERROR_$error"); done.countDown() }
+                        override fun onSegmentResults(segmentResults: Bundle) {
+                            segmentResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()?.let(segments::add)
+                        }
+                        override fun onEndOfSegmentedSession() {
+                            result.set(segments.joinToString(" ")); done.countDown()
+                        }
                         override fun onResults(results: Bundle?) {
                             result.set(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty())
                             done.countDown()
@@ -61,6 +68,7 @@ class RealSpeechProviderProbeTest {
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
                         putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, pipe.source)
+                        putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE)
                         putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, 16000)
                         putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
                         putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, android.media.AudioFormat.ENCODING_PCM_16BIT)

@@ -66,6 +66,7 @@ internal class SpeechCapture(
         }
         var streamingStarted = false
         var providerReady = false
+        val segments = mutableListOf<String>()
         try {
             val live = if (usePipe && Build.VERSION.SDK_INT >= 33) RecognitionAudioPipe().also { pipe = it } else null
             val engine = SpeechRecognizer.createSpeechRecognizer(context)
@@ -94,12 +95,24 @@ internal class SpeechCapture(
                     }
                     update(phase, text, "Đang nhận dạng…")
                 }
+                override fun onSegmentResults(segmentResults: Bundle) {
+                    if (!current(token, attempt)) return
+                    words(segmentResults)?.takeIf(String::isNotBlank)?.let(segments::add)
+                    update(phase, segments.joinToString(" "), "Đang nhận dạng…")
+                    if (!streamingStarted && phase == "listening") stop()
+                }
+                override fun onEndOfSegmentedSession() {
+                    if (!current(token, attempt)) return
+                    val text = segments.joinToString(" ")
+                    finish(token, text, if (text.isBlank()) "Chưa nhận được lời nói. Chạm micro để thử lại."
+                        else "Đã nhận dạng lời nói. Đây chưa phải điểm phát âm.")
+                }
                 override fun onResults(results: Bundle?) {
                     if (!current(token, attempt)) return
                     // A provider that ignores the pipe may already have captured
                     // the learner using its own microphone. Preserve its REAL result;
                     // restarting here would discard the words the learner just spoke.
-                    val text = words(results).orEmpty()
+                    val text = words(results).orEmpty().ifBlank { segments.joinToString(" ") }
                     finish(token, text, if (text.isBlank()) "Chưa nhận được lời nói. Chạm micro để thử lại."
                         else if (!streamingStarted) "Đã nhận dạng. Dịch vụ trên máy không cung cấp âm thanh để nghe lại."
                         else "Đã nhận dạng lời nói. Đây chưa phải điểm phát âm.")
@@ -126,6 +139,7 @@ internal class SpeechCapture(
             engine.startListening(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 if (live != null && Build.VERSION.SDK_INT >= 33) {
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, live.source)
+                    putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
                     putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, TemporarySpeechAudio.RATE)

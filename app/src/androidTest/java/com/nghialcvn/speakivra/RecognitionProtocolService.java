@@ -75,7 +75,10 @@ public class RecognitionProtocolService extends RecognitionService {
             if (active == callback) {
                 try {
                     callback.endOfSpeech();
-                    callback.results(result(answer));
+                    if (!ignorePipe && android.os.Build.VERSION.SDK_INT >= 33) {
+                        callback.segmentResults(result(answer));
+                        callback.endOfSegmentedSession();
+                    } else callback.results(result(answer));
                     active = null;
                 } catch (Exception error) { throw new IllegalStateException(error); }
             }

@@ -23,7 +23,7 @@ internal class TemporarySpeechAudio {
     val available get() = pcm?.isNotEmpty() == true
 
     @SuppressLint("MissingPermission")
-    fun start() {
+    fun start(onEndpoint: (() -> Unit)? = null) {
         clear()
         val minimum = AudioRecord.getMinBufferSize(RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         check(minimum > 0)
@@ -38,11 +38,16 @@ internal class TemporarySpeechAudio {
         recording = true
         worker = thread(name = "speakivra-current-utterance") {
             val buffer = ByteArray(1024)
+            val endpoint = if (onEndpoint != null) SpeechEndpoint() else null
             try {
                 while (recording && output.size() < MAX_BYTES) {
                     val count = input.read(buffer, 0, minOf(buffer.size, MAX_BYTES - output.size()))
-                    if (count <= 0) break
+                    if (count <= 0) { if (recording) onEndpoint?.invoke(); break }
                     output.write(buffer, 0, count)
+                    if (endpoint?.accept(buffer, count) != null) {
+                        onEndpoint?.invoke()
+                        break
+                    }
                 }
             } finally { buffer.fill(0) }
         }

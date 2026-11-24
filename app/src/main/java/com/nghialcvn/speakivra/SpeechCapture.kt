@@ -48,13 +48,18 @@ internal class SpeechCapture(
                 return
             }
             if (Build.VERSION.SDK_INT >= 33) {
-                audio.start()
-                timeout = Runnable { stop() }.also { handler.postDelayed(it, 60_000) }
-                update("listening", null, "Đang ghi âm… Chạm micro lần nữa để kết thúc.")
+                audio.start {
+                    handler.post { if (session.accepts(token) && phase == "listening") stop() }
+                }
+                timeout = Runnable {
+                    if (session.accepts(token) && phase == "listening") stop()
+                }.also { handler.postDelayed(it, 60_000) }
+                update("listening", null, "Đang nghe… Nói xong, micro sẽ tự dừng.")
                 return
             }
             beginRecognition(token, languageTag)
         } catch (_: Exception) {
+            audio.clear(); recordingChanged(false)
             finish(token, "", "Không mở được micro. Kiểm tra quyền và thử lại.")
         }
     }
@@ -70,7 +75,7 @@ internal class SpeechCapture(
             engine.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     if (session.accepts(token) && phase == "listening")
-                        update(phase, null, "Đang nghe… Nói tiếng Anh, chạm micro lần nữa để kết thúc.")
+                        update(phase, null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
                 }
                 override fun onBeginningOfSpeech() = Unit
                 override fun onRmsChanged(rmsdB: Float) = Unit

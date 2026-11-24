@@ -1,5 +1,6 @@
 name: One-time verified Speakivra V1.0.1 release
 # V1.0.1: identical settings and conversation structure across all themes.
+# Recheck fixed bottom conversation footer and both emulator test classes.
 
 on:
   push:

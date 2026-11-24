@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 
 /** Approved neon voice-settings extension. Other Speakivra screens keep their prior theme. */
 private val voiceBackground = Color(0xFF071126)
@@ -69,8 +70,11 @@ internal fun VoiceSettingsScreen(
     choice: VoiceChoice,
     available: List<InstalledSpeechVoice>,
     speed: Int,
+    explanationLanguage: String = LearningOptions.VIETNAMESE,
     message: String,
     onBack: () -> Unit,
+    onExplanationLanguage: (String) -> Unit = {},
+    onSpeed: (Int) -> Unit = {},
     onAccent: (String) -> Unit,
     onGender: (String) -> Unit,
     onAssign: (String) -> Unit,
@@ -91,6 +95,18 @@ internal fun VoiceSettingsScreen(
                 Text("Giọng đọc & Ngôn ngữ", color = voiceText, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Speakivra · Cá nhân hóa giọng đọc", color = voiceMuted, fontSize = 12.sp)
             }
+        }
+        VoicePanel("Chế độ ngôn ngữ") {
+            VoiceOption("Anh – Việt", "Bài học và mẹo luyện nói giải thích bằng tiếng Việt",
+                explanationLanguage == LearningOptions.VIETNAMESE) {
+                onExplanationLanguage(LearningOptions.VIETNAMESE)
+            }
+            VoiceOption("Anh – Anh", "English examples, pronunciation tips and comprehension review",
+                explanationLanguage == LearningOptions.ENGLISH) {
+                onExplanationLanguage(LearningOptions.ENGLISH)
+            }
+            Text("Chế độ giải thích độc lập với giọng Anh-Mỹ / Anh-Anh.",
+                color = voiceMuted, fontSize = 12.sp)
         }
         VoicePanel("Ngôn ngữ phát âm") {
             VoiceOption("🇺🇸 Anh-Mỹ (US)", "English · American", choice.accent == "US") { onAccent("US") }
@@ -161,8 +177,21 @@ internal fun VoiceSettingsScreen(
             }
             if (message.isNotBlank()) Text(message, color = voiceMuted, fontSize = 12.sp)
         }
-        VoicePanel("Tốc độ đọc hiện tại") {
-            Text("${speedLabel(speed)} · Giữ nguyên tốc độ đã cài trước đây", color = voiceText)
+        VoicePanel("Tốc độ giọng đọc") {
+            Text("${speedLabel(speed)} • Điều chỉnh tốc độ phát", color = voiceText)
+            Slider(
+                value = speed.toFloat(),
+                onValueChange = { onSpeed((it / 25f).roundToInt().coerceIn(3, 5) * 25) },
+                valueRange = 75f..125f, steps = 1,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.White, activeTrackColor = voiceAccent,
+                    inactiveTrackColor = Color(0xFF576B92))
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("0.75x", color = voiceMuted, fontSize = 12.sp)
+                Text("1.0x", color = voiceMuted, fontSize = 12.sp)
+                Text("1.25x", color = voiceMuted, fontSize = 12.sp)
+            }
         }
         Text(
             "Giọng đã chọn được lưu riêng theo người học. Không tải giọng trả phí, không thay đổi bài học hoặc dữ liệu tiến độ.",

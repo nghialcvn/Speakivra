@@ -107,19 +107,33 @@ internal fun StudioProgress(value: Float, modifier: Modifier = Modifier) {
 @Composable
 internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) {
     val p = studio
-    val active = when (page) { "lessons" -> "home"; "review", "summary" -> "repeat"; "profile", "updates" -> "profile"; else -> page }
-    Row(Modifier.fillMaxWidth().background(p.card).border(BorderStroke(0.5.dp, p.border))
-        .padding(horizontal = 8.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-        listOf(Triple("home", "home", "Trang chủ"), Triple("repeat", "mic", "Luyện nói"),
-            Triple("chat", "chat", "Hội thoại"), Triple("profile", "bell", "Cập nhật")).forEach { (id, icon, label) ->
+    val active = when (page) {
+        "review", "summary" -> "repeat"
+        "updates", "voice-settings", "edit-profile" -> "profile"
+        else -> page
+    }
+    Row(Modifier.fillMaxWidth().background(p.card)
+        .border(BorderStroke(0.5.dp, p.border))
+        .padding(horizontal = 4.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly) {
+        listOf(
+            Triple("home", "home", "Trang chủ"),
+            Triple("lessons", "book", "Bài học"),
+            Triple("repeat", "mic", "Luyện nói"),
+            Triple("progress", "progress", "Tiến độ"),
+            Triple("profile", "settings", "Cài đặt")
+        ).forEach { (id, icon, label) ->
             val selected = active == id
-            Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
+            Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
                 .clickable(role = Role.Tab, onClick = { onNavigate(id) })
-                .semantics { this.selected = selected }.padding(vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                .semantics { this.selected = selected }
+                .padding(vertical = 5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 StudioIcon(icon, Modifier.size(22.dp), if (selected) p.coral else p.muted)
-                Text(label, color = if (selected) p.coral else p.ink, fontSize = 11.sp,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = 1)
+                Text(label, color = if (selected) p.coral else p.ink,
+                    fontSize = 10.sp, maxLines = 1,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
             }
         }
     }
@@ -305,8 +319,10 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                             speed: Int, transcript: String, status: String, capturePhase: String, wordMatch: WordMatch, learner: Learner, onBack: () -> Unit,
                             onMode: (Boolean) -> Unit, onSpeed: (Int) -> Unit, onTranslation: () -> Unit,
                             onListen: () -> Unit, onSpeak: () -> Unit, onNext: () -> Unit,
-                            voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {}) {
+                            voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {},
+                            explanationLanguage: String = LearningOptions.VIETNAMESE) {
     val p = studio; val phrase = lesson.phrases[progress.phrase]
+    val englishOnly = explanationLanguage == LearningOptions.ENGLISH
     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Luyện nghe & nói", "${lessonLabel(lesson)} • Câu ${progress.phrase + 1}/${lesson.phrases.size}", onBack)
         StudioProgress((progress.phrase + 1f) / lesson.phrases.size)
@@ -322,7 +338,8 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
                 Text(colored, fontSize = 29.sp, lineHeight = 35.sp, textAlign = TextAlign.Center,
                     fontWeight = FontWeight.ExtraBold, modifier = Modifier.fillMaxWidth())
-                if (translation) Text(phrase.vietnamese, textAlign = TextAlign.Center, color = p.muted,
+                if (translation) Text(if (englishOnly) EnglishStudy.explanation(phrase.english) else phrase.vietnamese,
+                    textAlign = TextAlign.Center, color = p.muted,
                     fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
                 // Approved compact row: sample audio, current speed dropdown and translation.
                 // Only wrap for very narrow layouts or accessibility font scaling.
@@ -398,7 +415,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                     StudioIcon("bulb", Modifier.size(27.dp), p.green)
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text("Mẹo luyện âm", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                        Text(phrase.tip, fontSize = 14.sp)
+                        Text(if (englishOnly) EnglishStudy.pronunciationTip(phrase.english) else phrase.tip, fontSize = 14.sp)
                     }
                 }
             }
@@ -418,10 +435,13 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
                                 nextLabel: String, onBack: () -> Unit, onPrompt: () -> Unit, onReply: () -> Unit,
                                 onSpeak: () -> Unit, onTranslation: () -> Unit, onNext: () -> Unit,
                                 voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {},
-                                neon: Boolean = false) {
+                                neon: Boolean = false,
+                                explanationLanguage: String = LearningOptions.VIETNAMESE,
+                                onTypedText: (String) -> Unit = {}) {
     if (neon) {
         NeonConversationScreen(lesson, turnIndex, translation, transcript, capturePhase, status, learner,
-            nextLabel, onBack, onPrompt, onReply, onSpeak, onTranslation, onNext, voiceChoice, onVoiceSettings)
+            nextLabel, onBack, onPrompt, onReply, onSpeak, onTranslation, onNext, voiceChoice, onVoiceSettings,
+            explanationLanguage, onTypedText)
         return
     }
     val p = studio; val turn = lesson.conversation[turnIndex]
@@ -434,7 +454,8 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Text(turn.prompt, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    if (translation) Text(turn.translation, color = p.muted, fontSize = 14.sp)
+                    if (translation) Text(if (explanationLanguage == LearningOptions.ENGLISH) EnglishStudy.explanation(turn.prompt)
+                        else turn.translation, color = p.muted, fontSize = 14.sp)
                 }
                 IconButton(onClick = onPrompt, Modifier.semantics { contentDescription = "Nghe Emma" }) {
                     StudioIcon("speaker", color = p.coral)
@@ -447,7 +468,8 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
                 Text("Gợi ý trả lời", fontWeight = FontWeight.ExtraBold)
             }
             Text(turn.reply, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-            if (translation) Text(turn.replyTranslation, fontSize = 14.sp, color = p.muted)
+            if (translation) Text(if (explanationLanguage == LearningOptions.ENGLISH) EnglishStudy.pronunciationTip(turn.reply)
+                else turn.replyTranslation, fontSize = 14.sp, color = p.muted)
         }
         Box(Modifier.fillMaxWidth().height(114.dp), Alignment.Center) {
             CoralButton(captureLabel(capturePhase, "Nói câu trả lời"), Modifier.widthIn(max = 270.dp).align(Alignment.BottomCenter), chevron = false, onClick = onSpeak)

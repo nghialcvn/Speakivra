@@ -639,8 +639,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         }
                     }
                 }
-                if (page !in listOf("repeat", "edit-profile", "voice-settings") &&
-                    !(neon && page == "chat")) StudioBottomNavigation(page) { dest ->
+                // All three appearances use the same full-screen scripted conversation.
+                if (page !in listOf("repeat", "edit-profile", "voice-settings", "chat"))
+                    StudioBottomNavigation(page) { dest ->
                     if (dest == "lessons") selectedLevel = "A1"
                     navigate(dest)
                 }

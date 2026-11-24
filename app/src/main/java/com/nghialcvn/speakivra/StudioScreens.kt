@@ -220,8 +220,10 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 StudioIcon("chevron", Modifier.size(12.dp), p.purple)
             }
         }
-        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(p.lavender)
-            .border(1.dp, p.border, RoundedCornerShape(16.dp))
+        Row(Modifier.fillMaxWidth()
+            .then(if (p == NeonStudio) Modifier.neonGlass(16)
+                else Modifier.clip(RoundedCornerShape(16.dp)).background(p.lavender)
+                .border(1.dp, p.border, RoundedCornerShape(16.dp)))
             .clickable(role = Role.Button, onClick = onA2).padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -244,8 +246,11 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(if (selected == lesson.id) p.peach else p.card)
-                .border(1.dp, if (selected == lesson.id) Color.Transparent else p.border, RoundedCornerShape(16.dp))
+            Row(Modifier.fillMaxWidth()
+                .then(if (p == NeonStudio) Modifier.neonGlass(16, selected == lesson.id)
+                else Modifier.clip(RoundedCornerShape(16.dp))
+                    .background(if (selected == lesson.id) p.peach else p.card)
+                    .border(1.dp, if (selected == lesson.id) Color.Transparent else p.border, RoundedCornerShape(16.dp)))
                 .clickable(role = Role.Button, onClick = { onOpen(lesson) }).padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(Modifier.size(33.dp).background(p.peach, CircleShape), Alignment.Center) {

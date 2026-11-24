@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v0.1.17-beta",
+    "tag_name": "v0.1.18-beta",
     "draft": false,
-    "body": "- Khắc phục chức năng **Kiểm tra bản cập nhật**: nếu GitHub Releases API tạm thời không phản hồi hoặc bị giới hạn số lần truy cập, ứng dụng thử nguồn danh mục phiên bản dự phòng trên chính repository Speakivra.\n- Nguồn dự phòng chỉ cung cấp metadata chính thức. App vẫn kiểm tra tag, URL APK, mã SHA-256, applicationId, versionCode và chứng thư ký trước khi cho cập nhật đè.\n- Thông báo cụ thể hơn khi lỗi DNS, hết thời gian kết nối hoặc GitHub giới hạn lượt kiểm tra; không che mọi lỗi thành một thông báo chung.\n- Có nút **Mở GitHub Releases để tải thủ công** khi không nhận được danh sách bản cập nhật.\n- Workflow phát hành đồng bộ danh mục cập nhật dự phòng sau khi công bố APK được ký và kiểm thử. Không tải hoặc cài đặt từ nguồn ngoài repository chính thức.\n- Giữ nguyên Neon đã duyệt ở V0.1.16, các lựa chọn giọng Anh-Mỹ/Anh-Anh, giọng nam/nữ, dữ liệu học, hồ sơ, khóa ký và cơ chế cập nhật an toàn.\n",
+    "body": "# Speakivra V0.1.18 Beta\n\n## Mở rộng chương trình học\n\n- **A1: 15 chủ đề, đúng 300 câu luyện nói và 100 lượt hội thoại mẫu theo kịch bản.** Mười chủ đề cũ được nối thêm phía sau, mỗi chủ đề 20 câu và 7 lượt hội thoại; bổ sung 5 chủ đề (Sức khỏe, Thời tiết, Phương tiện, Công việc & trường học, Công nghệ), mỗi chủ đề 20 câu và 6 lượt hội thoại.\n- **A2 được mở với 5 chủ đề có nội dung thật:** Trải nghiệm, Lập kế hoạch, Nêu ý kiến, Giải quyết vấn đề, Du lịch & dịch vụ. Tổng cộng 60 câu luyện nói và 25 lượt hội thoại mẫu A2. Đây là **gói khởi đầu A2**, không tuyên bố đã bao phủ toàn bộ cấp A2.\n- Các câu mới đều có tiếng Anh, nghĩa tiếng Việt, mẹo phát âm; lượt hội thoại có câu hỏi, bản dịch, câu trả lời mẫu và nghĩa câu trả lời. Giọng đọc cho nội dung chưa có clip neural sử dụng TTS trên thiết bị, với chính sách lựa chọn US/UK và giọng đã có.\n- Trang chủ bổ sung lối vào A2, trang danh sách bài học hiển thị số chủ đề và số câu tương ứng. Không thay đổi giao diện Neon, lựa chọn Sáng/Tối hay cách vận hành micro.\n- **Bảo toàn vị trí và tiến độ học:** Giữ nguyên ID, thứ tự, nội dung và chỉ số của 120 câu A1/50 lượt hội thoại trước đây, chỉ nối thêm các câu mới ở cuối; 5 chủ đề A1 mới và 5 chủ đề A2 có ID riêng. Tiến độ, hồ sơ người học và cơ chế cập nhật giữ nguyên.\n- Không dùng AI hội thoại trực tuyến, không giả nhận dạng âm thanh là chấm phát âm. Luyện hội thoại vẫn là theo kịch bản.\n",
     "assets": [
       {
-        "name": "Speakivra-v0.1.17-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v0.1.17-beta/Speakivra-v0.1.17-release.apk",
-        "size": 12650090,
-        "digest": "sha256:21f786798f4e4ed9fd763a93d781aa07658f11de3e380a8c877dce1734945cc9"
+        "name": "Speakivra-v0.1.18-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v0.1.18-beta/Speakivra-v0.1.18-release.apk",
+        "size": 12666494,
+        "digest": "sha256:ae4a710e5e99e3172743bba36757c01beab728f8c4ff7f678ddec4a7f4b09f47"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 18,
-    "versionName": "0.1.17",
-    "apkName": "Speakivra-v0.1.17-release.apk",
-    "apkSha256": "21f786798f4e4ed9fd763a93d781aa07658f11de3e380a8c877dce1734945cc9",
+    "versionCode": 19,
+    "versionName": "0.1.18",
+    "apkName": "Speakivra-v0.1.18-release.apk",
+    "apkSha256": "ae4a710e5e99e3172743bba36757c01beab728f8c4ff7f678ddec4a7f4b09f47",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

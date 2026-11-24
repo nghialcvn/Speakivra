@@ -4,24 +4,47 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class LessonsTest {
-    @Test fun allApprovedTopicsHavePracticeConversationReviewAndOfflineAudio() {
-        assertEquals(listOf("Greetings & Introductions", "My Family", "Daily Routine", "Food & Drinks", "Shopping", "Directions", "My Hobbies", "Time & Dates", "Travel", "Real Conversation"), Lessons.all.map { it.title })
-        assertEquals(10, Lessons.all.map { it.id }.distinct().size)
-        Lessons.all.forEach { lesson ->
+    @Test fun a1HasExactly15Topics300PracticeLinesAnd100ConversationTurns() {
+        assertEquals(15, Lessons.a1.size)
+        assertEquals(300, Lessons.a1.sumOf { it.phrases.size })
+        assertEquals(100, Lessons.a1.sumOf { it.conversation.size })
+        assertEquals(listOf(
+            "Greetings & Introductions", "My Family", "Daily Routine", "Food & Drinks",
+            "Shopping", "Directions", "My Hobbies", "Time & Dates", "Travel", "Real Conversation"
+        ), Lessons.a1.take(10).map { it.title })
+        Lessons.a1.take(10).forEach { lesson ->
+            assertEquals(20, lesson.phrases.size)
+            assertEquals(7, lesson.conversation.size)
+        }
+        Lessons.a1.drop(10).forEach { lesson ->
+            assertEquals(20, lesson.phrases.size)
+            assertEquals(6, lesson.conversation.size)
+        }
+    }
+
+    @Test fun a2IsSeparateAndOffersRealContent() {
+        assertEquals(5, Lessons.a2.size)
+        assertEquals(60, Lessons.a2.sumOf { it.phrases.size })
+        assertEquals(25, Lessons.a2.sumOf { it.conversation.size })
+        Lessons.a2.forEach { lesson ->
+            assertTrue(lesson.id.startsWith("a2_"))
+            assertEquals("A2", Lessons.levelOf(lesson))
             assertEquals(12, lesson.phrases.size)
             assertEquals(5, lesson.conversation.size)
-            lesson.phrases.forEachIndexed { index, phrase ->
-                assertTrue(phrase.vietnamese.isNotBlank() && phrase.tip.isNotBlank())
-                if (index < 8) assertNotNull(SpeechProfiles.forText(phrase.english).clip)
-            }
-            lesson.conversation.forEachIndexed { index, turn ->
-                assertTrue(turn.translation.isNotBlank() && turn.replyTranslation.isNotBlank())
-                if (index < 3) {
-                    assertNotNull(SpeechProfiles.forText(turn.prompt).clip)
-                    assertNotNull(SpeechProfiles.forText(turn.reply).clip)
-                }
-                assertTrue(lesson.phrases.any { it.english == turn.reply })
-            }
+        }
+        assertEquals("A1", Lessons.levelOf(Lessons.a1.first()))
+        assertEquals(20, Lessons.all.map { it.id }.distinct().size)
+    }
+
+    @Test fun everyTopicHasVietnameseTranslationsPronunciationTipsAndWorkingReview() {
+        Lessons.all.forEach { lesson ->
+            assertTrue(lesson.title.isNotBlank() && lesson.vietnamese.isNotBlank())
+            assertTrue(lesson.phrases.all { it.english.isNotBlank() && it.vietnamese.isNotBlank() && it.tip.isNotBlank() })
+            assertTrue(lesson.conversation.all { turn ->
+                turn.prompt.isNotBlank() && turn.translation.isNotBlank() &&
+                    turn.reply.isNotBlank() && turn.replyTranslation.isNotBlank() &&
+                    lesson.phrases.any { it.english == turn.reply }
+            })
             repeat(3) { index ->
                 val question = reviewQuestion(lesson, index)
                 assertEquals(3, question.options.distinct().size)
@@ -30,17 +53,26 @@ class LessonsTest {
             }
         }
     }
-    @Test fun expandedContentIsAppendOnlyAndUsesDeviceTtsForNewLines() {
-        assertEquals(120, Lessons.all.sumOf { it.phrases.size })
-        assertEquals(50, Lessons.all.sumOf { it.conversation.size })
-        Lessons.all.forEach { lesson ->
-            assertEquals(8, lesson.phrases.take(8).count { SpeechProfiles.forText(it.english).clip != null })
-            assertTrue(lesson.phrases.drop(8).all { SpeechProfiles.forText(it.english).clip == null })
-            assertTrue(lesson.conversation.drop(3).all { turn ->
-                lesson.phrases.drop(8).any { it.english == turn.reply }
-            })
+
+    @Test fun legacyPhrasesAndNeuralAudioAreUnchangedAndNewTextUsesDeviceTts() {
+        val firstTen = Lessons.a1.take(10)
+        firstTen.forEach { lesson ->
+            repeat(8) { index ->
+                assertNotNull(SpeechProfiles.forText(lesson.phrases[index].english).clip)
+            }
+            repeat(3) { index ->
+                assertNotNull(SpeechProfiles.forText(lesson.conversation[index].prompt).clip)
+                assertNotNull(SpeechProfiles.forText(lesson.conversation[index].reply).clip)
+            }
+            assertTrue(lesson.phrases.drop(12).all { SpeechProfiles.forText(it.english).clip == null })
         }
+        assertEquals("My name is Alex.", firstTen.first().phrases[2].english)
+        assertEquals("I slept well, thank you.", firstTen.first().phrases[8].english)
+        assertEquals("I am twenty-five years old.", firstTen.first().phrases[12].english)
+        assertEquals("How did you sleep?", firstTen.first().conversation[3].prompt)
+        assertEquals("Where do you live now?", firstTen.first().conversation[5].prompt)
     }
+
     @Test fun oldFirstFourPhrasePositionsStillMeanTheSameContent() {
         assertEquals(listOf("Hello! How are you?", "I'm fine, thank you.", "My name is Alex.", "Nice to meet you!"), Lessons.all.first().phrases.take(4).map { it.english })
     }

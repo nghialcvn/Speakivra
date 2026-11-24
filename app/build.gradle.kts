@@ -9,13 +9,17 @@ val signingPath = providers.environmentVariable("SPEAKIVRA_KEYSTORE_PATH").orNul
 android {
     namespace = "com.nghialcvn.speakivra"
     compileSdk = 35
+    val approvedVersion = "1.0.0"
+    require(Regex("""[0-9]+\.[0-9]\.[0-9]""").matches(approvedVersion)) {
+        "Speakivra version must roll 1.0.9 -> 1.1.0, never 1.0.10"
+    }
     defaultConfig {
         applicationId = "com.nghialcvn.speakivra"
         minSdk = 26
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 19
-        versionName = "0.1.18"
+        versionCode = 20
+        versionName = approvedVersion
     }
     testBuildType = "release"
     signingConfigs {
@@ -58,6 +62,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

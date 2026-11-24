@@ -32,35 +32,39 @@ private val voiceMuted = Color(0xFFB8C7E1)
 
 @Composable
 private fun VoicePanel(title: String, content: @Composable ColumnScope.() -> Unit) {
+    val p = studio
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
-            .background(Brush.verticalGradient(listOf(voiceCard, Color(0xFF0E1932))))
-            .border(1.dp, Color(0xFF35476D), RoundedCornerShape(18.dp)).padding(16.dp),
+            .background(Brush.verticalGradient(
+                if (p == NeonStudio) listOf(Color(0xE71C2F54), Color(0xDE0C1D39))
+                else listOf(p.card, p.card)))
+            .border(1.dp, p.border, RoundedCornerShape(18.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(title, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = voiceText)
+        Text(title, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
         content()
     }
 }
 
 @Composable
 private fun VoiceOption(label: String, subtitle: String, checked: Boolean, onClick: () -> Unit) {
+    val p = studio
     val shape = RoundedCornerShape(14.dp)
     Row(
         Modifier.fillMaxWidth().clip(shape)
-            .background(if (checked) Color(0xFF173961) else Color(0xFF18233A))
-            .border(if (checked) 2.dp else 1.dp, if (checked) voiceAccent else Color(0xFF35476D), shape)
+            .background(if (checked) p.peach else p.card)
+            .border(if (checked) 2.dp else 1.dp, if (checked) p.coral else p.border, shape)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .heightIn(min = 62.dp).padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         RadioButton(
             selected = checked, onClick = null,
-            colors = RadioButtonDefaults.colors(selectedColor = voiceAccent, unselectedColor = voiceMuted)
+            colors = RadioButtonDefaults.colors(selectedColor = p.coral, unselectedColor = p.muted)
         )
         Column(Modifier.weight(1f)) {
-            Text(label, color = voiceText, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = voiceMuted, fontSize = 12.sp)
+            Text(label, color = p.ink, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = p.muted, fontSize = 12.sp)
         }
     }
 }
@@ -82,8 +86,12 @@ internal fun VoiceSettingsScreen(
     onPreviewDefault: () -> Unit,
     onResetDefault: () -> Unit
 ) {
+    val p = studio
+    val voiceAccent = p.coral
+    val voiceText = p.ink
+    val voiceMuted = p.muted
     Column(
-        Modifier.fillMaxSize().background(voiceBackground).verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().background(Color.Transparent).verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
@@ -118,8 +126,8 @@ internal fun VoiceSettingsScreen(
                     val active = choice.gender == key
                     Column(
                         Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
-                            .background(if (active) Color(0xFF173961) else Color(0xFF18233A))
-                            .border(if (active) 2.dp else 1.dp, if (active) voiceAccent else Color(0xFF35476D), RoundedCornerShape(15.dp))
+                            .background(if (active) p.peach else p.card)
+                            .border(if (active) 2.dp else 1.dp, if (active) p.coral else p.border, RoundedCornerShape(15.dp))
                             .clickable(role = Role.RadioButton) { onGender(key) }
                             .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -152,7 +160,7 @@ internal fun VoiceSettingsScreen(
             available.forEachIndexed { index, voice ->
                 Column(
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp))
-                        .background(Color(0xFF1B2B49)).padding(12.dp),
+                        .background(p.card).padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text("Giọng trên máy ${index + 1}", color = voiceText, fontWeight = FontWeight.Bold)
@@ -165,7 +173,7 @@ internal fun VoiceSettingsScreen(
                         ) { Text("▶ Nghe thử") }
                         Button(
                             onClick = { onAssign(voice.id) },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1878CF))
+                            colors = ButtonDefaults.buttonColors(containerColor = p.coral)
                         ) { Text(if (voice.id == choice.voiceId) "✓ Đã chọn" else "Dùng giọng này") }
                     }
                 }

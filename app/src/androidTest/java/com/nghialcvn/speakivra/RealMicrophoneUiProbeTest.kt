@@ -49,6 +49,9 @@ class RealMicrophoneUiProbeTest {
             ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
             stage = "Recognize real microphone input"
             ui.onNodeWithContentDescription("Nói và nhận dạng").performClick()
+            ui.waitUntil(timeoutMillis = 15000) {
+                ui.onAllNodes(hasText("Đang nghe…", substring = true)).fetchSemanticsNodes().isNotEmpty()
+            }
             output("mic-probe-ready.txt").writeText("READY")
             ui.waitUntil(timeoutMillis = 30000) {
                 ui.onAllNodes(hasText("Câu tiếp theo") and isEnabled()).fetchSemanticsNodes().isNotEmpty()

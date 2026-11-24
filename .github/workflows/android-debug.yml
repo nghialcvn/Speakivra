@@ -130,7 +130,7 @@ jobs:
             adb shell am instrument -w com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
-            python3 -c 'from pathlib import Path; s=Path("ui-test-output.txt").read_text(); assert "OK (1 test)" in s, s'
+            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 2 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports
         if: always() && inputs.ui_check && inputs.release
         uses: actions/upload-artifact@v4

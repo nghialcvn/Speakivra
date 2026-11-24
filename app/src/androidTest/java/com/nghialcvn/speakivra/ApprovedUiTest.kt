@@ -171,7 +171,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Sáng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Ứng dụng").performScrollTo().performClick()
         ui.onNodeWithText("Cập nhật thu gọn").assertDoesNotExist()
-        ui.onNodeWithText("Cập nhật mới", substring = true).performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("✨ Cập nhật mới", substring = false).performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Kiểm tra cập nhật").performScrollTo().performClick()
         ui.onNodeWithText("Phiên bản đang dùng: v${BuildConfig.VERSION_NAME}").assertIsDisplayed()
         shot("08-updates")

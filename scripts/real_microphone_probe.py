@@ -3,6 +3,9 @@ Uses the public EmulatorController injectAudio protocol from the SDK's
 emulator/lib/emulator_controller.proto. No fixture RecognitionService or transcript.
 """
 import json
+import base64
+import gzip
+import hashlib
 import os
 import pathlib
 import re
@@ -76,10 +79,10 @@ try:
     assert any(n.get('text') == 'Hello! How are you?' for n in root.iter('node')), 'Must test the real first sentence'
     adb('shell', 'screencap', '-p', '/sdcard/probe-before.png')
     adb('pull', '/sdcard/probe-before.png', str(OUT / 'before.png'))
-    audio_path = OUT / 'spoken-clip.pcm'
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', 'app/src/main/res/raw/voice_greeting.ogg', '-ac', '1', '-ar', '16000', '-f', 's16le', str(audio_path)], check=True)
-    pcm = audio_path.read_bytes()
-    audio_path.unlink()
+    fixture = pathlib.Path('scripts/fixtures/voice_greeting_pcm16k.b64')
+    metadata = json.loads(fixture.with_suffix('.json').read_text())
+    pcm = gzip.decompress(base64.b64decode(fixture.read_text()))
+    assert hashlib.sha256(pcm).hexdigest() == metadata['sha256'], 'Speech fixture integrity mismatch'
     # A little silence lets recognition bind; repeat the real clip so the
     # unsupported-source fallback still receives speech after its capability probe.
     stream = b'\0' * 8000 + pcm + b'\0' * 16000 + pcm + b'\0' * 96000

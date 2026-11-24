@@ -1,0 +1,9 @@
+{
+  "source": "app/src/main/res/raw/voice_greeting.ogg",
+  "source_sha256": "18c2198891161132f0d3ddeda7957085fa67673caf507656e8e57cabaad6d4e1",
+  "conversion": "ffmpeg -i voice_greeting.ogg -ac 1 -ar 16000 -f s16le output.pcm",
+  "format": "mono PCM signed 16-bit little endian, 16000 Hz",
+  "bytes": 67968,
+  "sha256": "060f6eeac01a2b067a105e188cd7056be8982140d2afb70ab6d66cda84b79d2c",
+  "purpose": "CI speech input only. Existing bundled voice, never a learner recording."
+}

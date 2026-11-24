@@ -560,93 +560,33 @@ private fun SettingsRow(icon: String, label: String, value: String, onClick: (()
     }
 }
 @Composable
-internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String, learner: Learner, onSwitchLearner: () -> Unit, onEditLearner: () -> Unit, onTheme: (Boolean) -> Unit,
-                           onVoice: () -> Unit, onSpeed: () -> Unit, onGoal: () -> Unit, onUpdates: () -> Unit,
-                           voiceChoice: VoiceChoice = VoiceChoice(),
-                           neon: Boolean = false, onNeon: () -> Unit = {},
-                           explanationLanguage: String = LearningOptions.VIETNAMESE,
-                           repeatCount: Int = 1,
-                           reminderEnabled: Boolean = false,
-                           onBack: () -> Unit = {},
-                           onAccent: (String) -> Unit = {},
-                           onGender: (String) -> Unit = {},
-                           onExplanationLanguage: (String) -> Unit = {},
-                           onStudyOptions: () -> Unit = {},
-                           onReminderToggle: (Boolean) -> Unit = {},
-                           onSound: () -> Unit = {},
-                           onAbout: () -> Unit = {}) {
-    if (neon) {
-        NeonProfileScreen(
-            speed = speed, goal = goal, version = version, learner = learner, voiceChoice = voiceChoice,
-            explanationLanguage = explanationLanguage, repeatCount = repeatCount,
-            reminderEnabled = reminderEnabled,
-            onBack = onBack, onSwitchLearner = onSwitchLearner, onEditLearner = onEditLearner,
-            onTheme = onTheme, onNeon = onNeon, onVoice = onVoice,
-            onAccent = onAccent, onGender = onGender, onExplanationLanguage = onExplanationLanguage,
-            onSpeed = onSpeed, onGoal = onGoal, onStudyOptions = onStudyOptions,
-            onReminderToggle = onReminderToggle, onSound = onSound, onUpdates = onUpdates,
-            onAbout = onAbout
-        )
-        return
-    }
-    val p = studio
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        PageHeading("Cá nhân & cài đặt")
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(17.dp)) {
-            Box(Modifier.size(76.dp)) {
-                LearnerAvatar(learner.avatar, Modifier.fillMaxSize())
-                Box(Modifier.align(Alignment.BottomEnd).size(30.dp).clip(CircleShape).background(p.coral)
-                    .border(2.dp, p.background, CircleShape).clickable(role = Role.Button, onClick = onEditLearner)
-                    .semantics { contentDescription = "Chỉnh sửa hồ sơ" }, Alignment.Center) {
-                    StudioIcon("pencil", Modifier.size(16.dp), Color.White)
-                }
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(learner.name, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-                Text("Học theo nhịp của bạn", color = p.muted, fontSize = 14.sp)
-            }
-        }
-        TextButton(onClick = onSwitchLearner) { Text("Đổi người học") }
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(p.card).border(1.dp, p.border, RoundedCornerShape(18.dp))) {
-            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StudioIcon("sun"); Text("Giao diện", Modifier.weight(1f), fontSize = 14.sp)
-                TwoChoices("Sáng", "Tối", !dark, { onTheme(!it) }, Modifier.width(130.dp))
-                TextButton(onClick = onNeon) {
-                    Text("Neon", color = studio.coral, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
-                }
-            }
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("globe", "Ngôn ngữ học", if (explanationLanguage == LearningOptions.ENGLISH) "Anh – Anh" else "Anh – Việt", onVoice)
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("speaker", "Giọng đọc & Ngôn ngữ", "${voiceChoice.accentLabel} · ${voiceChoice.genderLabel}", onVoice)
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("sliders", "Tùy chỉnh bài học", "Lặp ${repeatCount} lần", onStudyOptions)
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("bell", "Thông báo nhắc học", if (reminderEnabled) "Bật" else "Tắt", { onReminderToggle(!reminderEnabled) })
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("gauge", "Tốc độ mặc định", speedLabel(speed), onSpeed)
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("target", "Mục tiêu mỗi ngày", "$goal phút", onGoal)
-            HorizontalDivider(color = p.border, modifier = Modifier.padding(horizontal = 12.dp))
-            SettingsRow("volume", "Âm thanh & thông báo", "Cấu hình", onSound)
-        }
-        StudioCard {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.size(32.dp))
-                Text("Speakivra v$version", fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                OutlinedButton(onClick = onUpdates, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 7.dp),
-                    shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, p.coral)) {
-                    Text("Kiểm tra cập nhật", color = p.coral, fontSize = 11.sp)
-                }
-            }
-            HorizontalDivider(color = p.border)
-            TextButton(onClick = onAbout) { Text("Về Speakivra") }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StudioIcon("phone", Modifier.size(18.dp), p.muted)
-                Text("Tiến độ lưu trên thiết bị", color = p.muted, fontSize = 13.sp)
-            }
-        }
-    }
+internal fun ProfileScreen(
+    dark: Boolean, speed: Int, goal: Int, version: String,
+    learner: Learner, onSwitchLearner: () -> Unit, onEditLearner: () -> Unit,
+    onTheme: (Boolean) -> Unit, onVoice: () -> Unit, onSpeed: () -> Unit,
+    onGoal: () -> Unit, onUpdates: () -> Unit,
+    voiceChoice: VoiceChoice = VoiceChoice(), neon: Boolean = false,
+    onNeon: () -> Unit = {},
+    explanationLanguage: String = LearningOptions.VIETNAMESE,
+    repeatCount: Int = 1, reminderEnabled: Boolean = false,
+    onBack: () -> Unit = {}, onAccent: (String) -> Unit = {},
+    onGender: (String) -> Unit = {}, onExplanationLanguage: (String) -> Unit = {},
+    onStudyOptions: () -> Unit = {}, onReminderToggle: (Boolean) -> Unit = {},
+    onSound: () -> Unit = {}, onAbout: () -> Unit = {}
+) {
+    // No second Dark/Light tree: identical component structure across all themes.
+    UnifiedSettingsScreen(
+        dark = dark, neon = neon, speed = speed, goal = goal, version = version,
+        learner = learner, choice = voiceChoice, language = explanationLanguage,
+        repeats = repeatCount, reminder = reminderEnabled,
+        onBack = onBack, onSwitch = onSwitchLearner, onEdit = onEditLearner,
+        onTheme = onTheme, onNeon = onNeon, onVoice = onVoice,
+        onAccent = onAccent, onGender = onGender,
+        onLanguage = onExplanationLanguage,
+        onStudy = onStudyOptions, onReminder = onReminderToggle,
+        onSpeed = onSpeed, onGoal = onGoal, onSound = onSound,
+        onUpdates = onUpdates, onAbout = onAbout
+    )
 }
 
 internal fun captureLabel(phase: String, idle: String) = when (phase) {

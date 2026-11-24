@@ -468,7 +468,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
                 Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
-            SpokenResult(learner, if (capturePhase == "listening") "Đang ghi âm…" else transcript,
+            SpokenResult(learner, if (capturePhase == "listening" && transcript.isBlank()) "Đang ghi âm…" else transcript,
                 if (wordMatch.hasResult && capturePhase == "idle") wordMatch.canContinue else null)
             StudioCard(color = p.mint, border = p == NeonStudio) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -484,7 +484,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.green else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
             }
             Text("Đối chiếu từ nhận dạng, chưa chấm phát âm.", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            if (capturePhase != "idle" || (!wordMatch.hasResult && status != "Nhấn Nghe mẫu để bắt đầu")) Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            if (capturePhase != "idle" || status.contains("không cung cấp âm thanh") || (!wordMatch.hasResult && status != "Nhấn Nghe mẫu để bắt đầu")) Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         }
         val allowed = wordMatch.canContinue && capturePhase == "idle"
         CoralButton(if (!allowed) "Cần nói lại" else if (progress.phrase == lesson.phrases.lastIndex) "Sang hội thoại" else "Câu tiếp theo", enabled = allowed, chevron = allowed, onClick = onNext)

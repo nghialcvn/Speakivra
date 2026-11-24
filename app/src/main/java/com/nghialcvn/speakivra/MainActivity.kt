@@ -502,7 +502,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
-                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, finalTranscript.orEmpty(), status, capturePhase, wordMatch, learner,
+                            "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next,

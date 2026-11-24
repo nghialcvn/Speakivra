@@ -23,7 +23,7 @@ internal class TemporarySpeechAudio {
     val available get() = pcm?.isNotEmpty() == true
 
     @SuppressLint("MissingPermission")
-    fun start(onEndpoint: (() -> Unit)? = null) {
+    fun start(onEndpoint: (() -> Unit)? = null, onPcm: ((ByteArray, Int) -> Boolean)? = null) {
         clear()
         val minimum = AudioRecord.getMinBufferSize(RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         check(minimum > 0)
@@ -44,6 +44,7 @@ internal class TemporarySpeechAudio {
                     val count = input.read(buffer, 0, minOf(buffer.size, MAX_BYTES - output.size()))
                     if (count <= 0) { if (recording) onEndpoint?.invoke(); break }
                     output.write(buffer, 0, count)
+                    if (onPcm?.invoke(buffer, count) == false) { onEndpoint?.invoke(); break }
                     if (endpoint?.accept(buffer, count) != null) {
                         onEndpoint?.invoke()
                         break

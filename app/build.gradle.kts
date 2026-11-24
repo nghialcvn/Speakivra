@@ -9,7 +9,7 @@ val signingPath = providers.environmentVariable("SPEAKIVRA_KEYSTORE_PATH").orNul
 android {
     namespace = "com.nghialcvn.speakivra"
     compileSdk = 35
-    val approvedVersion = "1.0.4"
+    val approvedVersion = "1.0.5"
     require(Regex("""[0-9]+\.[0-9]\.[0-9]""").matches(approvedVersion)) {
         "Speakivra version must roll 1.0.9 -> 1.1.0, never 1.0.10"
     }
@@ -18,7 +18,7 @@ android {
         minSdk = 26
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 24
+        versionCode = 25
         versionName = approvedVersion
     }
     testBuildType = providers.gradleProperty("uiTestBuildType").getOrElse("release")

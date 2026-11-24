@@ -139,6 +139,7 @@ jobs:
             adb shell wm density 420
             adb install -r dist/*.apk
             adb install -r -t app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
             adb shell am instrument -w com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
@@ -151,6 +152,7 @@ jobs:
           path: |
             ui-review/**
             ui-test-output.txt
+            ui-recognition-provider.txt
             app/build/reports/androidTests/**
             app/build/outputs/androidTest-results/**
           if-no-files-found: warn

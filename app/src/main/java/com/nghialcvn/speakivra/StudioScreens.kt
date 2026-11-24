@@ -114,7 +114,9 @@ internal fun SectionPill(text: String, color: Color = studio.peach, ink: Color =
 internal fun StudioProgress(value: Float, modifier: Modifier = Modifier) {
     val progress = value.coerceIn(0f, 1f)
     Box(modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(studio.border).progressSemantics(progress)) {
-        Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(studio.coral, CircleShape))
+        Box(Modifier.fillMaxWidth(progress).fillMaxHeight()
+            .background(if (studio == NeonStudio) NeonLook.crest
+                else Brush.horizontalGradient(listOf(studio.coral, studio.coral)), CircleShape))
     }
 }
 @Composable
@@ -324,7 +326,7 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
 }
 @Composable
 private fun DecorativeWave() {
-    val color = studio.coralLight.copy(alpha = 0.5f)
+    val color = if (studio == NeonStudio) NeonLook.cyan else studio.coralLight.copy(alpha = 0.5f)
     Canvas(Modifier.width(64.dp).height(48.dp)) {
         listOf(.2f, .42f, .72f, 1f, .62f, .32f).forEachIndexed { i, h ->
             val x = size.width * (i + .5f) / 6
@@ -456,9 +458,9 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
             if (capturePhase == "idle" && wordMatch.hasResult && transcript.isNotBlank()) SpokenResult(learner, transcript)
-            StudioCard(color = p.mint, border = false) {
+            StudioCard(color = p.mint, border = p == NeonStudio) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StudioIcon("bulb", Modifier.size(27.dp), p.green)
+                    StudioIcon("bulb", Modifier.size(27.dp), if (p == NeonStudio) NeonLook.cyan else p.green)
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text("Mẹo luyện âm", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                         Text(if (englishOnly) EnglishStudy.pronunciationTip(phrase.english) else phrase.tip, fontSize = 14.sp)

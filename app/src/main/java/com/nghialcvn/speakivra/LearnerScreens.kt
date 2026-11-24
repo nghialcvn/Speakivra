@@ -42,6 +42,29 @@ internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier, square: B
 @Composable
 internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit) {
     val p = studio
+    if (learners.isEmpty()) {
+        // First install: no default named person, and no empty progress profile.
+        Column(Modifier.fillMaxSize().padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Spacer(Modifier.weight(1f))
+            Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra",
+                Modifier.size(85.dp))
+            Text("Ai học hôm nay?", fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold)
+            Text("Lần đầu sử dụng Speakivra, hãy tạo hồ sơ để bắt đầu.",
+                color = p.muted, fontSize = 15.sp, lineHeight = 22.sp)
+            StudioCard {
+                Text("Chưa có hồ sơ người học", fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold)
+                Text("Tên và ảnh đại diện do bạn tự chọn. Tiến độ lưu riêng trên máy.",
+                    color = p.muted, fontSize = 13.sp)
+            }
+            Spacer(Modifier.weight(1f))
+            CoralButton("+ Tạo hồ sơ mới", onClick = onAdd)
+        }
+        return
+    }
     var selected by rememberSaveable { mutableStateOf(initial ?: learners.first().id) }
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {

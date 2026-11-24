@@ -42,7 +42,14 @@ internal fun StudioCard(modifier: Modifier = Modifier, color: Color = studio.car
                         border: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
     val neon = studio == NeonStudio
     Column(modifier.fillMaxWidth()
-        .then(if (neon) Modifier.neonGlass(strong = border) else Modifier
+        .then(if (neon && color == studio.mint) Modifier
+            .shadow(9.dp, RoundedCornerShape(18.dp),
+                ambientColor = NeonLook.cyan, spotColor = NeonLook.blue)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Brush.horizontalGradient(listOf(
+                Color(0xF0005267), Color(0xF0124B6F))))
+            .border(1.5.dp, NeonLook.cyan, RoundedCornerShape(18.dp))
+        else if (neon) Modifier.neonGlass(strong = border) else Modifier
             .clip(RoundedCornerShape(18.dp)).background(color)
             .then(if (border) Modifier.border(1.dp, studio.border, RoundedCornerShape(18.dp)) else Modifier))
         .padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)

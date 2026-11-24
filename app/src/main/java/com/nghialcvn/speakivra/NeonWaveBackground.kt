@@ -30,6 +30,21 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
             )),
             size = size
         )
+        // Approved subtle upper ribbon: visually merges the transparent logo
+        // into the same neon background instead of a pasted image rectangle.
+        val topRibbon = Path().apply {
+            moveTo(-w * .15f, h * .105f)
+            cubicTo(w * .22f, h * .22f, w * .34f, h * .04f, w * .6f, h * .105f)
+            cubicTo(w * .86f, h * .15f, w * .96f, h * .045f,
+                w * 1.15f, h * .073f)
+        }
+        drawPath(topRibbon, brush = Brush.horizontalGradient(
+            listOf(Color(0xFF00E6FD), Color(0xFF3267FF), Color(0xFFC266F9))),
+            style = Stroke(width = 17f, cap = StrokeCap.Round), alpha = .12f)
+        drawPath(topRibbon, brush = Brush.horizontalGradient(
+            listOf(Color(0xFF00DDF9), Color(0xFF3C8FFF), Color(0xFFD17CFF))),
+            style = Stroke(width = 2.2f, cap = StrokeCap.Round), alpha = .75f)
+
         // Soft glow extends to screen edges, even under Android navigation.
         drawCircle(
             brush = Brush.radialGradient(
@@ -58,7 +73,7 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
             close()
         }
         drawPath(upper, brush = Brush.linearGradient(
-            listOf(Color(0xCC005BD0), Color(0x995E3BE7), Color(0x996D35D8)),
+            listOf(Color(0xE00078F6), Color(0xBA4457FF), Color(0xB98F36F0)),
             start = Offset(0f, y1), end = Offset(w, h)
         ))
         val crest = Path().apply {
@@ -69,10 +84,10 @@ internal fun NeonWaveBackground(modifier: Modifier = Modifier) {
                 w * 1.15f, y1 - h * .04f)
         }
         drawPath(crest, brush = Brush.horizontalGradient(
-            listOf(Color(0xFF15ADFC), Color(0xFF5479F8), Color(0xFFB176FC))
+            listOf(Color(0xFF00EEFF), Color(0xFF2D90FF), Color(0xFFD07AFF))
         ), style = Stroke(width = 16f, cap = StrokeCap.Round), alpha = .17f)
         drawPath(crest, brush = Brush.horizontalGradient(
-            listOf(Color(0xFF1DB9FE), Color(0xFF3E80FF), Color(0xFFC18AFF))
+            listOf(Color(0xFF00F0FF), Color(0xFF3C8FFF), Color(0xFFEE8FFF))
         ), style = Stroke(width = 3.5f, cap = StrokeCap.Round), alpha = .88f)
 
         val y2 = h * .89f

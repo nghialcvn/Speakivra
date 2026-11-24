@@ -233,14 +233,10 @@ private fun AccordionSection(
     val shape = RoundedCornerShape(18.dp)
     val borderColor = if (open) p.coral else p.border
     val modifier = Modifier.fillMaxWidth()
-        .then(if (neon) Modifier.shadow(
-            if (open) 11.dp else 6.dp, shape, ambientColor = Color(0xFF167DE4),
-            spotColor = Color(0xFF167DE4)) else Modifier)
-        .clip(shape)
-        .background(if (neon) Brush.linearGradient(listOf(
-            Color(0xF21B2C50), Color(0xE90D1B34)))
-        else Brush.linearGradient(listOf(p.card, p.card)))
-        .border(if (neon && open) 1.6.dp else 1.dp, borderColor, shape)
+        .then(if (neon) Modifier.neonGlass(18, open)
+            else Modifier.clip(shape)
+                .background(Brush.linearGradient(listOf(p.card, p.card)))
+                .border(1.dp, borderColor, shape))
     Column(modifier) {
         Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onToggle)
             .semantics { stateDescription = if (open) "Đang mở" else "Đang đóng" }
@@ -274,8 +270,10 @@ private fun InnerPanel(neon: Boolean, content: @Composable ColumnScope.() -> Uni
     val p = studio
     val shape = RoundedCornerShape(13.dp)
     Column(Modifier.fillMaxWidth().clip(shape)
-        .background(if (neon) Color(0xD116294C) else p.lavender.copy(alpha = .28f))
-        .border(1.dp, p.border, shape).padding(11.dp),
+        .background(if (neon) NeonLook.glossyPanel
+            else Brush.linearGradient(listOf(p.lavender.copy(alpha = .28f),
+                p.lavender.copy(alpha = .28f))))
+        .border(1.dp, if (neon) NeonLook.azure else p.border, shape).padding(11.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
 }
 
@@ -287,8 +285,9 @@ private fun SettingsTile(
     val p = studio
     val shape = RoundedCornerShape(12.dp)
     Row(Modifier.fillMaxWidth().clip(shape)
-        .background(if (neon) Color(0xD51B2E50) else p.card)
-        .border(1.dp, p.border, shape)
+        .background(if (neon) NeonLook.glossyPanel
+            else Brush.linearGradient(listOf(p.card, p.card)))
+        .border(1.dp, if (neon) NeonLook.blue else p.border, shape)
         .clickable(role = Role.Button, onClick = onClick)
         .padding(horizontal = 10.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,

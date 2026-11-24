@@ -39,14 +39,19 @@ class ApprovedUiTest {
     private fun shot(name: String) {
         ui.waitForIdle()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        // Semantics can settle before the compositor submits the new screen. PixelCopy
-        // waits for a real Compose frame before the full-window screenshot is taken.
-        val rendered = ui.onRoot().captureToImage()
-        check(rendered.width > 0 && rendered.height > 0)
+        // UI assertions run before this call. Capture the real emulator window,
+        // including system bars, via UiAutomation rather than a second Compose
+        // PixelCopy redraw. PixelCopy can time out on CI even when the view exists.
+        ui.onRoot().assertExists()
         instrumentation.waitForIdleSync()
         // System UI uses a separate surface from Compose. Wait for its window events too.
         instrumentation.uiAutomation.waitForIdle(500, 5000)
-        var bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        var bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot()) {
+            "Android Emulator did not produce a real screenshot: $name"
+        }
+        check(bitmap.width > 100 && bitmap.height > 100) {
+            "Android Emulator produced an invalid screenshot: $name"
+        }
         fun readableClock(image: Bitmap): Boolean {
             if (name != "01-home" && name != "07-dark-settings") return true
             val expectLight = name == "07-dark-settings"
@@ -61,9 +66,11 @@ class ApprovedUiTest {
         var attempts = 0
         while (!readableClock(bitmap) && attempts++ < 4) {
             bitmap.recycle()
-            ui.onRoot().captureToImage()
+            instrumentation.waitForIdleSync()
             instrumentation.uiAutomation.waitForIdle(500, 5000)
-            bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+            bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot()) {
+                "Android Emulator lost its screenshot surface: $name"
+            }
         }
         val clockReadable = readableClock(bitmap)
         val directory = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }

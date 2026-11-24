@@ -24,7 +24,7 @@ internal fun decodeLearners(value: String): List<Learner> {
             require(it.name.isNotBlank() && it.name.length <= 30 && it.avatar in 0..5)
         }
     }
-    require(learners.isNotEmpty() && learners.first().id == ORIGINAL_LEARNER && learners.distinctBy { it.id }.size == learners.size)
+    require(learners.distinctBy { it.id }.size == learners.size)
     return learners
 }
 /** Identity is immutable: editing a name/avatar must never select a different progress file. */
@@ -41,9 +41,14 @@ internal class LearnerStore(private val context: Context) {
     fun all(): List<Learner> {
         val saved = registry.getString("profiles", null)
         if (saved != null) return decodeLearners(saved) // Never silently replace a damaged registry.
-        val first = listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0))
+        // Existing installs have an explicit profile registry and are kept unchanged.
+        // Legacy installs predating the registry had learning preferences in the
+        // original file. Only those genuine legacy installs keep their old profile.
+        val legacyPrefs = context.getSharedPreferences("speakivra_progress", 0)
+        val first = if (legacyPrefs.all.isNotEmpty())
+            listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)) else emptyList()
         check(registry.edit().putString("profiles", encodeLearners(first)).commit())
-        return first // Original preferences remain in place: no copy, clear, or destructive migration.
+        return first // Fresh installs must explicitly create a named learner.
     }
     fun preferences(learner: Learner): SharedPreferences = context.getSharedPreferences(learnerPreferenceName(learner.id), 0)
     fun add(name: String, avatar: Int): Learner {

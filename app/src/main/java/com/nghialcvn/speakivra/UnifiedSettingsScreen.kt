@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -314,7 +315,8 @@ private fun RadioChoice(flag: String, title: String, sub: String,
     Row(Modifier.fillMaxWidth().clip(shape)
         .background(if (selected) p.peach else if (neon) Color(0xD2162645) else p.card)
         .border(if (selected) 1.6.dp else 1.dp, if (selected) p.coral else p.border, shape)
-        .clickable(role = Role.RadioButton, onClick = onClick).padding(9.dp),
+        .clickable(role = Role.RadioButton, onClick = onClick)
+        .semantics { this.selected = selected }.padding(9.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         RadioButton(selected = selected, onClick = null,
@@ -337,6 +339,7 @@ private fun ChoiceChip(text: String, selected: Boolean, neon: Boolean,
         .background(if (selected) p.peach else if (neon) Color(0xD8192A4A) else p.card)
         .border(if (selected) 1.6.dp else 1.dp, if (selected) p.coral else p.border, shape)
         .clickable(role = Role.RadioButton, onClick = onClick)
+        .semantics { this.selected = selected }
         .heightIn(min = 42.dp).padding(horizontal = 4.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center) {
         Text(text, color = if (selected) p.coral else p.ink, fontSize = 12.sp,
@@ -353,6 +356,7 @@ private fun GenderChip(text: String, selected: Boolean, neon: Boolean,
         .background(if (selected) p.peach else if (neon) Color(0xD8192A4A) else p.card)
         .border(if (selected) 1.6.dp else 1.dp, if (selected) p.coral else p.border, shape)
         .clickable(role = Role.RadioButton, onClick = onClick)
+        .semantics { this.selected = selected }
         .padding(12.dp), verticalArrangement = Arrangement.spacedBy(7.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         StudioIcon("speaker", Modifier.size(28.dp), if (selected) p.coral else p.muted)

@@ -24,18 +24,18 @@ internal val DarkStudio = StudioColors(Color(0xFF211D24), Color(0xFF2C2730), Col
     green = Color(0xFFA6E6BA), purple = Color(0xFFD3BDF5))
 /** Approved third appearance. Light/Dark palettes remain unchanged. */
 internal val NeonStudio = StudioColors(
-    background = Color(0xFF071126),
-    card = Color(0xFF13213C),
-    ink = Color(0xFFF3F6FF),
-    muted = Color(0xFFB2C1DE),
-    border = Color(0xFF34466A),
-    peach = Color(0xFF15365C),
-    lavender = Color(0xFF1B2C54),
-    mint = Color(0xFF103B48),
-    coral = Color(0xFF35B7FF),
-    coralLight = Color(0xFF5474FF),
-    green = Color(0xFF82EBC4),
-    purple = Color(0xFFB79CF5)
+    background = Color(0xFF061332),
+    card = Color(0xEA112453),
+    ink = Color(0xFFF7F9FF),
+    muted = Color(0xFFB8C8EB),
+    border = Color(0xFF426DBA),
+    peach = Color(0xDA173E79),
+    lavender = Color(0xE8172D6B),
+    mint = Color(0xEC07506D),
+    coral = Color(0xFF00DEFA),
+    coralLight = Color(0xFF2C87FF),
+    green = Color(0xFF62FFE2),
+    purple = Color(0xFFC77AFF)
 )
 internal val LocalStudioColors = staticCompositionLocalOf { LightStudio }
 internal val studio: StudioColors @Composable get() = LocalStudioColors.current

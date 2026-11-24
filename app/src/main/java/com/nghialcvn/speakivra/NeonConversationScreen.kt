@@ -32,12 +32,13 @@ private val bubble = Color(0xFF1D315B)
 
 @Composable
 private fun AiAvatar() {
+    val p = studio
     Box(Modifier.size(47.dp), contentAlignment = Alignment.Center) {
         LearnerAvatar(1, Modifier.size(40.dp))
         Text("AI", color = Color.White, fontSize = 9.sp,
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.align(Alignment.BottomEnd)
-                .background(Color(0xFF087CE5), RoundedCornerShape(7.dp))
+                .background(p.coral, RoundedCornerShape(7.dp))
                 .padding(horizontal = 4.dp, vertical = 2.dp))
     }
 }
@@ -45,8 +46,12 @@ private fun AiAvatar() {
 @Composable
 private fun NeonMessage(
     text: String, translation: String?, learner: Learner?,
-    isReply: Boolean, onPlay: () -> Unit, showPlay: Boolean = true
+    isReply: Boolean, onPlay: () -> Unit, showPlay: Boolean = true,
+    neonTheme: Boolean = true
 ) {
+    val p = studio
+    val foreground = p.ink
+    val replyInk = Color.White
     Row(Modifier.fillMaxWidth(),
         horizontalArrangement = if (isReply) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom) {
@@ -59,24 +64,28 @@ private fun NeonMessage(
             Row(Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
                 .background(Brush.horizontalGradient(
-                    if (isReply) listOf(Color(0xFF0871D8), Color(0xFF214FC2))
-                    else listOf(bubble, Color(0xFF172643))))
+                    if (isReply && neonTheme) listOf(Color(0xFF0871D8), Color(0xFF214FC2))
+                    else if (isReply) listOf(p.coral, p.coralLight)
+                    else if (neonTheme) listOf(bubble, Color(0xFF172643))
+                    else listOf(p.card, p.card)))
                 .border(1.dp,
-                    if (isReply) neon else Color(0xFF3D5886),
+                    if (isReply) p.coral else p.border,
                     RoundedCornerShape(18.dp))
                 .padding(horizontal = 12.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(text, Modifier.weight(1f), fontSize = 17.sp,
-                    lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold, color = white)
+                    lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold,
+                    color = if (isReply) replyInk else foreground)
                 if (showPlay) IconButton(onClick = onPlay, modifier = Modifier.size(35.dp)
                     .semantics { contentDescription =
                         if (isReply) "Nghe câu trả lời" else "Nghe câu hỏi" }) {
-                    StudioIcon("speaker", Modifier.size(20.dp), Color(0xFFBAE9FF))
+                    StudioIcon("speaker", Modifier.size(20.dp),
+                        if (isReply) Color.White else p.coral)
                 }
             }
             if (!translation.isNullOrBlank()) {
-                Text(translation, color = muted, fontSize = 12.sp,
+                Text(translation, color = p.muted, fontSize = 12.sp,
                     fontStyle = FontStyle.Italic, lineHeight = 17.sp,
                     modifier = Modifier.padding(horizontal = 10.dp))
             }
@@ -107,8 +116,13 @@ internal fun NeonConversationScreen(
     voiceChoice: VoiceChoice,
     onVoiceSettings: () -> Unit,
     explanationLanguage: String = LearningOptions.VIETNAMESE,
-    onTypedText: (String) -> Unit = {}
+    onTypedText: (String) -> Unit = {},
+    neonTheme: Boolean = true
 ) {
+    val p = studio
+    val white = p.ink
+    val muted = p.muted
+    val neon = p.coral
     val current = lesson.conversation[turnIndex]
     val englishOnly = explanationLanguage == LearningOptions.ENGLISH
     var showKeyboard by rememberSaveable { mutableStateOf(false) }
@@ -139,10 +153,10 @@ internal fun NeonConversationScreen(
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(Modifier.weight(1f).height(9.dp).clip(CircleShape)
-                .background(Color(0xFF233D6C))) {
+                .background(p.border.copy(alpha = .5f))) {
                 Box(Modifier.fillMaxWidth((turnIndex + 1f) / lesson.conversation.size)
                     .fillMaxHeight().background(Brush.horizontalGradient(
-                        listOf(neon, Color(0xFF597CFF))), CircleShape))
+                        listOf(p.coral, p.coralLight)), CircleShape))
             }
             Text("${turnIndex + 1}/${lesson.conversation.size}",
                 color = white, fontSize = 12.sp)
@@ -160,21 +174,21 @@ internal fun NeonConversationScreen(
                 val previous = lesson.conversation[turnIndex - 1]
                 Text("Lượt trước", color = muted, fontSize = 12.sp)
                 NeonMessage(previous.reply, null, learner, true, onPlay = {},
-                    showPlay = false)
+                    showPlay = false, neonTheme = neonTheme)
             }
             NeonMessage(current.prompt,
                 if (!translation) null else if (englishOnly)
                     EnglishStudy.explanation(current.prompt) else current.translation,
-                null, false, onPrompt)
+                null, false, onPrompt, neonTheme = neonTheme)
             NeonMessage(current.reply,
                 if (!translation) null else if (englishOnly)
                     EnglishStudy.pronunciationTip(current.reply)
                 else current.replyTranslation,
-                learner, true, onReply)
+                learner, true, onReply, neonTheme = neonTheme)
             if (capturePhase == "idle" && transcript.isNotBlank()) {
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp))
-                    .background(Color(0xFF132747))
-                    .border(1.dp, Color(0xFF365582), RoundedCornerShape(13.dp))
+                    .background(p.card)
+                    .border(1.dp, p.border, RoundedCornerShape(13.dp))
                     .padding(11.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -219,9 +233,10 @@ internal fun NeonConversationScreen(
             ) { StudioIcon("keyboard", Modifier.size(28.dp), white) }
             Box(Modifier.size(104.dp)
                 .shadow(13.dp, CircleShape)
-                .background(Brush.linearGradient(listOf(
-                    Color(0xFF27D0FF), Color(0xFF3058EE))), CircleShape)
-                .border(2.dp, Color(0xFFB3EEFF), CircleShape)
+                .background(Brush.linearGradient(
+                    if (neonTheme) listOf(Color(0xFF27D0FF), Color(0xFF3058EE))
+                    else listOf(p.coralLight, p.coral)), CircleShape)
+                .border(2.dp, if (neonTheme) Color(0xFFB3EEFF) else p.coralLight, CircleShape)
                 .clickable(role = Role.Button, onClick = onSpeak)
                 .semantics { contentDescription =
                     if (capturePhase == "listening") "Kết thúc lượt nói" else "Nói và nhận dạng" },
@@ -230,7 +245,7 @@ internal fun NeonConversationScreen(
             }
             IconButton(onClick = onNext,
                 modifier = Modifier.size(56.dp)
-                    .background(Color(0xFF23345A), CircleShape)
+                    .background(p.card, CircleShape)
                     .semantics { contentDescription = "Tiếp tục hội thoại" }) {
                 StudioIcon("next", Modifier.size(29.dp), white)
             }
@@ -239,8 +254,9 @@ internal fun NeonConversationScreen(
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
             color = muted, fontSize = 13.sp)
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(19.dp))
-            .background(Brush.horizontalGradient(listOf(
-                Color(0xFF187ECF), Color(0xFF315BE8))))
+            .background(Brush.horizontalGradient(
+                if (neonTheme) listOf(Color(0xFF187ECF), Color(0xFF315BE8))
+                else listOf(p.coral, p.coralLight)))
             .clickable(role = Role.Button, onClick = onNext)
             .heightIn(min = 44.dp), contentAlignment = Alignment.Center) {
             Text(nextLabel, color = white, fontWeight = FontWeight.ExtraBold)

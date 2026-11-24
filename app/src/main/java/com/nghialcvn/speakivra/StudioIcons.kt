@@ -19,6 +19,9 @@ private val Shapes = mapOf(
     "lock" to "M7 10 L7 7 C7 0 17 0 17 7 L17 10 M5 10 L19 10 L19 22 L5 22 Z M12 14 L12 18",
     "home" to "M3 10 L12 3 L21 10 L21 21 L15 21 L15 14 L9 14 L9 21 L3 21 Z",
     "mic" to "M9 6 C9 2 15 2 15 6 L15 12 C15 16 9 16 9 12 Z M6 11 L6 12 C6 20 18 20 18 12 L18 11 M12 19 L12 23 M9 23 L15 23",
+    // Same thin outlined microphone as the five-tab approved mockup; no emoji and
+    // distinct from the large round speak button inside the conversation screen.
+    "tab-mic" to "M9 5 C9 1.8 15 1.8 15 5 L15 12 C15 16.2 9 16.2 9 12 Z M5 11 L5 12 C5 20.8 19 20.8 19 12 L19 11 M12 19 L12 23 M8 23 L16 23",
     "chat" to "M5 4 L19 4 Q22 4 22 7 L22 15 Q22 18 19 18 L12 18 L6 22 L6 18 L5 18 Q2 18 2 15 L2 7 Q2 4 5 4 Z M7 11 L7.1 11 M12 11 L12.1 11 M17 11 L17.1 11",
     "bell" to "M5 17 L19 17 L17 13 L17 9 C17 2 7 2 7 9 L7 13 Z M10 21 Q12 23 14 21 M12 2 L12 1",
     "back" to "M20 12 L4 12 M10 6 L4 12 L10 18",
@@ -56,7 +59,7 @@ internal fun StudioIcon(name: String, modifier: Modifier = Modifier, color: Colo
     val path = remember(name) { PathParser().parsePathString(Shapes[name] ?: Shapes.getValue("chat")).toPath() }
     Canvas(modifier.size(24.dp)) {
         scale(size.width / 26f, size.height / 26f, pivot = androidx.compose.ui.geometry.Offset.Zero) {
-            drawPath(path, color, style = Stroke(1.65f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawPath(path, color, style = Stroke(if (name == "tab-mic") 1.9f else 1.65f, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
 }

@@ -1,9 +1,26 @@
-# A1 practice pack — V0.1.8
+# Speakivra curriculum: A1 and A2 (V0.1.18)
 
-The ten approved topics each contain eight practice phrases, three scripted conversation turns and three meaning checks. `Lessons.kt` is the runtime catalog; `scripts/lessons.json` is its editorial reference. All phrase, prompt and sample-answer text resolves to bundled neural audio. Future editorial changes must update the runtime catalog, speech profiles, audio manifest and coverage tests together.
+## A1: 15 chủ đề, 300 câu nói, 100 lượt hội thoại
 
-The first four phrases retain their original order for v0.1.7 progress compatibility. Existing `speakivra_progress` preferences and legacy `phrase`, `completed`, `playback_speed` keys are retained. If a first-lesson position has not been saved under the new namespace, it falls back to `phrase`. Each lesson stores its own phrase, conversation turn, review question, review score, completion count and phase under `lesson.<stable-id>.*`. `active_lesson` restores the selection. The displayed total adds legacy completed rounds to new per-lesson rounds; selecting lessons does not mark a round complete. Only the final review transition records completion. Repeating a lesson resets its current attempt and retains completed rounds.
+- Mười chủ đề A1 gốc: Chào hỏi, Gia đình, Sinh hoạt, Đồ ăn, Mua sắm, Hỏi đường, Sở thích, Giờ & ngày tháng, Du lịch, Giao tiếp thường ngày. Mỗi bài có **20 câu nói, 7 lượt hội thoại**, tổng 200 câu và 70 lượt.
+- Năm chủ đề A1 mới: Sức khỏe, Thời tiết, Phương tiện, Công việc & trường học, Công nghệ. Mỗi bài có **20 câu nói, 6 lượt hội thoại**, tổng 100 câu và 30 lượt.
+- Tổng A1: **300 câu nói và 100 lượt hội thoại trên 15 chủ đề**. Mỗi câu có bản dịch, mẹo nói; mỗi lượt hội thoại có câu hỏi, bản dịch và câu trả lời mẫu.
 
-The home screen keeps the approved header, current-lesson and tutor cards, colors and bottom navigation; a lesson list uses the existing panel and outlined button style. Practice keeps the existing speaking controls and adds the topic label and always-visible pronunciation tip. Conversation remains explicitly scripted; its responses do not adapt to recognition. Review checks meaning, not phoneme accuracy. No new permissions or paid services are introduced.
+## A2: Gói mở đầu, không phải toàn bộ A2
 
-The 20-minute daily target remains a target, not a timer or enforced duration. Full hands-free automatic recording, age onboarding, placement testing and AI dialogue remain future work. Device recognition may require the device provider's network connection. Validate actual playback, microphone returns, rotation/resume, cross-lesson progress and install-over on Samsung before treating device behavior as confirmed.
+- Trải nghiệm; Lập kế hoạch; Nêu ý kiến; Giải quyết vấn đề; Du lịch & dịch vụ.
+- Mỗi bài có 12 câu nói, 5 lượt hội thoại, 3 câu ôn tập. Tổng **5 chủ đề, 60 câu nói và 25 lượt hội thoại**.
+- Các mẫu A2 luyện quá khứ, hiện tại hoàn thành ở mức cơ bản, kế hoạch, so sánh và lời đề nghị lịch sự. Hội thoại tiếp tục là **kịch bản cố định**, không phải AI ứng biến.
+
+## Bảo toàn dữ liệu
+
+Runtime là `Lessons.kt`, cùng `ExpandedLessons.kt`, `MoreA1Practice.kt`, `A1NewTopics.kt`, `A2Lessons.kt`.
+- ID và thứ tự của **10 bài A1 đầu tiên** không đổi.
+- **12 câu và 5 lượt hội thoại cũ của từng bài A1** giữ nguyên thứ tự, các câu mới chỉ nối thêm phía sau.
+- ID A1 mới (`health`, `weather`, `transport`, `workplace`, `technology`) và ID A2 tiền tố `a2_` không trùng ID cũ.
+- Tiến độ riêng từng người học và từng chủ đề vẫn ở `lesson.<stable-id>.*`; `active_lesson` được giữ nguyên. Học lại mới đặt lại lượt hiện tại, không xóa số lần hoàn thành.
+
+## Âm thanh và kiểm tra
+
+110 clip neural Anh-Mỹ có sẵn không bị thay đổi. Nội dung mới chưa có clip neural đã duyệt nên được đọc qua TTS được cài trên máy, theo biến thể US/UK và lựa chọn giọng hiện có. Nếu thiếu giọng ngoại tuyến, ứng dụng thông báo rõ.
+Câu ôn tập kiểm tra nghĩa; nhận dạng giọng nói chỉ đối chiếu từ và **không phải chấm phát âm bằng âm học**. Tiến độ/độ tương thích được kiểm tra bằng unit test, Compose UI trên emulator và cuối cùng cần xác minh trên Samsung khi phát hành.

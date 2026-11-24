@@ -13,7 +13,8 @@ internal data class StudioColors(
     val background: Color, val card: Color, val ink: Color, val muted: Color,
     val border: Color, val peach: Color, val lavender: Color, val mint: Color,
     val coral: Color = Color(0xFFCE4D39), val coralLight: Color = Color(0xFFF1846D),
-    val green: Color, val purple: Color
+    val green: Color, val purple: Color,
+    val correctWord: Color = green, val incorrectWord: Color = coral
 )
 internal val LightStudio = StudioColors(Color(0xFFFFF9F4), Color.White, Color(0xFF201C2B),
     Color(0xFF655E6B), Color(0xFFE8DEE0), Color(0xFFFFE5DA), Color(0xFFF0E8FF),
@@ -35,7 +36,9 @@ internal val NeonStudio = StudioColors(
     coral = Color(0xFF00DEFA),
     coralLight = Color(0xFF2C87FF),
     green = Color(0xFF62FFE2),
-    purple = Color(0xFFC77AFF)
+    purple = Color(0xFFC77AFF),
+    correctWord = Color(0xFF62F59A),
+    incorrectWord = Color(0xFFFF7187)
 )
 internal val LocalStudioColors = staticCompositionLocalOf { LightStudio }
 internal val studio: StudioColors @Composable get() = LocalStudioColors.current

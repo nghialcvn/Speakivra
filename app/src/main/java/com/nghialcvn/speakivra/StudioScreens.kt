@@ -392,7 +392,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 val colored = buildAnnotatedString {
                     wordMatch.tokens.forEachIndexed { index, word ->
                         if (index > 0) append(" ")
-                        withStyle(SpanStyle(color = if (!wordMatch.hasResult) p.ink else if (wordMatch.matched[index]) p.green else p.coral)) { append(word) }
+                        withStyle(SpanStyle(color = if (!wordMatch.hasResult) p.ink else if (wordMatch.matched[index]) p.correctWord else p.incorrectWord)) { append(word) }
                     }
                 }
                 Text(colored, fontSize = 29.sp, lineHeight = 35.sp, textAlign = TextAlign.Center,
@@ -480,8 +480,8 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
             }
             if (wordMatch.hasResult) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Chưa khớp ${wordMatch.incorrect}/${wordMatch.tokens.size} từ · ${wordMatch.percent}%", color = p.coral, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.green else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                Text("Chưa khớp ${wordMatch.incorrect}/${wordMatch.tokens.size} từ · ${wordMatch.percent}%", color = p.incorrectWord, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.correctWord else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
             }
             Text("Đối chiếu từ nhận dạng, chưa chấm phát âm.", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             if (capturePhase != "idle" || status.contains("không cung cấp âm thanh") || (!wordMatch.hasResult && status != "Nhấn Nghe mẫu để bắt đầu")) Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })

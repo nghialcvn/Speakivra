@@ -154,8 +154,8 @@ class RecognitionFlowTest {
         val annotated = ui.onAllNodesWithText("Hello there.", substring = false, useUnmergedTree = true)
             .fetchSemanticsNodes().flatMap { it.config.getOrElse(SemanticsProperties.Text) { emptyList() } }
             .first { it.spanStyles.size == 2 }
-        assertEquals(expectedGreen, annotated.spanStyles.count { it.item.color == NeonStudio.green })
-        assertEquals(expectedRed, annotated.spanStyles.count { it.item.color == NeonStudio.coral })
+        assertEquals(expectedGreen, annotated.spanStyles.count { it.item.color == NeonStudio.correctWord })
+        assertEquals(expectedRed, annotated.spanStyles.count { it.item.color == NeonStudio.incorrectWord })
     }
     private fun screenshot(name: String) {
         ui.waitForIdle()

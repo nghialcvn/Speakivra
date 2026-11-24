@@ -10,6 +10,16 @@ class StudioThemeTest {
         val a = first.luminance(); val b = second.luminance()
         return (maxOf(a, b) + 0.05f) / (minOf(a, b) + 0.05f)
     }
+    @Test fun recognitionFeedbackUsesGreenAndRedWithoutChangingNeonAccent() {
+        for (palette in listOf(LightStudio, DarkStudio, NeonStudio)) {
+            assertTrue("Matched words must look green", palette.correctWord.green > palette.correctWord.red)
+            assertTrue("Unmatched words must look red", palette.incorrectWord.red > palette.incorrectWord.green && palette.incorrectWord.red > palette.incorrectWord.blue)
+            assertTrue(contrast(palette.correctWord, palette.card) >= 3f)
+            assertTrue(contrast(palette.incorrectWord, palette.card) >= 3f)
+        }
+        org.junit.Assert.assertEquals(Color(0xFF00DEFA), NeonStudio.coral)
+        org.junit.Assert.assertNotEquals(NeonStudio.coral, NeonStudio.incorrectWord)
+    }
     @Test fun bodyCopyRemainsReadableOnEveryCardInBothThemes() {
         for (palette in listOf(LightStudio, DarkStudio)) {
             for (background in listOf(palette.background, palette.card, palette.peach, palette.lavender, palette.mint)) {

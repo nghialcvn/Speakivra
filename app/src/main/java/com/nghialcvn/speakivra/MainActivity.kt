@@ -369,24 +369,107 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                 dismissButton = { TextButton(onClick = { dismissedUpdate = available.versionCode }) { Text("Để sau") } })
         }
         if (settingDialog.isNotBlank()) {
-            val title = when (settingDialog) { "speed" -> "Tốc độ mặc định"; "goal" -> "Mục tiêu mỗi ngày"; else -> "Giọng mẫu" }
-            AlertDialog(onDismissRequest = { settingDialog = "" }, title = { Text(title) }, text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    when (settingDialog) {
-                        "speed" -> listOf(75, 100, 125).forEach { value ->
-                            TextButton(onClick = { selectSpeed(value); settingDialog = "" }, modifier = Modifier.fillMaxWidth()) {
-                                Text(speedLabel(value) + if (playbackSpeed == value) " ✓" else "")
+            val title = when (settingDialog) {
+                "speed" -> "Tốc độ giọng đọc"
+                "goal" -> "Mục tiêu mỗi ngày"
+                "study" -> "Tùy chỉnh bài học"
+                "sound" -> "Âm thanh & thông báo"
+                "about" -> "Về Speakivra"
+                else -> "Giọng mẫu"
+            }
+            AlertDialog(
+                onDismissRequest = { settingDialog = "" },
+                title = { Text(title) },
+                text = {
+                    Column(Modifier.heightIn(max = 410.dp).verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                        when (settingDialog) {
+                            "speed" -> listOf(75, 100, 125).forEach { value ->
+                                TextButton(onClick = {
+                                    selectSpeed(value)
+                                    settingDialog = ""
+                                }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(speedLabel(value) +
+                                        if (playbackSpeed == value) " ✓" else "")
+                                }
                             }
-                        }
-                        "goal" -> listOf(10, 15, 20, 30).forEach { value ->
-                            TextButton(onClick = { goal = value; preferences.edit().putInt("daily_goal", value).apply(); settingDialog = "" }, modifier = Modifier.fillMaxWidth()) {
-                                Text("$value phút" + if (goal == value) " ✓" else "")
+                            "goal" -> listOf(10, 15, 20, 30).forEach { value ->
+                                TextButton(onClick = {
+                                    goal = value
+                                    preferences.edit().putInt("daily_goal", value).apply()
+                                    settingDialog = ""
+                                }, modifier = Modifier.fillMaxWidth()) {
+                                    Text("$value phút" + if (goal == value) " ✓" else "")
+                                }
                             }
+                            "study" -> {
+                                Text("Chọn cấp độ thực hành", fontWeight = FontWeight.Bold)
+                                Text("A1: 15 chủ đề • A2: 5 chủ đề", color = palette.muted,
+                                    fontSize = 12.sp)
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    listOf("A1", "A2").forEach { level ->
+                                        OutlinedButton(onClick = {
+                                            selectedLevel = level
+                                            settingDialog = ""
+                                            navigate("lessons")
+                                        }, modifier = Modifier.weight(1f)) {
+                                            Text(level)
+                                        }
+                                    }
+                                }
+                                HorizontalDivider()
+                                Text("Lặp lại câu mẫu", fontWeight = FontWeight.Bold)
+                                Text("Phát lại nguyên câu trong mỗi lượt nghe mẫu.",
+                                    color = palette.muted, fontSize = 12.sp)
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    (1..3).forEach { count ->
+                                        OutlinedButton(onClick = {
+                                            sampleRepeats = count
+                                            LearningOptions.setRepeats(preferences, count)
+                                        }, modifier = Modifier.weight(1f)) {
+                                            Text("$count lần" +
+                                                if (sampleRepeats == count) " ✓" else "")
+                                        }
+                                    }
+                                }
+                                HorizontalDivider()
+                                TextButton(onClick = {
+                                    settingDialog = "speed"
+                                }) { Text("Tốc độ đọc: ${speedLabel(playbackSpeed)}") }
+                                TextButton(onClick = {
+                                    settingDialog = "goal"
+                                }) { Text("Mục tiêu: $goal phút") }
+                            }
+                            "sound" -> {
+                                Text("Giọng đọc", fontWeight = FontWeight.Bold)
+                                Text("${voiceChoice.accentLabel} • ${voiceChoice.genderLabel}",
+                                    color = palette.muted)
+                                OutlinedButton(onClick = {
+                                    settingDialog = ""
+                                    openVoiceSettings()
+                                }) { Text("Chọn giọng và nghe thử") }
+                                HorizontalDivider()
+                                Text("Nhắc học cục bộ", fontWeight = FontWeight.Bold)
+                                Text("Nếu bật, Speakivra nhắc học khoảng 19:00 hằng ngày. Android có thể trì hoãn để tiết kiệm pin.",
+                                    color = palette.muted, fontSize = 12.sp)
+                                OutlinedButton(onClick = {
+                                    toggleReminder(!reminderEnabled)
+                                }) { Text(if (reminderEnabled) "Tắt nhắc học" else "Bật nhắc học") }
+                            }
+                            "about" -> {
+                                Text("Speakivra V$APP_VERSION", fontWeight = FontWeight.Bold)
+                                Text("Ứng dụng học tiếng Anh A1/A2. Bài hội thoại là kịch bản có sẵn, không phải người đối thoại AI trực tuyến.")
+                                Text("Âm thanh từ clip đã đóng gói và giọng TTS do điện thoại cung cấp. Nhận dạng có thể dùng dịch vụ của hệ thống.")
+                                Text("Tiến độ được giữ riêng trên thiết bị. Cập nhật dùng APK ký hợp lệ và xác minh SHA-256.")
+                            }
+                            else -> Text("Lựa chọn giọng được lưu riêng theo người học.")
                         }
-                        else -> Text("Anh-Mỹ • Âm thanh có sẵn trong ứng dụng. Giọng của thiết bị được dùng dự phòng nếu không phát được âm thanh mẫu.")
                     }
+                },
+                confirmButton = {
+                    TextButton(onClick = { settingDialog = "" }) { Text("Đóng") }
                 }
-            }, confirmButton = { TextButton(onClick = { settingDialog = "" }) { Text("Đóng") } })
+            )
         }
         Surface(color = palette.background, contentColor = palette.ink, modifier = Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {

@@ -439,53 +439,12 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
                                 neon: Boolean = false,
                                 explanationLanguage: String = LearningOptions.VIETNAMESE,
                                 onTypedText: (String) -> Unit = {}) {
-    if (neon) {
-        NeonConversationScreen(lesson, turnIndex, translation, transcript, capturePhase, status, learner,
-            nextLabel, onBack, onPrompt, onReply, onSpeak, onTranslation, onNext, voiceChoice, onVoiceSettings,
-            explanationLanguage, onTypedText)
-        return
-    }
-    val p = studio; val turn = lesson.conversation[turnIndex]
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        PageHeading("Emma • Luyện hội thoại", onBack = onBack)
-        VoiceSelectionChips(voiceChoice, onVoiceSettings)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { SectionPill("Mô phỏng theo kịch bản") }
-        ApprovedArtwork(false, Modifier.size(128.dp, 73.dp).clip(RoundedCornerShape(28.dp)))
-        StudioCard(color = p.lavender, border = false) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(turn.prompt, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    if (translation) Text(if (explanationLanguage == LearningOptions.ENGLISH) EnglishStudy.explanation(turn.prompt)
-                        else turn.translation, color = p.muted, fontSize = 14.sp)
-                }
-                IconButton(onClick = onPrompt, Modifier.semantics { contentDescription = "Nghe Emma" }) {
-                    StudioIcon("speaker", color = p.coral)
-                }
-            }
-        }
-        StudioCard(color = p.mint, border = false) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StudioIcon("chat", Modifier.size(22.dp), p.green)
-                Text("Gợi ý trả lời", fontWeight = FontWeight.ExtraBold)
-            }
-            Text(turn.reply, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-            if (translation) Text(if (explanationLanguage == LearningOptions.ENGLISH) EnglishStudy.pronunciationTip(turn.reply)
-                else turn.replyTranslation, fontSize = 14.sp, color = p.muted)
-        }
-        Box(Modifier.fillMaxWidth().height(114.dp), Alignment.Center) {
-            CoralButton(captureLabel(capturePhase, "Nói câu trả lời"), Modifier.widthIn(max = 270.dp).align(Alignment.BottomCenter), chevron = false, onClick = onSpeak)
-            Microphone(onSpeak, Modifier.align(Alignment.TopCenter), active = capturePhase == "listening")
-        }
-        if (capturePhase == "idle" && transcript.isNotBlank()) SpokenResult(learner, transcript)
-        Text(status, fontSize = 12.sp, color = p.muted, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            SpeakerChip("Nghe trả lời mẫu", onReply)
-            Text("Lượt ${turnIndex + 1}/${lesson.conversation.size}", color = p.muted, fontSize = 13.sp)
-        }
-        TextButton(onClick = onTranslation) { Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 12.sp) }
-        CoralButton(nextLabel, onClick = onNext)
-        Text("Không gửi bản ghi tới AI. Nhận dạng giọng nói có thể dùng dịch vụ của thiết bị.", color = p.muted, fontSize = 11.sp)
-    }
+    // One approved conversation component tree for Sáng, Tối and Neon.
+    // Only theme colors and depth differ; navigation and speech stay unchanged.
+    NeonConversationScreen(lesson, turnIndex, translation, transcript, capturePhase,
+        status, learner, nextLabel, onBack, onPrompt, onReply, onSpeak,
+        onTranslation, onNext, voiceChoice, onVoiceSettings, explanationLanguage,
+        onTypedText, neonTheme = neon)
 }
 @Composable
 internal fun ReviewScreen(lesson: Lesson, progress: LessonProgress, selection: Int, transcript: String, capturePhase: String, status: String, learner: Learner,

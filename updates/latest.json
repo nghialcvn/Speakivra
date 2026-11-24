@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.0.2-beta",
+    "tag_name": "v1.0.3-beta",
     "draft": false,
-    "body": "# Speakivra V1.0.2 Beta — Đồng bộ Neon theo hai ảnh được duyệt\n\nĐây là bản cập nhật giao diện, lấy hai ảnh **Trang chủ** và **Luyện nghe & nói** (ngày 24/11/2026) làm chuẩn màu sắc, ánh sáng và độ nổi. **Không thay đổi nội dung bài học, luồng chức năng, bố cục đã duyệt hoặc dữ liệu học hiện có.**\n\n## Thiết kế Neon chuẩn\n- Nền xanh đêm với dải sóng cyan, xanh lam, tím liền mạch phủ trọn màn hình, kể cả dưới thanh tab; thêm đường sáng mảnh ở đầu màn hình để biểu tượng thương hiệu hòa vào nền.\n- Phối màu chung: cyan sáng và viền phát quang, xanh lam hoàng gia, tím violet, chữ trắng và phần mô tả xanh bạc nhạt.\n- Thẻ kính tối nổi có viền cyan–tím, bóng đổ và lớp gradient sâu; áp dụng trên Trang chủ, Bài học A1/A2, Luyện nói, Hội thoại, Tiến độ, Cài đặt và các thẻ chung.\n- Logo đầu trang vẽ trực tiếp trên nền, không còn một ảnh vuông trắng đặt đè. Tai nghe vẽ biểu tượng 3D cyan/tím trên nền trong suốt.\n- Nút **Tiếp tục học** chuyển từ màu cam sang gradient xanh cyan–lam–tím phát sáng cùng phong cách toàn app.\n- Nút micro chính trong Luyện nghe & nói và Hội thoại cùng màu cầu xanh–tím sáng; icon micro trắng dễ đọc.\n- Icon **Luyện nói** trong thanh tab dưới mang hình micro bạc kiểu cổ điển của ảnh mẫu. Chỉ dùng trong Neon, không thay đổi icon Sáng/Tối.\n- Thanh tiến độ, ô lựa chọn Tự động/Thủ công, Nghe mẫu, thẻ **Mẹo luyện âm** và ô hội thoại được đồng bộ màu/độ nổi.\n- Cài đặt bốn nhóm thu gọn được giữ nguyên hành vi chỉ mở một nhóm và cùng cấu trúc ở cả ba theme; Neon dùng kính bóng đồng nhất, Sáng/Tối giữ màu cũ.\n\n## An toàn nâng cấp\n- Phiên bản **1.0.2** (`versionCode 22`), dùng applicationId và khóa ký release hiện có.\n- Dữ liệu tiến độ, hồ sơ, A1/A2, bộ phát âm/TTS, chế độ Anh-Việt/Anh-Anh, nhắc học và cập nhật trong app không bị di chuyển hoặc đặt lại.\n- Không đổi lời thoại, nhãn chức năng, logic phát âm hoặc ngưỡng chuyển câu.\n- Chỉ xuất bản signed APK khi unit test, lint, kiểm tra chữ ký và Android Emulator UI review đạt.\n",
+    "body": "# Speakivra V1.0.3 Beta\n\n- Thêm nút loa sát avatar để nghe lại chính giọng vừa ghi trong câu hiện tại. Không tự phát; ghi lại thay thế bản cũ; đổi câu, thoát bài hoặc đưa ứng dụng xuống nền sẽ hủy bản ghi. Âm thanh chỉ nằm trong RAM, không ghi vào thư viện hay file lâu dài.\n- Android 13 trở lên: ghi âm từ micro rồi đưa cùng âm thanh đó vào dịch vụ nhận dạng Android. Nhấn micro lần nữa để kết thúc, tối đa 60 giây. Việc nhận dạng phụ thuộc dịch vụ/ngôn ngữ được cài và có thể cần mạng. Android 8–12 giữ cơ chế nhận dạng trước đây; nghe lại bản ghi chưa được hỗ trợ trên các phiên bản này.\n- Khung kết quả theo thứ tự avatar, loa, lời nhận dạng in nghiêng, kết quả đạt/chưa đạt. Kết quả lấy từ cơ chế đối chiếu từ đang dùng; đây không phải điểm đánh giá âm học.\n- Giữ ID cố định cho từng câu và lượt hội thoại, cùng bản đồ di chuyển tiến độ từ V1.0.2. Khi thêm câu vào bài đã hoàn thành, bài chuyển thành Tiếp tục học và mở đúng câu chưa học; các lượt hoàn thành cũ vẫn giữ nguyên.\n- Neon dùng hình tai nghe, logo và micro bạc cổ điển nền trong suốt theo ảnh tham chiếu; tăng lớp sáng kính cyan–tím, đồng bộ micro cầu và hai dải sóng âm. Hiện thanh điều hướng năm mục trên màn luyện nói.\n- Giữ nguyên toàn bộ 15 chủ đề A1/300 câu/100 lượt hội thoại và nội dung A2, hồ sơ, package và khóa ký. Phiên bản 1.0.3, versionCode 23.\n\nChỉ phát hành APK từ workflow release có unit test, lint, xác minh chữ ký và kiểm thử Emulator thành công; ảnh chụp giao diện phải được xem trước khi xuất bản.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.0.2-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.2-beta/Speakivra-v1.0.2-release.apk",
-        "size": 13034756,
-        "digest": "sha256:d4bd7645f372d03e06cebe792b8e9dc387fb9b275195dd1a9165b63bcb1ece60"
+        "name": "Speakivra-v1.0.3-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.3-beta/Speakivra-v1.0.3-release.apk",
+        "size": 13251907,
+        "digest": "sha256:e14dea17826b73538ed40b5009b87f47e956c412c656db61012d246ddfb81751"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 22,
-    "versionName": "1.0.2",
-    "apkName": "Speakivra-v1.0.2-release.apk",
-    "apkSha256": "d4bd7645f372d03e06cebe792b8e9dc387fb9b275195dd1a9165b63bcb1ece60",
+    "versionCode": 23,
+    "versionName": "1.0.3",
+    "apkName": "Speakivra-v1.0.3-release.apk",
+    "apkSha256": "e14dea17826b73538ed40b5009b87f47e956c412c656db61012d246ddfb81751",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

@@ -57,43 +57,49 @@ internal class SpeechCapture(
         releaseEngine()
         val attempt = generation
         var streamingStarted = false
+        var providerReady = false
         try {
             val live = if (usePipe && Build.VERSION.SDK_INT >= 33) RecognitionAudioPipe().also { pipe = it } else null
             val engine = SpeechRecognizer.createSpeechRecognizer(context)
             recognizer = engine
             engine.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
-                    if (current(token, attempt) && live == null)
-                        update(phase, null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
+                    if (!current(token, attempt)) return
+                    providerReady = true
+                    if (live == null) update(phase, null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
                 }
                 override fun onBeginningOfSpeech() = Unit
                 override fun onRmsChanged(rmsdB: Float) = Unit
                 override fun onBufferReceived(buffer: ByteArray?) = Unit
                 override fun onEndOfSpeech() {
                     if (!current(token, attempt)) return
-                    if (live != null && !streamingStarted && phase == "listening") beginRecognition(token, usePipe = false)
-                    else processing(token)
+                    processing(token)
                 }
                 override fun onPartialResults(partialResults: Bundle?) {
-                    if (current(token, attempt) && (live == null || capturing))
-                        update(phase, words(partialResults), "Đang nhận dạng…")
+                    if (!current(token, attempt)) return
+                    val text = words(partialResults)
+                    if (!streamingStarted && !text.isNullOrBlank()) {
+                        // Only silence has been sent to the pipe so far. These words
+                        // came from the provider's own mic; do not interrupt it at the
+                        // capability deadline or start a competing recorder.
+                        probe?.let(handler::removeCallbacks); probe = null
+                    }
+                    update(phase, text, "Đang nhận dạng…")
                 }
                 override fun onResults(results: Bundle?) {
                     if (!current(token, attempt)) return
-                    if (live != null && !streamingStarted && phase == "listening") {
-                        beginRecognition(token, usePipe = false)
-                        return
-                    }
+                    // A provider that ignores the pipe may already have captured
+                    // the learner using its own microphone. Preserve its REAL result;
+                    // restarting here would discard the words the learner just spoke.
                     val text = words(results).orEmpty()
                     finish(token, text, if (text.isBlank()) "Chưa nhận được lời nói. Chạm micro để thử lại."
-                        else if (live == null) "Đã nhận dạng. Dịch vụ trên máy không cung cấp âm thanh để nghe lại."
+                        else if (!streamingStarted) "Đã nhận dạng. Dịch vụ trên máy không cung cấp âm thanh để nghe lại."
                         else "Đã nhận dạng lời nói. Đây chưa phải điểm phát âm.")
                 }
                 override fun onError(error: Int) {
                     if (!current(token, attempt)) return
                     if (live != null && !streamingStarted && phase == "listening" && error in setOf(
-                            SpeechRecognizer.ERROR_CLIENT, SpeechRecognizer.ERROR_AUDIO,
-                            SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT)) {
+                            SpeechRecognizer.ERROR_CLIENT, SpeechRecognizer.ERROR_AUDIO)) {
                         beginRecognition(token, usePipe = false)
                         return
                     }
@@ -143,9 +149,11 @@ internal class SpeechCapture(
                             }
                         } else if (SystemClock.elapsedRealtime() >= deadline) {
                             probe = null
-                            // This provider ignores EXTRA_AUDIO_SOURCE. Restore the original
-                            // microphone recognizer immediately, before asking the learner to speak.
-                            beginRecognition(token, usePipe = false)
+                            // An unsupported provider opens its own mic. If it is ready,
+                            // keep that SAME session: restarting could lose a long sentence
+                            // before its first partial/final result. Never open AudioRecord here.
+                            if (providerReady) update("listening", null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
+                            else beginRecognition(token, usePipe = false)
                         } else handler.postDelayed(this, 50)
                     }
                 }.also { handler.post(it) }

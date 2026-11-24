@@ -74,7 +74,22 @@ class RecognitionFlowTest {
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
         } finally { ui.runOnUiThread { capture.cancel() } }
     }
-    @Test fun providerIgnoringExternalAudioFallsBackToTheOriginalMicrophoneRecognition() = withProvider(true) {
+    @Test fun ignoredPipeMustNotDiscardRealWordsAlreadyCapturedByTheProviderMicrophone() = withProvider(true) {
+        fixture("nativeResultsWithPipe")
+        fixture("answer", "Hello there.")
+        val capture = installPractice()
+        try {
+            ui.runOnUiThread { capture.start() }
+            ui.waitUntil(10000) { capture.phase == "idle" }
+            assertEquals("Do not restart recognition after receiving real words", 0, fixture("stats").getInt("directStarts"))
+            assertEquals(0, fixture("stats").getInt("liveBytes"))
+            ui.onAllNodesWithText("Hello there.").assertCountEquals(2)
+            ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
+            assertColors(expectedGreen = 2, expectedRed = 0)
+            ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
+        } finally { ui.runOnUiThread { capture.cancel() } }
+    }
+    @Test fun providerRejectingExternalAudioFallsBackToTheOriginalMicrophoneRecognition() = withProvider(true) {
         val capture = installPractice()
         try {
             fixture("answer", "Hello there.")
@@ -96,8 +111,10 @@ class RecognitionFlowTest {
         shell("pm grant ${instrumentation.targetContext.packageName} ${Manifest.permission.RECORD_AUDIO}")
         shell("settings put secure voice_recognition_service $component")
         shell("pm grant ${instrumentation.context.packageName} ${Manifest.permission.RECORD_AUDIO}")
-        fixture("configure", ignore.toString())
-        try { test() } finally {
+        try {
+            fixture("configure", ignore.toString())
+            test()
+        } finally {
             if (old.isBlank() || old == "null") shell("settings delete secure voice_recognition_service")
             else shell("settings put secure voice_recognition_service $old")
         }

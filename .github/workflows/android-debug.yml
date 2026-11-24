@@ -140,7 +140,8 @@ jobs:
             adb install -r dist/*.apk
             adb install -r -t app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
             adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
-            adb shell am instrument -w com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
+            adb shell am instrument -w -e notClass com.nghialcvn.speakivra.RealSpeechProviderProbeTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
+            adb shell am instrument -w -e class com.nghialcvn.speakivra.RealSpeechProviderProbeTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee real-speech-provider-probe.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
             python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 2 and "FAILURES!!!" not in s, s'
@@ -153,6 +154,7 @@ jobs:
             ui-review/**
             ui-test-output.txt
             ui-recognition-provider.txt
+            real-speech-provider-probe.txt
             app/build/reports/androidTests/**
             app/build/outputs/androidTest-results/**
           if-no-files-found: warn

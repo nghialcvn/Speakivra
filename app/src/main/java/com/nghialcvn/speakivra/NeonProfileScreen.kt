@@ -97,6 +97,7 @@ internal fun NeonProfileScreen(
     onNeon: () -> Unit,
     onVoice: () -> Unit,
     onAccent: (String) -> Unit,
+    onGender: (String) -> Unit,
     onExplanationLanguage: (String) -> Unit,
     onSpeed: () -> Unit,
     onGoal: () -> Unit,
@@ -163,7 +164,30 @@ internal fun NeonProfileScreen(
                         }
                     }
                 }
-                Text("Chọn giọng nam/nữ và nghe thử trong Giọng đọc & Ngôn ngữ.",
+                Text("Giọng đọc AI (TTS)", color = neonWhite, fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("female" to "Giọng nữ", "male" to "Giọng nam").forEach { (gender, label) ->
+                        val active = voiceChoice.gender == gender
+                        Column(Modifier.weight(1f).clip(RoundedCornerShape(13.dp))
+                            .background(if (active) Color(0xFF163D65) else Color(0xFF12213B))
+                            .border(if (active) 2.dp else 1.dp,
+                                if (active) neonBlue else neonLine, RoundedCornerShape(13.dp))
+                            .clickable(role = Role.RadioButton) { onGender(gender) }
+                            .semantics { selected = active }
+                            .padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                            StudioIcon("speaker", Modifier.size(29.dp),
+                                if (active) neonBlue else neonGrey)
+                            Text(label, color = neonWhite, fontWeight = FontWeight.Bold)
+                            RadioButton(selected = active, onClick = null,
+                                colors = RadioButtonDefaults.colors(selectedColor = neonBlue))
+                        }
+                    }
+                }
+                TextButton(onClick = onVoice, modifier = Modifier.fillMaxWidth()) {
+                    Text("Nghe thử và chọn giọng ngoại tuyến trên máy", color = neonBlue)
+                }
+                Text("Android không cung cấp giới tính TTS đáng tin cậy: hãy nghe thử rồi gán giọng phù hợp.",
                     color = neonGrey, fontSize = 11.sp)
             }
             NeonSettingsTile("sliders", "Tùy chỉnh bài học",

@@ -48,8 +48,8 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Spacer(Modifier.weight(1f))
-            Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra",
-                Modifier.size(85.dp))
+            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra",
+                Modifier.size(112.dp))
             Text("Ai học hôm nay?", fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold)
             Text("Lần đầu sử dụng Speakivra, hãy tạo hồ sơ để bắt đầu.",
@@ -68,7 +68,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
     var selected by rememberSaveable { mutableStateOf(initial ?: learners.first().id) }
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.align(Alignment.CenterHorizontally).size(64.dp))
+            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.align(Alignment.CenterHorizontally).size(112.dp))
             Spacer(Modifier.height(8.dp))
             Text("Ai học hôm nay?", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.CenterHorizontally))
             Text("Chọn hồ sơ để tiếp tục", color = p.muted, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -81,7 +81,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                         .border(if (chosen) 1.5.dp else 1.dp, if (chosen) p.coral else p.border, RoundedCornerShape(18.dp)))
                     .clickable(role = Role.RadioButton) { selected = learner.id }.semantics { this.selected = chosen }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    LearnerAvatar(learner.avatar, Modifier.size(64.dp))
+                    LearnerAvatar(learner.avatar, Modifier.size(112.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                         StudioProgress(done.toFloat() / total)

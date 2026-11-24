@@ -63,6 +63,24 @@ class RecognitionFlowTest {
             ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
         } finally { ui.runOnUiThread { capture.cancel() } }
     }
+    @Test fun recognizedAgeDigitsMatchTheActualLessonAndUnlockNext() = withProvider(false) {
+        val reference = "I am twenty-five years old."
+        val capture = installPractice(reference)
+        try {
+            fixture("answer", "I am 25 years old")
+            ui.runOnUiThread { capture.start() }
+            ui.waitUntil(15000) { capture.phase == "idle" }
+            ui.onNodeWithText("I am 25 years old").assertIsDisplayed()
+            ui.onNodeWithContentDescription("Đạt đối chiếu lời nói").assertIsDisplayed()
+            ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
+            val sentence = ui.onNodeWithText(reference, useUnmergedTree = true).fetchSemanticsNode()
+                .config[SemanticsProperties.Text].single()
+            assertEquals(5, sentence.spanStyles.count { it.item.color == NeonStudio.correctWord })
+            ui.onNodeWithText("English (US)", substring = true).assertDoesNotExist()
+            ui.onNodeWithText("Giọng nữ", substring = false).assertDoesNotExist()
+            screenshot("25-neon-age-number-match")
+        } finally { ui.runOnUiThread { capture.cancel() } }
+    }
     @Test fun liveMicrophoneStopsOnSilenceWithoutASecondTap() = withProvider(false) {
         fixture("waitForEnd")
         fixture("answer", "Hello there.")
@@ -120,7 +138,7 @@ class RecognitionFlowTest {
             else shell("settings put secure voice_recognition_service $old")
         }
     }
-    private fun installPractice(): SpeechCapture {
+    private fun installPractice(reference: String = "Hello there."): SpeechCapture {
         var phase by mutableStateOf("idle")
         var final by mutableStateOf<String?>(null)
         var live by mutableStateOf("")
@@ -134,7 +152,9 @@ class RecognitionFlowTest {
             message = status
             lastCaptureMessage = status
         }
-        val lesson = Lessons.all.first().copy(phrases = listOf(Lessons.all.first().phrases.first().copy(english = "Hello there.")))
+        val phrase = Lessons.all.first().phrases.firstOrNull { it.english == reference }
+            ?: Lessons.all.first().phrases.first().copy(english = reference)
+        val lesson = Lessons.all.first().copy(phrases = listOf(phrase))
         ui.runOnUiThread {
             ui.activity.setContent {
                 SpeakivraTheme(false, true) {
@@ -142,7 +162,7 @@ class RecognitionFlowTest {
                         Surface(color = studio.background, modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                             PracticeScreen(lesson.copy(phrases = lesson.phrases + lesson.phrases), LessonProgress(), false, true,
                                 100, if (phase == "idle") final.orEmpty() else live, message, phase,
-                                matchWords("Hello there.", final), Learner("test", "Nghĩa", 0),
+                                matchWords(reference, final), Learner("test", "Nghĩa", 0),
                                 onBack = {}, onMode = {}, onSpeed = {}, onTranslation = {}, onListen = {},
                                 onSpeak = { capture.start() }, onNext = { capture.cancel(); final = null; live = "" })
                         }

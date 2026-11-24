@@ -103,6 +103,8 @@ class ApprovedUiTest {
         shot("18-neon-home")
         ui.onNodeWithText("Tiếp tục học").performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
+        ui.onNodeWithText("English (US)", substring = true).assertDoesNotExist()
+        ui.onNodeWithText("Giọng nữ", substring = false).assertDoesNotExist()
         ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
         ui.onNodeWithText("Chưa có lời nói nhận dạng").assertIsDisplayed()
         shot("19-neon-speaking")

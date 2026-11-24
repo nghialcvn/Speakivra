@@ -202,12 +202,9 @@ internal fun UnifiedSettingsScreen(
                         }
                         Text("V$version", color = p.muted, fontSize = 11.sp)
                     }
-                    UpdateMiniRow("speaker", "Nghe lại giọng vừa nói",
-                        "Nhấn loa cạnh avatar • bản ghi tạm")
-                    UpdateMiniRow("book", "Tiếp tục từ câu mới",
-                        "Giữ các câu và tiến độ đã học")
-                    UpdateMiniRow("layers", "Neon 3D và nền sóng",
-                        "Nền tràn màn hình, bóng kính xanh-tím")
+                    UpdateMiniRow("speaker", "Đối chiếu lời nói chính xác hơn")
+                    UpdateMiniRow("layers", "Logo lớn, nền trong suốt")
+                    UpdateMiniRow("sliders", "Luyện nói và cập nhật gọn hơn")
                 }
                 SettingsTile("phone", "Kiểm tra cập nhật",
                     "Phiên bản đang dùng: v$version", neon, onUpdates)
@@ -364,7 +361,7 @@ private fun GenderChip(text: String, selected: Boolean, neon: Boolean,
 }
 
 @Composable
-private fun UpdateMiniRow(icon: String, title: String, description: String) {
+private fun UpdateMiniRow(icon: String, title: String) {
     val p = studio
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -376,8 +373,6 @@ private fun UpdateMiniRow(icon: String, title: String, description: String) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold,
                 color = p.ink)
-            Text(description, color = p.muted, fontSize = 11.sp,
-                lineHeight = 15.sp)
         }
     }
 }

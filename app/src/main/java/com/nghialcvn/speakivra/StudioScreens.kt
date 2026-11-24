@@ -94,8 +94,8 @@ internal fun PageHeading(title: String, subtitle: String? = null, onBack: (() ->
 @Composable
 private fun Brand(modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        if (studio == NeonStudio) NeonBrandMark(Modifier.size(54.dp))
-        else Image(painterResource(R.drawable.speakivra_icon), "Logo Speakivra", Modifier.size(49.dp))
+        if (studio == NeonStudio) NeonBrandMark(Modifier.size(64.dp))
+        else Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(56.dp))
         Column {
             Text("Speakivra", fontWeight = FontWeight.ExtraBold, fontSize = 23.sp, color = studio.ink)
             Text("Listen. Speak. Improve.", color = studio.coral, fontStyle = FontStyle.Italic, fontSize = 11.sp)
@@ -385,7 +385,6 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Luyện nghe & nói", "${lessonLabel(lesson)} • Câu ${progress.phrase + 1}/${lesson.phrases.size}", onBack)
         StudioProgress((progress.phrase + 1f) / lesson.phrases.size)
-        VoiceSelectionChips(voiceChoice, onVoiceSettings)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             TwoChoices("Tự động", "Thủ công", automatic, onMode, Modifier.fillMaxWidth())
             StudioCard {

@@ -64,7 +64,7 @@ private fun UpdatesScreen(state: UpdateState, installation: Installation, onChec
         state.release?.let { item ->
             Text("Bản phát hành: v${item.version}", fontWeight = FontWeight.SemiBold)
             Text("Có gì mới:", color = p.coral)
-            Text(item.notes.ifBlank { "Chưa có ghi chú thay đổi." }, color = p.muted)
+            releaseHighlights(item.notes).forEach { Text("• $it", color = p.muted) }
             when (state.phase) {
                 "downloading" -> {
                     val percent = (state.bytes * 100 / item.size.coerceAtLeast(1)).coerceIn(0, 100)
@@ -89,7 +89,7 @@ private fun UpdatesScreen(state: UpdateState, installation: Installation, onChec
                 runCatching { context.startActivity(intent) }
             }) { Text("Mở GitHub Releases để tải thủ công") }
         }
-        Text("Tải trực tiếp trong ứng dụng, kiểm tra APK và chữ ký rồi mở trình cài đặt Android. Bạn xác nhận cài đặt; không cần tìm file trong thư mục tải xuống. Không gỡ app để giữ tiến độ học.", color = p.muted, fontSize = 12.sp)
+        Text("Cài đè bản mới để giữ hồ sơ và tiến độ.", color = p.muted, fontSize = 12.sp)
     }
 }
 
@@ -375,7 +375,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                 text = {
                     Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())) {
                         Text("Có gì mới", fontWeight = FontWeight.Bold)
-                        Text(available.notes.ifBlank { "Cải tiến và sửa lỗi ứng dụng." })
+                        releaseHighlights(available.notes).forEach { Text("• $it") }
                     }
                 },
                 confirmButton = { TextButton(onClick = { dismissedUpdate = available.versionCode; beginUpdate() }) { Text("Cập nhật ngay") } },

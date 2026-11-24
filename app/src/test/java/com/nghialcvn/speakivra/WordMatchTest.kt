@@ -37,4 +37,29 @@ class WordMatchTest {
         assertTrue(matchWords("I'm Đặng Minh.", "I'm Dang Minh").matched.all { it })
         assertFalse(matchWords("I'm Nghĩa.", "I'm Linh").matched.last())
     }
+    @Test fun screenshotAgeSentenceMatchesDigitsAndExpandedContractions() {
+        val reference = "I am twenty-five years old."
+        assertEquals(listOf(true, true, true, true, true), matchWords(reference, "I am 25 years old").matched)
+        assertEquals(listOf(true, true, true, true, true), matchWords(reference, "I'm twenty five years old").matched)
+        assertEquals(listOf(true, true, true, false, true), matchWords(reference, "I'm 25-year-old").matched)
+        assertTrue(matchWords(reference, "I'm 25-year-old").canContinue)
+        assertEquals(listOf(true, true, true, true, false), matchWords(reference, "I am 25 years").matched)
+        assertEquals(listOf(true, true, false, true, true), matchWords(reference, "I am 26 years old").matched)
+    }
+    @Test fun contractionsAreSymmetricAndMissingWordsStayWrong() {
+        for ((short, full) in listOf("I'm" to "I am", "You're" to "You are", "It's" to "It is", "don't" to "do not", "can't" to "cannot")) {
+            assertTrue(matchWords("$short here", "$full here").matched.all { it })
+            assertTrue(matchWords("$full here", "$short here").matched.all { it })
+        }
+        assertFalse(matchWords("I'm here", "I here").matched.first())
+        assertFalse(matchWords("I am here", "I here").matched[1])
+    }
+    @Test fun equivalentCardinalsKeepOriginalDisplayWordOwnership() {
+        assertEquals(listOf(true, true, true), matchWords("twenty five dollars", "25 dollars").matched)
+        assertTrue(matchWords("one hundred and five dollars", "105 dollars").matched.all { it })
+        assertTrue(matchWords("one thousand two hundred dollars", "1,200 dollars").matched.all { it })
+        assertTrue(matchWords("105 dollars", "one hundred five dollars").matched.all { it })
+        assertEquals(1, matchWords("five five", "5").matched.count { it })
+        assertFalse(matchWords("25", "twenty six").matched.single())
+    }
 }

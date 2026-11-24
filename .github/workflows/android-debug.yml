@@ -94,7 +94,19 @@ jobs:
         run: |
           UI_TASKS=()
           if [ "$UI_CHECK" = true ]; then UI_TASKS=(:app:assembleReleaseAndroidTest); fi
-          gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}" "${UI_TASKS[@]}"
+          # Maven Central can intermittently return HTTP 429 on fresh runners.
+          # Retry only that transient infrastructure error, not compilation or tests.
+          for attempt in 1 2 3; do
+            if gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}" "${UI_TASKS[@]}" > build-attempt.log 2>&1; then
+              cat build-attempt.log
+              break
+            fi
+            cat build-attempt.log
+            if ! grep -Eq 'status code 429|Too Many Requests' build-attempt.log || [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 12))
+          done
       - name: Verify APK and create update metadata
         env:
           SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}

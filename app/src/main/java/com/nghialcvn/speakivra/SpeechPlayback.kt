@@ -32,9 +32,10 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     private var closed = false
     private var session = 0L
     private var lastUtterance: String? = null
-    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long, val choice: VoiceChoice)
+    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long, val choice: VoiceChoice, val repeats: Int = 1)
     private var pending: Request? = null
     private var defaultVoice: Voice? = null
+    private var remainingAudioRepeats = 0
 
     /** User confirms gender by listening; Android TTS does not report voice gender. */
     fun installedVoices(accent: String): List<InstalledSpeechVoice> {
@@ -105,14 +106,16 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             }
         }
     }
-    fun speak(text: String, speed: Int, choice: VoiceChoice = VoiceChoice()) {
+    fun speak(text: String, speed: Int, choice: VoiceChoice = VoiceChoice(), repeatCount: Int = 1) {
         if (closed || text.isBlank()) return
         stop()
         val token = session
         hasFocus = runCatching { audio.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED }.getOrDefault(false)
         if (!hasFocus) { status("Chưa thể phát âm thanh lúc này. Hãy thử nghe lại."); return }
         val profile = SpeechProfiles.forText(text)
-        if (!choice.usesBundledAudio) { fallback(Request(profile, speed, token, choice)); return }
+        val count = repeatCount.coerceIn(1, 3)
+        remainingAudioRepeats = count - 1
+        if (!choice.usesBundledAudio) { fallback(Request(profile, speed, token, choice, count)); return }
         val resource = when (profile.clip) {
             "voice_greeting" -> R.raw.voice_greeting
             "voice_thanks" -> R.raw.voice_thanks
@@ -226,19 +229,27 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             "voice_conversation_110" -> R.raw.voice_conversation_110
             else -> 0
         }
-        if (resource == 0) { fallback(Request(profile, speed, token, choice)); return }
+        if (resource == 0) { fallback(Request(profile, speed, token, choice, count)); return }
         try {
             val created = MediaPlayer.create(app, resource, attributes, AudioManager.AUDIO_SESSION_ID_GENERATE)
                 ?: error("Cannot open bundled audio")
             player = created
             created.setOnCompletionListener { completed ->
                 if (!closed && token == session && player === completed) {
-                    releasePlayer(); releaseFocus(); status("Đã phát xong. Nhấn Nói để luyện tập.", token)
+                    if (remainingAudioRepeats > 0) {
+                        remainingAudioRepeats--
+                        runCatching { completed.seekTo(0); completed.start() }.onFailure {
+                            releasePlayer(); releaseFocus()
+                            status("Không thể phát lại mẫu giọng.", token)
+                        }
+                    } else {
+                        releasePlayer(); releaseFocus(); status("Đã phát xong. Nhấn Nói để luyện tập.", token)
+                    }
                 }
             }
             created.setOnErrorListener { failed, _, _ ->
                 if (!closed && token == session && player === failed) {
-                    releasePlayer(); fallback(Request(profile, speed, token, choice))
+                    releasePlayer(); fallback(Request(profile, speed, token, choice, count))
                 }
                 true
             }
@@ -274,15 +285,20 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
         }
         try {
             val prefix = "speech-${request.session}-"
-            lastUtterance = prefix + request.profile.parts.lastIndex
+            lastUtterance = prefix + "repeat-" + (request.repeats - 1) + "-" + request.profile.parts.lastIndex
             tts.stop()
             check(tts.setVoice(selected) == TextToSpeech.SUCCESS)
-            request.profile.parts.forEachIndexed { index, part ->
-                check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)
-                check(tts.setSpeechRate(SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)
-                check(tts.speak(part.text, TextToSpeech.QUEUE_ADD, null, prefix + index) == TextToSpeech.SUCCESS)
-                if (part.pauseAfterMs > 0 && index < request.profile.parts.lastIndex) {
-                    check(tts.playSilentUtterance(part.pauseAfterMs, TextToSpeech.QUEUE_ADD, prefix + "gap-$index") == TextToSpeech.SUCCESS)
+            repeat(request.repeats) { round ->
+                request.profile.parts.forEachIndexed { index, part ->
+                    check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)
+                    check(tts.setSpeechRate(SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)
+                    check(tts.speak(part.text, TextToSpeech.QUEUE_ADD, null, prefix + "repeat-$round-$index") == TextToSpeech.SUCCESS)
+                    if (part.pauseAfterMs > 0 && index < request.profile.parts.lastIndex) {
+                        check(tts.playSilentUtterance(part.pauseAfterMs, TextToSpeech.QUEUE_ADD, prefix + "gap-$round-$index") == TextToSpeech.SUCCESS)
+                    }
+                }
+                if (round < request.repeats - 1) {
+                    check(tts.playSilentUtterance(350L, TextToSpeech.QUEUE_ADD, prefix + "between-$round") == TextToSpeech.SUCCESS)
                 }
             }
         } catch (_: Exception) {
@@ -300,7 +316,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     }
     fun stop(notify: Boolean = false) {
         val wasActive = player != null || pending != null || lastUtterance != null
-        session++; pending = null; lastUtterance = null
+        session++; pending = null; lastUtterance = null; remainingAudioRepeats = 0
         releasePlayer(); runCatching { engine?.stop() }; releaseFocus()
         if (notify && wasActive) status("Đã dừng giọng đọc.")
     }

@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.0.3-beta",
+    "tag_name": "v1.0.4-beta",
     "draft": false,
-    "body": "# Speakivra V1.0.3 Beta\n\n- Thêm nút loa sát avatar để nghe lại chính giọng vừa ghi trong câu hiện tại. Không tự phát; ghi lại thay thế bản cũ; đổi câu, thoát bài hoặc đưa ứng dụng xuống nền sẽ hủy bản ghi. Âm thanh chỉ nằm trong RAM, không ghi vào thư viện hay file lâu dài.\n- Android 13 trở lên: ghi âm từ micro rồi đưa cùng âm thanh đó vào dịch vụ nhận dạng Android. Nhấn micro lần nữa để kết thúc, tối đa 60 giây. Việc nhận dạng phụ thuộc dịch vụ/ngôn ngữ được cài và có thể cần mạng. Android 8–12 giữ cơ chế nhận dạng trước đây; nghe lại bản ghi chưa được hỗ trợ trên các phiên bản này.\n- Khung kết quả theo thứ tự avatar, loa, lời nhận dạng in nghiêng, kết quả đạt/chưa đạt. Kết quả lấy từ cơ chế đối chiếu từ đang dùng; đây không phải điểm đánh giá âm học.\n- Giữ ID cố định cho từng câu và lượt hội thoại, cùng bản đồ di chuyển tiến độ từ V1.0.2. Khi thêm câu vào bài đã hoàn thành, bài chuyển thành Tiếp tục học và mở đúng câu chưa học; các lượt hoàn thành cũ vẫn giữ nguyên.\n- Neon dùng hình tai nghe, logo và micro bạc cổ điển nền trong suốt theo ảnh tham chiếu; tăng lớp sáng kính cyan–tím, đồng bộ micro cầu và hai dải sóng âm. Hiện thanh điều hướng năm mục trên màn luyện nói.\n- Giữ nguyên toàn bộ 15 chủ đề A1/300 câu/100 lượt hội thoại và nội dung A2, hồ sơ, package và khóa ký. Phiên bản 1.0.3, versionCode 23.\n\nChỉ phát hành APK từ workflow release có unit test, lint, xác minh chữ ký và kiểm thử Emulator thành công; ảnh chụp giao diện phải được xem trước khi xuất bản.\n",
+    "body": "# Speakivra V1.0.4 Beta — Khôi phục mic tự dừng sau khi nói\n\n- Sửa hồi quy V1.0.3: khi người học nói xong và ngừng khoảng 1,4 giây, micro tự dừng rồi gửi bản ghi thật vào dịch vụ nhận dạng Android. Không cần bấm dừng để được hiện lời nhận dạng. Nút micro vẫn có thể dùng để dừng sớm.\n- Giữ lời nhận dạng in nghiêng, tô màu từ và kết quả đạt/chưa đạt theo cơ chế đối chiếu hiện có; không tạo lời nói hay kết quả giả. Thời gian trả chữ phụ thuộc dịch vụ nhận dạng trên máy và kết nối của dịch vụ đó.\n- Nếu chưa nói, mic tự kết thúc sau khoảng 8 giây; một lượt tối đa 60 giây. Khoảng ngừng ngắn bên trong câu không làm kết thúc ngay; tiếng động rất ngắn không được tính là một câu nói.\n- Giữ nút loa cạnh avatar: chỉ nghe lại khi nhấn, không tự phát; bản ghi tạm chỉ nằm trong RAM và bị hủy khi đổi câu, thoát bài hoặc ghi lại. Nghe lại vẫn hỗ trợ Android 13 trở lên; Android cũ giữ nhận dạng do hệ thống tự kết thúc.\n- Giữ nguyên giao diện đã duyệt, nội dung A1/A2, hồ sơ, tiến độ, application ID và khóa ký. Phiên bản 1.0.4, versionCode 24; cài đè bản cũ.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.0.3-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.3-beta/Speakivra-v1.0.3-release.apk",
-        "size": 13251907,
-        "digest": "sha256:e14dea17826b73538ed40b5009b87f47e956c412c656db61012d246ddfb81751"
+        "name": "Speakivra-v1.0.4-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.4-beta/Speakivra-v1.0.4-release.apk",
+        "size": 13251904,
+        "digest": "sha256:ef7cc6a6d43733f1e29db2148519374bb49f164d76cb5090972edd60e91d7829"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 23,
-    "versionName": "1.0.3",
-    "apkName": "Speakivra-v1.0.3-release.apk",
-    "apkSha256": "e14dea17826b73538ed40b5009b87f47e956c412c656db61012d246ddfb81751",
+    "versionCode": 24,
+    "versionName": "1.0.4",
+    "apkName": "Speakivra-v1.0.4-release.apk",
+    "apkSha256": "ef7cc6a6d43733f1e29db2148519374bb49f164d76cb5090972edd60e91d7829",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

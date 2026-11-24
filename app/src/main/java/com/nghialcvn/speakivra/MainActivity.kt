@@ -482,17 +482,26 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") })
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
+                            "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, finalTranscript.orEmpty(), status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next,
-                                voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings)
+                                voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings,
+                                explanationLanguage = explanationLanguage)
                             "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, finalTranscript.orEmpty(), capturePhase, status, learner,
                                 nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
                                 }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
                                 onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
-                                onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings, neon = neon, onNext = {
+                                onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice,
+                                onVoiceSettings = ::openVoiceSettings, neon = neon,
+                                explanationLanguage = explanationLanguage,
+                                onTypedText = { typed ->
+                                    transcript = typed
+                                    finalTranscript = typed
+                                    status = "Câu trả lời bạn đã nhập, chưa qua nhận dạng giọng nói."
+                                }, onNext = {
                                     stopCapture(); speech.stop()
                                     if (progress.phase in listOf("repeat", "chat")) {
                                         saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase
@@ -503,12 +512,19 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 })
                             "review" -> ReviewScreen(lesson, progress, reviewSelection, finalTranscript.orEmpty(), capturePhase, status, learner,
                                 onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate("home") },
-                                onListen = { speak(reviewQuestion(lesson, progress.review).phrase.english) }, onSpeak = ::listen,
+                                onListen = {
+                                    speak(if (explanationLanguage == LearningOptions.ENGLISH)
+                                        EnglishStudy.review(lesson, progress.review).prompt
+                                        else reviewQuestion(lesson, progress.review).phrase.english)
+                                }, onSpeak = ::listen,
+                                explanationLanguage = explanationLanguage,
                                 onNext = {
                                     if (reviewSelection >= 0) {
                                         stopCapture(); speech.stop()
-                                        val question = reviewQuestion(lesson, progress.review)
-                                        val value = progress.answerReview(reviewSelection == question.answer)
+                                        val answer = if (explanationLanguage == LearningOptions.ENGLISH)
+                                            EnglishStudy.review(lesson, progress.review).answer
+                                        else reviewQuestion(lesson, progress.review).answer
+                                        val value = progress.answerReview(reviewSelection == answer)
                                         if (value.rounds > progress.rounds) completed++
                                         saveProgress(value); reviewSelection = -1; transcript = ""; page = progress.phase
                                     }
@@ -538,8 +554,14 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 choice = voiceChoice,
                                 available = speech.installedVoices(voiceChoice.accent),
                                 speed = playbackSpeed,
+                                explanationLanguage = explanationLanguage,
                                 message = status,
                                 onBack = { navigate(voiceReturnPage) },
+                                onExplanationLanguage = {
+                                    LearningOptions.setLanguage(preferences, it)
+                                    explanationLanguage = it
+                                },
+                                onSpeed = ::selectSpeed,
                                 onAccent = { changeVoice(accent = it) },
                                 onGender = { changeVoice(gender = it) },
                                 onAssign = { id ->
@@ -564,14 +586,40 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                     status = "Đã khôi phục giọng nữ neural Anh-Mỹ gốc."
                                 }
                             )
-                            "profile" -> ProfileScreen(dark, playbackSpeed, goal, APP_VERSION, learner, onEditLearner = { navigate("edit-profile") }, onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
-                                onTheme = { dark = it; neon = false; appearance.edit().putBoolean("dark_theme", it).putBoolean("neon_theme", false).apply() },
-                                neon = neon, onNeon = {
+                            "profile" -> ProfileScreen(
+                                dark = dark, speed = playbackSpeed, goal = goal,
+                                version = APP_VERSION, learner = learner,
+                                onEditLearner = { navigate("edit-profile") },
+                                onSwitchLearner = { stopCapture(); speech.stop(); onSwitchLearner() },
+                                onTheme = {
+                                    dark = it; neon = false
+                                    appearance.edit().putBoolean("dark_theme", it)
+                                        .putBoolean("neon_theme", false).apply()
+                                },
+                                neon = neon,
+                                onNeon = {
                                     neon = true
                                     appearance.edit().putBoolean("neon_theme", true).apply()
                                 },
-                                onVoice = ::openVoiceSettings, onSpeed = { settingDialog = "speed" },
-                                onGoal = { settingDialog = "goal" }, onUpdates = { page = "updates"; updates.check() }, voiceChoice = voiceChoice)
+                                onVoice = ::openVoiceSettings,
+                                onSpeed = { settingDialog = "speed" },
+                                onGoal = { settingDialog = "goal" },
+                                onUpdates = { page = "updates"; updates.check() },
+                                voiceChoice = voiceChoice,
+                                explanationLanguage = explanationLanguage,
+                                repeatCount = sampleRepeats,
+                                reminderEnabled = reminderEnabled,
+                                onBack = { navigate("home") },
+                                onAccent = { changeVoice(accent = it) },
+                                onExplanationLanguage = {
+                                    LearningOptions.setLanguage(preferences, it)
+                                    explanationLanguage = it
+                                },
+                                onStudyOptions = { settingDialog = "study" },
+                                onReminderToggle = ::toggleReminder,
+                                onSound = { settingDialog = "sound" },
+                                onAbout = { settingDialog = "about" }
+                            )
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
                                 UpdatesScreen(updateState, installation, updates::check, ::beginUpdate, ::requestInstall, updates::cancel)
@@ -579,7 +627,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         }
                     }
                 }
-                if (page !in listOf("repeat", "edit-profile", "voice-settings")) StudioBottomNavigation(page, ::navigate)
+                if (page !in listOf("repeat", "edit-profile", "voice-settings") &&
+                    !(neon && page == "chat")) StudioBottomNavigation(page) { dest ->
+                    if (dest == "lessons") selectedLevel = "A1"
+                    navigate(dest)
+                }
             }
         }
     }

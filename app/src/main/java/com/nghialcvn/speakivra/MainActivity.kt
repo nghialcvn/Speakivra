@@ -470,8 +470,13 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                 }
             )
         }
-        Surface(color = palette.background, contentColor = palette.ink, modifier = Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+        Surface(color = if (neon) Color.Transparent else palette.background,
+            contentColor = palette.ink, modifier = Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize()) {
+                // One full-screen background behind scroll content and the bottom five tabs.
+                // Never attach the wave to a short scrolling panel.
+                if (neon) NeonWaveBackground(Modifier.matchParentSize())
+                Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     // Each screen owns its scroll area; speaking/review keep the next action visible.
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
@@ -633,6 +638,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                     if (dest == "lessons") selectedLevel = "A1"
                     navigate(dest)
                 }
+                }
             }
         }
     }
@@ -648,7 +654,7 @@ private fun updateSystemBars(activity: ComponentActivity, dark: Boolean, color: 
     activity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(color.toArgb()))
     activity.window.decorView.setBackgroundColor(color.toArgb())
     activity.window.statusBarColor = color.toArgb()
-    activity.window.navigationBarColor = color.toArgb()
+    activity.window.navigationBarColor = if (color == NeonStudio.background) transparent else color.toArgb()
     WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
         isAppearanceLightStatusBars = !dark
         isAppearanceLightNavigationBars = !dark

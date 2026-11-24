@@ -126,7 +126,7 @@ class ApprovedUiTest {
         shot("06-settings")
         // Approved neon voice screen: language, voice label, preserved profile settings.
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performClick()
-        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").assertIsDisplayed()
+        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Anh – Việt").assertIsDisplayed()
         ui.onNodeWithText("Anh – Anh").assertIsDisplayed()
         shot("15-neon-voice-settings")
@@ -157,7 +157,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Thông báo nhắc học").performScrollTo().assertIsDisplayed()
         shot("16-neon-settings")
         ui.onNodeWithText("Sáng", substring = false).performClick()
-        ui.onNodeWithText("Kiểm tra cập nhật").performClick()
+        ui.onNodeWithText("Kiểm tra cập nhật").performScrollTo().performClick()
         ui.onNodeWithText("Phiên bản đang dùng: v${BuildConfig.VERSION_NAME}").assertIsDisplayed()
         shot("08-updates")
         // Neither theme changes nor navigation resets the saved phrase/review position.

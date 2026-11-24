@@ -75,8 +75,10 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             learners.forEach { learner ->
                 val chosen = learner.id == selected
                 val (done, total) = store.learned(learner)
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (chosen) p.peach.copy(alpha = .35f) else p.card)
-                    .border(if (chosen) 1.5.dp else 1.dp, if (chosen) p.coral else p.border, RoundedCornerShape(18.dp))
+                Row(Modifier.fillMaxWidth().then(if (p == NeonStudio) Modifier.neonGlass(18, chosen)
+                    else Modifier.clip(RoundedCornerShape(18.dp))
+                        .background(if (chosen) p.peach.copy(alpha = .35f) else p.card)
+                        .border(if (chosen) 1.5.dp else 1.dp, if (chosen) p.coral else p.border, RoundedCornerShape(18.dp)))
                     .clickable(role = Role.RadioButton) { selected = learner.id }.semantics { this.selected = chosen }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                     LearnerAvatar(learner.avatar, Modifier.size(64.dp))

@@ -26,7 +26,6 @@ import kotlin.concurrent.thread
 /** Runs separately from deterministic tests. NO fixture provider or supplied transcript:
  * feeds an existing spoken lesson clip to the emulator's actual configured recognizer.
  * A failure is retained as evidence, never counted as a successful speech test. */
-@androidx.annotation.RequiresApi(33)
 @androidx.test.filters.SdkSuppress(minSdkVersion = 33)
 class RealSpeechProviderProbeTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()

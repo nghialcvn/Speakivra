@@ -147,7 +147,7 @@ class ApprovedUiTest {
             org.junit.Assert.assertFalse(androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView).isAppearanceLightStatusBars)
         }
         shot("07-dark-settings")
-        ui.onNodeWithText("Sáng", substring = false).performClick()
+        ui.onNodeWithText("Sáng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Sáng", substring = false).assertIsSelected()
         // Neon is an opt-in third appearance, keeping the original light/dark options.
         ui.onNodeWithText("Neon", substring = false).performClick()
@@ -156,7 +156,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Tùy chỉnh bài học").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Thông báo nhắc học").performScrollTo().assertIsDisplayed()
         shot("16-neon-settings")
-        ui.onNodeWithText("Sáng", substring = false).performClick()
+        ui.onNodeWithText("Sáng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Kiểm tra cập nhật").performScrollTo().performClick()
         ui.onNodeWithText("Phiên bản đang dùng: v${BuildConfig.VERSION_NAME}").assertIsDisplayed()
         shot("08-updates")

@@ -132,21 +132,14 @@ class ApprovedUiTest {
         shot("15-neon-voice-settings")
         ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performClick()
         ui.onNodeWithText("Giọng nam", substring = false).performScrollTo().performClick()
-        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick()
         ui.onNodeWithText("Anh-Anh (UK) · Giọng nam").performScrollTo().assertIsDisplayed()
         // Restore original voice baseline so the rest of the existing UI test is unchanged.
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().performClick()
         ui.onNodeWithText("🇺🇸 Anh-Mỹ (US)").performScrollTo().performClick()
         ui.onNodeWithText("Giọng nữ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performScrollTo().performClick()
-        ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.waitForIdle()
-        // Diagnostic only: capture the actual screen and semantics after returning
-        // from the voice picker. Do not silently skip the required settings UI.
-        val debugDir = File(InstrumentationRegistry.getInstrumentation()
-            .targetContext.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
-        File(debugDir, "after-voice-return-semantics.txt").writeText(ui.onRoot().printToString())
-        shot("18-after-voice-return")
+        ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick()
         // Explicitly reselect the settings tab before theme checks.
         // This also verifies the new five-tab bottom navigation after returning
         // from the full-screen voice picker and resets the profile scroll.

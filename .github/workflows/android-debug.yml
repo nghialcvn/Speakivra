@@ -118,6 +118,11 @@ jobs:
           RELEASE_FLAG=()
           if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
           python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
+      - name: Prepare real microphone probe dependencies
+        if: inputs.ui_check && inputs.release
+        run: |
+          python3 -m pip install grpcio==1.76.0
+          if ! command -v ffmpeg >/dev/null; then sudo apt-get update -qq && sudo apt-get install -y ffmpeg; fi
       - name: Enable emulator acceleration for UI review
         if: inputs.ui_check && inputs.release
         run: |
@@ -132,7 +137,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_7_pro
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -grpc 8554
           disable-animations: true
           script: |
             adb shell wm size 1080x2340
@@ -144,6 +149,8 @@ jobs:
             adb shell am instrument -w -e class com.nghialcvn.speakivra.RealSpeechProviderProbeTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee real-speech-provider-probe.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
+            python3 scripts/real_microphone_probe.py
+            python3 -c 'import json; assert json.load(open("ui-review/real-microphone/result.json"))["passed"], "Real microphone recognition is unverified; do not publish"'
             python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 2 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports
         if: always() && inputs.ui_check && inputs.release
@@ -160,6 +167,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: Speakivra-${{ env.VARIANT }}-verification
           path: dist/*

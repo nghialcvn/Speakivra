@@ -18,6 +18,7 @@ internal class TemporarySpeechAudio {
     private var stream: ByteArrayOutputStream? = null
     private var pcm: ByteArray? = null
     private var player: AudioTrack? = null
+    val capturedBytes get() = stream?.size() ?: 0
     val isPlaying get() = player?.playState == AudioTrack.PLAYSTATE_PLAYING
     val available get() = pcm?.isNotEmpty() == true
 
@@ -36,7 +37,7 @@ internal class TemporarySpeechAudio {
         check(input.recordingState == AudioRecord.RECORDSTATE_RECORDING)
         recording = true
         worker = thread(name = "speakivra-current-utterance") {
-            val buffer = ByteArray(4096)
+            val buffer = ByteArray(1024)
             try {
                 while (recording && output.size() < MAX_BYTES) {
                     val count = input.read(buffer, 0, minOf(buffer.size, MAX_BYTES - output.size()))

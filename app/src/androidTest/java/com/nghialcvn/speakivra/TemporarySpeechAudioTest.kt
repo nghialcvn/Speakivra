@@ -1,7 +1,6 @@
 package com.nghialcvn.speakivra
 
 import android.Manifest
-import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
@@ -24,9 +23,9 @@ class TemporarySpeechAudioTest {
             assertFalse(audio.available)
             assertFalse(audio.isPlaying)
             audio.start()
-            SystemClock.sleep(350)
+            ui.waitUntil(timeoutMillis = 5000) { audio.capturedBytes >= 6400 }
             val first = audio.finish()
-            assertNotNull(first)
+            assertNotNull("A real PCM buffer is required before replay", first)
             assertTrue(audio.available)
             assertFalse("Finishing must never autoplay", audio.isPlaying)
             var error = false
@@ -37,7 +36,7 @@ class TemporarySpeechAudioTest {
             assertFalse(audio.available)
             assertFalse(audio.isPlaying)
             assertTrue("Replaced PCM must be zeroed", first!!.all { it == 0.toByte() })
-            SystemClock.sleep(350)
+            ui.waitUntil(timeoutMillis = 5000) { audio.capturedBytes >= 6400 }
             audio.finish()
             assertTrue(audio.available)
             audio.clear() // Same cleanup used by navigation, exit and background.

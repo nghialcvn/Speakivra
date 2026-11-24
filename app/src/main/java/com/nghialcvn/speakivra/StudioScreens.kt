@@ -112,7 +112,8 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
         "updates", "voice-settings", "edit-profile" -> "profile"
         else -> page
     }
-    Row(Modifier.fillMaxWidth().background(p.card)
+    Row(Modifier.fillMaxWidth().background(
+        if (p == NeonStudio) p.card.copy(alpha = 0.72f) else p.card)
         .border(BorderStroke(0.5.dp, p.border))
         .padding(horizontal = 4.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly) {

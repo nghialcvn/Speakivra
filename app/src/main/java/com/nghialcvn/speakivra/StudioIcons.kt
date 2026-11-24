@@ -22,6 +22,8 @@ private val Shapes = mapOf(
     // Same thin outlined microphone as the five-tab approved mockup; no emoji and
     // distinct from the large round speak button inside the conversation screen.
     "tab-mic" to "M9 5 C9 1.8 15 1.8 15 5 L15 12 C15 16.2 9 16.2 9 12 Z M5 11 L5 12 C5 20.8 19 20.8 19 12 L19 11 M12 19 L12 23 M8 23 L16 23",
+    "profile" to "M12 2 C19 2 19 11 12 11 C5 11 5 2 12 2 Z M2 23 C2 13 22 13 22 23",
+    "down" to "M5 9 L12 16 L19 9",
     "chat" to "M5 4 L19 4 Q22 4 22 7 L22 15 Q22 18 19 18 L12 18 L6 22 L6 18 L5 18 Q2 18 2 15 L2 7 Q2 4 5 4 Z M7 11 L7.1 11 M12 11 L12.1 11 M17 11 L17.1 11",
     "bell" to "M5 17 L19 17 L17 13 L17 9 C17 2 7 2 7 9 L7 13 Z M10 21 Q12 23 14 21 M12 2 L12 1",
     "back" to "M20 12 L4 12 M10 6 L4 12 L10 18",

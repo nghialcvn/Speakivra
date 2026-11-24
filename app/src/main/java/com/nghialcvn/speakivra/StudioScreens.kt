@@ -569,6 +569,7 @@ internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String
                            reminderEnabled: Boolean = false,
                            onBack: () -> Unit = {},
                            onAccent: (String) -> Unit = {},
+                           onGender: (String) -> Unit = {},
                            onExplanationLanguage: (String) -> Unit = {},
                            onStudyOptions: () -> Unit = {},
                            onReminderToggle: (Boolean) -> Unit = {},
@@ -581,7 +582,7 @@ internal fun ProfileScreen(dark: Boolean, speed: Int, goal: Int, version: String
             reminderEnabled = reminderEnabled,
             onBack = onBack, onSwitchLearner = onSwitchLearner, onEditLearner = onEditLearner,
             onTheme = onTheme, onNeon = onNeon, onVoice = onVoice,
-            onAccent = onAccent, onExplanationLanguage = onExplanationLanguage,
+            onAccent = onAccent, onGender = onGender, onExplanationLanguage = onExplanationLanguage,
             onSpeed = onSpeed, onGoal = onGoal, onStudyOptions = onStudyOptions,
             onReminderToggle = onReminderToggle, onSound = onSound, onUpdates = onUpdates,
             onAbout = onAbout

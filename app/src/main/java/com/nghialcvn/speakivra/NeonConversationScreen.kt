@@ -113,7 +113,8 @@ internal fun NeonConversationScreen(
     val englishOnly = explanationLanguage == LearningOptions.ENGLISH
     var showKeyboard by rememberSaveable { mutableStateOf(false) }
     var typedText by rememberSaveable(turnIndex) { mutableStateOf("") }
-    Column(Modifier.fillMaxSize().background(navy)
+    // Full-bleed cyan/violet wave lives on the app root, behind the conversation.
+    Column(Modifier.fillMaxSize().background(Color.Transparent)
         .padding(horizontal = 15.dp, vertical = 9.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {

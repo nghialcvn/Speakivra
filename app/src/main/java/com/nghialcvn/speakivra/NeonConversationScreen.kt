@@ -1,6 +1,8 @@
 package com.nghialcvn.speakivra
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -119,8 +121,13 @@ internal fun NeonConversationScreen(
                 StudioIcon("back", color = white)
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🎙 Speakivra", color = white, fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Image(painterResource(R.drawable.speakivra_icon),
+                        "Logo Speakivra", Modifier.size(30.dp))
+                    Text("Speakivra", color = white, fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold)
+                }
                 Text("Mô phỏng theo kịch bản", color = muted, fontSize = 11.sp)
             }
             StudioIcon("book", Modifier.size(24.dp), Color(0xFFFFD779))

@@ -28,6 +28,11 @@ internal fun lessonLabel(lesson: Lesson): String = when (lesson.id) {
     "greetings" -> "Chào hỏi"; "family" -> "Gia đình"; "routine" -> "Sinh hoạt hằng ngày"
     "food" -> "Đồ ăn & thức uống"; "shopping" -> "Mua sắm"; "directions" -> "Hỏi đường"
     "hobbies" -> "Sở thích"; "time" -> "Giờ & ngày tháng"; "travel" -> "Du lịch"
+    "health" -> "Sức khỏe"; "weather" -> "Thời tiết"; "transport" -> "Phương tiện"
+    "workplace" -> "Công việc & trường học"; "technology" -> "Công nghệ"
+    "a2_experiences" -> "Trải nghiệm"; "a2_plans" -> "Lập kế hoạch"
+    "a2_opinions" -> "Nêu ý kiến"; "a2_problems" -> "Giải quyết vấn đề"
+    "a2_travel" -> "Du lịch & dịch vụ"
     else -> "Giao tiếp thường ngày"
 }
 internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" }
@@ -121,7 +126,8 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 }
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
-                        onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit) {
+                        onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit,
+                        onA2: () -> Unit = {}) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -160,7 +166,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StudioIcon("layers", Modifier.size(28.dp), p.green)
-                Text("10 chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+                Text("15 chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
                 StudioIcon("chevron", Modifier.size(12.dp), p.green)
             }
             Row(Modifier.weight(1f).heightIn(min = 76.dp).clip(RoundedCornerShape(16.dp)).background(p.lavender)
@@ -175,14 +181,27 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 StudioIcon("chevron", Modifier.size(12.dp), p.purple)
             }
         }
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(p.lavender)
+            .border(1.dp, p.border, RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onA2).padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StudioIcon("book", Modifier.size(26.dp), p.purple)
+            Column(Modifier.weight(1f)) {
+                Text("A2 • Sơ trung cấp", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                Text("5 chủ đề • 60 câu luyện nói • 25 lượt hội thoại", color = p.muted, fontSize = 12.sp)
+            }
+            StudioIcon("chevron", Modifier.size(16.dp), p.purple)
+        }
     }
 }
 @Composable
-internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit, lessons: List<Lesson> = Lessons.all) {
+internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit,
+                           lessons: List<Lesson> = Lessons.a1, level: String = "A1") {
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PageHeading("Chọn bài học", "10 chủ đề gần gũi mỗi ngày")
+        PageHeading("Chọn bài học $level", if (level == "A1") "15 chủ đề • 300 câu nói • 100 lượt hội thoại" else "5 chủ đề A2 • 60 câu nói • 25 lượt hội thoại")
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
@@ -193,7 +212,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                 Box(Modifier.size(33.dp).background(p.peach, CircleShape), Alignment.Center) {
                     Text((index + 1).toString().padStart(2, '0'), color = p.coral, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                 }
-                StudioIcon(icons[index], Modifier.size(28.dp), p.coral)
+                StudioIcon(icons.getOrElse(index) { "book" }, Modifier.size(28.dp), p.coral)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(lessonLabel(lesson), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                     Text(lesson.title, color = p.muted, fontSize = 11.sp)
@@ -203,7 +222,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                 StudioIcon("chevron", Modifier.size(13.dp), p.muted)
             }
         }
-        Text("10 chủ đề • Học theo nhịp của bạn", color = p.purple, textAlign = TextAlign.Center,
+        Text("${lessons.size} chủ đề $level • Học theo nhịp của bạn", color = p.purple, textAlign = TextAlign.Center,
             fontSize = 13.sp, fontStyle = FontStyle.Italic, modifier = Modifier.fillMaxWidth()
                 .background(p.lavender, RoundedCornerShape(12.dp)).padding(10.dp))
     }

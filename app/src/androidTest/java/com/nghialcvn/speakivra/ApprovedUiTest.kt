@@ -140,6 +140,11 @@ class ApprovedUiTest {
         ui.onNodeWithText("Giọng nữ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Khôi phục giọng nữ neural gốc").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performClick()
+        // Explicitly reselect the settings tab before theme checks.
+        // This also verifies the new five-tab bottom navigation after returning
+        // from the full-screen voice picker and resets the profile scroll.
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.onNodeWithText("Cá nhân & cài đặt").assertIsDisplayed()
         ui.onNodeWithText("Tối", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Tối", substring = false).assertIsSelected()
         ui.runOnIdle {

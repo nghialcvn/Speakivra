@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.0.0-beta",
+    "tag_name": "v1.0.1-beta",
     "draft": false,
-    "body": "# Speakivra V1.0.0 Beta\n\n## Giao diện đã duyệt\n- Hoàn thiện lại chế độ Neon theo hai bản demo của người dùng: bảng Cài đặt xanh đen, các thẻ viền sáng, logo/phiên bản, danh mục Học tập, lựa chọn giọng đọc/ngôn ngữ, nhắc học, tùy chỉnh bài học, giao diện và thông tin ứng dụng.\n- Thanh điều hướng đủ **5 mục: Trang chủ, Bài học, Luyện nói, Tiến độ, Cài đặt**. Tab Tiến độ lấy dữ liệu từng người học/từng chủ đề thật, không tính dựa trên mô phỏng.\n- Hội thoại Neon có avatar người học/AI minh họa, bong bóng câu hỏi/trả lời, bản dịch hoặc mẹo tiếng Anh, micro nổi bật, nút nhập văn bản và chuyển lượt. Bản trả lời nhập thủ công được gắn nhãn riêng, không giả làm nhận dạng giọng nói.\n\n## Tính năng học\n- **Anh – Việt**: có bản dịch tiếng Việt và mẹo phát âm ban đầu.\n- **Anh – Anh**: câu mẫu giữ tiếng Anh; giải thích/hướng dẫn bằng tiếng Anh và kiểm tra câu trả lời tiếng Anh dựa trên hội thoại theo kịch bản. Chọn ngôn ngữ giải thích không tự đổi Anh-Mỹ/Anh-Anh của giọng đọc.\n- Lựa chọn Anh-Mỹ (US) hoặc Anh-Anh (UK) và giọng nam/nữ dùng cơ chế nghe thử, chọn giọng TTS thực đã cài trên thiết bị. Không giả định Android cung cấp giới tính giọng đọc; clip neural giọng nữ Anh-Mỹ cũ được giữ nguyên.\n- Tùy chỉnh cấp độ A1/A2, tốc độ 0.75x/1.0x/1.25x và lặp lại mẫu 1–3 lần có tác động thực vào luồng phát giọng.\n- Nhắc học **tùy chọn** mỗi tối khoảng 19:00 bằng Android WorkManager. Chỉ tạo lịch sau khi bật và có quyền thông báo; Android có thể điều chỉnh thời điểm để tiết kiệm pin.\n\n## Tương thích và an toàn\n- Giữ nội dung **A1: 15 chủ đề, 300 câu, 100 lượt hội thoại**; A2 khởi đầu: 5 chủ đề, 60 câu, 25 lượt hội thoại.\n- Không đổi applicationId, khóa ký, ID bài học hoặc dữ liệu tiến độ. Cài đặt bản release đã xác minh để cập nhật đè; không gỡ app cũ.\n- Phiên bản **1.0.0** là bước chuyển từ 0.1.18. Sau **1.0.9** phiên bản tiếp theo là **1.1.0**, không tạo 1.0.10; quy tắc được kiểm tra bằng unit test và Gradle.\n- Quy trình tiếp tục yêu cầu build release, chữ ký, lint, unit test và kiểm thử giao diện emulator trước khi publish. Bản phát hành beta chỉ được công bố khi toàn bộ kiểm thử đạt.\n",
+    "body": "# Speakivra V1.0.1 Beta\n\n## Đúng theo demo đã duyệt\n\n- **Một bố cục duy nhất trên ba giao diện:** Sáng, Tối, Neon chỉ khác màu và độ bóng. Không dùng hai màn hình Cài đặt có vị trí, kích thước và hàng chữ khác nhau.\n- **Bốn nhóm Cài đặt thu gọn:** Học tập, Tùy chỉnh, Hồ sơ, Ứng dụng. Ban đầu cả bốn đóng. Mỗi lần chỉ một nhóm mở; khi mở nhóm khác thì nhóm cũ tự đóng. Các lựa chọn ngôn ngữ, giọng, tốc độ, nhắc học, hồ sơ, kiểm tra cập nhật giữ nguyên chức năng thật.\n- **Sửa chữ bị bóp cột:** ô Giọng đọc & Ngôn ngữ có vùng tiêu đề và mô tả riêng, có giới hạn dòng và dấu lược khi cần; không ép chữ xuống mỗi dòng một ký tự ở giao diện Sáng/Tối.\n- **Neon bóng và nền xanh-tím 3D:** giao diện nền sóng vẽ trên toàn bộ vùng ứng dụng, kể cả dưới thanh điều hướng, co giãn theo kích thước thiết bị; không còn phần sóng bị cụt giữa màn hình. Thẻ và bong bóng hội thoại có chiều sâu, viền phát sáng nhẹ.\n- **Thanh tab Luyện nói:** biểu tượng micro nét viền mảnh chính xác theo style năm tab đã duyệt, dùng chung cho ba giao diện; không dùng emoji hoặc thay bằng nút micro lớn của màn hội thoại.\n- **Cập nhật mới gọn:** trong nhóm Ứng dụng, thẻ nhỏ “✨ Cập nhật mới” hiển thị ba thay đổi chính; nút kiểm tra phiên bản được giữ riêng.\n- **Lần cài đầu tiên:** không tự tạo hồ sơ tên “Nghĩa”. Người dùng phải tự nhập tên và chọn avatar. Các bản đã có hồ sơ, khóa lưu tiến độ và cài đặt không bị xóa hoặc ghi đè; legacy data chỉ được nhận diện khi có dữ liệu học thực.\n- **Không thay đổi** nội dung bài học, A1/A2, kỹ thuật phát âm, giọng đã gán, tiến độ cũ, package name, release signing key hay quy trình cập nhật cài đè.\n- Phiên bản: **1.0.1**, `versionCode=21`. Quy tắc 1.0.9 → 1.1.0 giữ nguyên.\n\n## Tiêu chuẩn phát hành\n\nBuild signed release, chạy unit test, lint, Android emulator UI review để kiểm tra bốn nhóm thu gọn, ba theme, ảnh chụp giao diện và tạo hồ sơ mới. Chỉ publish APK và metadata khi mọi bước kiểm tra bắt buộc đều đạt.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.0.0-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.0-beta/Speakivra-v1.0.0-release.apk",
-        "size": 13018369,
-        "digest": "sha256:e4e88aabe29fd8bbdacdb0540ac826c05d1fac556f6d6f9c2d7ab6636a52dbdb"
+        "name": "Speakivra-v1.0.1-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.1-beta/Speakivra-v1.0.1-release.apk",
+        "size": 13034743,
+        "digest": "sha256:d4febaf3d3436226b0902dc6ca6f2b3116faa02ab40fe3941e77196326d99e74"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 20,
-    "versionName": "1.0.0",
-    "apkName": "Speakivra-v1.0.0-release.apk",
-    "apkSha256": "e4e88aabe29fd8bbdacdb0540ac826c05d1fac556f6d6f9c2d7ab6636a52dbdb",
+    "versionCode": 21,
+    "versionName": "1.0.1",
+    "apkName": "Speakivra-v1.0.1-release.apk",
+    "apkSha256": "d4febaf3d3436226b0902dc6ca6f2b3116faa02ab40fe3941e77196326d99e74",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

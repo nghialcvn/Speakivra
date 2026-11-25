@@ -33,6 +33,9 @@ internal fun lessonLabel(lesson: Lesson): String = when (lesson.id) {
     "a2_experiences" -> "Trải nghiệm"; "a2_plans" -> "Lập kế hoạch"
     "a2_opinions" -> "Nêu ý kiến"; "a2_problems" -> "Giải quyết vấn đề"
     "a2_travel" -> "Du lịch & dịch vụ"
+    "a2_health" -> "Sức khỏe & sinh hoạt"; "a2_work" -> "Công việc & phối hợp"
+    "a2_learning" -> "Học tập & mục tiêu"; "a2_community" -> "Cộng đồng & dịch vụ"
+    "a2_stories" -> "Kể chuyện & tình huống"
     else -> "Giao tiếp thường ngày"
 }
 internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" }
@@ -239,7 +242,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             StudioIcon("book", Modifier.size(26.dp), p.purple)
             Column(Modifier.weight(1f)) {
                 Text("A2 • Sơ trung cấp", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-                Text("5 chủ đề • 60 câu luyện nói • 25 lượt hội thoại", color = p.muted, fontSize = 12.sp)
+                Text("${Lessons.a2.size} chủ đề • ${Lessons.a2.sumOf { it.phrases.size }} câu luyện nói • ${Lessons.a2.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
             }
             StudioIcon("chevron", Modifier.size(16.dp), p.purple)
         }
@@ -251,7 +254,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PageHeading("Chọn bài học $level", if (level == "A1") "15 chủ đề • 300 câu nói • 100 lượt hội thoại" else "5 chủ đề A2 • 60 câu nói • 25 lượt hội thoại")
+        PageHeading("Chọn bài học $level", if (level == "A1") "15 chủ đề • 300 câu nói • 100 lượt hội thoại" else "${lessons.size} chủ đề A2 • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại")
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
@@ -479,7 +482,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
             }
             if (wordMatch.hasResult) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Chưa khớp ${wordMatch.incorrect}/${wordMatch.tokens.size} từ · ${wordMatch.percent}%", color = p.incorrectWord, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Khớp ${wordMatch.correct}/${wordMatch.tokens.size} từ · ${wordMatch.matchPercent}%", color = if (wordMatch.incorrect == 0) p.correctWord else p.incorrectWord, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.correctWord else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
             }
             Text("Đối chiếu từ nhận dạng, chưa chấm phát âm.", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())

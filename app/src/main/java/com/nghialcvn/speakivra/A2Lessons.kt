@@ -2,7 +2,7 @@ package com.nghialcvn.speakivra
 
 /** Introductory A2 curriculum: real bilingual phrases and scripted exchanges, no fake AI dialogue. */
 internal object A2Lessons {
-    val all: List<Lesson> = listOf(
+    val original: List<Lesson> = listOf(
         Lesson("a2_experiences", "Life Experiences", "Trải nghiệm cá nhân", listOf(
             Phrase("I have visited Da Nang twice.", "Tôi đã đến Đà Nẵng hai lần.", "Chú ý thì và từ chỉ thời gian; nhấn từ mang nghĩa chính.", id = "572ed8aa5593999df095"),
             Phrase("I have never tried skiing.", "Tôi chưa từng thử trượt tuyết.", "Luyện nối âm ở tốc độ vừa phải, không nuốt phụ âm cuối.", id = "dd78148589581676b10d"),
@@ -104,4 +104,5 @@ internal object A2Lessons {
             ConversationTurn("How was your stay with us?", "Kỳ lưu trú của bạn ở đây thế nào?", "Thank you for making our stay comfortable.", "Cảm ơn bạn đã giúp kỳ nghỉ của chúng tôi thoải mái.", id = "57f334e5327945d88436")
         )),
     )
+    val all: List<Lesson> = ExpandedA2Lessons.expand(original)
 }

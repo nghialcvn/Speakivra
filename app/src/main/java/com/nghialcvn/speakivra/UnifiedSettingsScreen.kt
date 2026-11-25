@@ -202,9 +202,9 @@ internal fun UnifiedSettingsScreen(
                         }
                         Text("V$version", color = p.muted, fontSize = 11.sp)
                     }
-                    UpdateMiniRow("speaker", "Đối chiếu lời nói chính xác hơn")
-                    UpdateMiniRow("layers", "Logo lớn, nền trong suốt")
-                    UpdateMiniRow("sliders", "Luyện nói và cập nhật gọn hơn")
+                    UpdateMiniRow("speaker", "Kết quả khớp từ hiển thị đúng")
+                    UpdateMiniRow("book", "A2: 300 câu, 150 lượt hội thoại")
+                    UpdateMiniRow("layers", "10 chủ đề A2, độ khó tăng dần")
                 }
                 SettingsTile("phone", "Kiểm tra cập nhật",
                     "Phiên bản đang dùng: v$version", neon, onUpdates)

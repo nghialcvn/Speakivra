@@ -43,6 +43,7 @@ class RecognitionFlowTest {
             ui.onAllNodesWithText("Hello there.").assertCountEquals(2)
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
             assertColors(expectedGreen = 2, expectedRed = 0)
+            ui.onNodeWithText("Khớp 2/2 từ · 100%").assertIsDisplayed()
             ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsEnabled().performClick()
             screenshot("20-neon-recognition-pass")
             // A wrong answer must also be visible, color each unmatched word and lock Next.
@@ -52,11 +53,13 @@ class RecognitionFlowTest {
             ui.onNodeWithText("Good morning.").assertIsDisplayed()
             ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
             assertColors(expectedGreen = 0, expectedRed = 2)
+            ui.onNodeWithText("Khớp 0/2 từ · 0%").assertIsDisplayed()
             screenshot("21-neon-recognition-retry")
             fixture("answer", "Hello friend.")
             ui.runOnUiThread { capture.start() }
             ui.waitUntil(15000) { capture.phase == "idle" }
             assertColors(expectedGreen = 1, expectedRed = 1)
+            ui.onNodeWithText("Khớp 1/2 từ · 50%").assertIsDisplayed()
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled().performClick()
             ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
             ui.onNodeWithText("Chưa có lời nói nhận dạng").assertIsDisplayed()
@@ -78,7 +81,26 @@ class RecognitionFlowTest {
             assertEquals(5, sentence.spanStyles.count { it.item.color == NeonStudio.correctWord })
             ui.onNodeWithText("English (US)", substring = true).assertDoesNotExist()
             ui.onNodeWithText("Giọng nữ", substring = false).assertDoesNotExist()
+            ui.onNodeWithText("Khớp 5/5 từ · 100%").assertIsDisplayed()
+            ui.onNodeWithText("Chưa khớp 0/5 từ · 0%").assertDoesNotExist()
             screenshot("25-neon-age-number-match")
+        } finally { ui.runOnUiThread { capture.cancel() } }
+    }
+    @Test fun fullyMatchedWorkQuestionShowsOneHundredPercent() = withProvider(false) {
+        val reference = "What do you do for work?"
+        val capture = installPractice(reference)
+        try {
+            fixture("answer", "what do you do for work")
+            ui.runOnUiThread { capture.start() }
+            ui.waitUntil(15000) { capture.phase == "idle" }
+            ui.onNodeWithText("Khớp 6/6 từ · 100%").assertIsDisplayed()
+            ui.onNodeWithText("Chưa khớp 0/6 từ · 0%").assertDoesNotExist()
+            ui.onNodeWithContentDescription("Đạt đối chiếu lời nói").assertIsDisplayed()
+            ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
+            val text = ui.onNodeWithText(reference, useUnmergedTree = true).fetchSemanticsNode()
+                .config[SemanticsProperties.Text].single()
+            assertEquals(6, text.spanStyles.count { it.item.color == NeonStudio.correctWord })
+            screenshot("27-neon-work-question-full-match")
         } finally { ui.runOnUiThread { capture.cancel() } }
     }
     @Test fun liveMicrophoneStopsOnSilenceWithoutASecondTap() = withProvider(false) {
@@ -105,6 +127,7 @@ class RecognitionFlowTest {
             ui.onAllNodesWithText("Hello there.").assertCountEquals(2)
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
             assertColors(expectedGreen = 2, expectedRed = 0)
+            ui.onNodeWithText("Khớp 2/2 từ · 100%").assertIsDisplayed()
             ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
         } finally { ui.runOnUiThread { capture.cancel() } }
     }
@@ -119,6 +142,7 @@ class RecognitionFlowTest {
             ui.onAllNodesWithText("Hello there.").assertCountEquals(2)
             ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
             assertColors(expectedGreen = 2, expectedRed = 0)
+            ui.onNodeWithText("Khớp 2/2 từ · 100%").assertIsDisplayed()
             ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
             screenshot("22-neon-recognition-provider-fallback")
         } finally { ui.runOnUiThread { capture.cancel() } }

@@ -4,6 +4,19 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class WordMatchTest {
+    @Test fun matchPercentageReportsCorrectWordsWithoutChangingTheMismatchGate() {
+        val all = matchWords("What do you do for work?", "what do you do for work")
+        assertEquals(6, all.correct)
+        assertEquals(100, all.matchPercent)
+        assertEquals(0, all.incorrect)
+        assertTrue(all.canContinue)
+        val some = matchWords("one two three four five", "one two")
+        assertEquals(2, some.correct)
+        assertEquals(40, some.matchPercent)
+        assertEquals(60, some.percent)
+        assertFalse(some.canContinue)
+        assertEquals(0, matchWords("", null).matchPercent)
+    }
     @Test fun approvedExamplesColorReferenceWordsAndGateNext() {
         val pass = matchWords("My name is Alex.", "my name is I like")
         assertEquals(listOf(true, true, true, false), pass.matched)

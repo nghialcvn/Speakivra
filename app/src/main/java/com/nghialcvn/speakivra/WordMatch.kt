@@ -4,6 +4,8 @@ import java.util.Locale
 import java.text.Normalizer
 
 internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean) {
+    val correct get() = matched.count { it }
+    val matchPercent get() = if (tokens.isEmpty()) 0 else correct * 100 / tokens.size
     val incorrect get() = matched.count { !it }
     val percent get() = if (tokens.isEmpty()) 100 else (incorrect * 100f / tokens.size).toInt()
     val canContinue get() = hasResult && tokens.isNotEmpty() && incorrect * 100 < tokens.size * 60

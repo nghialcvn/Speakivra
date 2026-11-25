@@ -23,17 +23,17 @@ class LessonsTest {
     }
 
     @Test fun a2IsSeparateAndOffersRealContent() {
-        assertEquals(5, Lessons.a2.size)
-        assertEquals(60, Lessons.a2.sumOf { it.phrases.size })
-        assertEquals(25, Lessons.a2.sumOf { it.conversation.size })
+        assertEquals(10, Lessons.a2.size)
+        assertEquals(300, Lessons.a2.sumOf { it.phrases.size })
+        assertEquals(150, Lessons.a2.sumOf { it.conversation.size })
         Lessons.a2.forEach { lesson ->
             assertTrue(lesson.id.startsWith("a2_"))
             assertEquals("A2", Lessons.levelOf(lesson))
-            assertEquals(12, lesson.phrases.size)
-            assertEquals(5, lesson.conversation.size)
+            assertEquals(30, lesson.phrases.size)
+            assertEquals(15, lesson.conversation.size)
         }
         assertEquals("A1", Lessons.levelOf(Lessons.a1.first()))
-        assertEquals(20, Lessons.all.map { it.id }.distinct().size)
+        assertEquals(25, Lessons.all.map { it.id }.distinct().size)
     }
 
     @Test fun everyTopicHasVietnameseTranslationsPronunciationTipsAndWorkingReview() {

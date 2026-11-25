@@ -88,12 +88,32 @@ class ApprovedUiTest {
         val manager = context.getSystemService(android.app.NotificationManager::class.java)
         val notification = manager.activeNotifications.single { it.id == UpdateNotifications.ID }.notification
         org.junit.Assert.assertTrue(notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("Có bản cập nhật mới"))
-        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("cmd statusbar expand-notifications").close()
-        android.os.SystemClock.sleep(700)
-        shot("53-native-update-notification-fixture")
-        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("cmd statusbar collapse").close()
-        notification.contentIntent.send()
-        ui.waitForIdle()
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        try {
+            automation.executeShellCommand("cmd statusbar expand-notifications").close()
+            automation.waitForIdle(500, 5000)
+            android.os.SystemClock.sleep(700)
+            // The shade pauses the Activity. Capture the system surface directly;
+            // Compose/Espresso idling must only resume after the shade has closed.
+            val bitmap = requireNotNull(automation.takeScreenshot())
+            val out = File(context.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
+            File(out, "53-native-update-notification-fixture.png").outputStream().use {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            }
+            bitmap.recycle()
+            val title = notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString()
+            var node = automation.rootInActiveWindow.findAccessibilityNodeInfosByText(title).firstOrNull()
+            var clicked = false
+            while (node != null && !clicked) {
+                if (node.isClickable) clicked = node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
+                node = node.parent
+            }
+            check(clicked) { "The real Android update notification could not be clicked" }
+        } finally {
+            automation.executeShellCommand("cmd statusbar collapse").close()
+            automation.waitForIdle(500, 5000)
+        }
+        ui.waitUntil(10000) { ui.onAllNodesWithText("Cập nhật ứng dụng").fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText("Cập nhật ứng dụng").assertIsDisplayed()
         manager.cancel(UpdateNotifications.ID)
         // A retry with a worse result must not erase earned hearts.

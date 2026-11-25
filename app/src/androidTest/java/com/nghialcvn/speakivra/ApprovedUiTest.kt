@@ -72,8 +72,8 @@ class ApprovedUiTest {
         val courseTotal = "Thành tích đã đạt: 9"
         ui.onNodeWithText(courseTotal).assertIsDisplayed()
         assertSingleLine(courseTotal)
-        val achievementBounds = ui.onNodeWithText(courseTotal).fetchSemanticsNode().boundsInRoot
-        val continueBounds = ui.onNodeWithText("Tiếp tục bài học ›").fetchSemanticsNode().boundsInRoot
+        val achievementBounds = ui.onNodeWithText(courseTotal, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val continueBounds = ui.onNodeWithText("Tiếp tục bài học ›", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         org.junit.Assert.assertTrue(achievementBounds.bottom < continueBounds.top)
         shot("50-profile-diamond-achievements")
         ui.onNodeWithText("Tiếp tục bài học ›").performClick()
@@ -112,7 +112,7 @@ class ApprovedUiTest {
     }
     private fun assertSingleLine(text: String) {
         val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
-        ui.onNodeWithText(text).performSemanticsAction(
+        ui.onNodeWithText(text, useUnmergedTree = true).performSemanticsAction(
             androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
         org.junit.Assert.assertTrue(layouts.isNotEmpty())
         layouts.forEach {

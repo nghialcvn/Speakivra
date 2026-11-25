@@ -85,13 +85,12 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                         StudioProgress(done.toFloat() / total)
-                        Text("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
-                        Text("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp,
+                        SingleLineInfo("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
+                        AchievementSummary(TopicAchievements(store.preferences(learner)).total(),
+                            fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                        SingleLineInfo("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp,
                             modifier = Modifier.clickable(role = Role.Button) { onResume(learner) }.padding(vertical = 5.dp))
-                        Text("Thành tích đã đạt: ${TopicAchievements(store.preferences(learner)).total()} ❤️",
-                            color = p.ink, fontSize = 12.sp)
                     }
-                    if (chosen) StudioIcon("check", Modifier.size(24.dp), p.coral)
                 }
             }
             OutlinedButton(onClick = onAdd, modifier = Modifier.fillMaxWidth().heightIn(min = 68.dp), shape = RoundedCornerShape(18.dp)) {

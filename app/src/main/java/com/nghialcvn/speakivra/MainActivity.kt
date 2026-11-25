@@ -601,7 +601,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                             "level-lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel,
                                 onBack = { navigate("lessons") }, hearts = achievements::hearts)
-                            "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
+                            "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson, achievements::hearts)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },

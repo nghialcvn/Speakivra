@@ -260,7 +260,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PageHeading("Chọn bài học $level", "${lessons.size} chủ đề $level • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại", onBack)
-        Text("Thành tích đã đạt: ${lessons.sumOf(hearts)} ❤️", color = p.ink, fontSize = 13.sp)
+        AchievementSummary(lessons.sumOf(hearts))
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
@@ -288,8 +288,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                         StudioIcon(if (open) "chevron" else "lock", Modifier.size(13.dp), p.muted)
                     }
                     val earned = hearts(lesson)
-                    Text((0 until 3).joinToString("") { if (it < earned) "❤️" else "🩶" }, fontSize = 15.sp,
-                        modifier = Modifier.semantics { contentDescription = "${lessonLabel(lesson)}: $earned trên 3 tim" })
+                    TopicDiamonds(lessonLabel(lesson), earned)
                 }
             }
         }

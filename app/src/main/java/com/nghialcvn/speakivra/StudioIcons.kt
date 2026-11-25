@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 
 /** Small native outline icons: no emoji glyphs, remote icon fonts or extra SDKs. */
 private val Shapes = mapOf(
+    "diamond" to "M2 8 L7 2 L17 2 L22 8 L12 22 Z M2 8 L22 8 M7 2 L9 8 L12 22 L15 8 L17 2 M9 8 L12 2 L15 8",
     "pencil" to "M4 16 L16 4 L20 8 L8 20 L3 21 Z M13 7 L17 11",
     "lock" to "M7 10 L7 7 C7 0 17 0 17 7 L17 10 M5 10 L19 10 L19 22 L5 22 Z M12 14 L12 18",
     "home" to "M3 10 L12 3 L21 10 L21 21 L15 21 L15 14 L9 14 L9 21 L3 21 Z",

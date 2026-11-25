@@ -59,6 +59,7 @@ class ApprovedUiTest {
         android.os.SystemClock.sleep(350)
         // System UI uses a separate surface from Compose. Wait for its window events too.
         instrumentation.uiAutomation.waitForIdle(500, 5000)
+        dismissUnrelatedLauncherAnr(instrumentation)
         var bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot()) {
             "Android Emulator did not produce a real screenshot: $name"
         }
@@ -281,13 +282,13 @@ class ApprovedUiTest {
                 }
             }
         }
-        ui.onNodeWithText("Chưa khớp 0/2 từ · 0%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Khớp 2/2 từ · 100%").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Câu tiếp theo").assertIsEnabled().performClick()
         org.junit.Assert.assertEquals(1, nextCalls)
         ui.onNodeWithText("I’m Nghĩa.").performScrollTo().assertIsDisplayed()
         shot("11-speaking-pass")
         ui.runOnIdle { result.value = "hello there" }
-        ui.onNodeWithText("Chưa khớp 2/2 từ · 100%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Khớp 0/2 từ · 0%").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
         ui.onNodeWithText("Máy nhận dạng được:").assertDoesNotExist()
         ui.onNodeWithText("hello there").performScrollTo().assertIsDisplayed()

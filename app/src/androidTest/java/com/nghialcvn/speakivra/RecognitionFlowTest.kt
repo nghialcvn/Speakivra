@@ -210,6 +210,7 @@ class RecognitionFlowTest {
         instrumentation.uiAutomation.waitForIdle(500, 5000)
         val target = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots/$name.png")
         target.parentFile!!.mkdirs()
+        dismissUnrelatedLauncherAnr(instrumentation)
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         target.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
     }

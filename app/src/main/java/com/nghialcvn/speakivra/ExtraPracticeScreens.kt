@@ -103,8 +103,8 @@ internal fun PassagePracticeScreen(item: ReadingPassage, selected: Int, whole: B
                         pushStringAnnotation("sentence", index.toString())
                         pushStyle(SpanStyle(background = if (index == selected) p.coral.copy(alpha = .15f) else Color.Transparent))
                         val tokens = matchWords(part.english, null).tokens
-                        val vocabularyRanges = item.vocabulary.flatMap { vocab ->
-                            Regex(Regex.escape(vocab.english), RegexOption.IGNORE_CASE).findAll(part.english).map { it.range }.toList()
+                        val vocabularyRanges = (item.vocabulary.map { it.english } + "Cook dinner").flatMap { phrase ->
+                            Regex(Regex.escape(phrase), RegexOption.IGNORE_CASE).findAll(part.english).map { it.range }.toList()
                         }
                         var characterOffset = 0
                         tokens.forEachIndexed { wordIndex, word ->
@@ -199,13 +199,13 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
                         if (accepted || reveal) IpaLine(if (accepted) evaluation.reference else row.answer, voice.accent, Modifier.fillMaxWidth())
                         if (hint && !accepted && !reveal) Text("Gợi ý: ${row.answer.substringBefore(' ')} …", color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ExtraOutline("Gợi ý", onClick = { hint = true })
+                            ExtraOutline("Gợi ý", onClick = { hint = true }, bulb = true)
                             ExtraOutline("Nghe đáp án", speaker = true, onClick = { reveal = true; onListen(row.answer) })
                         }
                     }
                 }
             }
-            ExtraMicrophone(phase, "Chạm để trả lời", onSpeak)
+            ExtraMicrophone(phase, if (accepted) "Chạm để nói lại" else "Chạm để trả lời", onSpeak)
             SpokenResult(learner, if (phase == "idle") finalTranscript.orEmpty() else transcript,
                 if (phase == "idle" && !finalTranscript.isNullOrBlank()) accepted else null)
             if (!finalTranscript.isNullOrBlank() && phase == "idle") Row(
@@ -223,13 +223,13 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
 }
 
 @Composable
-private fun ExtraOutline(label: String, onClick: () -> Unit, speaker: Boolean = false) {
+private fun ExtraOutline(label: String, onClick: () -> Unit, speaker: Boolean = false, bulb: Boolean = false) {
     Row(Modifier.clip(RoundedCornerShape(8.dp))
         .border(1.dp, studio.border, RoundedCornerShape(8.dp))
         .clickable(role = Role.Button, onClick = onClick).heightIn(min = 32.dp)
         .padding(horizontal = 10.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        if (speaker) StudioIcon("speaker", Modifier.size(17.dp), studio.coral)
+        if (speaker || bulb) StudioIcon(if (speaker) "speaker" else "bulb", Modifier.size(17.dp), studio.coral)
         Text(label, color = if (speaker) studio.coral else studio.ink,
             fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
     }

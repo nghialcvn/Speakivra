@@ -107,7 +107,13 @@ class ApprovedUiTest {
             device.waitForIdle()
         }
         ui.waitUntil(10000) { ui.onAllNodesWithText("Cập nhật ứng dụng").fetchSemanticsNodes().isNotEmpty() }
-        ui.onNodeWithText("Cập nhật ứng dụng").assertIsDisplayed()
+        // The existing screen has one page heading and one card heading.
+        ui.onAllNodesWithText("Cập nhật ứng dụng").assertCountEquals(2)
+        ui.onAllNodesWithText("Cập nhật ứng dụng").onFirst().assertIsDisplayed()
+        ui.runOnUiThread {
+            org.junit.Assert.assertEquals(androidx.lifecycle.Lifecycle.State.RESUMED, ui.activity.lifecycle.currentState)
+        }
+        shot("54-notification-opened-existing-app")
         manager.cancel(UpdateNotifications.ID)
         // A retry with a worse result must not erase earned hearts.
         val lesson = Lessons.a1.first()

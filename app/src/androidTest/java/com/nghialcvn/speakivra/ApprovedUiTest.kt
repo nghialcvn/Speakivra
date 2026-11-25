@@ -34,6 +34,17 @@ class ApprovedUiTest {
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
                     .putInt("lesson.greetings.correct", 0).putInt("lesson.greetings.rounds", 0).commit()
+                if (description.methodName == "approvedHeartRewardsResumeAndUpdateNotification") {
+                    val prefs = context.getSharedPreferences("speakivra_progress", 0)
+                    prefs.edit().apply { prefs.all.keys.filter { it.startsWith("achievement.") }.forEach { remove(it) } }.commit()
+                    val rewards = TopicAchievements(prefs)
+                    Lessons.a1.take(3).forEachIndexed { index, lesson ->
+                        lesson.phrases.forEach { phrase ->
+                            rewards.record(lesson, phrase.id, WordMatch((1..100).map { "word$it" },
+                                (1..100).map { it <= listOf(95, 75, 60)[index] }, true))
+                        }
+                    }
+                }
                 base.evaluate()
             }
         }

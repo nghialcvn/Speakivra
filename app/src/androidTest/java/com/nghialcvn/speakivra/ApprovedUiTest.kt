@@ -102,7 +102,7 @@ class ApprovedUiTest {
             }
             bitmap.recycle()
             val title = notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString()
-            var node = automation.rootInActiveWindow.findAccessibilityNodeInfosByText(title).firstOrNull()
+            var node = requireNotNull(automation.rootInActiveWindow).findAccessibilityNodeInfosByText(title).firstOrNull()
             var clicked = false
             while (node != null && !clicked) {
                 if (node.isClickable) clicked = node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)

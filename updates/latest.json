@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.1.0-beta",
+    "tag_name": "v1.1.1-beta",
     "draft": false,
-    "body": "# Speakivra V1.1.0 Beta\n\n- Gom lựa chọn học vào mục “Học tập” thu gọn.\n- Phiên âm IPA serif in nghiêng theo demo, đóng gói font cùng ứng dụng.\n\nGiữ nguyên hồ sơ, tiến độ và các chức năng học hiện có.\n\nBeta phát hành theo yêu cầu để kiểm tra trên S24 Ultra. Kiểm thử micro ảo Emulator chưa đạt. Chưa xác minh micro trên Samsung.\n",
+    "body": "# Speakivra V1.1.1 Beta\n\n- Trang chủ: đổi “Học tập” thành “Bài học”.\n- Mở màn Bài học riêng, dùng chung với tab thứ hai.\n- Chọn A1/A2/B1 để vào danh sách chủ đề từng cấp.\n\nGiữ nguyên hồ sơ, tiến độ, font IPA và các chức năng học. Tiếp tục bản Beta kiểm tra trên S24 Ultra: micro ảo Emulator chưa đạt ở 1.1.0. Chưa xác minh micro trên Samsung.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.1.0-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.0-beta/Speakivra-v1.1.0-release.apk",
-        "size": 14375237,
-        "digest": "sha256:d82e79a2ba3eb4fc950e5987787f8733de9b9bc1409a20b5ca50af78c1e6b289"
+        "name": "Speakivra-v1.1.1-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.1-beta/Speakivra-v1.1.1-release.apk",
+        "size": 14375253,
+        "digest": "sha256:76ee232c9b23a300f51a9bab74044065b887e154802ea934afab0f47a45743ed"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 30,
-    "versionName": "1.1.0",
-    "apkName": "Speakivra-v1.1.0-release.apk",
-    "apkSha256": "d82e79a2ba3eb4fc950e5987787f8733de9b9bc1409a20b5ca50af78c1e6b289",
+    "versionCode": 31,
+    "versionName": "1.1.1",
+    "apkName": "Speakivra-v1.1.1-release.apk",
+    "apkSha256": "76ee232c9b23a300f51a9bab74044065b887e154802ea934afab0f47a45743ed",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

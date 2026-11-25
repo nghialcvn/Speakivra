@@ -91,46 +91,20 @@ class ApprovedUiTest {
         UpdateNotifications.deliver(context, release.copy(versionCode = current.versionCode), current)
         val notification = manager.activeNotifications.single { it.id == UpdateNotifications.ID }.notification
         org.junit.Assert.assertTrue(notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("Có bản cập nhật mới"))
-        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val device = androidx.test.uiautomator.UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        val out = File(context.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
         try {
-            automation.executeShellCommand("cmd statusbar expand-notifications").close()
-            automation.waitForIdle(500, 5000)
-            android.os.SystemClock.sleep(700)
-            // The shade pauses the Activity. Capture the system surface directly;
-            // Compose/Espresso idling must only resume after the shade has closed.
-            val bitmap = requireNotNull(automation.takeScreenshot())
-            val out = File(context.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
-            File(out, "53-native-update-notification-fixture.png").outputStream().use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            }
-            bitmap.recycle()
-            val title = notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString()
-            val service = automation.serviceInfo
-            service.flags = service.flags or android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
-            automation.serviceInfo = service
-            var target: android.view.accessibility.AccessibilityNodeInfo? = null
-            val deadline = android.os.SystemClock.uptimeMillis() + 5000
-            while (target == null && android.os.SystemClock.uptimeMillis() < deadline) {
-                val roots = listOfNotNull(automation.rootInActiveWindow) + automation.windows.mapNotNull { it.root }
-                target = roots.flatMap { it.findAccessibilityNodeInfosByText(title) }.firstOrNull()
-                if (target == null) android.os.SystemClock.sleep(100)
-            }
-            val bounds = android.graphics.Rect()
-            requireNotNull(target) { "Update notification title is absent from System UI" }.getBoundsInScreen(bounds)
-            check(!bounds.isEmpty) { "Update notification has no touch bounds" }
-            // System UI does not always expose ACTION_CLICK on notification children.
-            // Send an actual touch at the title bounds obtained from its live window.
-            val time = android.os.SystemClock.uptimeMillis()
-            listOf(android.view.MotionEvent.ACTION_DOWN, android.view.MotionEvent.ACTION_UP).forEachIndexed { offset, action ->
-                val event = android.view.MotionEvent.obtain(time, time + offset * 50L, action,
-                    bounds.exactCenterX(), bounds.exactCenterY(), 0)
-                event.source = android.view.InputDevice.SOURCE_TOUCHSCREEN
-                try { check(automation.injectInputEvent(event, true)) { "Notification touch was rejected" } }
-                finally { event.recycle() }
-            }
+            check(device.openNotification()) { "Android notification shade could not open" }
+            val card = device.wait(androidx.test.uiautomator.Until.findObject(
+                androidx.test.uiautomator.By.textContains("Có bản cập nhật mới")), 10000)
+            check(device.takeScreenshot(File(out, "53-native-update-notification-fixture.png")))
+            device.dumpWindowHierarchy(File(out, "53-system-notification-hierarchy.xml"))
+            requireNotNull(card) { "Update notification is absent from System UI; inspect hierarchy XML" }.click()
+            check(device.wait(androidx.test.uiautomator.Until.hasObject(
+                androidx.test.uiautomator.By.pkg(context.packageName)), 10000)) { "Notification did not return to Speakivra" }
         } finally {
-            automation.executeShellCommand("cmd statusbar collapse").close()
-            automation.waitForIdle(500, 5000)
+            device.executeShellCommand("cmd statusbar collapse")
+            device.waitForIdle()
         }
         ui.waitUntil(10000) { ui.onAllNodesWithText("Cập nhật ứng dụng").fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText("Cập nhật ứng dụng").assertIsDisplayed()

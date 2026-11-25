@@ -37,3 +37,9 @@ Passages support selected-sentence and full-paragraph recognition with the exist
 Translation exercises require complete bidirectional canonical word alignment against curated alternative translations. Numbers, punctuation and contractions use the existing normalizer. Extra/omitted wrong words, including negations, fail. Unknown alternative phrasing is labelled “Chưa khớp đáp án mẫu”, not semantic or acoustic pronunciation scoring. Hints and listening to answers never complete a question.
 
 Reference IPA is a static US/GB asset generated offline with `scripts/generate_ipa.py` (pinned espeakng-loader and phonemizer); the demo's three IPA lines are explicitly reviewed overrides. No synthesis engine is added to the APK. IPA is reading guidance, not a phoneme assessment of recorded speech. Personal names remain in their original spelling outside IPA brackets. The two accent lookups and complete active curriculum coverage are tested.
+
+## V1.1.0: stable IPA typography
+
+The IPA line now explicitly uses the packaged Tinos Italic face, normal weight and no synthetic font styles. Generic Android serif resolution is no longer used; Samsung system font settings cannot select another family for this text. The packaged face covers every character in both IPA dictionaries and Vietnamese personal names. The original design image specifies the visual serif italic style, not an identifiable named font; no claim is made that Tinos is Times New Roman. Font licensing is included in `assets/font-licenses`.
+
+All six existing home study destinations are inside one initially collapsed “Học tập” section. Their original callbacks, content, colours, topic gates and progress storage are unchanged. Profile reset V1.0.8 is not repeated. Version rolls from 1.0.9 to 1.1.0, code 30.

@@ -6,7 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.contentDescription
@@ -31,12 +35,17 @@ internal object IpaText {
         return if (name != null) "/${language.getString(key("I'm"))}/ $name" else null
     }
 }
+// A packaged italic face keeps IPA independent of Samsung's configurable system serif.
+internal val ApprovedIpaFont = FontFamily(Font(R.font.ipa_serif_italic,
+    weight = FontWeight.Normal, style = FontStyle.Italic))
+
 @Composable
 internal fun IpaLine(english: String, accent: String = "US", modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val ipa = remember(english, accent) { IpaText.lookup(context, english, accent) } ?: return
     Text(ipa, modifier = modifier.semantics { contentDescription = "Phiên âm IPA" },
-        fontSize = 14.sp, lineHeight = 19.sp, fontFamily = FontFamily.Serif,
+        fontSize = 14.sp, lineHeight = 19.sp, fontFamily = ApprovedIpaFont, fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
+        style = TextStyle(fontSynthesis = FontSynthesis.None),
         fontStyle = FontStyle.Italic, color = if (studio == NeonStudio) NeonLook.cyan.copy(alpha = .85f) else studio.muted,
         textAlign = TextAlign.Center)
 }

@@ -72,6 +72,10 @@ class ExtraPracticeFlowTest {
         ui.onNodeWithText("A2", substring = false).performClick()
         ui.onNodeWithText("My daily routine").performClick()
         ui.onNodeWithContentDescription("Phiên âm IPA").assertExists()
+        val ipaTypeface = requireNotNull(androidx.core.content.res.ResourcesCompat.getFont(ui.activity, R.font.ipa_serif_italic))
+        Assert.assertTrue("IPA must load the bundled real italic face", ipaTypeface.isItalic)
+        val paint = android.graphics.Paint().apply { typeface = ipaTypeface }
+        "ɪæθðʌəɜːˈŋʃʒɹ".forEach { Assert.assertTrue("IPA glyph $it", paint.hasGlyph(it.toString())) }
         ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
         val item = ExtraPracticeData.passages.first { it.level == "A2" }
         answer(item.sentences[0].english)

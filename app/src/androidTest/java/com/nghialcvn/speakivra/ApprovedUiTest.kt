@@ -29,7 +29,7 @@ class ApprovedUiTest {
                     .putString("profiles", encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
-                    .putBoolean("neon_theme", description.methodName == "neonHomeAndPracticeUseApprovedReplayRow")
+                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLearningGroupStartsCollapsedAndKeepsAllExistingChoices"))
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
@@ -123,6 +123,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Học tập").performScrollTo().assertIsDisplayed()
         shot("45-home-learning-collapsed")
         ui.expandHomeLearning()
+        shot("46-home-learning-expanded")
         listOf("10 chủ đề A1", "A2 • Sơ trung cấp", "B1 • Trung cấp", "Hội thoại mẫu",
             "Luyện nói theo đoạn văn", "Tiếng Anh nói thế nào?").forEach {
             ui.onNodeWithText(it).assertExists()

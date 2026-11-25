@@ -389,6 +389,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
             "updates", "edit-profile" -> "profile"
             "passage" -> "passages"
             "exercise" -> "exercises"
+            "level-lessons", "passages", "exercises" -> "lessons"
             else -> "home"
         })
     }
@@ -458,7 +459,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                         OutlinedButton(onClick = {
                                             selectedLevel = level
                                             settingDialog = ""
-                                            navigate("lessons")
+                                            navigate("level-lessons")
                                         }, modifier = Modifier.weight(1f)) {
                                             Text(level)
                                         }
@@ -531,13 +532,14 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                         when (page) {
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
-                                onLessons = { selectedLevel = "A1"; navigate("lessons") }, onChat = { navigate("chat") },
-                                onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") },
-                                onB1 = { selectedLevel = "B1"; navigate("lessons") },
-                                onPassages = { navigate("passages") }, onExercises = { navigate("exercises") })
+                                onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
+                            "lessons" -> LessonHubScreen(
+                                onLevel = { selectedLevel = it; navigate("level-lessons") },
+                                onChat = { navigate("chat") }, onPassages = { navigate("passages") },
+                                onExercises = { navigate("exercises") }, onBack = { navigate("home") })
                             "passages", "exercises" -> ExtraCatalogueScreen(page == "passages", extraLevel,
                                 extraCompleted, ::loadProgress, onLevel = { extraLevel = it },
-                                onBack = { navigate("home") }, onPassage = ::openPassage, onExercise = ::openExercise)
+                                onBack = { navigate("lessons") }, onPassage = ::openPassage, onExercise = ::openExercise)
                             "passage" -> PassagePracticeScreen(passage, sentenceIndex, wholePassage, showTranslation,
                                 playbackSpeed, voiceChoice, learner, finalTranscript, transcript, capturePhase, status,
                                 onBack = { navigate("passages") },
@@ -563,8 +565,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                         if (questionIndex < exercise.questions.lastIndex) questionIndex++ else page = "exercises"
                                     }
                                 })
-                            "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
-                                learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
+                            "level-lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
+                                learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel,
+                                onBack = { navigate("lessons") })
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
@@ -627,7 +630,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 })
                                 val following = learnerLessons.getOrNull(learnerLessons.indexOf(lesson) + 1)
                                 if (following != null) CoralButton("Bài tiếp theo: ${lessonLabel(following)}", onClick = { openLesson(following) })
-                                TextButton(onClick = { navigate("lessons") }) { Text("Về danh sách bài học") }
+                                TextButton(onClick = { selectedLevel = Lessons.levelOf(lesson); navigate("level-lessons") }) { Text("Về danh sách bài học") }
                             }
                             "edit-profile" -> CreateLearnerScreen(initial = learner, onBack = { navigate("profile") }, onSave = { name, avatar ->
                                 val error = onUpdateLearner(name, avatar)
@@ -714,8 +717,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                 }
                 // All three appearances use the same full-screen scripted conversation.
                 if (page !in listOf("edit-profile", "voice-settings", "chat"))
-                    StudioBottomNavigation(if (page in listOf("passages", "passage", "exercises", "exercise")) "repeat" else page) { dest ->
-                    if (dest == "lessons") selectedLevel = "A1"
+                    StudioBottomNavigation(when (page) {
+                    "level-lessons", "passages", "exercises" -> "lessons"
+                    "passage", "exercise" -> "repeat"
+                    else -> page
+                }) { dest ->
                     navigate(dest)
                 }
                 }

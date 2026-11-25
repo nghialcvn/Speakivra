@@ -45,3 +45,7 @@ The IPA line now explicitly uses the packaged Tinos Italic face, normal weight a
 All six existing home study destinations are inside one initially collapsed “Học tập” section. Their original callbacks, content, colours, topic gates and progress storage are unchanged. Profile reset V1.0.8 is not repeated. Version rolls from 1.0.9 to 1.1.0, code 30.
 
 The CI virtual microphone probe registers `injectAudio` before launching the real APK test, streams silence until the app reports its recorder ready, then supplies the unchanged integrity-checked English PCM clip in real time. The check remains enabled and requires the real recognizer to unlock Next; it does not inject text or substitute a recognition service. Full probe logcat is retained to distinguish input-routing failures from app/recognizer failures. Reference protocol: https://github.com/google/android-emulator-webrtc/blob/master/proto/emulator_controller.proto
+
+## V1.1.1: dedicated lesson navigation
+
+The Home “Bài học” card and bottom tab two both navigate to `lessons`, the same dedicated hub. Level cards navigate to `level-lessons`, retain the chosen A1/A2/B1 catalogue, and return to the hub via the header or Android Back. Paragraph/exercise catalogues also return to this hub. Home no longer renders expanded study children. Topic gates, learner preferences, recognition, temporary recording and replay remain unchanged from 1.1.0.

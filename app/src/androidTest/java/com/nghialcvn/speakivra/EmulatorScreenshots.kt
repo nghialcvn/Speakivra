@@ -25,11 +25,9 @@ internal fun dismissUnrelatedLauncherAnr(instrumentation: Instrumentation) {
 }
 
 
-/** Home choices are now behind the explicitly requested collapsed learning group. */
-internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.expandHomeLearning() {
-    val header = onNodeWithText("Học tập", substring = false)
-    if (header.fetchSemanticsNode().config.getOrElse(
-            androidx.compose.ui.semantics.SemanticsProperties.StateDescription) { "" } == "Đang thu gọn") {
-        header.performScrollTo().performClick()
-    }
+/** Home entry and second tab both navigate to the same dedicated lesson hub. */
+internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.openLessonHub() {
+    onNode(hasText("Bài học", substring = false) and SemanticsMatcher.expectValue(
+        androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab)).performClick()
+    onNodeWithText("Chọn cấp độ hoặc dạng luyện tập").assertIsDisplayed()
 }

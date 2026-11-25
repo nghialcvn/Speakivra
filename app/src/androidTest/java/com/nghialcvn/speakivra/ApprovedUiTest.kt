@@ -29,7 +29,7 @@ class ApprovedUiTest {
                     .putString("profiles", encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
-                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLearningGroupStartsCollapsedAndKeepsAllExistingChoices"))
+                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub"))
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
@@ -115,23 +115,39 @@ class ApprovedUiTest {
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
-    @Test fun homeLearningGroupStartsCollapsedAndKeepsAllExistingChoices() {
+    @Test fun homeLessonEntryAndSecondTabOpenSameDedicatedHub() {
         ui.onNodeWithText("Bắt đầu học").performClick()
-        ui.onNodeWithText("B1 • Trung cấp").assertDoesNotExist()
+        ui.onNodeWithText("Học tập", substring = false).assertDoesNotExist()
+        ui.onNodeWithText("A2 • Sơ trung cấp").assertDoesNotExist()
         ui.onNodeWithText("Luyện nói theo đoạn văn").assertDoesNotExist()
-        ui.onNodeWithText("Tiếng Anh nói thế nào?").assertDoesNotExist()
-        ui.onNodeWithText("Học tập").performScrollTo().assertIsDisplayed()
-        shot("45-home-learning-collapsed")
-        ui.expandHomeLearning()
-        shot("46-home-learning-expanded")
-        listOf("10 chủ đề A1", "A2 • Sơ trung cấp", "B1 • Trung cấp", "Hội thoại mẫu",
-            "Luyện nói theo đoạn văn", "Tiếng Anh nói thế nào?").forEach {
-            ui.onNodeWithText(it).assertExists()
+        ui.onNodeWithContentDescription("Mở mục Bài học").performScrollTo().assertIsDisplayed()
+        shot("45-home-lesson-link")
+        ui.onNodeWithContentDescription("Mở mục Bài học").performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertDoesNotExist()
+        ui.onNodeWithContentDescription("Mở mục Bài học").assertDoesNotExist()
+        ui.onNodeWithText("Chọn cấp độ hoặc dạng luyện tập").assertIsDisplayed()
+        val lessonTab = hasText("Bài học", substring = false) and SemanticsMatcher.expectValue(
+            androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab)
+        ui.onNode(lessonTab).assertIsSelected()
+        listOf("A1 • Cơ bản", "A2 • Sơ trung cấp", "B1 • Trung cấp", "Hội thoại mẫu",
+            "Luyện nói theo đoạn văn", "Tiếng Anh nói thế nào?").forEach { ui.onNodeWithText(it).assertExists() }
+        shot("46-lesson-hub")
+        listOf("A1" to "A1 • Cơ bản", "A2" to "A2 • Sơ trung cấp", "B1" to "B1 • Trung cấp").forEach { (level, title) ->
+            ui.onNodeWithText(title).performScrollTo().performClick()
+            ui.onNodeWithText("Chọn bài học $level").assertIsDisplayed()
+            ui.onNodeWithText("Chọn cấp độ hoặc dạng luyện tập").assertDoesNotExist()
+            ui.onNode(lessonTab).assertIsSelected()
+            shot("47-$level-lesson-detail")
+            ui.onNodeWithContentDescription("Quay lại").performClick()
+            ui.onNodeWithText("Chọn cấp độ hoặc dạng luyện tập").assertIsDisplayed()
         }
-        ui.onNodeWithText("Học tập").performScrollTo().performClick()
-        ui.onNodeWithText("B1 • Trung cấp").assertDoesNotExist()
-        ui.onNodeWithText("Tiếng Anh nói thế nào?").assertDoesNotExist()
-        ui.onNodeWithText("Tiếp tục học").assertExists()
+        ui.onNodeWithText("Trang chủ", substring = false).performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
+        ui.onNodeWithText("A2 • Sơ trung cấp").assertDoesNotExist()
+        ui.openLessonHub()
+        ui.onNode(lessonTab).assertIsSelected()
+        ui.runOnUiThread { ui.activity.onBackPressedDispatcher.onBackPressed() }
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
     @Test fun approvedScreensAndThemeAreInteractiveAndKeepLessonPosition() {
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
@@ -142,7 +158,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         shot("01-home")
         // New A2 catalogue is a real navigable level, not a placeholder.
-        ui.expandHomeLearning()
+        ui.openLessonHub()
         ui.onNodeWithText("A2 • Sơ trung cấp").performScrollTo().performClick()
         ui.onNodeWithText("Chọn bài học A2").assertIsDisplayed()
         ui.onNodeWithText("Trải nghiệm").assertIsDisplayed()
@@ -156,8 +172,8 @@ class ApprovedUiTest {
         ui.onNodeWithText("Trải nghiệm • Câu 1/30").assertIsDisplayed()
         shot("28-a2-new-lesson")
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
-        ui.expandHomeLearning()
-        ui.onNodeWithText("10 chủ đề A1").performScrollTo().performClick()
+        ui.openLessonHub()
+        ui.onNodeWithText("A1 • Cơ bản").performScrollTo().performClick()
         ui.onNodeWithText("Chọn bài học A1").assertIsDisplayed()
         shot("02-lessons")
         ui.onNodeWithText("Giao tiếp thường ngày").performScrollTo().assertIsDisplayed()
@@ -175,7 +191,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("1x", substring = false).performClick()
         ui.onNodeWithContentDescription("Tốc độ đọc: 1x").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.expandHomeLearning()
+        ui.openLessonHub()
         ui.onNodeWithText("Hội thoại mẫu").performClick()
         ui.onNodeWithText("Mô phỏng theo kịch bản").assertIsDisplayed()
         ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()

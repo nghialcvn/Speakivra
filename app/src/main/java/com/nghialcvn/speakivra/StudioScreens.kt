@@ -9,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
@@ -170,9 +169,7 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 }
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
-                        onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit,
-                        onA2: () -> Unit = {}, onB1: () -> Unit = {},
-                        onPassages: () -> Unit = {}, onExercises: () -> Unit = {}) {
+                        onContinue: () -> Unit, onLessons: () -> Unit, onProfile: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -210,86 +207,59 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             CoralButton(if (progress.phase == "summary") "Xem tổng kết" else "Tiếp tục học", onClick = onContinue)
             if (completed > 0) Text("Đã hoàn thành: $completed lượt bài", color = p.muted, fontSize = 12.sp)
         }
-        var learningExpanded by remember { mutableStateOf(false) }
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            StudioCard(contentPadding = 0.dp) {
-                Row(Modifier.fillMaxWidth()
-                    .clickable(role = Role.Button) { learningExpanded = !learningExpanded }
-                    .semantics { stateDescription = if (learningExpanded) "Đang mở" else "Đang thu gọn" }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StudioIcon("book", Modifier.size(28.dp), p.coral)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Học tập", fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold)
-                        Text("A1 • A2 • B1 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
-                            fontSize = 12.sp, lineHeight = 17.sp)
-                    }
-                    StudioIcon("chevron", Modifier.size(17.dp).rotate(if (learningExpanded) 90f else 0f), p.coral)
+        StudioCard(Modifier.clickable(role = Role.Button, onClick = onLessons)
+            .semantics { contentDescription = "Mở mục Bài học" }) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StudioIcon("book", Modifier.size(28.dp), p.coral)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Bài học", fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("A1 • A2 • B1 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
+                        fontSize = 12.sp, lineHeight = 17.sp)
                 }
-            }
-            if (learningExpanded) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                    Row(Modifier.weight(1f).heightIn(min = 76.dp)
-                        .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
-                            .clip(RoundedCornerShape(16.dp)).background(p.mint))
-                        .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        StudioIcon("layers", Modifier.size(28.dp), p.green)
-                        Text("${Lessons.a1.size} chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-                        StudioIcon("chevron", Modifier.size(12.dp), p.green)
-                    }
-                    Row(Modifier.weight(1f).heightIn(min = 76.dp)
-                        .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
-                            .clip(RoundedCornerShape(16.dp)).background(p.lavender))
-                        .clickable(role = Role.Button, onClick = onChat).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        StudioIcon("chat", Modifier.size(26.dp), p.purple)
-                        Column(Modifier.weight(1f)) {
-                            Text("Hội thoại mẫu", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
-                            Text("Mô phỏng", color = p.coral, fontSize = 11.sp,
-                                modifier = Modifier.background(p.peach, RoundedCornerShape(8.dp)).padding(horizontal = 5.dp, vertical = 2.dp))
-                        }
-                        StudioIcon("chevron", Modifier.size(12.dp), p.purple)
-                    }
-                }
-                listOf(Triple("A2 • Sơ trung cấp", Lessons.a2, onA2),
-                    Triple("B1 • Trung cấp", Lessons.b1, onB1)).forEach { (title, items, open) ->
-                Row(Modifier.fillMaxWidth()
-                    .then(if (p == NeonStudio) Modifier.neonGlass(16)
-                        else Modifier.clip(RoundedCornerShape(16.dp)).background(p.lavender)
-                        .border(1.dp, p.border, RoundedCornerShape(16.dp)))
-                    .clickable(role = Role.Button, onClick = open).padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StudioIcon("book", Modifier.size(26.dp), p.purple)
-                    Column(Modifier.weight(1f)) {
-                        Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-                        Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
-                    }
-                    StudioIcon("chevron", Modifier.size(16.dp), p.purple)
-                }
-                }
-                listOf("Luyện nói theo đoạn văn" to onPassages, "Tiếng Anh nói thế nào?" to onExercises).forEach { (title, open) ->
-                    StudioCard(Modifier.clickable(role = Role.Button, onClick = open)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            StudioIcon("book", Modifier.size(26.dp), p.coral)
-                            Text(title, Modifier.weight(1f).padding(horizontal = 12.dp), fontWeight = FontWeight.ExtraBold)
-                            StudioIcon("chevron", Modifier.size(16.dp), p.coral)
-                        }
-                        Text("A1 • A2 • B1", color = p.muted, fontSize = 12.sp)
-                    }
-                }
+                StudioIcon("chevron", Modifier.size(17.dp), p.coral)
             }
         }
     }
 }
+
+@Composable
+internal fun LessonHubScreen(onLevel: (String) -> Unit, onChat: () -> Unit,
+    onPassages: () -> Unit, onExercises: () -> Unit, onBack: () -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        PageHeading("Bài học", "Chọn cấp độ hoặc dạng luyện tập", onBack)
+        listOf(Triple("A1", "A1 • Cơ bản", Lessons.a1),
+            Triple("A2", "A2 • Sơ trung cấp", Lessons.a2),
+            Triple("B1", "B1 • Trung cấp", Lessons.b1)).forEach { (level, title, items) ->
+            LessonHubCard(title, "${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại",
+                "book") { onLevel(level) }
+        }
+        LessonHubCard("Hội thoại mẫu", "Mô phỏng theo kịch bản", "chat", onChat)
+        LessonHubCard("Luyện nói theo đoạn văn", "A1 • A2 • B1", "book", onPassages)
+        LessonHubCard("Tiếng Anh nói thế nào?", "A1 • A2 • B1", "book", onExercises)
+    }
+}
+@Composable
+private fun LessonHubCard(title: String, detail: String, icon: String, onOpen: () -> Unit) {
+    StudioCard(Modifier.clickable(role = Role.Button, onClick = onOpen)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StudioIcon(icon, Modifier.size(27.dp), studio.coral)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, fontSize = 16.sp, lineHeight = 21.sp, fontWeight = FontWeight.ExtraBold)
+                Text(detail, fontSize = 12.sp, lineHeight = 17.sp, color = studio.muted)
+            }
+            StudioIcon("chevron", Modifier.size(17.dp), studio.coral)
+        }
+    }
+}
+
 @Composable
 internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit,
-                           lessons: List<Lesson> = Lessons.a1, level: String = "A1") {
+                           lessons: List<Lesson> = Lessons.a1, level: String = "A1", onBack: (() -> Unit)? = null) {
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PageHeading("Chọn bài học $level", "${lessons.size} chủ đề $level • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại")
+        PageHeading("Chọn bài học $level", "${lessons.size} chủ đề $level • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại", onBack)
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)

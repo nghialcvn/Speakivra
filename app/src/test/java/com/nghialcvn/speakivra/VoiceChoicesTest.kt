@@ -18,16 +18,16 @@ class VoiceChoicesTest {
         assertFalse(male.usesBundledAudio)
         assertFalse(british.usesBundledAudio)
         assertFalse(custom.usesBundledAudio)
-        assertEquals("en-GB", british.languageTag)
+        assertEquals("en-US", british.languageTag)
         assertEquals("Giọng nam", male.genderLabel)
-        assertEquals("Anh-Anh (UK)", british.accentLabel)
+        assertEquals("Anh-Mỹ (US)", british.accentLabel)
     }
 
     @Test fun copyPreservesVoiceChoiceWithoutTouchingProgress() {
         val old = VoiceChoice()
         val changed = old.copy(accent = "GB", gender = "male", voiceId = "tested-voice")
         assertEquals("en-US", old.languageTag)
-        assertEquals("en-GB", changed.languageTag)
+        assertEquals("en-US", changed.languageTag)
         assertEquals("tested-voice", changed.voiceId)
         assertFalse(changed.usesBundledAudio)
     }

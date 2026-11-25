@@ -255,11 +255,12 @@ private fun LessonHubCard(title: String, detail: String, icon: String, onOpen: (
 
 @Composable
 internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit,
-                           lessons: List<Lesson> = Lessons.a1, level: String = "A1", onBack: (() -> Unit)? = null) {
+                           lessons: List<Lesson> = Lessons.a1, level: String = "A1", onBack: (() -> Unit)? = null, hearts: (Lesson) -> Int = { 0 }) {
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PageHeading("Chọn bài học $level", "${lessons.size} chủ đề $level • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại", onBack)
+        Text("Thành tích đã đạt: ${lessons.sumOf(hearts)} ❤️", color = p.ink, fontSize = 13.sp)
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
@@ -281,8 +282,15 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                     if (!open) Text("Khóa • Hoàn thành chủ đề $index để mở", color = p.muted, fontSize = 11.sp)
                     if (value.rounds > 0) Text(if (value.phase == "summary") "Hoàn thành • ${value.rounds} lượt" else "Tiếp tục học • Đã học ${value.rounds} lượt", color = p.green, fontSize = 11.sp)
                 }
-                if (selected == lesson.id) Text("${value.phrase + 1}/${lesson.phrases.size} câu", fontSize = 11.sp, color = p.muted)
-                StudioIcon(if (open) "chevron" else "lock", Modifier.size(13.dp), p.muted)
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (selected == lesson.id) Text("${value.phrase + 1}/${lesson.phrases.size} câu", fontSize = 11.sp, color = p.muted)
+                        StudioIcon(if (open) "chevron" else "lock", Modifier.size(13.dp), p.muted)
+                    }
+                    val earned = hearts(lesson)
+                    Text((0 until 3).joinToString("") { if (it < earned) "❤️" else "🩶" }, fontSize = 15.sp,
+                        modifier = Modifier.semantics { contentDescription = "${lessonLabel(lesson)}: $earned trên 3 tim" })
+                }
             }
         }
         Text("${lessons.size} chủ đề $level • Học theo nhịp của bạn", color = p.purple, textAlign = TextAlign.Center,
@@ -360,7 +368,7 @@ internal fun DecorativeWave() {
 internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         listOf(
-            (if (choice.accent == "GB") "🇬🇧 English (UK)" else "🇺🇸 English (US)") to "Ngôn ngữ phát âm",
+            "🇺🇸 English (US)" to "Ngôn ngữ phát âm",
             (if (choice.gender == "male") "🔊 Giọng nam" else "🔊 Giọng nữ") to "Giọng đọc"
         ).forEach { (label, description) ->
             Row(
@@ -369,7 +377,7 @@ internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
                           else Modifier.clip(RoundedCornerShape(16.dp))
                               .background(studio.lavender)
                               .border(1.dp, studio.border, RoundedCornerShape(16.dp)))
-                    .clickable(role = Role.Button, onClick = onOpen)
+                    .then(if (description == "Giọng đọc") Modifier.clickable(role = Role.Button, onClick = onOpen) else Modifier)
                     .semantics { contentDescription = description }
                     .padding(horizontal = 10.dp, vertical = 9.dp),
                 horizontalArrangement = Arrangement.Center,
@@ -377,7 +385,7 @@ internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
             ) {
                 Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = studio.ink, maxLines = 1)
                 Spacer(Modifier.width(4.dp))
-                Text("⌄", color = studio.purple, fontSize = 13.sp)
+                if (description == "Giọng đọc") Text("⌄", color = studio.purple, fontSize = 13.sp)
             }
         }
     }

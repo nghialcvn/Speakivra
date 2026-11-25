@@ -136,7 +136,7 @@ internal fun NeonConversationScreen(
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Image(painterResource(R.drawable.speakivra_icon),
+                    Image(painterResource(R.drawable.brand_logo_clear),
                         "Logo Speakivra", Modifier.size(30.dp))
                     Text("Speakivra", color = white, fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold)

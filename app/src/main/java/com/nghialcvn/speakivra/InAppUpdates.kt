@@ -130,6 +130,7 @@ internal class InAppUpdates(application: Application) : AndroidViewModel(applica
                 val saved = if (restore) withContext(Dispatchers.IO) { mutex.withLock { files.restore(installation) } } else null
                 state = if (saved != null) UpdateState(phase = "downloaded", release = saved, file = files.destination(), bytes = saved.size,
                     message = "APK đã tải và kiểm tra. Bấm Cài cập nhật để tiếp tục.") else checkForUpdate(installation)
+                if (state.release != null) UpdateNotifications.deliver(getApplication(), state.release, installation)
             } catch (cancelled: CancellationException) { throw cancelled }
               catch (_: Exception) { state = UpdateState(message = "Không kiểm tra được cập nhật. Kiểm tra kết nối và thử lại.") }
         }

@@ -29,7 +29,7 @@ class ApprovedUiTest {
                     .putString("profiles", encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
-                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub"))
+                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub", "approvedHeartRewardsResumeAndUpdateNotification"))
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
@@ -39,6 +39,65 @@ class ApprovedUiTest {
         }
     }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @Test fun approvedHeartRewardsResumeAndUpdateNotification() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val prefs = context.getSharedPreferences("speakivra_progress", 0)
+        val rewards = TopicAchievements(prefs)
+        Lessons.a1.take(3).forEachIndexed { index, lesson ->
+            lesson.phrases.forEach { phrase ->
+                // Explicit score fixture for threshold UI only; production uses final ASR.
+                val tokens = (1..100).map { "word$it" }
+                rewards.record(lesson, phrase.id, WordMatch(tokens, (1..100).map { it <= listOf(95,75,60)[index] }, true))
+            }
+        }
+        ui.onNodeWithText("Thành tích đã đạt: 6 ❤️").assertIsDisplayed()
+        shot("50-profile-heart-achievements")
+        ui.onNodeWithText("Tiếp tục bài học ›").performClick()
+        ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.openLessonHub()
+        ui.onNodeWithText("A1 • Cơ bản").performClick()
+        ui.onNodeWithText("Thành tích đã đạt: 6 ❤️").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Chào hỏi: 3 trên 3 tim").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Gia đình: 2 trên 3 tim").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Sinh hoạt hằng ngày: 1 trên 3 tim").assertIsDisplayed()
+        shot("51-topic-heart-achievements")
+        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Hội thoại mẫu").performClick()
+        shot("52-conversation-clear-logo")
+        ui.onNodeWithText("🇺🇸 English (US)").assertIsDisplayed()
+        // Actual Android notification, with an explicit future-release fixture.
+        val current = currentInstallation(context)
+        context.getSharedPreferences("speakivra_update_notifications", 0).edit().remove("notified_version").commit()
+        val release = AppRelease("test", current.versionCode + 1,
+            "- Phần thưởng tim\n- Sửa tiếp tục bài học\n- Logo trong suốt",
+            "https://github.com/nghialcvn/Speakivra/releases/download/vtest/test.apk",
+            current.packageName, current.certificate, 1, "0".repeat(64))
+        UpdateNotifications.deliver(context, release, current)
+        val manager = context.getSystemService(android.app.NotificationManager::class.java)
+        val notification = manager.activeNotifications.single { it.id == UpdateNotifications.ID }.notification
+        org.junit.Assert.assertTrue(notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("Có bản cập nhật mới"))
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("cmd statusbar expand-notifications").close()
+        android.os.SystemClock.sleep(700)
+        shot("53-native-update-notification-fixture")
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("cmd statusbar collapse").close()
+        notification.contentIntent.send()
+        ui.waitForIdle()
+        ui.onNodeWithText("Cập nhật ứng dụng").assertIsDisplayed()
+        manager.cancel(UpdateNotifications.ID)
+        // A retry with a worse result must not erase earned hearts.
+        val lesson = Lessons.a1.first()
+        rewards.record(lesson, lesson.phrases.first().id, matchWords(lesson.phrases.first().english, "unrelated"))
+        org.junit.Assert.assertEquals(3, rewards.hearts(lesson))
+        val other = context.getSharedPreferences("achievement-isolation-test", 0)
+        other.edit().clear().commit()
+        org.junit.Assert.assertEquals(0, TopicAchievements(other).total())
+        // A saved UK setting migrates to US without touching progress or old voice data.
+        prefs.edit().putString("speech_accent", "GB").putString("speech_voice_GB_female", "old-british-voice").commit()
+        org.junit.Assert.assertEquals("US", VoiceChoices.read(prefs).accent)
+        org.junit.Assert.assertEquals("old-british-voice", prefs.getString("speech_voice_GB_female", null))
+        org.junit.Assert.assertEquals(3, rewards.hearts(lesson))
+    }
     private fun shot(name: String) {
         ui.waitForIdle()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -214,15 +273,14 @@ class ApprovedUiTest {
         // Only one accordion expands at a time.
         ui.onNodeWithText("Học tập").performClick()
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().performClick()
-        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").assertDoesNotExist()
         ui.onNodeWithText("Anh – Việt").assertIsDisplayed()
         ui.onNodeWithText("Anh – Anh").assertIsDisplayed()
         shot("15-neon-voice-settings")
-        ui.onNodeWithText("🇬🇧 Anh-Anh (UK)").performClick()
         ui.onNodeWithText("Giọng nam", substring = false).performScrollTo().performClick()
         ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick()
         ui.onNodeWithText("Học tập").performScrollTo().performClick()
-        ui.onNodeWithText("Anh-Anh (UK) • Giọng nam").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Anh-Mỹ (US) • Giọng nam").performScrollTo().assertIsDisplayed()
         // Restore original voice baseline so the rest of the existing UI test is unchanged.
         ui.onNodeWithText("Giọng đọc & Ngôn ngữ").performScrollTo().performClick()
         ui.onNodeWithText("🇺🇸 Anh-Mỹ (US)").performScrollTo().performClick()

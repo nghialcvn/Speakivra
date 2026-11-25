@@ -146,6 +146,7 @@ jobs:
             adb shell wm size 1080x2340
             adb shell wm density 420
             adb install -r dist/*.apk
+            adb shell pm grant com.nghialcvn.speakivra android.permission.POST_NOTIFICATIONS
             adb install -r -t app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
             adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
             adb shell am instrument -w -e notClass com.nghialcvn.speakivra.RealSpeechProviderProbeTest,com.nghialcvn.speakivra.RealMicrophoneUiProbeTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt

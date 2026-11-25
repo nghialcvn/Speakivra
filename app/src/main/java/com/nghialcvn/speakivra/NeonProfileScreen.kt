@@ -146,8 +146,6 @@ internal fun NeonProfileScreen(
                 Text("Tùy chọn ngôn ngữ", color = neonWhite, fontWeight = FontWeight.Bold)
                 NeonRadioOption("🇺🇸 Anh – Mỹ (US)", "English (American)",
                     voiceChoice.accent == "US") { onAccent("US") }
-                NeonRadioOption("🇬🇧 Anh – Anh (UK)", "English (British)",
-                    voiceChoice.accent == "GB") { onAccent("GB") }
                 Text("Chế độ giải thích", color = neonWhite, fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("Anh – Việt" to LearningOptions.VIETNAMESE,

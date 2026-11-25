@@ -118,7 +118,6 @@ internal fun VoiceSettingsScreen(
         }
         VoicePanel("Ngôn ngữ phát âm") {
             VoiceOption("🇺🇸 Anh-Mỹ (US)", "English · American", choice.accent == "US") { onAccent("US") }
-            VoiceOption("🇬🇧 Anh-Anh (UK)", "English · British", choice.accent == "GB") { onAccent("GB") }
         }
         VoicePanel("Giọng đọc") {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

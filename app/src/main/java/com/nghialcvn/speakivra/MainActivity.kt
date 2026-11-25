@@ -95,10 +95,18 @@ private fun UpdatesScreen(state: UpdateState, installation: Installation, onChec
 
 class MainActivity : ComponentActivity() {
     private val updates: InAppUpdates by viewModels()
+    private var updateRequested by mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applySavedSystemBars()
-        setContent { SpeakivraApp(updates) }
+        updateRequested = intent.getBooleanExtra(UpdateNotifications.OPEN_UPDATES, false)
+        UpdateNotifications.schedule(this)
+        setContent { SpeakivraApp(updates, updateRequested) { updateRequested = false } }
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        updateRequested = intent.getBooleanExtra(UpdateNotifications.OPEN_UPDATES, false)
     }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -114,19 +122,32 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun SpeakivraApp(updates: InAppUpdates) {
+private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpdateHandled: () -> Unit) {
     val context = LocalContext.current
     val store = remember(context) { LearnerStore(context.applicationContext) }
     var learners by remember { mutableStateOf(store.all()) }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var creating by rememberSaveable { mutableStateOf(false) }
+    var resumeLearning by rememberSaveable { mutableStateOf(false) }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        updates.check()
+    }
+    LaunchedEffect(Unit) {
+        val settings = context.getSharedPreferences("speakivra_update_notifications", 0)
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !StudyReminders.hasPermission(context) &&
+            !settings.getBoolean("permission_requested", false)) {
+            settings.edit().putBoolean("permission_requested", true).apply()
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        updates.checkOnce()
+    }
     val active = learners.firstOrNull { it.id == activeId }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
         if (active != null) {
             key(active.id) {
-                LearnerApp(updates, active, onSwitchLearner = { lastId = active.id; activeId = null }, onUpdateLearner = { name, avatar ->
+                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onSwitchLearner = { lastId = active.id; activeId = null }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.all(); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
@@ -153,7 +174,8 @@ private fun SpeakivraApp(updates: InAppUpdates) {
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, learners, lastId,
                                 onAdd = { creating = true },
-                                onStart = { activeId = it.id; lastId = it.id })
+                                onStart = { resumeLearning = false; activeId = it.id; lastId = it.id },
+                                onResume = { resumeLearning = true; activeId = it.id; lastId = it.id })
                         }
                     }
                 }
@@ -163,11 +185,17 @@ private fun SpeakivraApp(updates: InAppUpdates) {
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner: () -> Unit, onUpdateLearner: (String, Int) -> String?) {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onUpdateLearner: (String, Int) -> String?) {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
-    var page by rememberSaveable { mutableStateOf("home") }
+    var page by rememberSaveable { mutableStateOf(if (resumeLearning) {
+        val item = Lessons.all.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
+        restoreLessonProgress(item, preferences::getInt) { key, default -> preferences.getString(key, default) ?: default }.phase
+    } else "home") }
+    LaunchedEffect(updateRequested) {
+        if (updateRequested) { page = "updates"; updates.check(); onUpdateHandled() }
+    }
     var selectedLevel by rememberSaveable { mutableStateOf("A1") }
     val installation = updates.installation
     val updateState = updates.state
@@ -211,6 +239,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     val learnerLessons = remember(learner.name) { Lessons.all.map { personalizeLesson(it, learner.name) } }
     val lesson = learnerLessons.firstOrNull { it.id == selectedId && topicIsOpen(it, learnerLessons, ::loadProgress) } ?: learnerLessons.first()
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
+    val achievements = remember(learner.id) { TopicAchievements(preferences) }
     val index = progress.phrase
     val phrases = lesson.phrases
     val chatIndex = progress.turn
@@ -288,7 +317,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         capturePhase = phase
         if (words != null) {
             transcript = words
-            if (phase == "idle") finalTranscript = words.takeIf { it.isNotBlank() }
+            if (phase == "idle") {
+                finalTranscript = words.takeIf { it.isNotBlank() }
+                if (page == "repeat" && finalTranscript != null)
+                    achievements.record(lesson, phrases[index].id, matchWords(phrases[index].english, finalTranscript))
+            }
         }
         status = message
     })
@@ -567,7 +600,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 })
                             "level-lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel,
-                                onBack = { navigate("lessons") })
+                                onBack = { navigate("lessons") }, hearts = achievements::hearts)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
                                 onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },

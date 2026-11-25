@@ -88,8 +88,6 @@ internal fun UnifiedSettingsScreen(
                         fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
                     RadioChoice("🇺🇸", "Anh – Mỹ (US)", "English (American)",
                         choice.accent == "US", neon) { onAccent("US") }
-                    RadioChoice("🇬🇧", "Anh – Anh (UK)", "English (British)",
-                        choice.accent == "GB", neon) { onAccent("GB") }
                     Text("Chế độ giải thích", color = p.ink,
                         fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
                         modifier = Modifier.padding(top = 4.dp))

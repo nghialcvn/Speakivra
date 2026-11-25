@@ -40,7 +40,7 @@ internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier, square: B
 }
 
 @Composable
-internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit) {
+internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit, onResume: (Learner) -> Unit = onStart) {
     val p = studio
     if (learners.isEmpty()) {
         // First install: no default named person, and no empty progress profile.
@@ -86,7 +86,10 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                         Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                         StudioProgress(done.toFloat() / total)
                         Text("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
-                        Text("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp)
+                        Text("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp,
+                            modifier = Modifier.clickable(role = Role.Button) { onResume(learner) }.padding(vertical = 5.dp))
+                        Text("Thành tích đã đạt: ${TopicAchievements(store.preferences(learner)).total()} ❤️",
+                            color = p.ink, fontSize = 12.sp)
                     }
                     if (chosen) StudioIcon("check", Modifier.size(24.dp), p.coral)
                 }

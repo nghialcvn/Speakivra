@@ -1,0 +1,96 @@
+name: Publish reviewed V1.1.2 approved hearts beta
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-reviewed-apk
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    env:
+      REVIEWED_RUN: '45666457860'
+      REVIEWED_SOURCE: 51afb5e609388bbed4aa781dd130782d4a8dfbfe
+      APPROVED_APK_SHA256: 4757037aee82a3e2abdc736d00bbf33640d4e9429eb581381e96de5e6830e6b1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate the exact user-approved candidate and known test limitation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_RUN" > "$RUNNER_TEMP/candidate-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_RUN/jobs" > "$RUNNER_TEMP/candidate-jobs.json"
+          gh run download "$REVIEWED_RUN" --name Speakivra-release-verification --dir dist
+          gh run download "$REVIEWED_RUN" --name Speakivra-ui-review --dir review
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          run = json.loads((root / 'candidate-run.json').read_text())
+          assert run['event'] == 'workflow_dispatch' and run['conclusion'] == 'failure'
+          assert run['head_sha'] == os.environ['REVIEWED_SOURCE']
+          assert run['path'].split('@')[0] == '.github/workflows/android-debug.yml'
+          jobs = json.loads((root / 'candidate-jobs.json').read_text())['jobs']
+          steps = [step for job in jobs for step in job['steps']]
+          assert [s['name'] for s in steps if s['conclusion'] == 'failure'] == ['Review approved screens on Android emulator']
+          for name in ['Check fixed signing certificate before building', 'Test, lint and build once', 'Verify APK and create update metadata']:
+              assert any(s['name'] == name and s['conclusion'] == 'success' for s in steps)
+          changes = subprocess.check_output(['git', 'diff', '--name-only', os.environ['REVIEWED_SOURCE'], 'HEAD'], text=True).splitlines()
+          assert set(changes) <= {'.github/workflows/publish-v112-reviewed-beta.yml', 'docs/releases/v1.1.2-beta.md'}, 'App source changed; do not publish a different build.'
+          review = pathlib.Path('review')
+          assert 'OK (17 tests)' in (review / 'ui-test-output.txt').read_text()
+          assert 'FAILURES!!!' not in (review / 'ui-test-output.txt').read_text()
+          assert 'OK (1 test)' in (review / 'real-speech-provider-probe.txt').read_text()
+          assert 'FAILURES!!!' not in (review / 'real-speech-provider-probe.txt').read_text()
+          mic = json.loads((review / 'ui-review/real-microphone/result.json').read_text())
+          assert mic['passed'] is False and mic['stage'] == 'Recognize real microphone input'
+          meta = json.loads(pathlib.Path('dist/speakivra-update.json').read_text())
+          assert meta['applicationId'] == 'com.nghialcvn.speakivra'
+          assert meta['versionName'] == '1.1.2' and meta['versionCode'] == 32
+          assert meta['signingCertificateSha256'] == 'e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35'
+          assert meta['apkSha256'] == os.environ['APPROVED_APK_SHA256']
+          apk = pathlib.Path('dist', meta['apkName'])
+          assert hashlib.sha256(apk.read_bytes()).hexdigest() == os.environ['APPROVED_APK_SHA256']
+          subprocess.check_call(['git', 'diff', '--exit-code', '9549bc80bf28fe5cd12285e09c410aba87a90b88', os.environ['REVIEWED_SOURCE'], '--', 'app/src/main/java/com/nghialcvn/speakivra/SpeechCapture.kt', 'app/src/main/java/com/nghialcvn/speakivra/TemporarySpeechAudio.kt', 'app/src/main/java/com/nghialcvn/speakivra/WordMatch.kt'])
+          notes = pathlib.Path('docs/releases/v1.1.2-beta.md').read_text()
+          assert 'Chưa xác minh micro trên Samsung' in notes
+          print('Exact candidate verified. Publishing as explicitly requested, with the failed microphone test disclosed. No tests were relabeled as passing.')
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Reverify fixed signing key and unchanged APK
+        env:
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          export ANDROID_HOME="$SDK_ROOT"
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;35.0.0"
+          cp dist/speakivra-update.json "$RUNNER_TEMP/original-metadata.json"
+          python3 scripts/apk_metadata.py dist/Speakivra-v1.1.2-release.apk dist --release
+          python3 - <<'PY'
+          import json, os, pathlib
+          assert json.loads(pathlib.Path('dist/speakivra-update.json').read_text()) == json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'original-metadata.json').read_text())
+          PY
+      - name: Publish the exact beta APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.1.2-beta >/dev/null 2>&1; then
+            echo '::error::V1.1.2 already exists; never replace its APK.'
+            exit 1
+          fi
+          gh release create v1.1.2-beta --target "$GITHUB_SHA" --prerelease --draft --title 'Speakivra v1.1.2-beta' --notes-file docs/releases/v1.1.2-beta.md
+          gh release upload v1.1.2-beta dist/*.apk dist/speakivra-update.json
+          gh release edit v1.1.2-beta --draft=false
+      - name: Enable this signed beta in the in-app update index
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update_release_index.py

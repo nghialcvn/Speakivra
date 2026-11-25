@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.0.6-beta",
+    "tag_name": "v1.0.7-beta",
     "draft": false,
-    "body": "# Speakivra V1.0.6 Beta\n\n- Logo lớn hơn, nền trong suốt.\n- Sửa đối chiếu “I am” và “I'm”.\n- Đối chiếu số tuổi bằng chữ hoặc chữ số.\n- Gọn màn luyện nói; chọn giọng trong tùy chọn.\n- Cập nhật mới chỉ hiển thị tiêu đề.\n",
+    "body": "# Speakivra V1.0.7 Beta\n\n- Sửa hiển thị khớp từ và phần trăm kết quả.\n- A2: 10 chủ đề, 300 câu luyện nói.\n- A2: 150 lượt hội thoại, độ dài và độ khó tăng dần.\n- Giữ tiến độ cũ, tiếp tục từ nội dung mới.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.0.6-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.6-beta/Speakivra-v1.0.6-release.apk",
-        "size": 13745405,
-        "digest": "sha256:e6c4b08ae909d29b7a552c21f40551f97537aa50443583a4e85fec5828efeb11"
+        "name": "Speakivra-v1.0.7-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.0.7-beta/Speakivra-v1.0.7-release.apk",
+        "size": 13778170,
+        "digest": "sha256:fd2a256bc12ceb23788bc734fb1af76e9323854d0d99f991404cad719897b642"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 26,
-    "versionName": "1.0.6",
-    "apkName": "Speakivra-v1.0.6-release.apk",
-    "apkSha256": "e6c4b08ae909d29b7a552c21f40551f97537aa50443583a4e85fec5828efeb11",
+    "versionCode": 27,
+    "versionName": "1.0.7",
+    "apkName": "Speakivra-v1.0.7-release.apk",
+    "apkSha256": "fd2a256bc12ceb23788bc734fb1af76e9323854d0d99f991404cad719897b642",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

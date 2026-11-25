@@ -102,13 +102,29 @@ class ApprovedUiTest {
             }
             bitmap.recycle()
             val title = notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString()
-            var node = requireNotNull(automation.rootInActiveWindow).findAccessibilityNodeInfosByText(title).firstOrNull()
-            var clicked = false
-            while (node != null && !clicked) {
-                if (node.isClickable) clicked = node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK)
-                node = node.parent
+            val service = automation.serviceInfo
+            service.flags = service.flags or android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+            automation.serviceInfo = service
+            var target: android.view.accessibility.AccessibilityNodeInfo? = null
+            val deadline = android.os.SystemClock.uptimeMillis() + 5000
+            while (target == null && android.os.SystemClock.uptimeMillis() < deadline) {
+                val roots = listOfNotNull(automation.rootInActiveWindow) + automation.windows.mapNotNull { it.root }
+                target = roots.flatMap { it.findAccessibilityNodeInfosByText(title) }.firstOrNull()
+                if (target == null) android.os.SystemClock.sleep(100)
             }
-            check(clicked) { "The real Android update notification could not be clicked" }
+            val bounds = android.graphics.Rect()
+            requireNotNull(target) { "Update notification title is absent from System UI" }.getBoundsInScreen(bounds)
+            check(!bounds.isEmpty) { "Update notification has no touch bounds" }
+            // System UI does not always expose ACTION_CLICK on notification children.
+            // Send an actual touch at the title bounds obtained from its live window.
+            val time = android.os.SystemClock.uptimeMillis()
+            listOf(android.view.MotionEvent.ACTION_DOWN, android.view.MotionEvent.ACTION_UP).forEachIndexed { offset, action ->
+                val event = android.view.MotionEvent.obtain(time, time + offset * 50L, action,
+                    bounds.exactCenterX(), bounds.exactCenterY(), 0)
+                event.source = android.view.InputDevice.SOURCE_TOUCHSCREEN
+                try { check(automation.injectInputEvent(event, true)) { "Notification touch was rejected" } }
+                finally { event.recycle() }
+            }
         } finally {
             automation.executeShellCommand("cmd statusbar collapse").close()
             automation.waitForIdle(500, 5000)

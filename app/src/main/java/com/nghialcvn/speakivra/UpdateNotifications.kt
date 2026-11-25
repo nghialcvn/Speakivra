@@ -25,7 +25,10 @@ internal object UpdateNotifications {
         val manager = context.getSystemService(NotificationManager::class.java)
         val prefs = context.getSharedPreferences("speakivra_update_notifications", 0)
         if (release == null || release.versionCode <= current.versionCode || !release.canInstallOver(current)) {
-            manager.cancel(ID)
+            // An older in-flight network response must not remove a newer offer.
+            val shown = manager.activeNotifications.firstOrNull { it.id == ID }
+            if (shown != null && shown.notification.extras.getLong("speakivra_release_code", 0) <= current.versionCode)
+                manager.cancel(ID)
             return
         }
         if (!StudyReminders.hasPermission(context) || !NotificationManagerCompat.from(context).areNotificationsEnabled()) return
@@ -42,6 +45,7 @@ internal object UpdateNotifications {
             .setContentTitle("Speakivra — Có bản cập nhật mới")
             .setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setContentIntent(action).setAutoCancel(true).setOnlyAlertOnce(true).build()
+        notification.extras.putLong("speakivra_release_code", release.versionCode)
         NotificationManagerCompat.from(context).notify(ID, notification)
         prefs.edit().putLong("notified_version", release.versionCode).apply()
     }

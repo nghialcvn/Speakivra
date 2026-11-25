@@ -86,6 +86,9 @@ class ApprovedUiTest {
             current.packageName, current.certificate, 1, "0".repeat(64))
         UpdateNotifications.deliver(context, release, current)
         val manager = context.getSystemService(android.app.NotificationManager::class.java)
+        ui.waitUntil(5000) { manager.activeNotifications.any { it.id == UpdateNotifications.ID } }
+        // An older network result cannot cancel a newer notification already posted.
+        UpdateNotifications.deliver(context, release.copy(versionCode = current.versionCode), current)
         val notification = manager.activeNotifications.single { it.id == UpdateNotifications.ID }.notification
         org.junit.Assert.assertTrue(notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("Có bản cập nhật mới"))
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation

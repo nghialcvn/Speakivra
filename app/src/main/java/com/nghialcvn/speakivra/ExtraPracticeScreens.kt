@@ -3,6 +3,7 @@ package com.nghialcvn.speakivra
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,7 +21,7 @@ internal fun ExtraCatalogueScreen(passages: Boolean, level: String, completed: S
     load: (Lesson) -> LessonProgress, onLevel: (String) -> Unit, onBack: () -> Unit,
     onPassage: (ReadingPassage) -> Unit, onExercise: (SpeakingExercise) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
         PageHeading(if (passages) "Luyện nói theo đoạn văn" else "Tiếng Anh nói thế nào?", "A1 • A2 • B1", onBack)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("A1", "A2", "B1").forEach {
@@ -36,7 +37,7 @@ internal fun ExtraCatalogueScreen(passages: Boolean, level: String, completed: S
                 "${item.questions.count { it.id in completed }}/${item.questions.size} câu",
                 extraTopicOpen(item.lessonId, load), item.questions.all { it.id in completed }) { onExercise(item) }
         }
-        Text("Học xong chủ đề 3 để mở chủ đề 4, rồi tiếp tục theo thứ tự bài học.", color = studio.muted, fontSize = 12.sp)
+        Text("Học xong chủ đề 3 để mở chủ đề 4, rồi tiếp tục theo thứ tự bài học.", color = studio.muted, fontSize = 12.sp, lineHeight = 15.sp)
     }
 }
 @Composable
@@ -46,9 +47,9 @@ private fun ExtraCatalogueCard(title: String, subtitle: String, progress: String
         .semantics { if (!open) disabled() }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(title, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-                Text(subtitle, color = studio.muted, fontSize = 14.sp)
-                Text(if (open) progress else "Đang khóa", color = studio.coral, fontSize = 12.sp)
+                Text(title, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 23.sp)
+                Text(subtitle, color = studio.muted, fontSize = 14.sp, lineHeight = 18.sp)
+                Text(if (open) progress else "Đang khóa", color = studio.coral, fontSize = 12.sp, lineHeight = 15.sp)
             }
             StudioIcon(if (!open) "lock" else if (done) "check" else "chevron", Modifier.size(22.dp), studio.coral)
         }
@@ -61,17 +62,17 @@ private fun ExtraMicrophone(phase: String, prompt: String, onSpeak: () -> Unit) 
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly) {
             DecorativeWave()
-            Microphone(onSpeak, large = true, active = phase == "listening")
+            Microphone(onSpeak, Modifier.size(94.dp), large = true, active = phase == "listening")
             DecorativeWave()
         }
-        Text(captureLabel(phase, prompt), color = studio.muted, fontSize = 14.sp, textAlign = TextAlign.Center)
+        Text(captureLabel(phase, prompt), color = studio.muted, fontSize = 14.sp, lineHeight = 18.sp, textAlign = TextAlign.Center)
     }
 }
 @Composable
 private fun ExtraSpeed(speed: Int, onSpeed: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { expanded = true }, contentPadding = PaddingValues(horizontal = 10.dp)) { Text("${speedLabel(speed)} ⌄") }
+        ExtraOutline("${speedLabel(speed)} ⌄", onClick = { expanded = true })
         DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
             listOf(75, 100, 125).forEach { value ->
                 DropdownMenuItem(text = { Text(speedLabel(value)) }, onClick = { expanded = false; onSpeed(value) })
@@ -91,10 +92,10 @@ internal fun PassagePracticeScreen(item: ReadingPassage, selected: Int, whole: B
     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PageHeading("Luyện nói theo đoạn văn", "${item.level} • ${item.topic}", onBack)
         StudioProgress((selected + 1f) / item.sentences.size)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             TwoChoices("Từng câu", "Cả đoạn", !whole, { onWhole(!it) }, Modifier.fillMaxWidth())
-            StudioCard {
-                Text(item.title, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+            StudioCard(contentPadding = 10.dp, spacing = 4.dp) {
+                Text(item.title, fontSize = 21.sp, lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold)
                 val annotated = buildAnnotatedString {
                     var tokenOffset = 0
                     item.sentences.forEachIndexed { index, part ->
@@ -123,30 +124,31 @@ internal fun PassagePracticeScreen(item: ReadingPassage, selected: Int, whole: B
                 }
                 @Suppress("DEPRECATION")
                 ClickableText(annotated, style = MaterialTheme.typography.bodyLarge.copy(color = p.ink,
-                    fontSize = 16.sp, lineHeight = 25.sp), onClick = { offset ->
+                    fontSize = 16.sp, lineHeight = 23.sp), onClick = { offset ->
                     annotated.getStringAnnotations("sentence", offset, offset).firstOrNull()?.let { onSentence(it.item.toInt()) }
                 }, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Chọn câu trong đoạn văn" })
                 IpaLine(sentence.english, voice.accent, Modifier.fillMaxWidth())
-                if (translation) Text(sentence.vietnamese, color = p.muted, fontSize = 14.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                if (translation) Text(sentence.vietnamese, color = p.muted, fontSize = 14.sp, lineHeight = 18.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                 var listenMenu by remember { mutableStateOf(false) }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Box {
-                        SpeakerChip("Nghe đoạn", { listenMenu = true })
+                        ExtraOutline("Nghe đoạn", speaker = true, onClick = { listenMenu = true })
                         DropdownMenu(listenMenu, onDismissRequest = { listenMenu = false }) {
                             DropdownMenuItem(text = { Text("Nghe cả đoạn") }, onClick = { listenMenu = false; onListen(item.english) })
                             DropdownMenuItem(text = { Text("Nghe câu đang chọn") }, onClick = { listenMenu = false; onListen(sentence.english) })
                         }
                     }
                     ExtraSpeed(speed, onSpeed)
-                    OutlinedButton(onClick = onTranslation, contentPadding = PaddingValues(horizontal = 10.dp)) { Text(if (translation) "Ẩn dịch" else "Hiện dịch") }
+                    ExtraOutline(if (translation) "Ẩn dịch" else "Hiện dịch", onTranslation)
                 }
             }
-            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            StudioCard(contentPadding = 8.dp, spacing = 4.dp) {
+                Text("Từ vựng & cụm từ", fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, lineHeight = 19.sp)
                 item.vocabulary.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        pair.forEach { vocab -> StudioCard(Modifier.weight(1f).clickable(role = Role.Button) { onListen(vocab.english) }) {
-                            Text(vocab.english, color = p.coral, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            Text(vocab.vietnamese, color = p.muted, fontSize = 12.sp)
+                        pair.forEach { vocab -> StudioCard(Modifier.weight(1f).clickable(role = Role.Button) { onListen(vocab.english) }, border = false, contentPadding = 6.dp, spacing = 2.dp) {
+                            Text(vocab.english, color = p.coral, fontWeight = FontWeight.Bold, fontSize = 13.sp, lineHeight = 16.sp)
+                            Text(vocab.vietnamese, color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
                         } }
                     }
                 }
@@ -154,14 +156,16 @@ internal fun PassagePracticeScreen(item: ReadingPassage, selected: Int, whole: B
             ExtraMicrophone(phase, if (whole) "Chạm để đọc cả đoạn" else "Chạm để đọc câu đang chọn", onSpeak)
             SpokenResult(learner, if (phase == "idle") finalTranscript.orEmpty() else transcript,
                 if (phase == "idle" && result.hasResult) result.canContinue else null)
-            if (result.hasResult) Text("Khớp ${result.correct}/${result.tokens.size} từ · ${result.matchPercent}%", color = if (result.incorrect == 0) p.correctWord else p.incorrectWord, fontSize = 13.sp)
-            if (status.isNotBlank() && (phase != "idle" || finalTranscript.isNullOrBlank())) Text(status, color = p.muted, fontSize = 12.sp)
+            if (result.hasResult) Text("Khớp ${result.correct}/${result.tokens.size} từ · ${result.matchPercent}%", color = if (result.incorrect == 0) p.correctWord else p.incorrectWord, fontSize = 13.sp, lineHeight = 16.sp)
+            if (status.isNotBlank() && (phase != "idle" || finalTranscript.isNullOrBlank())) Text(status, color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
         }
         if (!whole) {
             CoralButton(if (result.canContinue && phase == "idle") "Câu tiếp theo" else "Luyện cả đoạn",
+                chevron = false, labelColor = if (p == NeonStudio) Color(0xFF071B3F) else null,
                 onClick = { if (result.canContinue && phase == "idle") onNext() else onWhole(true) })
         } else CoralButton(if (result.canContinue && phase == "idle") "Hoàn thành đoạn văn" else "Cần nói lại",
-            enabled = result.canContinue && phase == "idle", onClick = onNext)
+            enabled = result.canContinue && phase == "idle", chevron = false,
+            labelColor = if (p == NeonStudio) Color(0xFF071B3F) else null, onClick = onNext)
     }
 }
 @Composable
@@ -176,27 +180,27 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PageHeading("Tiếng Anh nói thế nào?", "${item.level} • ${item.topic} • Câu ${selected + 1}/${item.questions.size}", onBack)
         StudioProgress((selected + 1f) / item.questions.size)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             item.questions.forEachIndexed { index, row ->
                 val active = index == selected
                 val saved = row.id in completed && !active
-                StudioCard {
+                StudioCard(border = active, contentPadding = 6.dp, spacing = 4.dp) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("${index + 1}", color = p.muted, fontSize = 12.sp)
-                        Text(row.vietnamese, Modifier.weight(1f), fontWeight = if (active) FontWeight.Bold else FontWeight.Normal, fontSize = 14.sp)
+                        Text("${index + 1}", color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
+                        Text(row.vietnamese, Modifier.weight(1f), fontWeight = if (active) FontWeight.Bold else FontWeight.Normal, fontSize = 14.sp, lineHeight = 18.sp)
                         Text(if (saved || (active && (accepted || reveal))) {
                             if (active && accepted) evaluation.reference else row.answer
                         } else "?", Modifier.weight(1f),
                             color = if (saved || (active && accepted)) p.correctWord else p.muted,
-                            fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         if (saved || (active && accepted)) StudioIcon("check", Modifier.size(18.dp), p.correctWord)
                     }
                     if (active) {
                         if (accepted || reveal) IpaLine(if (accepted) evaluation.reference else row.answer, voice.accent, Modifier.fillMaxWidth())
-                        if (hint && !accepted && !reveal) Text("Gợi ý: ${row.answer.substringBefore(' ')} …", color = p.muted, fontSize = 12.sp)
+                        if (hint && !accepted && !reveal) Text("Gợi ý: ${row.answer.substringBefore(' ')} …", color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { hint = true }) { Text("Gợi ý") }
-                            SpeakerChip("Nghe đáp án", { reveal = true; onListen(row.answer) })
+                            ExtraOutline("Gợi ý", onClick = { hint = true })
+                            ExtraOutline("Nghe đáp án", speaker = true, onClick = { reveal = true; onListen(row.answer) })
                         }
                     }
                 }
@@ -204,11 +208,29 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
             ExtraMicrophone(phase, "Chạm để trả lời", onSpeak)
             SpokenResult(learner, if (phase == "idle") finalTranscript.orEmpty() else transcript,
                 if (phase == "idle" && !finalTranscript.isNullOrBlank()) accepted else null)
-            if (!finalTranscript.isNullOrBlank() && phase == "idle") Text(
-                if (accepted) "Cách diễn đạt phù hợp" else "Chưa khớp đáp án mẫu. Hãy nghe và thử lại nhé.",
-                color = if (accepted) p.correctWord else p.incorrectWord, fontSize = 13.sp)
-            if (status.isNotBlank() && (phase != "idle" || finalTranscript.isNullOrBlank())) Text(status, color = p.muted, fontSize = 12.sp)
+            if (!finalTranscript.isNullOrBlank() && phase == "idle") Row(
+                Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                if (accepted) StudioIcon("check", Modifier.size(19.dp).padding(end = 4.dp), p.correctWord)
+                Text(if (accepted) "Cách diễn đạt phù hợp" else "Chưa khớp đáp án mẫu. Hãy nghe và thử lại nhé.",
+                    color = if (accepted) p.correctWord else p.incorrectWord, fontSize = 13.sp, lineHeight = 16.sp)
+            }
+            if (status.isNotBlank() && (phase != "idle" || finalTranscript.isNullOrBlank())) Text(status, color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
         }
-        CoralButton(if (accepted) "Câu tiếp theo" else "Cần nói lại", enabled = accepted, onClick = onNext)
+        CoralButton(if (accepted) "Câu tiếp theo" else "Cần nói lại", enabled = accepted, chevron = false,
+            labelColor = if (p == NeonStudio) Color(0xFF071B3F) else null, onClick = onNext)
+    }
+}
+
+@Composable
+private fun ExtraOutline(label: String, onClick: () -> Unit, speaker: Boolean = false) {
+    Row(Modifier.clip(RoundedCornerShape(8.dp))
+        .border(1.dp, studio.border, RoundedCornerShape(8.dp))
+        .clickable(role = Role.Button, onClick = onClick).heightIn(min = 32.dp)
+        .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        if (speaker) StudioIcon("speaker", Modifier.size(17.dp), studio.coral)
+        Text(label, color = if (speaker) studio.coral else studio.ink,
+            fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
     }
 }

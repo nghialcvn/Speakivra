@@ -42,7 +42,7 @@ internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 
 
 @Composable
 internal fun StudioCard(modifier: Modifier = Modifier, color: Color = studio.card,
-                        border: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
+                        border: Boolean = true, contentPadding: Dp = 16.dp, spacing: Dp = 10.dp, content: @Composable ColumnScope.() -> Unit) {
     val neon = studio == NeonStudio
     Column(modifier.fillMaxWidth()
         .then(if (neon && color == studio.mint) Modifier
@@ -55,11 +55,11 @@ internal fun StudioCard(modifier: Modifier = Modifier, color: Color = studio.car
         else if (neon) Modifier.neonGlass(strong = border) else Modifier
             .clip(RoundedCornerShape(18.dp)).background(color)
             .then(if (border) Modifier.border(1.dp, studio.border, RoundedCornerShape(18.dp)) else Modifier))
-        .padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
+        .padding(contentPadding), verticalArrangement = Arrangement.spacedBy(spacing), content = content)
 }
 @Composable
 internal fun CoralButton(label: String, modifier: Modifier = Modifier, enabled: Boolean = true,
-                         chevron: Boolean = true, onClick: () -> Unit) {
+                         chevron: Boolean = true, labelColor: Color? = null, onClick: () -> Unit) {
     val p = studio
     val isNeon = p == NeonStudio
     val brush = if (isNeon) NeonLook.crest
@@ -75,7 +75,7 @@ internal fun CoralButton(label: String, modifier: Modifier = Modifier, enabled: 
             NeonLook.edge, RoundedCornerShape(26.dp)) else Modifier)
         .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
         .heightIn(min = 50.dp).padding(horizontal = 20.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
-        Text(label, color = if (enabled) Color.White else p.muted, fontSize = 17.sp,
+        Text(label, color = if (enabled) labelColor ?: Color.White else p.muted, fontSize = 17.sp,
             fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = if (chevron) 20.dp else 0.dp))
         if (!enabled && label == "Cần nói lại") StudioIcon("lock", Modifier.size(19.dp).align(Alignment.CenterStart), p.muted)

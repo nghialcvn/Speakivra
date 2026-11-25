@@ -387,6 +387,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         navigate(when (page) {
             "voice-settings" -> voiceReturnPage
             "updates", "edit-profile" -> "profile"
+            "passage" -> "passages"
+            "exercise" -> "exercises"
             else -> "home"
         })
     }

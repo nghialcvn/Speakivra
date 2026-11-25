@@ -63,7 +63,6 @@ internal object ExtraPracticeData {
             ReadingSentence("passage_a2_experiences_s2", "I make breakfast.", "Tôi chuẩn bị bữa sáng."),
             ReadingSentence("passage_a2_experiences_s3", "Then I go to work by bus.", "Sau đó tôi đi làm bằng xe buýt."),
             ReadingSentence("passage_a2_experiences_s4", "In the evening, I cook dinner and read a book.", "Buổi tối, tôi nấu bữa tối và đọc sách."),
-            ReadingSentence("passage_a2_experiences_s5", "I try to prepare things the night before because my mornings are usually busy.", "Tôi cố chuẩn bị đồ từ tối hôm trước vì buổi sáng thường bận."),
         ), listOf(
             PracticeVocabulary("Wake up early", "Thức dậy sớm"),
             PracticeVocabulary("Make breakfast", "Chuẩn bị bữa sáng"),

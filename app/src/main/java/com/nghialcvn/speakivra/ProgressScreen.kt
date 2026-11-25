@@ -37,30 +37,34 @@ internal fun ProgressScreen(
         }
         Text("A1 • Căn bản", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
         lessons.filter { Lessons.levelOf(it) == "A1" }.forEach { lesson ->
-            LessonProgressRow(lesson, load(lesson), onOpen)
+            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
         }
         Text("A2 • Sơ trung cấp", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
         lessons.filter { Lessons.levelOf(it) == "A2" }.forEach { lesson ->
-            LessonProgressRow(lesson, load(lesson), onOpen)
+            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
+        }
+        Text("B1 • Trung cấp", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+        lessons.filter { Lessons.levelOf(it) == "B1" }.forEach { lesson ->
+            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
         }
     }
 }
 
 @Composable
-private fun LessonProgressRow(lesson: Lesson, value: LessonProgress, onOpen: (Lesson) -> Unit) {
+private fun LessonProgressRow(lesson: Lesson, value: LessonProgress, open: Boolean, onOpen: (Lesson) -> Unit) {
     val p = studio
     Row(Modifier.fillMaxWidth()
         .then(if (p == NeonStudio) Modifier.neonGlass(15)
             else Modifier.background(p.card, RoundedCornerShape(15.dp))
                 .border(1.dp, p.border, RoundedCornerShape(15.dp)))
-        .clickable { onOpen(lesson) }.padding(13.dp),
+        .clickable(enabled = open) { onOpen(lesson) }.padding(13.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StudioIcon(if (value.phase == "summary") "check" else "book",
+        StudioIcon(if (!open) "lock" else if (value.phase == "summary") "check" else "book",
             Modifier.size(23.dp), if (value.phase == "summary") p.green else p.coral)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(lessonLabel(lesson), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text(if (value.phase == "summary") "${value.rounds} lượt hoàn thành"
+            Text(if (!open) "Chủ đề đang khóa" else if (value.phase == "summary") "${value.rounds} lượt hoàn thành"
                  else "${value.phrase + 1}/${lesson.phrases.size} câu • ${value.phase}",
                 color = p.muted, fontSize = 12.sp)
             StudioProgress((value.phrase + 1f) / lesson.phrases.size)

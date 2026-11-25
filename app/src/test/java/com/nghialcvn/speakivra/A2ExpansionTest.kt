@@ -22,7 +22,7 @@ class A2ExpansionTest {
             repeat(18) { resumed = resumed.nextPhrase(expanded) }
             assertEquals("chat", resumed.phase)
             assertEquals(5, resumed.turn)
-            repeat(10) { resumed = resumed.nextTurn(expanded) }
+            repeat(5) { resumed = resumed.nextTurn(expanded) }
             assertEquals("summary", resumed.phase)
             assertEquals(3, resumed.rounds)
             assertTrue(resumed.learnedPhrases!!.containsAll(expanded.phrases.map { it.id }))
@@ -55,7 +55,7 @@ class A2ExpansionTest {
             val late = lesson.phrases.takeLast(10).map { words(it.english) }.average()
             assertTrue("${lesson.id}: $early -> $middle -> $late", early < middle && middle < late)
             assertEquals(30, lesson.phrases.map { it.english }.distinct().size)
-            assertEquals(15, lesson.conversation.map { it.prompt }.distinct().size)
+            assertEquals(10, lesson.conversation.map { it.prompt }.distinct().size)
             lesson.conversation.forEach { turn ->
                 assertTrue(lesson.phrases.any { it.english == turn.reply && it.vietnamese == turn.replyTranslation })
             }

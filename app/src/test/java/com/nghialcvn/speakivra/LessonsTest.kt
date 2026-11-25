@@ -4,10 +4,10 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class LessonsTest {
-    @Test fun a1HasExactly15Topics300PracticeLinesAnd100ConversationTurns() {
-        assertEquals(15, Lessons.a1.size)
-        assertEquals(300, Lessons.a1.sumOf { it.phrases.size })
-        assertEquals(100, Lessons.a1.sumOf { it.conversation.size })
+    @Test fun a1KeepsTheOriginalTenTopics() {
+        assertEquals(10, Lessons.a1.size)
+        assertEquals(200, Lessons.a1.sumOf { it.phrases.size })
+        assertEquals(70, Lessons.a1.sumOf { it.conversation.size })
         assertEquals(listOf(
             "Greetings & Introductions", "My Family", "Daily Routine", "Food & Drinks",
             "Shopping", "Directions", "My Hobbies", "Time & Dates", "Travel", "Real Conversation"
@@ -16,24 +16,20 @@ class LessonsTest {
             assertEquals(20, lesson.phrases.size)
             assertEquals(7, lesson.conversation.size)
         }
-        Lessons.a1.drop(10).forEach { lesson ->
-            assertEquals(20, lesson.phrases.size)
-            assertEquals(6, lesson.conversation.size)
-        }
     }
 
     @Test fun a2IsSeparateAndOffersRealContent() {
-        assertEquals(10, Lessons.a2.size)
-        assertEquals(300, Lessons.a2.sumOf { it.phrases.size })
+        assertEquals(15, Lessons.a2.size)
+        assertEquals(450, Lessons.a2.sumOf { it.phrases.size })
         assertEquals(150, Lessons.a2.sumOf { it.conversation.size })
         Lessons.a2.forEach { lesson ->
             assertTrue(lesson.id.startsWith("a2_"))
             assertEquals("A2", Lessons.levelOf(lesson))
             assertEquals(30, lesson.phrases.size)
-            assertEquals(15, lesson.conversation.size)
+            assertEquals(10, lesson.conversation.size)
         }
         assertEquals("A1", Lessons.levelOf(Lessons.a1.first()))
-        assertEquals(25, Lessons.all.map { it.id }.distinct().size)
+        assertEquals(45, Lessons.all.map { it.id }.distinct().size)
     }
 
     @Test fun everyTopicHasVietnameseTranslationsPronunciationTipsAndWorkingReview() {

@@ -36,7 +36,7 @@ internal fun lessonLabel(lesson: Lesson): String = when (lesson.id) {
     "a2_health" -> "Sức khỏe & sinh hoạt"; "a2_work" -> "Công việc & phối hợp"
     "a2_learning" -> "Học tập & mục tiêu"; "a2_community" -> "Cộng đồng & dịch vụ"
     "a2_stories" -> "Kể chuyện & tình huống"
-    else -> "Giao tiếp thường ngày"
+    else -> if (lesson.id.startsWith("a2_") || lesson.id.startsWith("b1_")) lesson.vietnamese else "Giao tiếp thường ngày"
 }
 internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" }
 
@@ -170,7 +170,7 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
                         onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit,
-                        onA2: () -> Unit = {}) {
+                        onA2: () -> Unit = {}, onB1: () -> Unit = {}) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -215,7 +215,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StudioIcon("layers", Modifier.size(28.dp), p.green)
-                Text("15 chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+                Text("${Lessons.a1.size} chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
                 StudioIcon("chevron", Modifier.size(12.dp), p.green)
             }
             Row(Modifier.weight(1f).heightIn(min = 76.dp)
@@ -232,19 +232,22 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 StudioIcon("chevron", Modifier.size(12.dp), p.purple)
             }
         }
+        listOf(Triple("A2 • Sơ trung cấp", Lessons.a2, onA2),
+            Triple("B1 • Trung cấp", Lessons.b1, onB1)).forEach { (title, items, open) ->
         Row(Modifier.fillMaxWidth()
             .then(if (p == NeonStudio) Modifier.neonGlass(16)
                 else Modifier.clip(RoundedCornerShape(16.dp)).background(p.lavender)
                 .border(1.dp, p.border, RoundedCornerShape(16.dp)))
-            .clickable(role = Role.Button, onClick = onA2).padding(14.dp),
+            .clickable(role = Role.Button, onClick = open).padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             StudioIcon("book", Modifier.size(26.dp), p.purple)
             Column(Modifier.weight(1f)) {
-                Text("A2 • Sơ trung cấp", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-                Text("${Lessons.a2.size} chủ đề • ${Lessons.a2.sumOf { it.phrases.size }} câu luyện nói • ${Lessons.a2.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
             }
             StudioIcon("chevron", Modifier.size(16.dp), p.purple)
+        }
         }
     }
 }
@@ -254,16 +257,17 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PageHeading("Chọn bài học $level", if (level == "A1") "15 chủ đề • 300 câu nói • 100 lượt hội thoại" else "${lessons.size} chủ đề A2 • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại")
+        PageHeading("Chọn bài học $level", "${lessons.size} chủ đề $level • ${lessons.sumOf { it.phrases.size }} câu nói • ${lessons.sumOf { it.conversation.size }} lượt hội thoại")
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
+            val open = topicIsOpen(lesson, lessons, load)
             Row(Modifier.fillMaxWidth()
                 .then(if (p == NeonStudio) Modifier.neonGlass(16, selected == lesson.id)
                 else Modifier.clip(RoundedCornerShape(16.dp))
                     .background(if (selected == lesson.id) p.peach else p.card)
                     .border(1.dp, if (selected == lesson.id) Color.Transparent else p.border, RoundedCornerShape(16.dp)))
-                .clickable(role = Role.Button, onClick = { onOpen(lesson) }).padding(12.dp),
+                .clickable(enabled = open, role = Role.Button, onClick = { onOpen(lesson) }).padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(Modifier.size(33.dp).background(p.peach, CircleShape), Alignment.Center) {
                     Text((index + 1).toString().padStart(2, '0'), color = p.coral, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
@@ -272,10 +276,11 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(lessonLabel(lesson), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                     Text(lesson.title, color = p.muted, fontSize = 11.sp)
+                    if (!open) Text("Khóa • Hoàn thành chủ đề $index để mở", color = p.muted, fontSize = 11.sp)
                     if (value.rounds > 0) Text(if (value.phase == "summary") "Hoàn thành • ${value.rounds} lượt" else "Tiếp tục học • Đã học ${value.rounds} lượt", color = p.green, fontSize = 11.sp)
                 }
                 if (selected == lesson.id) Text("${value.phrase + 1}/${lesson.phrases.size} câu", fontSize = 11.sp, color = p.muted)
-                StudioIcon("chevron", Modifier.size(13.dp), p.muted)
+                StudioIcon(if (open) "chevron" else "lock", Modifier.size(13.dp), p.muted)
             }
         }
         Text("${lessons.size} chủ đề $level • Học theo nhịp của bạn", color = p.purple, textAlign = TextAlign.Center,

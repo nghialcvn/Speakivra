@@ -209,7 +209,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         { key, default -> preferences.getString(key, default) ?: default })
     var selectedId by rememberSaveable { mutableStateOf(preferences.getString("active_lesson", "greetings") ?: "greetings") }
     val learnerLessons = remember(learner.name) { Lessons.all.map { personalizeLesson(it, learner.name) } }
-    val lesson = learnerLessons.firstOrNull { it.id == selectedId } ?: learnerLessons.first()
+    val lesson = learnerLessons.firstOrNull { it.id == selectedId && topicIsOpen(it, learnerLessons, ::loadProgress) } ?: learnerLessons.first()
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
     val index = progress.phrase
     val phrases = lesson.phrases
@@ -318,6 +318,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         if (automatic && page == "repeat") speak(phrases[progress.phrase].english)
     }
     fun openLesson(source: Lesson) {
+        if (!topicIsOpen(source, learnerLessons, ::loadProgress)) return
         val item = personalizeLesson(source, learner.name)
         stopCapture(); speech.stop()
         transcript = ""
@@ -417,10 +418,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             }
                             "study" -> {
                                 Text("Chọn cấp độ thực hành", fontWeight = FontWeight.Bold)
-                                Text("A1: 15 chủ đề • A2: 5 chủ đề", color = palette.muted,
+                                Text("A1: 10 chủ đề • A2: 15 chủ đề • B1: 20 chủ đề", color = palette.muted,
                                     fontSize = 12.sp)
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    listOf("A1", "A2").forEach { level ->
+                                    listOf("A1", "A2", "B1").forEach { level ->
                                         OutlinedButton(onClick = {
                                             selectedLevel = level
                                             settingDialog = ""
@@ -498,7 +499,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { selectedLevel = "A1"; navigate("lessons") }, onChat = { navigate("chat") },
-                                onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") })
+                                onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") },
+                                onB1 = { selectedLevel = "B1"; navigate("lessons") })
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)

@@ -117,7 +117,7 @@ internal fun UnifiedSettingsScreen(
                         fontSize = 11.sp, color = p.muted, lineHeight = 16.sp)
                 }
                 SettingsTile("sliders", "Tùy chỉnh bài học",
-                    "A1 / A2 • Lặp $repeats lần", neon, onStudy)
+                    "A1 / A2 / B1 • Lặp $repeats lần", neon, onStudy)
                 InnerPanel(neon) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -202,9 +202,9 @@ internal fun UnifiedSettingsScreen(
                         }
                         Text("V$version", color = p.muted, fontSize = 11.sp)
                     }
-                    UpdateMiniRow("speaker", "Kết quả khớp từ hiển thị đúng")
-                    UpdateMiniRow("book", "A2: 300 câu, 150 lượt hội thoại")
-                    UpdateMiniRow("layers", "10 chủ đề A2, độ khó tăng dần")
+                    UpdateMiniRow("speaker", "Hồ sơ mới, mở khóa theo tiến độ")
+                    UpdateMiniRow("book", "A2: 15 chủ đề, 450 câu luyện nói")
+                    UpdateMiniRow("layers", "B1: 20 chủ đề, 700 câu luyện nói")
                 }
                 SettingsTile("phone", "Kiểm tra cập nhật",
                     "Phiên bản đang dùng: v$version", neon, onUpdates)

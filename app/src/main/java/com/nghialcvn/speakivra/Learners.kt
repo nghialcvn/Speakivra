@@ -38,20 +38,12 @@ internal fun updateLearnerList(existing: List<Learner>, id: String, name: String
 
 internal class LearnerStore(private val context: Context) {
     private val registry = context.getSharedPreferences("speakivra_learners", 0)
+    init { resetForCurriculum108(context) }
     fun all(): List<Learner> {
         val saved = registry.getString("profiles", null)
-        if (saved != null) return decodeLearners(saved) // Never silently replace a damaged registry.
-        // Existing installs have an explicit profile registry and are kept unchanged.
-        // Legacy installs predating the registry had learning preferences in the
-        // original file. Only those genuine legacy installs keep their old profile.
-        val legacyPrefs = context.getSharedPreferences("speakivra_progress", 0)
-        val hasLegacyProgress = legacyPrefs.contains("active_lesson") ||
-            legacyPrefs.contains("completed") ||
-            legacyPrefs.all.keys.any { it.startsWith("lesson.") }
-        val first = if (hasLegacyProgress)
-            listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)) else emptyList()
-        check(registry.edit().putString("profiles", encodeLearners(first)).commit())
-        return first // Fresh installs must explicitly create a named learner.
+        if (saved != null) return decodeLearners(saved)
+        check(registry.edit().putString("profiles", "[]").commit())
+        return emptyList()
     }
     fun preferences(learner: Learner): SharedPreferences = context.getSharedPreferences(learnerPreferenceName(learner.id), 0)
     fun add(name: String, avatar: Int): Learner {

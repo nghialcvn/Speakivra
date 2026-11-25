@@ -191,7 +191,7 @@ internal fun NeonProfileScreen(
                     color = neonGrey, fontSize = 11.sp)
             }
             NeonSettingsTile("sliders", "Tùy chỉnh bài học",
-                "A1 / A2 • ${speedLabel(speed)} • lặp $repeatCount lần", onStudyOptions)
+                "A1 / A2 / B1 • ${speedLabel(speed)} • lặp $repeatCount lần", onStudyOptions)
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(neonPanel).border(1.dp, neonLine, RoundedCornerShape(16.dp))
                 .clickable { onReminderToggle(!reminderEnabled) }

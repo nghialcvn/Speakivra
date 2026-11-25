@@ -104,5 +104,5 @@ internal object A2Lessons {
             ConversationTurn("How was your stay with us?", "Kỳ lưu trú của bạn ở đây thế nào?", "Thank you for making our stay comfortable.", "Cảm ơn bạn đã giúp kỳ nghỉ của chúng tôi thoải mái.", id = "57f334e5327945d88436")
         )),
     )
-    val all: List<Lesson> = ExpandedA2Lessons.expand(original)
+    val all: List<Lesson> = ExpandedA2Lessons.expand(original).map { it.copy(conversation = it.conversation.take(10)) } + A2NewTopics.all
 }

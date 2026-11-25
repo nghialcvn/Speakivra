@@ -31,16 +31,18 @@ internal class SpeechCapture(
     private var capturing = false
     private var generation = 0L
     private var locale = "en-US"
+    private var endpointSilenceMillis = 1400
     val hasRecording get() = audio.available
     val phase get() = session.phase
     fun replay() {
         if (phase == "idle") audio.play { update("idle", null, "Không phát được bản ghi. Hãy nói lại.") }
     }
-    fun start(languageTag: String = "en-US") {
+    fun start(languageTag: String = "en-US", silenceMillis: Int = 1400) {
         require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
         audio.clear(); recordingChanged(false)
         locale = languageTag
+        endpointSilenceMillis = silenceMillis.coerceIn(1400, 4000)
         update("listening", "", "Đang mở micro…")
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             finish(token, "", "Cần cấp quyền micro trong Cài đặt Android → Speakivra.")
@@ -161,7 +163,7 @@ internal class SpeechCapture(
                                 capturing = true
                                 audio.start(onEndpoint = {
                                     handler.post { if (current(token, attempt) && phase == "listening") stop() }
-                                }, onPcm = live::write)
+                                }, onPcm = live::write, silenceMillis = endpointSilenceMillis)
                                 streamingStarted = true
                                 update("listening", null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
                             } catch (_: Exception) {

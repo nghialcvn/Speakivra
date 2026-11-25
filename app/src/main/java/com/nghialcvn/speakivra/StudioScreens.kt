@@ -170,7 +170,8 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
                         onContinue: () -> Unit, onLessons: () -> Unit, onChat: () -> Unit, onProfile: () -> Unit,
-                        onA2: () -> Unit = {}, onB1: () -> Unit = {}) {
+                        onA2: () -> Unit = {}, onB1: () -> Unit = {},
+                        onPassages: () -> Unit = {}, onExercises: () -> Unit = {}) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -249,6 +250,16 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             StudioIcon("chevron", Modifier.size(16.dp), p.purple)
         }
         }
+        listOf("Luyện nói theo đoạn văn" to onPassages, "Tiếng Anh nói thế nào?" to onExercises).forEach { (title, open) ->
+            StudioCard(Modifier.clickable(role = Role.Button, onClick = open)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    StudioIcon("book", Modifier.size(26.dp), p.coral)
+                    Text(title, Modifier.weight(1f).padding(horizontal = 12.dp), fontWeight = FontWeight.ExtraBold)
+                    StudioIcon("chevron", Modifier.size(16.dp), p.coral)
+                }
+                Text("A1 • A2 • B1", color = p.muted, fontSize = 12.sp)
+            }
+        }
     }
 }
 @Composable
@@ -314,7 +325,7 @@ internal fun TwoChoices(first: String, second: String, selectedFirst: Boolean, o
     }
 }
 @Composable
-private fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(modifier.clip(RoundedCornerShape(12.dp))
         .background(if (studio == NeonStudio) NeonLook.glossyPanel
             else Brush.linearGradient(listOf(studio.peach, studio.peach)))
@@ -343,7 +354,7 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
     }
 }
 @Composable
-private fun DecorativeWave() {
+internal fun DecorativeWave() {
     val neon = studio == NeonStudio
     val color = if (neon) NeonLook.cyan else studio.coralLight.copy(alpha = 0.5f)
     Canvas(Modifier.width(64.dp).height(48.dp)) {
@@ -404,6 +415,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
                 Text(colored, fontSize = 29.sp, lineHeight = 35.sp, textAlign = TextAlign.Center,
                     fontWeight = FontWeight.ExtraBold, modifier = Modifier.fillMaxWidth())
+                IpaLine(phrase.english, voiceChoice.accent, Modifier.fillMaxWidth())
                 if (translation) Text(if (englishOnly) EnglishStudy.explanation(phrase.english) else phrase.vietnamese,
                     textAlign = TextAlign.Center, color = p.muted,
                     fontSize = 16.sp, modifier = Modifier.fillMaxWidth())

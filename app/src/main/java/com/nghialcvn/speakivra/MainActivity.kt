@@ -259,10 +259,27 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
             reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
+    var extraLevel by rememberSaveable { mutableStateOf("A1") }
+    var passageId by rememberSaveable { mutableStateOf(ExtraPracticeData.passages.first().id) }
+    var sentenceIndex by rememberSaveable { mutableIntStateOf(0) }
+    var wholePassage by rememberSaveable { mutableStateOf(false) }
+    var exerciseId by rememberSaveable { mutableStateOf(ExtraPracticeData.exercises.first().id) }
+    var questionIndex by rememberSaveable { mutableIntStateOf(0) }
+    var extraCompleted by remember(learner.id) {
+        mutableStateOf(preferences.getStringSet("extra.completed_ids", emptySet()).orEmpty().toSet())
+    }
+    fun completeExtra(ids: Collection<String>) {
+        extraCompleted = extraCompleted + ids
+        preferences.edit().putStringSet("extra.completed_ids", extraCompleted).apply()
+    }
+    val passage = ExtraPracticeData.passages.first { it.id == passageId }
+    val sentence = passage.sentences[sentenceIndex.coerceIn(passage.sentences.indices)]
+    val exercise = ExtraPracticeData.exercises.first { it.id == exerciseId }
+    val question = exercise.questions[questionIndex.coerceIn(exercise.questions.indices)]
     var voiceReturnPage by rememberSaveable { mutableStateOf("profile") }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
-    var finalTranscript by remember(page, learner.name, voiceChoice.accent, voiceChoice.gender, voiceChoice.voiceId, lesson.id, progress.phrase, progress.turn, progress.review) { mutableStateOf<String?>(null) }
+    var finalTranscript by remember(page, learner.name, voiceChoice.accent, voiceChoice.gender, voiceChoice.voiceId, lesson.id, progress.phrase, progress.turn, progress.review, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) { mutableStateOf<String?>(null) }
     val wordMatch = matchWords(phrases[index].english, finalTranscript)
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
     var capturePhase by remember { mutableStateOf("idle") }
@@ -291,7 +308,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
-        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag)
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400)
         else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
@@ -302,11 +319,25 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        } else capture.start(voiceChoice.languageTag)
+        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400)
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
-    DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review) {
+    DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {
         onDispose { stopCapture() }
+    }
+    fun clearExtra() {
+        stopCapture(); speech.stop(); transcript = ""; finalTranscript = null; status = ""
+    }
+    fun openPassage(item: ReadingPassage) {
+        if (!extraTopicOpen(item.lessonId, ::loadProgress)) return
+        clearExtra(); passageId = item.id; wholePassage = false
+        sentenceIndex = item.sentences.indexOfFirst { it.id !in extraCompleted }.coerceAtLeast(0)
+        page = "passage"
+    }
+    fun openExercise(item: SpeakingExercise) {
+        if (!extraTopicOpen(item.lessonId, ::loadProgress)) return
+        clearExtra(); exerciseId = item.id
+        questionIndex = nextUnfinishedQuestion(item, extraCompleted); page = "exercise"
     }
     fun next() {
         if (!wordMatch.canContinue || capture.phase != "idle") return
@@ -500,7 +531,36 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                                 onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { selectedLevel = "A1"; navigate("lessons") }, onChat = { navigate("chat") },
                                 onProfile = { navigate("profile") }, onA2 = { selectedLevel = "A2"; navigate("lessons") },
-                                onB1 = { selectedLevel = "B1"; navigate("lessons") })
+                                onB1 = { selectedLevel = "B1"; navigate("lessons") },
+                                onPassages = { navigate("passages") }, onExercises = { navigate("exercises") })
+                            "passages", "exercises" -> ExtraCatalogueScreen(page == "passages", extraLevel,
+                                extraCompleted, ::loadProgress, onLevel = { extraLevel = it },
+                                onBack = { navigate("home") }, onPassage = ::openPassage, onExercise = ::openExercise)
+                            "passage" -> PassagePracticeScreen(passage, sentenceIndex, wholePassage, showTranslation,
+                                playbackSpeed, voiceChoice, learner, finalTranscript, transcript, capturePhase, status,
+                                onBack = { navigate("passages") },
+                                onSentence = { clearExtra(); sentenceIndex = it },
+                                onWhole = { clearExtra(); wholePassage = it }, onSpeak = ::listen,
+                                onListen = { speak(it) }, onSpeed = ::selectSpeed,
+                                onTranslation = { showTranslation = !showTranslation }, onNext = {
+                                    val result = matchWords(if (wholePassage) passage.english else sentence.english, finalTranscript)
+                                    if (capturePhase == "idle" && result.canContinue) {
+                                        completeExtra(if (wholePassage) passage.sentences.map { it.id } + passage.id else listOf(sentence.id))
+                                        clearExtra()
+                                        if (wholePassage) page = "passages"
+                                        else if (sentenceIndex < passage.sentences.lastIndex) sentenceIndex++
+                                        else wholePassage = true
+                                    }
+                                })
+                            "exercise" -> SpeakingExerciseScreen(exercise, questionIndex, extraCompleted, voiceChoice,
+                                learner, finalTranscript, transcript, capturePhase, status,
+                                onBack = { navigate("exercises") }, onSpeak = ::listen, onListen = { speak(it) },
+                                onNext = {
+                                    if (capturePhase == "idle" && evaluateExercise(question, finalTranscript).accepted) {
+                                        completeExtra(listOf(question.id)); clearExtra()
+                                        if (questionIndex < exercise.questions.lastIndex) questionIndex++ else page = "exercises"
+                                    }
+                                })
                             "lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson)
@@ -652,7 +712,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, onSwitchLearner:
                 }
                 // All three appearances use the same full-screen scripted conversation.
                 if (page !in listOf("edit-profile", "voice-settings", "chat"))
-                    StudioBottomNavigation(page) { dest ->
+                    StudioBottomNavigation(if (page in listOf("passages", "passage", "exercises", "exercise")) "repeat" else page) { dest ->
                     if (dest == "lessons") selectedLevel = "A1"
                     navigate(dest)
                 }

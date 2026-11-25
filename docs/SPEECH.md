@@ -27,3 +27,13 @@ This script is intentionally not part of GitHub Actions. Model downloads and inf
 - Generation assets: https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1.
 
 Only newly generated speech audio is distributed. The model weights and runtime are not redistributed inside Speakivra. These are synthetic voices. Perceived expression and audible quality still require listening on the target device; compilation and file-integrity checks do not prove human-level emotion.
+
+## V1.0.9: passages, spoken translation and IPA
+
+The two extra catalogues contain 15 original bilingual passages and 15 six-question exercise packs (five per CEFR level). They use the same topic gates as the main curriculum. Their stable completion IDs live in `extra.completed_ids` in each learner's existing preferences and never change main lesson rounds or the V1.0.8 reset marker.
+
+Passages support selected-sentence and full-paragraph recognition with the existing ordered word matcher and continuation threshold. Whole-paragraph capture allows 2.4 seconds of silence on the PCM path (sentence default remains 1.4 seconds, total limit remains 60 seconds). Providers using their own microphone retain their own endpoint policy. Replay remains RAM-only, explicit speaker press, cleared on sentence/mode/question changes, leaving, background or replacement.
+
+Translation exercises require complete bidirectional canonical word alignment against curated alternative translations. Numbers, punctuation and contractions use the existing normalizer. Extra/omitted wrong words, including negations, fail. Unknown alternative phrasing is labelled “Chưa khớp đáp án mẫu”, not semantic or acoustic pronunciation scoring. Hints and listening to answers never complete a question.
+
+Reference IPA is a static US/GB asset generated offline with `scripts/generate_ipa.py` (pinned espeakng-loader and phonemizer); the demo's three IPA lines are explicitly reviewed overrides. No synthesis engine is added to the APK. IPA is reading guidance, not a phoneme assessment of recorded speech. Personal names remain in their original spelling outside IPA brackets. The two accent lookups and complete active curriculum coverage are tested.

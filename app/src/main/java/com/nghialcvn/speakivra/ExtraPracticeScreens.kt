@@ -4,6 +4,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -186,23 +190,31 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
                 val saved = row.id in completed && !active
                 StudioCard(border = active, contentPadding = 6.dp, spacing = 4.dp) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("${index + 1}", color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
+                        Box(Modifier.size(23.dp).clip(RoundedCornerShape(5.dp)).background(p.coral.copy(alpha = .16f)), Alignment.Center) {
+                            Text("${index + 1}", color = p.ink, fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold)
+                        }
                         Text(row.vietnamese, Modifier.weight(1f), fontWeight = if (active) FontWeight.Bold else FontWeight.Normal, fontSize = 14.sp, lineHeight = 18.sp)
-                        Text(if (saved || (active && (accepted || reveal))) {
-                            if (active && accepted) evaluation.reference else row.answer
-                        } else "?", Modifier.weight(1f),
-                            color = if (saved || (active && accepted)) p.correctWord else p.muted,
-                            fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        val shown = saved || (active && (accepted || reveal))
+                        Box(Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
+                            .background(if (shown) p.coral.copy(alpha = .12f) else Color.Transparent)
+                            .then(if (shown) Modifier.border(1.dp, p.border, RoundedCornerShape(6.dp)) else Modifier.drawBehind {
+                                drawRoundRect(p.border, cornerRadius = CornerRadius(6.dp.toPx()),
+                                    style = Stroke(1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
+                            }).padding(horizontal = 7.dp, vertical = 4.dp), Alignment.Center) {
+                            Text(if (shown) { if (active && accepted) evaluation.reference else row.answer } else "?",
+                                color = if (active && accepted) p.correctWord else if (shown) p.ink else p.muted,
+                                fontSize = 13.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        }
                         if (saved || (active && accepted)) StudioIcon("check", Modifier.size(18.dp), p.correctWord)
                     }
-                    if (active) {
+                }
+                if (active) {
                         if (accepted || reveal) IpaLine(if (accepted) evaluation.reference else row.answer, voice.accent, Modifier.fillMaxWidth())
                         if (hint && !accepted && !reveal) Text("Gợi ý: ${row.answer.substringBefore(' ')} …", color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                             ExtraOutline("Gợi ý", onClick = { hint = true }, bulb = true)
                             ExtraOutline("Nghe đáp án", speaker = true, onClick = { reveal = true; onListen(row.answer) })
                         }
-                    }
                 }
             }
             ExtraMicrophone(phase, if (accepted) "Chạm để nói lại" else "Chạm để trả lời", onSpeak)

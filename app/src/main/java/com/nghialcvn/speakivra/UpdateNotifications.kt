@@ -36,6 +36,7 @@ internal object UpdateNotifications {
         if (manager.getNotificationChannel(CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE) return
         if (prefs.getLong("notified_version", 0) >= release.versionCode) return
         val intent = Intent(context, MainActivity::class.java)
+            .setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
             .putExtra(OPEN_UPDATES, true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val action = PendingIntent.getActivity(context, ID, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val text = releaseHighlights(release.notes).joinToString(" • ") + "\nChạm để xem và cập nhật."

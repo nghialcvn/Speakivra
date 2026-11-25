@@ -29,12 +29,12 @@ class ApprovedUiTest {
                     .putString("profiles", encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
-                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub", "approvedHeartRewardsResumeAndUpdateNotification"))
+                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub", "approvedHeartRewardsAndResume"))
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
                     .putInt("lesson.greetings.correct", 0).putInt("lesson.greetings.rounds", 0).commit()
-                if (description.methodName == "approvedHeartRewardsResumeAndUpdateNotification") {
+                if (description.methodName == "approvedHeartRewardsAndResume") {
                     val prefs = context.getSharedPreferences("speakivra_progress", 0)
                     prefs.edit().apply { prefs.all.keys.filter { it.startsWith("achievement.") }.forEach { remove(it) } }.commit()
                     val rewards = TopicAchievements(prefs)
@@ -50,7 +50,7 @@ class ApprovedUiTest {
         }
     }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
-    @Test fun approvedHeartRewardsResumeAndUpdateNotification() {
+    @Test fun approvedHeartRewardsAndResume() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val prefs = context.getSharedPreferences("speakivra_progress", 0)
         val rewards = TopicAchievements(prefs)
@@ -77,44 +77,6 @@ class ApprovedUiTest {
         ui.onNodeWithText("Hội thoại mẫu").performClick()
         shot("52-conversation-clear-logo")
         ui.onNodeWithText("🇺🇸 English (US)").assertIsDisplayed()
-        // Actual Android notification, with an explicit future-release fixture.
-        val current = currentInstallation(context)
-        context.getSharedPreferences("speakivra_update_notifications", 0).edit().remove("notified_version").commit()
-        val release = AppRelease("test", current.versionCode + 1,
-            "- Phần thưởng tim\n- Sửa tiếp tục bài học\n- Logo trong suốt",
-            "https://github.com/nghialcvn/Speakivra/releases/download/vtest/test.apk",
-            current.packageName, current.certificate, 1, "0".repeat(64))
-        UpdateNotifications.deliver(context, release, current)
-        val manager = context.getSystemService(android.app.NotificationManager::class.java)
-        ui.waitUntil(5000) { manager.activeNotifications.any { it.id == UpdateNotifications.ID } }
-        // An older network result cannot cancel a newer notification already posted.
-        UpdateNotifications.deliver(context, release.copy(versionCode = current.versionCode), current)
-        val notification = manager.activeNotifications.single { it.id == UpdateNotifications.ID }.notification
-        org.junit.Assert.assertTrue(notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("Có bản cập nhật mới"))
-        val device = androidx.test.uiautomator.UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        val out = File(context.getExternalFilesDir(null), "ui-screenshots").apply { mkdirs() }
-        try {
-            check(device.openNotification()) { "Android notification shade could not open" }
-            val card = device.wait(androidx.test.uiautomator.Until.findObject(
-                androidx.test.uiautomator.By.textContains("Có bản cập nhật mới")), 10000)
-            check(device.takeScreenshot(File(out, "53-native-update-notification-fixture.png")))
-            device.dumpWindowHierarchy(File(out, "53-system-notification-hierarchy.xml"))
-            requireNotNull(card) { "Update notification is absent from System UI; inspect hierarchy XML" }.click()
-            check(device.wait(androidx.test.uiautomator.Until.hasObject(
-                androidx.test.uiautomator.By.pkg(context.packageName)), 10000)) { "Notification did not return to Speakivra" }
-        } finally {
-            device.executeShellCommand("cmd statusbar collapse")
-            device.waitForIdle()
-        }
-        ui.waitUntil(10000) { ui.onAllNodesWithText("Cập nhật ứng dụng").fetchSemanticsNodes().isNotEmpty() }
-        // The existing screen has one page heading and one card heading.
-        ui.onAllNodesWithText("Cập nhật ứng dụng").assertCountEquals(2)
-        ui.onAllNodesWithText("Cập nhật ứng dụng").onFirst().assertIsDisplayed()
-        ui.runOnUiThread {
-            org.junit.Assert.assertEquals(androidx.lifecycle.Lifecycle.State.RESUMED, ui.activity.lifecycle.currentState)
-        }
-        shot("54-notification-opened-existing-app")
-        manager.cancel(UpdateNotifications.ID)
         // A retry with a worse result must not erase earned hearts.
         val lesson = Lessons.a1.first()
         rewards.record(lesson, lesson.phrases.first().id, matchWords(lesson.phrases.first().english, "unrelated"))

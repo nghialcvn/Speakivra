@@ -71,6 +71,7 @@ class CurriculumUpgradeTest {
 
     @Test fun b1StartsWithThreeTopicsAndFinishingThirdUnlocksOnlyFourth() {
         ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("B1 • Trung cấp").performScrollTo().performClick()
         ui.onNodeWithText("20 chủ đề B1 • 700 câu nói • 300 lượt hội thoại").assertIsDisplayed()
         Lessons.b1.take(3).forEach { ui.onNodeWithText(it.vietnamese).assertIsEnabled() }
@@ -89,11 +90,13 @@ class CurriculumUpgradeTest {
         ui.activityRule.scenario.recreate()
         if (ui.onAllNodesWithText("Bắt đầu học").fetchSemanticsNodes().isNotEmpty())
             ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("B1 • Trung cấp").performScrollTo().performClick()
         ui.onNodeWithText(Lessons.b1[3].vietnamese).assertIsEnabled()
         ui.onNodeWithText(Lessons.b1[4].vietnamese).assertIsNotEnabled()
         shot("33-neon-b1-fourth-topic-unlocked")
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("A2 • Sơ trung cấp").performScrollTo().performClick()
         ui.onNodeWithText("Giải quyết vấn đề").assertIsNotEnabled()
     }

@@ -67,6 +67,7 @@ class ExtraPracticeFlowTest {
     }
     @Test fun paragraphUsesRealRecognitionAndClearsReplayAcrossSentenceWholeModeAndExit() = provider {
         ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("Luyện nói theo đoạn văn").performScrollTo().performClick()
         ui.onNodeWithText("A2", substring = false).performClick()
         ui.onNodeWithText("My daily routine").performClick()
@@ -98,6 +99,7 @@ class ExtraPracticeFlowTest {
     }
     @Test fun exerciseAcceptsEquivalentAnswerButHintAndListeningNeverCompleteAQuestion() = provider {
         ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("Tiếng Anh nói thế nào?").performScrollTo().performClick()
         ui.onNodeWithText("Ăn uống", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()

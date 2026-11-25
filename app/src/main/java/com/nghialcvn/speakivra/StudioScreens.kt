@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
@@ -209,55 +210,75 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
             CoralButton(if (progress.phase == "summary") "Xem tổng kết" else "Tiếp tục học", onClick = onContinue)
             if (completed > 0) Text("Đã hoàn thành: $completed lượt bài", color = p.muted, fontSize = 12.sp)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            Row(Modifier.weight(1f).heightIn(min = 76.dp)
-                .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
-                    .clip(RoundedCornerShape(16.dp)).background(p.mint))
-                .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StudioIcon("layers", Modifier.size(28.dp), p.green)
-                Text("${Lessons.a1.size} chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-                StudioIcon("chevron", Modifier.size(12.dp), p.green)
-            }
-            Row(Modifier.weight(1f).heightIn(min = 76.dp)
-                .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
-                    .clip(RoundedCornerShape(16.dp)).background(p.lavender))
-                .clickable(role = Role.Button, onClick = onChat).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StudioIcon("chat", Modifier.size(26.dp), p.purple)
-                Column(Modifier.weight(1f)) {
-                    Text("Hội thoại mẫu", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Mô phỏng", color = p.coral, fontSize = 11.sp,
-                        modifier = Modifier.background(p.peach, RoundedCornerShape(8.dp)).padding(horizontal = 5.dp, vertical = 2.dp))
+        var learningExpanded by remember { mutableStateOf(false) }
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            StudioCard(contentPadding = 0.dp) {
+                Row(Modifier.fillMaxWidth()
+                    .clickable(role = Role.Button) { learningExpanded = !learningExpanded }
+                    .semantics { stateDescription = if (learningExpanded) "Đang mở" else "Đang thu gọn" }
+                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StudioIcon("book", Modifier.size(28.dp), p.coral)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Học tập", fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("A1 • A2 • B1 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
+                            fontSize = 12.sp, lineHeight = 17.sp)
+                    }
+                    StudioIcon("chevron", Modifier.size(17.dp).rotate(if (learningExpanded) 90f else 0f), p.coral)
                 }
-                StudioIcon("chevron", Modifier.size(12.dp), p.purple)
             }
-        }
-        listOf(Triple("A2 • Sơ trung cấp", Lessons.a2, onA2),
-            Triple("B1 • Trung cấp", Lessons.b1, onB1)).forEach { (title, items, open) ->
-        Row(Modifier.fillMaxWidth()
-            .then(if (p == NeonStudio) Modifier.neonGlass(16)
-                else Modifier.clip(RoundedCornerShape(16.dp)).background(p.lavender)
-                .border(1.dp, p.border, RoundedCornerShape(16.dp)))
-            .clickable(role = Role.Button, onClick = open).padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            StudioIcon("book", Modifier.size(26.dp), p.purple)
-            Column(Modifier.weight(1f)) {
-                Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-                Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
-            }
-            StudioIcon("chevron", Modifier.size(16.dp), p.purple)
-        }
-        }
-        listOf("Luyện nói theo đoạn văn" to onPassages, "Tiếng Anh nói thế nào?" to onExercises).forEach { (title, open) ->
-            StudioCard(Modifier.clickable(role = Role.Button, onClick = open)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    StudioIcon("book", Modifier.size(26.dp), p.coral)
-                    Text(title, Modifier.weight(1f).padding(horizontal = 12.dp), fontWeight = FontWeight.ExtraBold)
-                    StudioIcon("chevron", Modifier.size(16.dp), p.coral)
+            if (learningExpanded) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    Row(Modifier.weight(1f).heightIn(min = 76.dp)
+                        .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
+                            .clip(RoundedCornerShape(16.dp)).background(p.mint))
+                        .clickable(role = Role.Button, onClick = onLessons).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StudioIcon("layers", Modifier.size(28.dp), p.green)
+                        Text("${Lessons.a1.size} chủ đề A1", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+                        StudioIcon("chevron", Modifier.size(12.dp), p.green)
+                    }
+                    Row(Modifier.weight(1f).heightIn(min = 76.dp)
+                        .then(if (p == NeonStudio) Modifier.neonGlass(16) else Modifier
+                            .clip(RoundedCornerShape(16.dp)).background(p.lavender))
+                        .clickable(role = Role.Button, onClick = onChat).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StudioIcon("chat", Modifier.size(26.dp), p.purple)
+                        Column(Modifier.weight(1f)) {
+                            Text("Hội thoại mẫu", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                            Text("Mô phỏng", color = p.coral, fontSize = 11.sp,
+                                modifier = Modifier.background(p.peach, RoundedCornerShape(8.dp)).padding(horizontal = 5.dp, vertical = 2.dp))
+                        }
+                        StudioIcon("chevron", Modifier.size(12.dp), p.purple)
+                    }
                 }
-                Text("A1 • A2 • B1", color = p.muted, fontSize = 12.sp)
+                listOf(Triple("A2 • Sơ trung cấp", Lessons.a2, onA2),
+                    Triple("B1 • Trung cấp", Lessons.b1, onB1)).forEach { (title, items, open) ->
+                Row(Modifier.fillMaxWidth()
+                    .then(if (p == NeonStudio) Modifier.neonGlass(16)
+                        else Modifier.clip(RoundedCornerShape(16.dp)).background(p.lavender)
+                        .border(1.dp, p.border, RoundedCornerShape(16.dp)))
+                    .clickable(role = Role.Button, onClick = open).padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StudioIcon("book", Modifier.size(26.dp), p.purple)
+                    Column(Modifier.weight(1f)) {
+                        Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại", color = p.muted, fontSize = 12.sp)
+                    }
+                    StudioIcon("chevron", Modifier.size(16.dp), p.purple)
+                }
+                }
+                listOf("Luyện nói theo đoạn văn" to onPassages, "Tiếng Anh nói thế nào?" to onExercises).forEach { (title, open) ->
+                    StudioCard(Modifier.clickable(role = Role.Button, onClick = open)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            StudioIcon("book", Modifier.size(26.dp), p.coral)
+                            Text(title, Modifier.weight(1f).padding(horizontal = 12.dp), fontWeight = FontWeight.ExtraBold)
+                            StudioIcon("chevron", Modifier.size(16.dp), p.coral)
+                        }
+                        Text("A1 • A2 • B1", color = p.muted, fontSize = 12.sp)
+                    }
+                }
             }
         }
     }

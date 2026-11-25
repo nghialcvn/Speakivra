@@ -115,6 +115,23 @@ class ApprovedUiTest {
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
+    @Test fun homeLearningGroupStartsCollapsedAndKeepsAllExistingChoices() {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("B1 • Trung cấp").assertDoesNotExist()
+        ui.onNodeWithText("Luyện nói theo đoạn văn").assertDoesNotExist()
+        ui.onNodeWithText("Tiếng Anh nói thế nào?").assertDoesNotExist()
+        ui.onNodeWithText("Học tập").performScrollTo().assertIsDisplayed()
+        shot("45-home-learning-collapsed")
+        ui.expandHomeLearning()
+        listOf("10 chủ đề A1", "A2 • Sơ trung cấp", "B1 • Trung cấp", "Hội thoại mẫu",
+            "Luyện nói theo đoạn văn", "Tiếng Anh nói thế nào?").forEach {
+            ui.onNodeWithText(it).assertExists()
+        }
+        ui.onNodeWithText("Học tập").performScrollTo().performClick()
+        ui.onNodeWithText("B1 • Trung cấp").assertDoesNotExist()
+        ui.onNodeWithText("Tiếng Anh nói thế nào?").assertDoesNotExist()
+        ui.onNodeWithText("Tiếp tục học").assertExists()
+    }
     @Test fun approvedScreensAndThemeAreInteractiveAndKeepLessonPosition() {
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
         ui.onNodeWithContentDescription("Logo Speakivra").assertIsDisplayed()
@@ -124,6 +141,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         shot("01-home")
         // New A2 catalogue is a real navigable level, not a placeholder.
+        ui.expandHomeLearning()
         ui.onNodeWithText("A2 • Sơ trung cấp").performScrollTo().performClick()
         ui.onNodeWithText("Chọn bài học A2").assertIsDisplayed()
         ui.onNodeWithText("Trải nghiệm").assertIsDisplayed()
@@ -137,6 +155,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Trải nghiệm • Câu 1/30").assertIsDisplayed()
         shot("28-a2-new-lesson")
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("10 chủ đề A1").performScrollTo().performClick()
         ui.onNodeWithText("Chọn bài học A1").assertIsDisplayed()
         shot("02-lessons")
@@ -155,6 +174,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("1x", substring = false).performClick()
         ui.onNodeWithContentDescription("Tốc độ đọc: 1x").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.expandHomeLearning()
         ui.onNodeWithText("Hội thoại mẫu").performClick()
         ui.onNodeWithText("Mô phỏng theo kịch bản").assertIsDisplayed()
         ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()

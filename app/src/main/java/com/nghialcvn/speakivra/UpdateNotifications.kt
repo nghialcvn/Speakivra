@@ -39,7 +39,7 @@ internal object UpdateNotifications {
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_update_notification)
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.brand_logo_clear))
-            .setContentTitle("Speakivra ${release.version} — Có bản cập nhật mới")
+            .setContentTitle("Speakivra — Có bản cập nhật mới")
             .setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setContentIntent(action).setAutoCancel(true).setOnlyAlertOnce(true).build()
         NotificationManagerCompat.from(context).notify(ID, notification)

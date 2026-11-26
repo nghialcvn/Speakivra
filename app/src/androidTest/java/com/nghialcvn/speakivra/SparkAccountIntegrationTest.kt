@@ -130,6 +130,9 @@ class SparkAccountIntegrationTest {
         assertEquals(95,store.preferences(restored).getInt(achievement,0))
         assertEquals(2,store.preferences(restored).getInt("lesson.greetings.rounds",0))
         assertEquals(Lessons.a1[2].id,store.preferences(restored).getString("active_lesson",null))
+        ui.onNodeWithText("Cài đặt", substring=false).assertIsSelected()
         shot("83-spark-cloud-restored")
+        ui.onNodeWithText("Trang chủ", substring=false).performClick()
+        ui.onNodeWithText("Tiếp tục học", substring=false).performScrollTo().assertExists()
     }
 }

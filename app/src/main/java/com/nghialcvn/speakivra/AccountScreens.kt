@@ -11,6 +11,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -117,7 +120,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                         }
                     }, onPage = { page = it; message = null })
                 if (page == "login") {
-                    OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Tiếp tục học trên máy này") }
+                    OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) { Text("Tiếp tục học trên máy này", color = studio.ink) }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                         StudioIcon("wifi", Modifier.size(17.dp), studio.muted); Spacer(Modifier.width(7.dp))
                         Text("Bạn vẫn có thể học khi không có mạng.", color = studio.muted, fontSize = 12.sp)
@@ -131,7 +134,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                 OutlinedButton(onClick = { busy = true; gateway.verifyEmail { busy = false; message = it.fold(onSuccess = { "Đã gửi email xác minh." }, onFailure = { it.message }) } }, enabled = !busy) { Text("Gửi lại email xác minh") }
             }
             "link" -> {
-                IconButton(onClick = ::back, modifier = Modifier.size(32.dp)) { StudioIcon("back") }
+                IconButton(onClick = ::back, modifier = Modifier.size(32.dp).semantics { contentDescription = "Quay lại" }) { StudioIcon("back") }
                 Text("Liên kết dữ liệu hiện tại", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Đưa hồ sơ trên máy này lên tài khoản của bạn.", color = studio.muted, fontSize = 14.sp)
                 learner?.let { GuestLinkSummary(it, identity) }
@@ -144,26 +147,25 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                         }
                     }
                     Text("Nếu tài khoản đã có dữ liệu, bạn sẽ xem phương án gộp trước khi xác nhận.", fontSize = 13.sp, color = studio.muted)
-                    TextButton(onClick = { showLinkDetails = !showLinkDetails }, contentPadding = PaddingValues(0.dp), modifier = Modifier.heightIn(min = 32.dp)) {
-                        Text("Chi tiết liên kết", fontSize = 12.sp)
-                    }
+                    Text("Chi tiết liên kết", fontSize = 12.sp, color = studio.coral,
+                        modifier = Modifier.clickable { showLinkDetails = !showLinkDetails }.padding(vertical = 4.dp))
                     if (showLinkDetails) {
+                        Text("Tài khoản nhận hồ sơ: ${session?.email ?: session?.name.orEmpty()}", color = studio.muted, fontSize = 12.sp)
                         Text("Hồ sơ này chỉ được liên kết một lần với một tài khoản Speakivra. Không thể chuyển sang tài khoản khác.", color = studio.muted, fontSize = 12.sp)
                         Text("Mã hồ sơ chỉ để nhận diện, không phải mã đăng nhập hay mã khôi phục.", color = studio.muted, fontSize = 12.sp)
                     }
-                    Text("Tài khoản nhận hồ sơ: ${session?.email ?: session?.name.orEmpty()}", color = studio.muted, fontSize = 12.sp)
                     val existing = store.all().filter { item -> item.id != learner?.id && identityStore.peek(item)?.ownerUid == session?.uid && session != null }
                     if (existing.isNotEmpty()) {
                         Text("Tài khoản đã có ${existing.size} hồ sơ: ${existing.joinToString { it.name }}.", fontSize = 12.sp)
                         Text("Giữ cả hồ sơ hiện có và hồ sơ đang liên kết. Mỗi hồ sơ có tiến độ riêng.", color = studio.muted, fontSize = 12.sp)
                     }
                 }
-                CoralButton("Liên kết và đồng bộ", chevron = false, enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
-                OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Để sau", color = studio.ink) }
+                AccountPrimaryButton("Liên kết và đồng bộ", enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
+                OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) { Text("Để sau", color = studio.ink) }
             }
             "account" -> {
                 PageHeading("Tài khoản & đồng bộ", onBack = onBack)
-                StudioCard(contentPadding = 14.dp, spacing = 4.dp) {
+                StudioCard(modifier = Modifier.clickable { showMethods = !showMethods }.semantics { contentDescription = "Phương thức đăng nhập" }, contentPadding = 14.dp, spacing = 4.dp) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Box(Modifier.size(52.dp).clip(CircleShape).background(studio.coral.copy(alpha = .14f)), contentAlignment = Alignment.Center) {
                             StudioIcon("profile", Modifier.size(30.dp), studio.coral)
@@ -178,7 +180,6 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                             }
                         }
                     }
-                    TextButton(onClick = { showMethods = !showMethods }, contentPadding = PaddingValues(0.dp), modifier = Modifier.heightIn(min = 30.dp)) { Text("Phương thức đăng nhập", fontSize = 11.sp) }
                     if (showMethods) {
                         session?.email?.let { Text(it, color = studio.muted, fontSize = 12.sp) }
                         if (session?.provider?.contains("Google") != true) TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.GOOGLE, ::loggedIn) }, enabled = !busy) { Text("Liên kết Google") }
@@ -205,8 +206,8 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                                 result.exceptionOrNull()?.let { message = it.message }
                             }
                         }
-                    }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Đồng bộ ngay") }
-                    if (learner != null && identity?.ownerUid == null) CoralButton("Liên kết dữ liệu hiện tại", chevron = false) { page = "link" }
+                    }, enabled = !busy, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, studio.coral)) { Text("Đồng bộ ngay") }
+                    if (learner != null && identity?.ownerUid == null) AccountPrimaryButton("Liên kết dữ liệu hiện tại") { page = "link" }
                 }
                 StudioCard(contentPadding = 14.dp, spacing = 10.dp) {
                     Text("Hồ sơ người học", fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
@@ -269,7 +270,8 @@ private fun AccountCredentialsForm(page: String, busy: Boolean, onProvider: (Log
     var repeat by remember(page) { mutableStateOf("") }
     StudioCard(contentPadding = 14.dp, spacing = 8.dp) {
         if (page == "login") {
-            OutlinedButton(onClick = { onProvider(LoginProvider.GOOGLE) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { onProvider(LoginProvider.GOOGLE) }, enabled = !busy, modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, studio.coral)) {
                 GoogleAccountMark(Modifier.size(20.dp)); Spacer(Modifier.width(10.dp)); Text("Tiếp tục với Google", color = studio.ink, fontWeight = FontWeight.Bold)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -288,7 +290,7 @@ private fun AccountCredentialsForm(page: String, busy: Boolean, onProvider: (Log
             singleLine = true, visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
         if (page == "login") TextButton(onClick = { onPage("reset") }, modifier = Modifier.align(Alignment.End)) { Text("Quên mật khẩu?") }
-        CoralButton(when (page) { "register" -> "Tạo tài khoản"; "reset" -> "Gửi hướng dẫn"; else -> "Đăng nhập" }, chevron = false, enabled = !busy) { onSubmit(email.trim(), password, repeat) }
+        AccountPrimaryButton(when (page) { "register" -> "Tạo tài khoản"; "reset" -> "Gửi hướng dẫn"; else -> "Đăng nhập" }, enabled = !busy) { onSubmit(email.trim(), password, repeat) }
         if (page == "login") Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Chưa có tài khoản?", color = studio.muted, fontSize = 13.sp)
             TextButton(onClick = { onPage("register") }) { Text("Tạo tài khoản") }
@@ -364,5 +366,17 @@ private fun GoogleAccountMark(modifier: Modifier) {
         }
         drawLine(Color(0xFF4285F4), Offset(size.width * .51f, size.height * .5f), Offset(size.width - inset, size.height * .5f), stroke, StrokeCap.Butt)
         drawArc(Color(0xFF4285F4), 0f, 27f, false, Offset(inset,inset), arcSize, style = Stroke(stroke))
+    }
+}
+
+@Composable
+private fun AccountPrimaryButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
+    val p = studio
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+        .background(if (enabled) Brush.horizontalGradient(listOf(p.coral, p.coral.copy(alpha = .9f)))
+            else Brush.horizontalGradient(listOf(p.border, p.border)))
+        .clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+        .heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 11.dp), contentAlignment = Alignment.Center) {
+        Text(label, color = if (enabled) Color.White else p.muted, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
     }
 }

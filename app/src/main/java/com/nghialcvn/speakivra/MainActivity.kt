@@ -132,6 +132,8 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var accountEntry by rememberSaveable { mutableStateOf(false) }
+    var accountAuthScreen by remember { mutableStateOf(true) }
+    var entryPage by rememberSaveable { mutableStateOf("home") }
     var creating by rememberSaveable { mutableStateOf(false) }
     var resumeLearning by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -157,7 +159,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
         if (active != null) {
             key(active.id) {
-                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
@@ -175,18 +177,31 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                     Box(Modifier.fillMaxSize()) {
                         if (neon) NeonWaveBackground(Modifier.matchParentSize())
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                            if (accountEntry) AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(), onBack = { accountEntry = false }, onChooseLearner = { selected -> accountEntry = false; activeId = selected.id; lastId = selected.id; resumeLearning = false })
+                            if (accountEntry) Column(Modifier.fillMaxSize()) {
+                                Box(Modifier.weight(1f)) {
+                                    AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(),
+                                        onBack = { accountEntry = false }, onAuthScreen = { accountAuthScreen = it },
+                                        onChooseLearner = { selected -> accountEntry = false; entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false })
+                                }
+                                if (!accountAuthScreen) StudioBottomNavigation("profile") { destination ->
+                                    val selected = available.firstOrNull { it.id == lastId } ?: available.firstOrNull()
+                                    if (selected != null) {
+                                        entryPage = destination; activeId = selected.id; lastId = selected.id; resumeLearning = false
+                                    }
+                                    accountEntry = false
+                                }
+                            }
                             else if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
-                                learners = store.visible(cloud.uid); creating = false; activeId = learner.id; lastId = learner.id
+                                learners = store.visible(cloud.uid); creating = false; entryPage = "home"; activeId = learner.id; lastId = learner.id
                                 null
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, available, lastId,
-                                onAdd = { creating = true }, onAccount = { accountEntry = true },
-                                onStart = { resumeLearning = false; activeId = it.id; lastId = it.id },
-                                onResume = { resumeLearning = true; activeId = it.id; lastId = it.id })
+                                onAdd = { creating = true }, onAccount = { accountAuthScreen = true; accountEntry = true },
+                                onStart = { entryPage = "home"; resumeLearning = false; activeId = it.id; lastId = it.id },
+                                onResume = { entryPage = "home"; resumeLearning = true; activeId = it.id; lastId = it.id })
                         }
                     }
                 }
@@ -196,7 +211,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?) {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, initialPage: String = "home") {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
@@ -204,7 +219,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     var page by rememberSaveable { mutableStateOf(if (resumeLearning) {
         val item = Lessons.catalogue.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
         restoreLessonProgress(item, preferences::getInt) { key, default -> preferences.getString(key, default) ?: default }.phase
-    } else "home") }
+    } else initialPage) }
     LaunchedEffect(updateRequested) {
         if (updateRequested) { page = "updates"; updates.check(); onUpdateHandled() }
     }

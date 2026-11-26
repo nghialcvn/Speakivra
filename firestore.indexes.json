@@ -1,1 +1,1 @@
-{"indexes": [], "fieldOverrides": []}
+{"indexes": [], "fieldOverrides": [{"collectionGroup": "profiles", "fieldPath": "progressJson", "indexes": []}]}

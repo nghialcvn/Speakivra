@@ -5,7 +5,7 @@ rules_version = '2';
 // accounts/{uid}/claimProofs/{id}: secret:string(64 hex), createdAt:timestamp.
 // Transient proof: atomic with claim, no reads, client deletes after success.
 // accounts/{uid}/profiles/{id}: schema=1, profileId=id, name:string(1..30),
-// avatar:int(0..5), progressJson:string(<=131072), revision:int(1..1e9),
+// avatar:int(0..5), progressJson:string(<=524288), revision:int(1..1e9),
 // createdAt:timestamp(immutable), updatedAt:timestamp(server time).
 // Android separately whitelists curriculum fields inside opaque progressJson.
 // No roles, tokens, email or audio. Account namespaces need no parent document.
@@ -34,7 +34,7 @@ service cloud.firestore {
     data.schema == 1 && data.profileId == id && validId(id) &&
     data.name is string && data.name.size() > 0 && data.name.size() <= 30 &&
     data.avatar is int && data.avatar >= 0 && data.avatar <= 5 &&
-    data.progressJson is string && data.progressJson.size() <= 131072 &&
+    data.progressJson is string && data.progressJson.size() <= 524288 &&
     data.revision is int && data.revision > 0 && data.revision <= 1000000000 &&
     data.createdAt is timestamp && data.updatedAt is timestamp && data.updatedAt == request.time;
   }

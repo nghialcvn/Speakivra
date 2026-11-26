@@ -16,8 +16,8 @@ const profileRef=(d,uid,g)=>doc(d,'accounts',uid,'profiles',g.id);
 async function claim(d,uid,g,secret=g.secret){const b=writeBatch(d);b.set(claimRef(d,g),{schema:2,ownerUid:uid,createdAt:serverTimestamp()});b.set(proofRef(d,uid,g),{secret,createdAt:serverTimestamp()});return b.commit();}
 const snapshot=g=>({schema:1,profileId:g.id,name:'Nghĩa',avatar:0,progressJson:'{}',revision:1,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
 test('claim requires verified auth and actual secret, not displayed serial',async()=>{
- const g=guest();await assertFails(claim(env.unauthenticatedContext().firestore(),'A',g));await assertFails(claim(db('A',false),'A',g));
- await assertFails(claim(db('A'),'A',g,'0'.repeat(64)));await assertSucceeds(claim(db('A'),'A',g));
+ const g=guest();await assertSucceeds(getDoc(claimRef(db('A'),g)));await assertFails(claim(env.unauthenticatedContext().firestore(),'A',g));await assertFails(claim(db('A',false),'A',g));
+ await assertFails(claim(db('A'),'A',g,'0'.repeat(64)));await assertFails(claim(db('A'),'A',g,g.id.slice(0,20)));await assertSucceeds(claim(db('A'),'A',g));
 });
 test('claim and proof must be atomic; no foreign or even owner proof reads',async()=>{
  const g=guest(),a=db('A');await assertFails(setDoc(claimRef(a,g),{schema:2,ownerUid:'A',createdAt:serverTimestamp()}));
@@ -42,7 +42,7 @@ test('caller cannot create another owner or privileged extra fields',async()=>{
 test('snapshots need a claim and validate all required fields on create AND update',async()=>{
  const g=guest(),a=db('A'),ref=profileRef(a,'A',g);await assertFails(setDoc(ref,snapshot(g)));await claim(a,'A',g);
  await assertSucceeds(setDoc(ref,snapshot(g)));await assertSucceeds(updateDoc(ref,{name:'Nghĩa An',revision:2,updatedAt:serverTimestamp()}));
- for(const mutation of [{name:5},{name:''},{name:'x'.repeat(31)},{avatar:-1},{avatar:6},{profileId:'f'.repeat(64)},{admin:true},{progressJson:'x'.repeat(131073)},{createdAt:Timestamp.fromMillis(1)},{revision:9000000001}])
+ for(const mutation of [{name:5},{name:''},{name:'x'.repeat(31)},{avatar:-1},{avatar:6},{profileId:'f'.repeat(64)},{admin:true},{progressJson:'x'.repeat(524289)},{createdAt:Timestamp.fromMillis(1)},{revision:9000000001}])
   await assertFails(updateDoc(ref,{revision:3,updatedAt:serverTimestamp(),...mutation}));
  await assertFails(setDoc(ref,{name:'missing fields'}));await assertFails(updateDoc(ref,{name:'No revision increment',updatedAt:serverTimestamp()}));
 });

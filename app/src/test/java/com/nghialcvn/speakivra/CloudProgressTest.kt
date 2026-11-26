@@ -27,4 +27,18 @@ class CloudProgressTest {
         assertEquals(1, cleaned.length()); assertTrue(cleaned.has("active_lesson"))
         assertFalse(cleaned.toString().contains("secret")); assertFalse(cleaned.toString().contains("/private/audio"))
     }
+    @Test fun completeCurrentCatalogueFitsOnePrivateSnapshotWithoutDroppingAchievements() {
+        val values = mutableMapOf<String,Any>()
+        Lessons.catalogue.forEach { lesson ->
+            values["lesson.${lesson.id}.phase"] = "summary"
+            values["lesson.${lesson.id}.rounds"] = 1
+            values["lesson.${lesson.id}.learned_phrases"] = lesson.phrases.joinToString("|") { it.id }
+            values["lesson.${lesson.id}.learned_turns"] = lesson.conversation.joinToString("|") { it.id }
+            lesson.phrases.forEach { phrase -> values["achievement.${lesson.id}.${phrase.id}"] = 95 }
+        }
+        val exported = profileSyncPayload(Learner(ORIGINAL_LEARNER,"Nghĩa",0),GuestIdentity("a".repeat(64),""),values).getJSONObject("progress")
+        assertTrue(exported.toString().length < 524288)
+        assertEquals(Lessons.catalogue.sumOf { it.phrases.size }, exported.keys().asSequence().count { it.startsWith("achievement.") })
+    }
+
 }

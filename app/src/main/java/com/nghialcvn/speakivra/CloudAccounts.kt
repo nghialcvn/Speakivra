@@ -6,6 +6,8 @@ import androidx.work.*
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -105,9 +107,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
             val local = learnerStore.findCloud(document.id)
             if (local == null || identities.peek(local)?.ownerUid == null) {
                 val value = validateSnapshot(document)
-                applyingCloud = true
-                try { learnerStore.importCloud(document.id, expectedUid, value.first, value.second, sanitizedCloudProgress(document.id, JSONObject(document.getString("progressJson") ?: "{}"))) }
-                finally { applyingCloud = false }
+                applyImported(document.id, expectedUid, value.first, value.second, sanitizedCloudProgress(document.id, JSONObject(document.getString("progressJson") ?: "{}")))
             }
         }
         for (person in learnerStore.all().filter { identities.peek(it)?.ownerUid == expectedUid }) syncOne(person, expectedUid)
@@ -117,7 +117,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
         check(doc.getLong("schema") == 1L && doc.getString("profileId") == doc.id && Regex("[a-f0-9]{64}").matches(doc.id))
         val name = requireNotNull(doc.getString("name")); val avatar = requireNotNull(doc.getLong("avatar")).toInt()
         require(name.isNotBlank() && name.length <= 30 && name.none { it.isISOControl() } && avatar in 0..5)
-        check((doc.getString("progressJson") ?: error("Thiếu tiến độ.")).length <= 131072)
+        check((doc.getString("progressJson") ?: error("Thiếu tiến độ.")).length <= 524288)
         return name to avatar
     }
     private suspend fun syncOne(person: Learner, owner: String) {
@@ -134,7 +134,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
             val avatar = if (dirtyName) person.avatar else oldMeta.second
             val remote = if (old.exists()) sanitizedCloudProgress(identity.profileId, JSONObject(old.getString("progressJson") ?: "{}")) else JSONObject()
             val combined = sanitizedCloudProgress(identity.profileId, mergeCloudProgress(input, remote))
-            val text = combined.toString(); check(text.length <= 131072) { "Tiến độ quá lớn để đồng bộ." }
+            val text = combined.toString(); check(text.length <= 524288) { "Tiến độ quá lớn để đồng bộ." }
             if (!old.exists() || name != oldMeta.first || avatar != oldMeta.second || text != old.getString("progressJson")) {
                 transaction.set(ref, mapOf("schema" to 1, "profileId" to identity.profileId, "name" to name, "avatar" to avatar,
                     "progressJson" to text, "revision" to ((old.getLong("revision") ?: 0) + 1),
@@ -148,13 +148,18 @@ internal class AccountRuntime private constructor(private val context: Context, 
         val newerMeta = current.name != person.name || current.avatar != person.avatar
         val now = profileSyncPayload(current, identity, learnerStore.preferences(current).all).getJSONObject("progress")
         val combinedNow = sanitizedCloudProgress(identity.profileId, mergeCloudProgress(merged.third, now))
-        applyingCloud = true
-        try { learnerStore.importCloud(identity.profileId, owner, if (newerMeta) current.name else merged.first,
-            if (newerMeta) current.avatar else merged.second, combinedNow) } finally { applyingCloud = false }
+        applyImported(identity.profileId, owner, if (newerMeta) current.name else merged.first,
+            if (newerMeta) current.avatar else merged.second, combinedNow)
         syncPrefs.edit().putLong("synced.${person.id}", System.currentTimeMillis())
             .putBoolean("metadataDirty.${person.id}", newerMeta)
             .putBoolean("pending.${person.id}", newerMeta || combinedNow.toString() != merged.third.toString()).apply()
         if (newerMeta || combinedNow.toString() != merged.third.toString()) schedule()
+    }
+    private suspend fun applyImported(profileId: String, owner: String, name: String, avatar: Int, progress: JSONObject) = withContext(Dispatchers.Main.immediate) {
+        // SharedPreferences dispatches listeners synchronously on Main. This prevents cloud imports
+        // from enqueueing themselves forever while preserving genuine study changes between imports.
+        applyingCloud = true
+        try { learnerStore.importCloud(profileId, owner, name, avatar, progress) } finally { applyingCloud = false }
     }
     fun metadataChanged(learner: Learner) {
         syncPrefs.edit().putBoolean("metadataDirty.${learner.id}", true).putBoolean("pending.${learner.id}", true).apply()

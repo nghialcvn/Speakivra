@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.1.5-beta",
+    "tag_name": "v1.1.6-beta",
     "draft": false,
-    "body": "# Speakivra V1.1.5 Beta\n\n- Thêm cấp độ riêng Tiếng Anh Khách sạn.\n- Lễ tân: 15 chủ đề giao tiếp và xử lý sự cố.\n- Buồng phòng: 15 chủ đề giao tiếp và xử lý sự cố.\n- 240 câu mẫu, 180 lượt hội thoại phân vai và 240 câu Việt → Anh.\n- Giữ phiên âm IPA, xanh–đỏ theo từ, kim cương và nghe lại bản ghi tạm.\n\nGiữ nguyên hồ sơ và tiến độ A1/A2/B1. Khóa Khách sạn mở riêng, có thể chọn cả 15 chủ đề của từng nghiệp vụ mà không cần hoàn thành A1/A2/B1. Hội thoại là tình huống được biên soạn sẵn; hướng xử lý nhấn mạnh xác nhận yêu cầu, phối hợp bộ phận liên quan và không tự hứa bồi thường hoặc hoàn tiền ngoài thẩm quyền.\n",
+    "body": "# Speakivra V1.1.6 Beta\n\n- Gộp Lễ tân và Buồng phòng trong khung Nghe & nhắc lại theo demo đã duyệt.\n- Thêm hai tab Lễ tân / Buồng phòng ngay trong khung Học theo tình huống.\n- Chọn nghiệp vụ rồi nhấn Hội thoại phân vai hoặc Tiếng Anh nói thế nào? để mở ngay danh sách chủ đề tương ứng.\n\nGiữ 15 chủ đề mỗi nghiệp vụ, nội dung, hồ sơ, tiến độ, IPA, xanh–đỏ theo từ và thành tích kim cương.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.1.5-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.5-beta/Speakivra-v1.1.5-release.apk",
-        "size": 14469156,
-        "digest": "sha256:5a9c9e25a7bcad5d1bf8cade8d16edd41b56a6b0764cc6ddd886cdc7469fe88a"
+        "name": "Speakivra-v1.1.6-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.6-beta/Speakivra-v1.1.6-release.apk",
+        "size": 14469178,
+        "digest": "sha256:046550c1304c1c39a947b5930870d30963ec49b09da42a91c9a3a151b7a83e5a"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 35,
-    "versionName": "1.1.5",
-    "apkName": "Speakivra-v1.1.5-release.apk",
-    "apkSha256": "5a9c9e25a7bcad5d1bf8cade8d16edd41b56a6b0764cc6ddd886cdc7469fe88a",
+    "versionCode": 36,
+    "versionName": "1.1.6",
+    "apkName": "Speakivra-v1.1.6-release.apk",
+    "apkSha256": "046550c1304c1c39a947b5930870d30963ec49b09da42a91c9a3a151b7a83e5a",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

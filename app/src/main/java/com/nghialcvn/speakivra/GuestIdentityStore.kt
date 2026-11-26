@@ -34,7 +34,7 @@ internal class GuestIdentityStore(context: Context) {
         }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key) }
         val encrypted = cipher.doFinal(secret.toByteArray(Charsets.UTF_8))
-        val identity = GuestIdentity(guestProfileId(secret.toByteArray(Charsets.UTF_8)), "", alias)
+        val identity = GuestIdentity(guestProfileId(secret.toByteArray(Charsets.UTF_8)), alias)
         val record = encode(identity).put("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
             .put("ciphertext", Base64.encodeToString(encrypted, Base64.NO_WRAP))
         if (!registry.edit().putString(learner.id, record.toString()).commit()) {
@@ -66,13 +66,13 @@ internal class GuestIdentityStore(context: Context) {
         require(Regex("[a-f0-9]{64}").matches(profileId) && uid.isNotBlank())
         val old = peek(learner)
         require(old == null || (old.profileId == profileId && (old.ownerUid == null || old.ownerUid == uid)))
-        if (old == null) check(registry.edit().putString(learner.id, encode(GuestIdentity(profileId, "", "", uid)).toString()).commit())
+        if (old == null) check(registry.edit().putString(learner.id, encode(GuestIdentity(profileId, "", uid)).toString()).commit())
         else recordServerReceipt(learner, GuestClaimReceipt(profileId, uid), uid)
     }
     private fun encode(value: GuestIdentity) = JSONObject().put("scheme", 2).put("profileId", value.profileId)
         .put("keyAlias", value.keyAlias).apply { value.ownerUid?.let { put("ownerUid", it) } }
     private fun decode(json: JSONObject): GuestIdentity {
         val id = json.getString("profileId"); require(Regex("[a-f0-9]{64}").matches(id))
-        return GuestIdentity(id, "", json.optString("keyAlias"), if (json.has("ownerUid")) json.getString("ownerUid") else null)
+        return GuestIdentity(id, json.optString("keyAlias"), if (json.has("ownerUid")) json.getString("ownerUid") else null)
     }
 }

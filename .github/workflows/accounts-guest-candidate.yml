@@ -1,4 +1,4 @@
-name: Verify guest identity and account draft
+name: Verify Spark accounts and guest identity
 on:
   push:
     branches: [feat/accounts-guest]
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: Prepare Android SDK
         run: |
           SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
@@ -64,6 +64,25 @@ jobs:
           RELEASE_FLAG=()
           if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
           python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Start isolated Firebase emulators and check ownership rules
+        run: |
+          npm ci --prefix tests/firestore
+          npx -y firebase-tools@15.37.0 emulators:start --only auth,firestore --project demo-speakivra-spark > firebase-emulators.log 2>&1 &
+          echo "$!" > firebase-emulators.pid
+          python3 - <<'PYREADY'
+          import time, urllib.request
+          for attempt in range(150):
+              try:
+                  with urllib.request.urlopen("http://127.0.0.1:4400/emulators", timeout=2) as response:
+                      if b'firestore' in response.read(): break
+              except Exception: pass
+              time.sleep(1)
+          else: raise SystemExit("Firebase emulators did not start")
+          PYREADY
+          FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm --prefix tests/firestore test
       - name: Enable emulator acceleration for UI review
         if: true
         run: |
@@ -87,10 +106,10 @@ jobs:
             adb shell pm grant com.nghialcvn.speakivra android.permission.POST_NOTIFICATIONS
             adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
             adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
-            adb shell am instrument -w -e class com.nghialcvn.speakivra.AccountDraftFlowTest,com.nghialcvn.speakivra.FreshInstallLearnerTest,com.nghialcvn.speakivra.ApprovedUiTest#approvedDiamondRewardsAndResume com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
+            adb shell am instrument -w -e class com.nghialcvn.speakivra.AccountDraftFlowTest,com.nghialcvn.speakivra.FreshInstallLearnerTest,com.nghialcvn.speakivra.ApprovedUiTest#approvedDiamondRewardsAndResume,com.nghialcvn.speakivra.SparkAccountIntegrationTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
-            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 5 and "FAILURES!!!" not in s, s'
+            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 6 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -99,6 +118,7 @@ jobs:
           path: |
             ui-review/**
             ui-test-output.txt
+            firebase-emulators.log
             ui-recognition-provider.txt
             real-speech-provider-probe.txt
             app/build/reports/androidTests/**

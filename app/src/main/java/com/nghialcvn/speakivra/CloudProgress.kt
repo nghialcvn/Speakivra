@@ -34,5 +34,5 @@ internal fun cloudProgressValues(progress: JSONObject): Map<String, Any> = build
 }
 /** The same export whitelist is used at the import boundary; untrusted JSON cannot change device settings. */
 internal fun sanitizedCloudProgress(profileId: String, raw: JSONObject): JSONObject = profileSyncPayload(
-    Learner(ORIGINAL_LEARNER, "Cloud", 0), GuestIdentity(profileId, "", ""), cloudProgressValues(raw)
+    Learner(ORIGINAL_LEARNER, "Cloud", 0), GuestIdentity(profileId, ""), cloudProgressValues(raw)
 ).getJSONObject("progress")

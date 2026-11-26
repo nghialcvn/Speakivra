@@ -33,15 +33,17 @@ internal class SpeechCapture(
     private var locale = "en-US"
     private var nameHints = arrayListOf<String>()
     private var endpointSilenceMillis = 1400
+    private var maximumAttemptMillis = 60000
     val hasRecording get() = audio.available
     val phase get() = session.phase
     fun replay() {
         if (phase == "idle") audio.play { update("idle", null, "Không phát được bản ghi. Hãy nói lại.") }
     }
-    fun start(languageTag: String = "en-US", silenceMillis: Int = 1400, properName: String? = null) {
+    fun start(languageTag: String = "en-US", silenceMillis: Int = 1400, properName: String? = null, maximumMillis: Int = 60000) {
         require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
         audio.clear(); recordingChanged(false)
+        maximumAttemptMillis = maximumMillis.coerceIn(60000, 240000)
         locale = languageTag
         nameHints = arrayListOf<String>().apply { properName?.trim()?.takeIf { it.isNotBlank() }?.let { add(it) } }
         endpointSilenceMillis = silenceMillis.coerceIn(1400, 4000)
@@ -156,7 +158,7 @@ internal class SpeechCapture(
                 if (Build.VERSION.SDK_INT >= 33 && nameHints.isNotEmpty())
                     putStringArrayListExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, nameHints)
             })
-            armTimeout(token, 60_000)
+            armTimeout(token, maximumAttemptMillis.toLong())
             if (live != null) {
                 val deadline = SystemClock.elapsedRealtime() + 4000
                 probe = object : Runnable {
@@ -168,7 +170,7 @@ internal class SpeechCapture(
                                 capturing = true
                                 audio.start(onEndpoint = {
                                     handler.post { if (current(token, attempt) && phase == "listening") stop() }
-                                }, onPcm = live::write, silenceMillis = endpointSilenceMillis)
+                                }, onPcm = live::write, silenceMillis = endpointSilenceMillis, maximumMillis = maximumAttemptMillis)
                                 streamingStarted = true
                                 update("listening", null, "Đang nghe… Nói xong, micro sẽ tự dừng. Chạm để dừng sớm.")
                             } catch (_: Exception) {

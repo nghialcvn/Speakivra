@@ -23,8 +23,10 @@ internal class TemporarySpeechAudio {
     val available get() = pcm?.isNotEmpty() == true
 
     @SuppressLint("MissingPermission")
-    fun start(onEndpoint: (() -> Unit)? = null, onPcm: ((ByteArray, Int) -> Boolean)? = null, silenceMillis: Int = 1400) {
+    fun start(onEndpoint: (() -> Unit)? = null, onPcm: ((ByteArray, Int) -> Boolean)? = null, silenceMillis: Int = 1400, maximumMillis: Int = 60000) {
         clear()
+        val duration = maximumMillis.coerceIn(60000, 240000)
+        val maximumBytes = RATE * 2 * (duration / 1000)
         val minimum = AudioRecord.getMinBufferSize(RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         check(minimum > 0)
         val input = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, RATE,
@@ -38,10 +40,10 @@ internal class TemporarySpeechAudio {
         recording = true
         worker = thread(name = "speakivra-current-utterance") {
             val buffer = ByteArray(1024)
-            val endpoint = if (onEndpoint != null) SpeechEndpoint(silenceMillis = silenceMillis) else null
+            val endpoint = if (onEndpoint != null) SpeechEndpoint(silenceMillis = silenceMillis, maximumMillis = duration) else null
             try {
-                while (recording && output.size() < MAX_BYTES) {
-                    val count = input.read(buffer, 0, minOf(buffer.size, MAX_BYTES - output.size()))
+                while (recording && output.size() < maximumBytes) {
+                    val count = input.read(buffer, 0, minOf(buffer.size, maximumBytes - output.size()))
                     if (count <= 0) { if (recording) onEndpoint?.invoke(); break }
                     output.write(buffer, 0, count)
                     if (onPcm?.invoke(buffer, count) == false) { onEndpoint?.invoke(); break }

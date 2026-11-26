@@ -39,6 +39,14 @@ class SpeechEndpointTest {
         assertNull(feed(endpoint, 80, 2000))
         assertEquals(SpeechEndpoint.Reason.NO_SPEECH, feed(endpoint, 0, 3980))
     }
+    @Test fun expandedPassageCanContinueAfterOneMinuteButStillStopsAtTheBoundedLimit() {
+        assertEquals(60000, speechAttemptLimitMillis(false))
+        assertEquals(240000, speechAttemptLimitMillis(true))
+        val endpoint = SpeechEndpoint(maximumMillis = speechAttemptLimitMillis(true))
+        assertNull(feed(endpoint, 2000, 60000))
+        assertNull(feed(endpoint, 2000, 179980))
+        assertEquals(SpeechEndpoint.Reason.LIMIT, feed(endpoint, 2000, 20))
+    }
     @Test fun longUtterancesStillHaveAFiniteLimit() {
         val endpoint = SpeechEndpoint(maximumMillis = 2000)
         assertNull(feed(endpoint, 2000, 1980))

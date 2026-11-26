@@ -125,9 +125,15 @@ class MainActivity : ComponentActivity() {
 private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpdateHandled: () -> Unit) {
     val context = LocalContext.current
     val store = remember(context) { LearnerStore(context.applicationContext) }
-    var learners by remember { mutableStateOf(store.all()) }
+    val cloud = remember(context) { AccountRuntime.get(context) }
+    val cloudRevision by cloud.revision.collectAsState()
+    var learners by remember { mutableStateOf(store.visible(cloud.uid)) }
+    LaunchedEffect(cloudRevision) { learners = store.visible(cloud.uid) }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
+    var accountEntry by rememberSaveable { mutableStateOf(false) }
+    var accountAuthScreen by remember { mutableStateOf(true) }
+    var entryPage by rememberSaveable { mutableStateOf("home") }
     var creating by rememberSaveable { mutableStateOf(false) }
     var resumeLearning by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -142,13 +148,19 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
         }
         updates.checkOnce()
     }
-    val active = learners.firstOrNull { it.id == activeId }
+    val available = learners.filter { GuestIdentityStore(context).peek(it)?.canOpen(cloud.uid) != false }
+    val active = available.firstOrNull { it.id == activeId }
+    DisposableEffect(active?.id, cloud.uid) {
+        val person = active
+        val listener = person?.let { cloud.watch(it) }
+        onDispose { if (person != null && listener != null) store.preferences(person).unregisterOnSharedPreferenceChangeListener(listener) }
+    }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
         if (active != null) {
             key(active.id) {
-                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onSwitchLearner = { lastId = active.id; activeId = null }, onUpdateLearner = { name, avatar ->
-                    try { store.update(active.id, name, avatar); learners = store.all(); null }
+                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                    try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                 })
@@ -165,17 +177,31 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                     Box(Modifier.fillMaxSize()) {
                         if (neon) NeonWaveBackground(Modifier.matchParentSize())
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                            if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
+                            if (accountEntry) Column(Modifier.fillMaxSize()) {
+                                Box(Modifier.weight(1f)) {
+                                    AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(),
+                                        onBack = { accountEntry = false }, onAuthScreen = { accountAuthScreen = it },
+                                        onChooseLearner = { selected -> accountEntry = false; entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false })
+                                }
+                                if (!accountAuthScreen) StudioBottomNavigation("profile") { destination ->
+                                    val selected = available.firstOrNull { it.id == lastId } ?: available.firstOrNull()
+                                    if (selected != null) {
+                                        entryPage = destination; activeId = selected.id; lastId = selected.id; resumeLearning = false
+                                    }
+                                    accountEntry = false
+                                }
+                            }
+                            else if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
-                                learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
+                                learners = store.visible(cloud.uid); creating = false; entryPage = "home"; activeId = learner.id; lastId = learner.id
                                 null
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
-                            }) else LearnerPicker(store, learners, lastId,
-                                onAdd = { creating = true },
-                                onStart = { resumeLearning = false; activeId = it.id; lastId = it.id },
-                                onResume = { resumeLearning = true; activeId = it.id; lastId = it.id })
+                            }) else LearnerPicker(store, available, lastId,
+                                onAdd = { creating = true }, onAccount = { accountAuthScreen = true; accountEntry = true },
+                                onStart = { entryPage = "home"; resumeLearning = false; activeId = it.id; lastId = it.id },
+                                onResume = { entryPage = "home"; resumeLearning = true; activeId = it.id; lastId = it.id })
                         }
                     }
                 }
@@ -185,14 +211,15 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onUpdateLearner: (String, Int) -> String?) {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, initialPage: String = "home") {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
+    var accountAuthScreen by remember { mutableStateOf(true) }
     var page by rememberSaveable { mutableStateOf(if (resumeLearning) {
         val item = Lessons.catalogue.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
         restoreLessonProgress(item, preferences::getInt) { key, default -> preferences.getString(key, default) ?: default }.phase
-    } else "home") }
+    } else initialPage) }
     LaunchedEffect(updateRequested) {
         if (updateRequested) { page = "updates"; updates.check(); onUpdateHandled() }
     }
@@ -467,6 +494,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
             "updates", "edit-profile" -> "profile"
             "passage" -> "passages"
             "exercise" -> if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises"
+            "account" -> "profile"
             "hotel-topics" -> "hotel"
             "hotel" -> "lessons"
             "repeat", "chat", "review", "summary" -> if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home"
@@ -780,6 +808,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     status = "Đã khôi phục giọng nữ neural Anh-Mỹ gốc."
                                 }
                             )
+                            "account" -> AccountFlow(learner, onBack = { navigate("profile") }, onAuthScreen = { accountAuthScreen = it }, onChooseLearner = onChooseLearner)
                             "profile" -> ProfileScreen(
                                 dark = dark, speed = playbackSpeed, goal = goal,
                                 version = APP_VERSION, learner = learner,
@@ -813,7 +842,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onStudyOptions = { settingDialog = "study" },
                                 onReminderToggle = ::toggleReminder,
                                 onSound = { settingDialog = "sound" },
-                                onAbout = { settingDialog = "about" }
+                                onAbout = { settingDialog = "about" },
+                                onAccount = { navigate("account") }
                             )
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
@@ -823,8 +853,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     }
                 }
                 // All three appearances use the same full-screen scripted conversation.
-                if (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson)))
+                if ((page != "account" || !accountAuthScreen) && (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson))))
                     StudioBottomNavigation(when (page) {
+                    "account" -> "profile"
                     "hotel", "hotel-topics", "level-lessons", "passages", "exercises" -> "lessons"
                     "chat", "passage", "exercise" -> "repeat"
                     else -> page

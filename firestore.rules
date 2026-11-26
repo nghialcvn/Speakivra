@@ -1,0 +1,73 @@
+rules_version = '2';
+// Prototype rules. Private models:
+// claims/{id}: schema=2, ownerUid:string(1..128), createdAt:timestamp.
+// id=SHA256(one-time 256-bit secret, encoded as 64 hex chars); immutable forever.
+// accounts/{uid}/claimProofs/{id}: secret:string(64 hex), createdAt:timestamp.
+// Transient proof: atomic with claim, no reads, client deletes after success.
+// accounts/{uid}/profiles/{id}: schema=1, profileId=id, name:string(1..30),
+// avatar:int(0..5), progressJson:string(<=524288), revision:int(1..1e9),
+// createdAt:timestamp(immutable), updatedAt:timestamp(server time).
+// Android separately whitelists curriculum fields inside opaque progressJson.
+// No roles, tokens, email or audio. Account namespaces need no parent document.
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function isAuthenticated() { return request.auth != null; }
+  function verified() { return isAuthenticated() && request.auth.token.email_verified == true; }
+  function isOwner(uid) { return verified() && request.auth.uid == uid; }
+  function validId(id) { return id.matches('^[a-f0-9]{64}$'); }
+  function uidUnchanged(data) { return data.ownerUid == request.auth.uid; }
+  function uidNotModified(data) { return data.ownerUid == resource.data.ownerUid; }
+  function isValidClaim(data) {
+   return data.keys().hasAll(['schema','ownerUid','createdAt']) &&
+    data.keys().hasOnly(['schema','ownerUid','createdAt']) && data.schema is int && data.schema == 2 &&
+    data.ownerUid is string && data.ownerUid.size() > 0 && data.ownerUid.size() <= 128 &&
+    data.createdAt is timestamp && data.createdAt == request.time;
+  }
+  function isValidProof(data) {
+   return data.keys().hasAll(['secret','createdAt']) && data.keys().hasOnly(['secret','createdAt']) &&
+    data.secret is string && data.secret.size() == 64 && data.secret.matches('^[a-f0-9]{64}$') &&
+    data.createdAt is timestamp && data.createdAt == request.time;
+  }
+  function isValidProfile(data,id) {
+   return data.keys().hasAll(['schema','profileId','name','avatar','progressJson','revision','createdAt','updatedAt']) &&
+    data.keys().hasOnly(['schema','profileId','name','avatar','progressJson','revision','createdAt','updatedAt']) &&
+    data.schema is int && data.schema == 1 && data.profileId == id && validId(id) &&
+    data.name is string && data.name.size() > 0 && data.name.size() <= 30 &&
+    data.avatar is int && data.avatar >= 0 && data.avatar <= 5 &&
+    data.progressJson is string && data.progressJson.size() <= 524288 &&
+    data.revision is int && data.revision > 0 && data.revision <= 1000000000 &&
+    data.createdAt is timestamp && data.updatedAt is timestamp && data.updatedAt == request.time;
+  }
+  function ownsClaim(uid,id) {
+   return isOwner(uid) && get(/databases/$(database)/documents/claims/$(id)).data.ownerUid == uid;
+  }
+  match /claims/{id} {
+   // Exact missing-ID check permitted; no listing or foreign owner disclosure.
+   allow get: if verified() && validId(id) &&
+    (!exists(/databases/$(database)/documents/claims/$(id)) || resource.data.ownerUid == request.auth.uid);
+   allow list: if false;
+   allow create: if verified() && validId(id) && isValidClaim(request.resource.data) &&
+    uidUnchanged(request.resource.data) &&
+    hashing.sha256(getAfter(/databases/$(database)/documents/accounts/$(request.auth.uid)/claimProofs/$(id)).data.secret).toHexString().lower() == id;
+   allow update, delete: if false;
+  }
+  match /accounts/{uid}/claimProofs/{id} {
+   allow read: if false;
+   allow create: if isOwner(uid) && validId(id) && isValidProof(request.resource.data) &&
+    hashing.sha256(request.resource.data.secret).toHexString().lower() == id &&
+    getAfter(/databases/$(database)/documents/claims/$(id)).data.ownerUid == uid;
+   allow update: if false;
+   allow delete: if isOwner(uid);
+  }
+  match /accounts/{uid}/profiles/{id} {
+   allow get: if ownsClaim(uid,id);
+   allow list: if isOwner(uid) && request.query.limit != null && request.query.limit <= 200;
+   allow create: if ownsClaim(uid,id) && isValidProfile(request.resource.data,id) &&
+    request.resource.data.revision == 1 && request.resource.data.createdAt == request.time;
+   allow update: if ownsClaim(uid,id) && isValidProfile(request.resource.data,id) &&
+    request.resource.data.createdAt == resource.data.createdAt && request.resource.data.revision == resource.data.revision + 1;
+   allow delete: if ownsClaim(uid,id);
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

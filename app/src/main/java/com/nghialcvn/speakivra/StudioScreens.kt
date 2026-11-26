@@ -615,7 +615,7 @@ internal fun ProfileScreen(
     onBack: () -> Unit = {}, onAccent: (String) -> Unit = {},
     onGender: (String) -> Unit = {}, onExplanationLanguage: (String) -> Unit = {},
     onStudyOptions: () -> Unit = {}, onReminderToggle: (Boolean) -> Unit = {},
-    onSound: () -> Unit = {}, onAbout: () -> Unit = {}
+    onSound: () -> Unit = {}, onAbout: () -> Unit = {}, onAccount: () -> Unit = {}
 ) {
     // No second Dark/Light tree: identical component structure across all themes.
     UnifiedSettingsScreen(
@@ -628,7 +628,7 @@ internal fun ProfileScreen(
         onLanguage = onExplanationLanguage,
         onStudy = onStudyOptions, onReminder = onReminderToggle,
         onSpeed = onSpeed, onGoal = onGoal, onSound = onSound,
-        onUpdates = onUpdates, onAbout = onAbout
+        onUpdates = onUpdates, onAbout = onAbout, onAccount = onAccount
     )
 }
 

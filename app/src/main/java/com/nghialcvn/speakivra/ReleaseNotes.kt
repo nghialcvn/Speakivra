@@ -3,6 +3,11 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.1.8" to listOf(
+            "profile" to "Hồ sơ khách có mã riêng, liên kết một lần với tài khoản",
+            "layers" to "Đồng bộ hồ sơ, tiến độ và kim cương trên nhiều thiết bị",
+            "tools" to "Đăng nhập Google/email, đăng ký và xác minh email",
+            "info" to "Microsoft tạm thời chưa khả dụng; bản ghi giọng nói chỉ lưu trên máy"),
         "1.1.3" to listOf("layers" to "Thành tích kim cương, căn giữa và hiển thị trên một hàng"),
         "1.1.4" to listOf("speaker" to "Sửa đối chiếu giờ đọc thành số", "chat" to "Xanh–đỏ theo từng từ trong lời nói và đáp án"),
         "1.1.5" to listOf("reception" to "Tiếng Anh Khách sạn: 15 chủ đề mỗi nghiệp vụ", "chat" to "240 câu mẫu, 180 lượt hội thoại và 240 câu Việt → Anh"),

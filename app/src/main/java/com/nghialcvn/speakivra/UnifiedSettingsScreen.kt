@@ -52,7 +52,8 @@ internal fun UnifiedSettingsScreen(
     onGoal: () -> Unit,
     onSound: () -> Unit,
     onUpdates: () -> Unit,
-    onAbout: () -> Unit
+    onAbout: () -> Unit,
+    onAccount: () -> Unit = {}
 ) {
     val p = studio
     var expanded by rememberSaveable { mutableStateOf<String?>(null) }
@@ -168,8 +169,7 @@ internal fun UnifiedSettingsScreen(
                         Column(Modifier.weight(1f)) {
                             Text(learner.name, color = p.ink, fontSize = 15.sp,
                                 fontWeight = FontWeight.ExtraBold)
-                            Text("Tiến độ riêng trên thiết bị",
-                                color = p.muted, fontSize = 11.sp)
+                            GuestIdentityLabel(learner)
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -181,6 +181,7 @@ internal fun UnifiedSettingsScreen(
                         }
                     }
                 }
+                SettingsTile("phone", "Tài khoản & đồng bộ", "Liên kết hồ sơ khách và học tiếp trên thiết bị khác", neon, onAccount)
             }
 
             AccordionSection("Ứng dụng", "Cập nhật mới • Phiên bản • Thông tin",

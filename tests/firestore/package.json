@@ -1,0 +1,17 @@
+{
+  "name": "speakivra-spark-security-tests",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 rules.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.4.0"
+  },
+  "private": true
+}

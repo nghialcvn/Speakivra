@@ -45,19 +45,44 @@ internal class LearnerStore(private val context: Context) {
         check(registry.edit().putString("profiles", "[]").commit())
         return emptyList()
     }
+    fun visible(uid: String?): List<Learner> = all().filter { GuestIdentityStore(context).peek(it)?.canOpen(uid) != false }
+    fun findCloud(profileId: String): Learner? = all().firstOrNull { GuestIdentityStore(context).peek(it)?.profileId == profileId }
+    @Synchronized fun importCloud(profileId: String, uid: String, name: String, avatar: Int, progress: JSONObject): Learner {
+        require(name.isNotBlank() && name.length <= 30 && name.none { it.isISOControl() } && avatar in 0..5)
+        val existing = findCloud(profileId)
+        require(existing == null || GuestIdentityStore(context).peek(existing)?.ownerUid == null || GuestIdentityStore(context).peek(existing)?.ownerUid == uid)
+        val person = existing?.copy(name = name, avatar = avatar) ?: Learner(UUID.randomUUID().toString(), name, avatar)
+        // Bind before making a restored learner visible. No secret is needed to restore an already owned record.
+        GuestIdentityStore(context).restoreOwned(person, profileId, uid)
+        val list = all()
+        check(registry.edit().putString("profiles", encodeLearners(if (existing == null) list + person else list.map { if (it.id == person.id) person else it })).commit())
+        val edit = preferences(person).edit()
+        val localProgress = if (existing == null) JSONObject() else profileSyncPayload(existing, requireNotNull(GuestIdentityStore(context).peek(existing)), preferences(existing).all).getJSONObject("progress")
+        val combined = sanitizedCloudProgress(profileId, mergeCloudProgress(localProgress, progress))
+        cloudProgressValues(combined).forEach { (key,value) -> when(value) {
+            is Int -> edit.putInt(key,value)
+            is String -> edit.putString(key,value)
+            is Set<*> -> edit.putStringSet(key,value.filterIsInstance<String>().toSet())
+        } }
+        check(edit.commit())
+        return person
+    }
     fun preferences(learner: Learner): SharedPreferences = context.getSharedPreferences(learnerPreferenceName(learner.id), 0)
     fun add(name: String, avatar: Int): Learner {
         val clean = name.trim()
         require(clean.isNotEmpty() && clean.length <= 30 && clean.none { it.isISOControl() } && avatar in 0..5)
         val existing = all()
-        require(existing.none { it.name.equals(clean, ignoreCase = true) }) { "Tên người học đã có. Hãy chọn tên khác." }
+        require(visible(AccountRuntime.get(context).uid).none { it.name.equals(clean, ignoreCase = true) }) { "Tên người học đã có. Hãy chọn tên khác." }
         val learner = Learner(UUID.randomUUID().toString(), clean, avatar)
         check(registry.edit().putString("profiles", encodeLearners(existing + learner)).commit())
         return learner
     }
     fun update(id: String, name: String, avatar: Int) {
-        val updated = updateLearnerList(all(), id, name, avatar)
+        val values = all()
+        val visibleUpdated = updateLearnerList(visible(AccountRuntime.get(context).uid), id, name, avatar)
+        val updated = values.map { old -> visibleUpdated.firstOrNull { it.id == old.id } ?: old }
         check(registry.edit().putString("profiles", encodeLearners(updated)).commit())
+        AccountRuntime.get(context).metadataChanged(updated.first { it.id == id })
     }
     fun learned(learner: Learner): Pair<Int, Int> {
         val prefs = preferences(learner)

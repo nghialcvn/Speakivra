@@ -1,4 +1,5 @@
 plugins {
+    id("com.google.gms.google-services")
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -9,7 +10,7 @@ val signingPath = providers.environmentVariable("SPEAKIVRA_KEYSTORE_PATH").orNul
 android {
     namespace = "com.nghialcvn.speakivra"
     compileSdk = 35
-    val approvedVersion = "1.1.7"
+    val approvedVersion = "1.1.8"
     require(Regex("""[0-9]+\.[0-9]\.[0-9]""").matches(approvedVersion)) {
         "Speakivra version must roll 1.0.9 -> 1.1.0, never 1.0.10"
     }
@@ -18,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 37
+        versionCode = 38
         versionName = approvedVersion
     }
     testBuildType = providers.gradleProperty("uiTestBuildType").getOrElse("release")
@@ -49,6 +50,12 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)

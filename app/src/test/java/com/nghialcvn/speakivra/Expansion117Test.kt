@@ -63,7 +63,9 @@ class Expansion117Test {
     @Test fun installedNotesCannotSilentlyRepeatAnOlderVersion() {
         val current = InstalledReleaseNotes.forVersion(BuildConfig.VERSION_NAME)
         assertTrue(current.isNotEmpty())
-        assertTrue(current.any { "500 câu" in it.second })
+        assertTrue(InstalledReleaseNotes.forVersion("1.1.7").any { "500 câu" in it.second })
+        assertTrue(current.any { "Đồng bộ hồ sơ" in it.second })
+        assertNotEquals(InstalledReleaseNotes.forVersion("1.1.7"), current)
         assertFalse(current.any { "Hồ sơ mới" in it.second || "450 câu" in it.second })
         assertNotEquals(InstalledReleaseNotes.forVersion("1.1.6"), current)
         assertTrue(InstalledReleaseNotes.forVersion("9.9.9").isEmpty())

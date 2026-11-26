@@ -21,6 +21,7 @@ import java.util.Locale
 
 internal object IpaText {
     @Volatile private var data: JSONObject? = null
+    @Volatile private var hotelData: JSONObject? = null
     fun key(text: String) = text.trim().replace('’', '\'').replace('‘', '\'')
         .replace(Regex("\\s+"), " ").lowercase(Locale.US)
     fun lookup(context: Context, text: String, accent: String): String? {
@@ -30,6 +31,11 @@ internal object IpaText {
         val language = source.getJSONObject(if (accent == "GB") "GB" else "US")
         val value = language.optString(key(text), "")
         if (value.isNotBlank()) return "/$value/"
+        val hotel = hotelData ?: synchronized(this) {
+            hotelData ?: JSONObject(context.assets.open("hotel-ipa.json").bufferedReader().use { it.readText() }).also { hotelData = it }
+        }
+        val hotelValue = hotel.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
+        if (hotelValue.isNotBlank()) return "/$hotelValue/"
         // Personal names remain in their own spelling outside IPA brackets, never a fabricated English pronunciation.
         val name = Regex("(?i)^I'm (.+?)[.!?]?$").matchEntire(text.trim())?.groupValues?.get(1)
         return if (name != null) "/${language.getString(key("I'm"))}/ $name" else null

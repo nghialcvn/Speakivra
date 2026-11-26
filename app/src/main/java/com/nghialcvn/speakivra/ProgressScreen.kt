@@ -24,7 +24,7 @@ internal fun ProgressScreen(
     val totalRounds = lessons.sumOf { load(it).rounds }
     val touched = lessons.count { lesson ->
         val progress = load(lesson)
-        progress.phrase > 0 || progress.phase != "repeat" || progress.rounds > 0
+        progress.phrase > 0 || progress.phase != "repeat" || progress.rounds > 0 || progress.learnedTurns.orEmpty().isNotEmpty()
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -51,6 +51,12 @@ internal fun ProgressScreen(
         Text("B1 • Trung cấp", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
         lessons.filter { Lessons.levelOf(it) == "B1" }.forEach { lesson ->
             LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
+        }
+        listOf("FO", "HK").forEach { role ->
+            Text("Khách sạn • ${HotelCurriculum.roleLabel(role)}", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            lessons.filter { HotelCurriculum.isHotel(it) && HotelCurriculum.role(it) == role }.forEach { lesson ->
+                LessonProgressRow(lesson, load(lesson), true, onOpen)
+            }
         }
     }
 }

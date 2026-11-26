@@ -61,8 +61,8 @@ internal class LearnerStore(private val context: Context) {
     }
     fun learned(learner: Learner): Pair<Int, Int> {
         val prefs = preferences(learner)
-        val total = Lessons.all.sumOf { it.phrases.size }
-        val done = Lessons.all.sumOf { lesson ->
+        val total = Lessons.catalogue.sumOf { it.phrases.size }
+        val done = Lessons.catalogue.sumOf { lesson ->
             val progress = restoreLessonProgress(lesson, prefs::getInt) { key, default -> prefs.getString(key, default) ?: default }
             if (progress.phase != "repeat" || progress.rounds > 0) lesson.phrases.size else progress.phrase
         }

@@ -40,7 +40,7 @@ internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier, square: B
 }
 
 @Composable
-internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit, onResume: (Learner) -> Unit = onStart) {
+internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit, onResume: (Learner) -> Unit = onStart, onAccount: () -> Unit = {}) {
     val p = studio
     if (learners.isEmpty()) {
         // First install: no default named person, and no empty progress profile.
@@ -62,6 +62,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             }
             Spacer(Modifier.weight(1f))
             CoralButton("+ Tạo hồ sơ mới", onClick = onAdd)
+            OutlinedButton(onClick = onAccount) { Text("Đăng nhập để học tiếp") }
         }
         return
     }
@@ -84,6 +85,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                     LearnerAvatar(learner.avatar, Modifier.size(112.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                        GuestIdentityLabel(learner)
                         StudioProgress(done.toFloat() / total)
                         SingleLineInfo("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
                         AchievementSummary(TopicAchievements(store.preferences(learner)).total(),
@@ -97,6 +99,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                 Text("+", fontSize = 30.sp, color = p.coral); Spacer(Modifier.width(12.dp)); Text("Thêm người học", color = p.ink, fontSize = 17.sp)
             }
         }
+        TextButton(onClick = onAccount, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Tài khoản & đồng bộ") }
         Text("Không cần mật khẩu • Tiến độ lưu riêng trên máy", color = p.muted, fontSize = 12.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
         CoralButton("Bắt đầu học", onClick = { learners.firstOrNull { it.id == selected }?.let(onStart) })
     }

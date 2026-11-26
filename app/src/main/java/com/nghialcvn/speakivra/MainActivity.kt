@@ -128,6 +128,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     var learners by remember { mutableStateOf(store.all()) }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
+    var accountEntry by rememberSaveable { mutableStateOf(false) }
     var creating by rememberSaveable { mutableStateOf(false) }
     var resumeLearning by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -165,7 +166,8 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                     Box(Modifier.fillMaxSize()) {
                         if (neon) NeonWaveBackground(Modifier.matchParentSize())
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                            if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
+                            if (accountEntry) AccountFlow(learners.firstOrNull { it.id == lastId } ?: learners.firstOrNull(), onBack = { accountEntry = false })
+                            else if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
                                 learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
@@ -173,7 +175,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, learners, lastId,
-                                onAdd = { creating = true },
+                                onAdd = { creating = true }, onAccount = { accountEntry = true },
                                 onStart = { resumeLearning = false; activeId = it.id; lastId = it.id },
                                 onResume = { resumeLearning = true; activeId = it.id; lastId = it.id })
                         }
@@ -189,6 +191,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
+    var accountAuthScreen by remember { mutableStateOf(true) }
     var page by rememberSaveable { mutableStateOf(if (resumeLearning) {
         val item = Lessons.catalogue.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
         restoreLessonProgress(item, preferences::getInt) { key, default -> preferences.getString(key, default) ?: default }.phase
@@ -467,6 +470,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
             "updates", "edit-profile" -> "profile"
             "passage" -> "passages"
             "exercise" -> if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises"
+            "account" -> "profile"
             "hotel-topics" -> "hotel"
             "hotel" -> "lessons"
             "repeat", "chat", "review", "summary" -> if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home"
@@ -780,6 +784,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     status = "Đã khôi phục giọng nữ neural Anh-Mỹ gốc."
                                 }
                             )
+                            "account" -> AccountFlow(learner, onBack = { navigate("profile") }, onAuthScreen = { accountAuthScreen = it })
                             "profile" -> ProfileScreen(
                                 dark = dark, speed = playbackSpeed, goal = goal,
                                 version = APP_VERSION, learner = learner,
@@ -813,7 +818,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onStudyOptions = { settingDialog = "study" },
                                 onReminderToggle = ::toggleReminder,
                                 onSound = { settingDialog = "sound" },
-                                onAbout = { settingDialog = "about" }
+                                onAbout = { settingDialog = "about" },
+                                onAccount = { navigate("account") }
                             )
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
@@ -823,7 +829,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     }
                 }
                 // All three appearances use the same full-screen scripted conversation.
-                if (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson)))
+                if ((page != "account" || !accountAuthScreen) && (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson))))
                     StudioBottomNavigation(when (page) {
                     "hotel", "hotel-topics", "level-lessons", "passages", "exercises" -> "lessons"
                     "chat", "passage", "exercise" -> "repeat"

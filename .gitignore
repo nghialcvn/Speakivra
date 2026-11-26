@@ -12,3 +12,9 @@ local.properties
 __pycache__/
 *.pyc
 *.der
+
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+.firebase/
+.env.*

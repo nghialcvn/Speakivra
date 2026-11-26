@@ -1,6 +1,7 @@
 package com.nghialcvn.speakivra
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
@@ -8,14 +9,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-internal fun HotelHubScreen(mode: String, onMode: (String) -> Unit,
-                           onRole: (String) -> Unit, onBack: () -> Unit) {
+internal fun HotelHubScreen(role: String, onRole: (String) -> Unit,
+                           onOpen: (String, String) -> Unit, onBack: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -23,14 +26,21 @@ internal fun HotelHubScreen(mode: String, onMode: (String) -> Unit,
         Text("Cấp độ riêng", color = p.coral, fontSize = 12.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
                 .border(1.dp, p.coral, RoundedCornerShape(18.dp)).padding(horizontal = 14.dp, vertical = 5.dp))
-        listOf("FO", "HK").forEach { role ->
-            StudioCard(Modifier.clickable { onRole(role) }) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StudioIcon(if (role == "FO") "reception" else "housekeeping", Modifier.size(38.dp), p.coral)
+        StudioCard {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StudioIcon("speaker", Modifier.size(24.dp), p.coral)
+                Text("Nghe & nhắc lại", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            }
+            listOf("FO", "HK").forEachIndexed { index, item ->
+                if (index > 0) HorizontalDivider(color = p.muted.copy(alpha = .2f))
+                Row(Modifier.fillMaxWidth().testTag("hotel-repeat-$item")
+                    .clickable(role = Role.Button) { onOpen(item, "repeat") }.padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StudioIcon(if (item == "FO") "reception" else "housekeeping", Modifier.size(38.dp), p.coral)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(HotelCurriculum.roleLabel(role), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                        Text(HotelCurriculum.roleEnglish(role), fontSize = 13.sp, color = p.muted)
-                        Text("15 chủ đề • " + if (role == "FO") "Đón tiếp & hỗ trợ khách" else "Chăm sóc phòng & khách",
+                        Text(HotelCurriculum.roleLabel(item), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(HotelCurriculum.roleEnglish(item), fontSize = 13.sp, color = p.muted)
+                        Text("15 chủ đề • " + if (item == "FO") "Đón tiếp & hỗ trợ khách" else "Chăm sóc phòng & khách",
                             fontSize = 12.sp, color = p.muted)
                     }
                     StudioIcon("chevron", Modifier.size(16.dp), p.coral)
@@ -39,19 +49,32 @@ internal fun HotelHubScreen(mode: String, onMode: (String) -> Unit,
         }
         StudioCard {
             Text("Học theo tình huống", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            listOf(Triple("repeat", "Nghe & nhắc lại", "speaker"),
-                Triple("chat", "Hội thoại phân vai", "family"),
+            Row(Modifier.fillMaxWidth().border(1.dp, p.coral, RoundedCornerShape(22.dp))) {
+                listOf("FO", "HK").forEach { item ->
+                    val selected = role == item
+                    Surface(Modifier.weight(1f).testTag("hotel-role-$item").selectable(
+                        selected = selected, role = Role.Tab, onClick = { onRole(item) }),
+                        shape = RoundedCornerShape(22.dp), color = if (selected) p.coral else androidx.compose.ui.graphics.Color.Transparent,
+                        contentColor = if (selected) androidx.compose.ui.graphics.Color.White else p.ink) {
+                        Text(HotelCurriculum.roleLabel(item), Modifier.padding(vertical = 10.dp),
+                            textAlign = TextAlign.Center, fontSize = 14.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                    }
+                }
+            }
+            Text("${HotelCurriculum.roleLabel(role)} • 15 chủ đề", fontSize = 12.sp, color = p.muted)
+            listOf(Triple("chat", "Hội thoại phân vai", "family"),
                 Triple("exercise", "Tiếng Anh nói thế nào?", "chat")).forEach { (value, title, icon) ->
-                Row(Modifier.fillMaxWidth().clickable { onMode(value) }.padding(vertical = 10.dp),
+                Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { onOpen(role, value) }.padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StudioIcon(icon, Modifier.size(24.dp), p.coral)
                     Text(title, Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    StudioIcon(if (mode == value) "check" else "chevron", Modifier.size(18.dp), p.coral)
+                    StudioIcon("chevron", Modifier.size(18.dp), p.coral)
                 }
             }
         }
-        Text("Chọn nghiệp vụ để bắt đầu", textAlign = TextAlign.Center, fontSize = 13.sp,
+        Text("Chọn nghiệp vụ và cách học để bắt đầu", textAlign = TextAlign.Center, fontSize = 13.sp,
             modifier = Modifier.fillMaxWidth().border(1.dp, p.coral, RoundedCornerShape(20.dp)).padding(12.dp))
     }
 }

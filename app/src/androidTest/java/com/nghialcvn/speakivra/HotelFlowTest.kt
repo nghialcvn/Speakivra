@@ -16,14 +16,15 @@ import java.io.File
 /** Test provider exists only in the instrumentation APK. Production routes are exercised unchanged. */
 @RunWith(AndroidJUnit4::class)
 class HotelFlowTest {
-    @get:Rule(order = 0) val seed = TestRule { base, _: Description -> object : Statement() {
+    @get:Rule(order = 0) val seed = TestRule { base, description: Description -> object : Statement() {
         override fun evaluate() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences(CURRICULUM_MIGRATIONS, 0).edit().putBoolean(RESET_108, true).commit()
             context.getSharedPreferences("speakivra_learners", 0).edit().clear().putString("profiles",
                 encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
             context.getSharedPreferences("speakivra_progress", 0).edit().clear()
-                .putBoolean("neon_theme", true).putBoolean("automatic_mode", false)
+                .putBoolean("neon_theme", description.methodName != "approvedHubTabsOpenBothModesAndRepeatResetsMode")
+                .putBoolean("dark_theme", false).putBoolean("automatic_mode", false)
                 .putInt("speed_calibration", 2).putInt("playback_speed", 75)
                 .putString("active_lesson", "greetings").commit()
             base.evaluate()
@@ -69,11 +70,36 @@ class HotelFlowTest {
         ui.onNodeWithText("Tiếng Anh Khách sạn").performScrollTo().performClick()
         ui.onNodeWithText("Giao tiếp với khách quốc tế").assertIsDisplayed()
     }
+    @Test fun approvedHubTabsOpenBothModesAndRepeatResetsMode() {
+        hotel()
+        ui.onNodeWithTag("hotel-role-FO").performScrollTo().assertIsSelected()
+        listOf("FO", "HK").forEach { role ->
+            ui.onNodeWithTag("hotel-role-$role").performScrollTo().performClick().assertIsSelected()
+            shot("64-hotel-hub-$role")
+            listOf("Hội thoại phân vai", "Tiếng Anh nói thế nào?").forEach { mode ->
+                ui.onNodeWithText(mode, substring = false).performScrollTo().performClick()
+                ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 15 chủ đề").assertIsDisplayed()
+                ui.onNodeWithText(HotelCurriculum.lessons(role).first().vietnamese, substring = false)
+                    .performScrollTo().performClick()
+                if (mode == "Hội thoại phân vai") ui.onNodeWithText("Hội thoại Khách sạn").assertIsDisplayed()
+                else ui.onNodeWithText("Câu 1/8", substring = true).assertExists()
+                ui.onNodeWithContentDescription("Quay lại").performClick()
+                ui.onNodeWithContentDescription("Quay lại").performClick()
+                ui.onNodeWithTag("hotel-role-$role").performScrollTo().assertIsSelected()
+            }
+            ui.onNodeWithTag("hotel-repeat-$role").performScrollTo().performClick()
+            ui.onNodeWithText(HotelCurriculum.lessons(role).first().vietnamese, substring = false)
+                .performScrollTo().performClick()
+            ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
+            ui.onNodeWithContentDescription("Quay lại").performClick()
+            ui.onNodeWithContentDescription("Quay lại").performClick()
+        }
+    }
     @Test fun allFifteenTopicsInBothRolesOpenWithoutCefrPrerequisites() {
         hotel()
         shot("60-hotel-role-picker")
         listOf("FO", "HK").forEach { role ->
-            ui.onNodeWithText(HotelCurriculum.roleLabel(role), substring = false).performScrollTo().performClick()
+            ui.onNodeWithTag("hotel-repeat-$role").performScrollTo().performClick()
             ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 15 chủ đề").assertIsDisplayed()
             shot(if (role == "FO") "61-hotel-front-office" else "62-hotel-housekeeping")
             ui.onNodeWithText(HotelCurriculum.lessons(role).last().vietnamese, substring = false).performScrollTo().performClick()
@@ -90,8 +116,8 @@ class HotelFlowTest {
     }
     @Test fun staffConversationMatchesDemoAndResumesWithTemporaryReplay() = provider {
         hotel()
+        ui.onNodeWithTag("hotel-role-HK").performScrollTo().performClick()
         ui.onNodeWithText("Hội thoại phân vai").performScrollTo().performClick()
-        ui.onNodeWithText("Buồng phòng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Bổ sung đồ dùng", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Hội thoại Khách sạn").assertIsDisplayed()
         ui.onNodeWithText("Bạn là nhân viên buồng phòng").assertIsDisplayed()
@@ -115,8 +141,8 @@ class HotelFlowTest {
     }
     @Test fun translatedStaffAnswerPreservesProgressWhenSwitchingToPhrasePractice() = provider {
         hotel()
+        ui.onNodeWithTag("hotel-role-FO").performScrollTo().performClick()
         ui.onNodeWithText("Tiếng Anh nói thế nào?", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Lễ tân", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Thẻ phòng không hoạt động", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
         answer("I am sorry about that. Let me help you with your key card.")
@@ -126,8 +152,7 @@ class HotelFlowTest {
         Assert.assertTrue(prefs.getStringSet("extra.completed_ids", emptySet()).orEmpty().contains("exercise_hotel_fo_key_issue_p1"))
         ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.onNodeWithText("Nghe & nhắc lại", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Lễ tân", substring = false).performScrollTo().performClick()
+        ui.onNodeWithTag("hotel-repeat-FO").performScrollTo().performClick()
         ui.onNodeWithText("Thẻ phòng không hoạt động", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithText("For security, may I verify your identification first?", substring = false).assertExists()

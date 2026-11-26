@@ -619,8 +619,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onChat = { navigate("chat") }, onPassages = { navigate("passages") },
                                 onExercises = { navigate("exercises") }, onBack = { navigate("home") },
                                 onHotel = { navigate("hotel") })
-                            "hotel" -> HotelHubScreen(hotelMode, { hotelMode = it },
-                                onRole = { hotelRole = it; navigate("hotel-topics") }, onBack = { navigate("lessons") })
+                            "hotel" -> HotelHubScreen(hotelRole, onRole = { hotelRole = it },
+                                onOpen = { role, mode -> hotelRole = role; hotelMode = mode; navigate("hotel-topics") },
+                                onBack = { navigate("lessons") })
                             "hotel-topics" -> HotelTopicsScreen(hotelRole, ::loadProgress, achievements::hearts,
                                 onOpen = ::openHotelTopic, onBack = { navigate("hotel") })
                             "passages", "exercises" -> ExtraCatalogueScreen(page == "passages", extraLevel,

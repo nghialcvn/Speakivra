@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Speakivra",
+        "supportEmail": "nghianguyen.lcvn@gmail.com",
+        "authorizedRedirectUris": [
+          "https://speakivra-nghialcvn.firebaseapp.com/__/auth/handler"
+        ]
+      }
+    }
+  }
+}

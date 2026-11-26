@@ -28,6 +28,7 @@ class SparkAccountIntegrationTest {
     private lateinit var runtime: AccountRuntime
     @get:Rule(order = 0) val seed = TestRule { base, _: Description -> object : Statement() {
         override fun evaluate() {
+            Assume.assumeTrue("Emulated account setup is debug-only", BuildConfig.DEBUG)
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences(CURRICULUM_MIGRATIONS,0).edit().putBoolean(RESET_108,true).commit()
             context.getSharedPreferences("speakivra_learners",0).edit().clear().putString("profiles",encodeLearners(listOf(Learner(ORIGINAL_LEARNER,"Nghĩa",0)))).commit()
@@ -76,6 +77,8 @@ class SparkAccountIntegrationTest {
         ui.onNodeWithText("Tài khoản & đồng bộ",substring=false).performClick()
         ui.onNodeWithText("Tiếp tục với Google").assertExists()
         shot("84-login-live-sdk")
+        ui.onNodeWithText("Tiếp tục với Microsoft").performClick()
+        ui.onNodeWithText("Đăng nhập Microsoft tạm thời chưa khả dụng. Hãy dùng Google hoặc email.").performScrollTo().assertExists()
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
         ui.onNodeWithText("Email",substring=false).performTextInput(email)
         ui.onNodeWithText("Mật khẩu",substring=false).performTextInput(password)

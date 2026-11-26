@@ -19,6 +19,7 @@ import java.security.spec.X509EncodedKeySpec
 class AccountDraftFlowTest {
     @get:Rule(order = 0) val seed = TestRule { base, _: Description -> object : Statement() {
         override fun evaluate() {
+            Assume.assumeTrue("Emulated account setup is debug-only", BuildConfig.DEBUG)
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences(CURRICULUM_MIGRATIONS, 0).edit().putBoolean(RESET_108, true).commit()
             context.getSharedPreferences("speakivra_learners", 0).edit().clear().putString("profiles",

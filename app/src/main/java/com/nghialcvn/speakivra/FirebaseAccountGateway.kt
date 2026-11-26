@@ -66,11 +66,7 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
                 else auth.signInWithCredential(google).cloudAwait()
             }
             LoginProvider.MICROSOFT -> {
-                val oauth = OAuthProvider.newBuilder("microsoft.com").addCustomParameter("prompt", "select_account").build()
-                val pending = auth.pendingAuthResult
-                if (pending != null) pending.cloudAwait()
-                else if (linking) requireNotNull(auth.currentUser).startActivityForLinkWithProvider(activity, oauth).cloudAwait()
-                else auth.startActivityForSignInWithProvider(activity, oauth).cloudAwait()
+                error("Đăng nhập Microsoft tạm thời chưa khả dụng. Hãy dùng Google hoặc email.")
             }
             LoginProvider.EMAIL -> error("Dùng email và mật khẩu để đăng nhập.")
         }

@@ -1,7 +1,7 @@
 package com.nghialcvn.speakivra
 
 /** Provider-independent state; a successful UI state requires an actual service result. */
-internal data class AccountSession(val uid: String, val name: String, val provider: String, val verified: Boolean)
+internal data class AccountSession(val uid: String, val name: String, val provider: String, val verified: Boolean, val email: String? = null)
 internal enum class LoginProvider { GOOGLE, MICROSOFT, EMAIL }
 internal interface AccountGateway {
     val session: AccountSession?

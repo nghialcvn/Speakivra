@@ -34,7 +34,7 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
         val provider = user.providerData.map { it.providerId }.filter { it != "firebase" }.joinToString(" + ") {
             when(it) { "google.com" -> "Google"; "microsoft.com" -> "Microsoft"; "password" -> "Email"; else -> it }
         }
-        AccountSession(user.uid, user.displayName?.takeIf { it.isNotBlank() } ?: "Tài khoản Speakivra", provider, user.isEmailVerified)
+        AccountSession(user.uid, user.displayName?.takeIf { it.isNotBlank() } ?: "Tài khoản Speakivra", provider, user.isEmailVerified, user.email)
     }
     private fun <T> run(result: (Result<T>) -> Unit, action: suspend () -> T) {
         scope.launch {

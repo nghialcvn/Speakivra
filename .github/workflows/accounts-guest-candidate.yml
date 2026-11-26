@@ -73,14 +73,16 @@ jobs:
           npx -y firebase-tools@15.37.0 emulators:start --only auth,firestore --project demo-speakivra-spark > firebase-emulators.log 2>&1 &
           echo "$!" > firebase-emulators.pid
           python3 - <<'PYREADY'
-          import time, urllib.request
-          for attempt in range(150):
+          import time, urllib.request, urllib.error
+          def ready(url):
               try:
-                  with urllib.request.urlopen("http://127.0.0.1:4400/emulators", timeout=2) as response:
-                      if b'firestore' in response.read(): break
-              except Exception: pass
+                  with urllib.request.urlopen(url, timeout=2) as response: return response.status < 500
+              except urllib.error.HTTPError as error: return error.code < 500
+              except Exception: return False
+          for attempt in range(150):
+              if ready("http://127.0.0.1:8080/") and ready("http://127.0.0.1:9099/emulator/v1/projects/demo-speakivra-spark/config"): break
               time.sleep(1)
-          else: raise SystemExit("Firebase emulators did not start")
+          else: raise SystemExit("Firebase Auth/Firestore endpoints did not become ready")
           PYREADY
           FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm --prefix tests/firestore test
       - name: Enable emulator acceleration for UI review

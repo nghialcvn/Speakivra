@@ -53,6 +53,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
     var busy by remember { mutableStateOf(false) }
     val runtime = remember { AccountRuntime.get(context) }
     val cloudRevision by runtime.revision.collectAsState()
+    var showMethods by rememberSaveable { mutableStateOf(false) }
     var confirm by remember { mutableStateOf(false) }
     var synced by remember { mutableStateOf(false) }
     var identity by remember(learner?.id) { mutableStateOf<GuestIdentity?>(null) }
@@ -130,6 +131,14 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                     Text("Hồ sơ và tiến độ hiện tại được giữ lại khi liên kết.")
                     Text("Hồ sơ này chỉ được liên kết một lần với một tài khoản Speakivra. Không thể chuyển sang tài khoản khác.", color = studio.muted)
                     Text("Mã hồ sơ chỉ để nhận diện, không phải mã đăng nhập hay mã khôi phục.", color = studio.muted, fontSize = 12.sp)
+                    HorizontalDivider()
+                    Text("Tài khoản nhận hồ sơ", fontWeight = FontWeight.ExtraBold)
+                    Text(session?.email ?: session?.name.orEmpty(), color = studio.muted)
+                    val existing = store.all().filter { item -> item.id != learner?.id && identityStore.peek(item)?.ownerUid == session?.uid && session != null }
+                    if (existing.isNotEmpty()) {
+                        Text("Tài khoản đã có ${existing.size} hồ sơ: ${existing.joinToString { it.name }}.")
+                        Text("Giữ cả hồ sơ hiện có và hồ sơ đang liên kết. Mỗi hồ sơ có tiến độ riêng.", color = studio.muted)
+                    }
                 }
                 CoralButton("Liên kết và đồng bộ", chevron = false, enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
                 TextButton(onClick = onBack) { Text("Để sau") }
@@ -139,6 +148,12 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                 StudioCard {
                     Text(session?.name ?: "Chưa đăng nhập", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
                     Text(session?.provider ?: "Hồ sơ vẫn được giữ trên máy", color = studio.muted)
+                    session?.email?.let { Text(it, color = studio.muted, fontSize = 13.sp) }
+                    TextButton(onClick = { showMethods = !showMethods }) { Text("Phương thức đăng nhập") }
+                    if (showMethods) {
+                        if (session?.provider?.contains("Google") != true) TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.GOOGLE, ::loggedIn) }, enabled = !busy) { Text("Liên kết Google") }
+                        if (session?.provider?.contains("Microsoft") != true) TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.MICROSOFT, ::loggedIn) }, enabled = !busy) { Text("Liên kết Microsoft") }
+                    }
                 }
                 StudioCard {
                     Text(if (displaySynced) "Đã đồng bộ" else "Chưa đồng bộ", fontWeight = FontWeight.ExtraBold,
@@ -157,6 +172,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                             }
                         }
                     }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Đồng bộ ngay") }
+                    if (learner != null && identity?.ownerUid == null) CoralButton("Liên kết dữ liệu hiện tại", chevron = false) { page = "link" }
                 }
                 StudioCard {
                     Text("Hồ sơ người học", fontWeight = FontWeight.ExtraBold)
@@ -166,12 +182,6 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                         }
                     }
                     Text("Mỗi hồ sơ có tiến độ riêng", color = studio.muted, fontSize = 12.sp)
-                }
-                if (learner != null && identity?.ownerUid == null) CoralButton("Liên kết dữ liệu hiện tại", chevron = false) { page = "link" }
-                StudioCard {
-                    Text("Phương thức đăng nhập", fontWeight = FontWeight.ExtraBold)
-                    TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.GOOGLE, ::loggedIn) }, enabled = !busy) { Text("Liên kết Google") }
-                    TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.MICROSOFT, ::loggedIn) }, enabled = !busy) { Text("Liên kết Microsoft") }
                 }
                 Text("Khi mất mạng, tiến độ được lưu trên máy và đồng bộ khi có mạng trở lại.", color = studio.muted, fontSize = 12.sp)
                 Text("Bản ghi giọng nói chỉ lưu tạm trên máy.", color = studio.muted, fontSize = 12.sp)
@@ -183,7 +193,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
         if (!gateway.configured) Text("Chưa kết nối đám mây", color = studio.muted, fontSize = 11.sp)
     }
     if (confirm) AlertDialog(onDismissRequest = { confirm = false }, title = { Text("Xác nhận liên kết một lần") },
-        text = { Text("Hồ sơ ${learner?.name.orEmpty()} (${identity?.serial.orEmpty()}) sẽ thuộc tài khoản đã chọn và không thể chuyển sang tài khoản khác.") },
+        text = { Text("Hồ sơ ${learner?.name.orEmpty()} (${identity?.serial.orEmpty()}) sẽ thuộc tài khoản ${session?.email ?: session?.name.orEmpty()} và không thể chuyển sang tài khoản khác.") },
         confirmButton = { TextButton(onClick = {
             confirm = false
             val current = session; val guest = identity; val person = learner

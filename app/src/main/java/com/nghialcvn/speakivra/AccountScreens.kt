@@ -43,21 +43,33 @@ internal fun GuestIdentityLabel(learner: Learner) {
  * This draft cannot report a successful login, ownership claim or sync without a gateway receipt. */
 @Composable
 internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
-    gateway: AccountGateway = remember { UnconfiguredAccountGateway() }, onAuthScreen: (Boolean) -> Unit = {}) {
+    gateway: AccountGateway = rememberAccountGateway(), onAuthScreen: (Boolean) -> Unit = {}, onChooseLearner: (Learner) -> Unit = { onBack() }) {
     val context = LocalContext.current
     val identityStore = remember { GuestIdentityStore(context.applicationContext) }
     val store = remember { LearnerStore(context.applicationContext) }
-    var page by rememberSaveable { mutableStateOf(if (gateway.session == null) "login" else "account") }
+    var page by rememberSaveable { mutableStateOf(if (gateway.session == null) "login" else if (gateway.session?.verified != true) "verify" else "account") }
     var session by remember { mutableStateOf(gateway.session) }
     var message by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    val runtime = remember { AccountRuntime.get(context) }
+    val cloudRevision by runtime.revision.collectAsState()
     var confirm by remember { mutableStateOf(false) }
     var synced by remember { mutableStateOf(false) }
     var identity by remember(learner?.id) { mutableStateOf<GuestIdentity?>(null) }
     LaunchedEffect(learner?.id) {
         if (learner != null) identity = withContext(Dispatchers.IO) { runCatching { identityStore.ensure(learner) }.getOrNull() }
     }
-    SideEffect { onAuthScreen(page != "account") }
+    val liveUid = gateway.session?.uid
+    LaunchedEffect(liveUid) {
+        if (session?.uid != liveUid) {
+            session = gateway.session
+            page = if (session == null) "login" else if (session?.verified != true) "verify" else "account"
+            synced = false
+        }
+    }
+    val displaySynced = if (gateway is FirebaseAccountGateway) remember(cloudRevision, learner?.id, synced) { runtime.isSynced(learner) } else synced
+    val effectivePage = if (page !in listOf("login", "register", "reset") && session?.uid != liveUid) "login" else page
+    SideEffect { onAuthScreen(effectivePage != "account") }
     fun back() { if (page == "login" || page == "account") onBack() else { message = null; page = "login" } }
     BackHandler(onBack = ::back)
     fun loggedIn(result: Result<AccountSession>) {
@@ -67,7 +79,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
     }
     Column(Modifier.fillMaxSize().background(studio.background).verticalScroll(rememberScrollState()).imePadding().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        when (page) {
+        when (effectivePage) {
             "login", "register", "reset" -> {
                 Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
                     Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(48.dp))
@@ -89,7 +101,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                             when (page) {
                                 "register" -> gateway.register(email, password) { result ->
                                     busy = false
-                                    result.fold(onSuccess = { session = gateway.session; page = "verify" }, onFailure = { message = it.message })
+                                    result.fold(onSuccess = { session = gateway.session; page = "verify" }, onFailure = { message = it.message; if (gateway.session != null) { session = gateway.session; page = "verify" } })
                                 }
                                 "reset" -> gateway.resetPassword(email) { result ->
                                     busy = false
@@ -129,8 +141,8 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                     Text(session?.provider ?: "Hồ sơ vẫn được giữ trên máy", color = studio.muted)
                 }
                 StudioCard {
-                    Text(if (synced) "Đã đồng bộ" else "Chưa đồng bộ", fontWeight = FontWeight.ExtraBold,
-                        color = if (synced) studio.green else studio.muted)
+                    Text(if (displaySynced) "Đã đồng bộ" else "Chưa đồng bộ", fontWeight = FontWeight.ExtraBold,
+                        color = if (displaySynced) studio.green else studio.muted)
                     Text("Hồ sơ, tiến độ và kim cương", color = studio.muted)
                     OutlinedButton(onClick = {
                         val value = identity
@@ -146,12 +158,18 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                 }
                 StudioCard {
                     Text("Hồ sơ người học", fontWeight = FontWeight.ExtraBold)
-                    store.all().forEach { item ->
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            LearnerAvatar(item.avatar, Modifier.size(36.dp)); Text(item.name, fontWeight = FontWeight.Bold)
+                    store.visible(gateway.session?.uid).forEach { item ->
+                        Row(Modifier.fillMaxWidth().clickable { onChooseLearner(item) }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            LearnerAvatar(item.avatar, Modifier.size(36.dp)); Text(item.name, Modifier.weight(1f), fontWeight = FontWeight.Bold); StudioIcon("chevron")
                         }
                     }
                     Text("Mỗi hồ sơ có tiến độ riêng", color = studio.muted, fontSize = 12.sp)
+                }
+                if (learner != null && identity?.ownerUid == null) CoralButton("Liên kết dữ liệu hiện tại", chevron = false) { page = "link" }
+                StudioCard {
+                    Text("Phương thức đăng nhập", fontWeight = FontWeight.ExtraBold)
+                    TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.GOOGLE, ::loggedIn) }, enabled = !busy) { Text("Liên kết Google") }
+                    TextButton(onClick = { busy = true; gateway.linkProvider(LoginProvider.MICROSOFT, ::loggedIn) }, enabled = !busy) { Text("Liên kết Microsoft") }
                 }
                 Text("Khi mất mạng, tiến độ được lưu trên máy và đồng bộ khi có mạng trở lại.", color = studio.muted, fontSize = 12.sp)
                 Text("Bản ghi giọng nói chỉ lưu tạm trên máy.", color = studio.muted, fontSize = 12.sp)
@@ -175,7 +193,14 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                         busy = false
                         result.fold(onSuccess = { receipt ->
                             runCatching { identityStore.recordServerReceipt(person, receipt, current.uid) }.fold(
-                                onSuccess = { identity = it; synced = false; page = "account" },
+                                onSuccess = {
+                                    identity = it; synced = false; page = "account"; busy = true
+                                    val payload = profileSyncPayload(person, it, store.preferences(person).all)
+                                    gateway.sync(payload) { syncResult ->
+                                        busy = false; synced = syncResult.isSuccess
+                                        message = syncResult.exceptionOrNull()?.message
+                                    }
+                                },
                                 onFailure = { message = it.message })
                         }, onFailure = { message = it.message })
                     }

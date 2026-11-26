@@ -18,3 +18,7 @@ firebase-debug.*.log
 firestore-debug.log
 .firebase/
 .env.*
+
+node_modules/
+ui-debug.log
+database-debug.log

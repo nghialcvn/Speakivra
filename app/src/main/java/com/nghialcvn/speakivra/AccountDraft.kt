@@ -7,6 +7,7 @@ internal interface AccountGateway {
     val session: AccountSession?
     val configured: Boolean
     fun signIn(provider: LoginProvider, email: String, password: String, result: (Result<AccountSession>) -> Unit)
+    fun linkProvider(provider: LoginProvider, result: (Result<AccountSession>) -> Unit) { result(Result.failure(IllegalStateException("Chưa kết nối dịch vụ tài khoản."))) }
     fun register(email: String, password: String, result: (Result<Unit>) -> Unit)
     fun resetPassword(email: String, result: (Result<Unit>) -> Unit)
     fun refreshSession(result: (Result<AccountSession>) -> Unit)

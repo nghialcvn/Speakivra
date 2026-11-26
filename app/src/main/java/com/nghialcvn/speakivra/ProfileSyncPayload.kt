@@ -8,7 +8,8 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
     val allowedLessons = Lessons.catalogue.associateBy { it.id }
     val progress = JSONObject()
     values.forEach { (key, value) ->
-        if (key == "extra.completed_ids" && value is Set<*>) {
+        if (key == "active_lesson" && value is String && value in allowedLessons) progress.put(key, value)
+        else if (key == "extra.completed_ids" && value is Set<*>) {
             val known = (ExtraPracticeData.passages.flatMap { p -> p.sentences.map { it.id } + p.id } +
                 ExtraPracticeData.exercises.flatMap { it.questions.map { q -> q.id } } +
                 HotelCurriculum.exercises.flatMap { it.questions.map { q -> q.id } }).toSet()
@@ -33,6 +34,14 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
             val lesson = allowedLessons[parts.getOrNull(1)]
             if (lesson != null && lesson.phrases.any { it.id == parts.getOrNull(2) }) progress.put(key, value)
         }
+    }
+    // Export stable completion IDs even for old preferences that only stored indices.
+    allowedLessons.values.forEach { lesson ->
+        val state = restoreLessonProgress(lesson,
+            { key, default -> (values[key] as? Int) ?: default },
+            { key, default -> (values[key] as? String) ?: default })
+        if (state.learnedPhrases.orEmpty().isNotEmpty()) progress.put("lesson.${lesson.id}.learned_phrases", state.learnedPhrases.orEmpty().sorted().joinToString("|"))
+        if (state.learnedTurns.orEmpty().isNotEmpty()) progress.put("lesson.${lesson.id}.learned_turns", state.learnedTurns.orEmpty().sorted().joinToString("|"))
     }
     return JSONObject().put("schema", 1).put("profileId", identity.profileId)
         .put("name", learner.name).put("avatar", learner.avatar).put("progress", progress)

@@ -125,7 +125,10 @@ class MainActivity : ComponentActivity() {
 private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpdateHandled: () -> Unit) {
     val context = LocalContext.current
     val store = remember(context) { LearnerStore(context.applicationContext) }
-    var learners by remember { mutableStateOf(store.all()) }
+    val cloud = remember(context) { AccountRuntime.get(context) }
+    val cloudRevision by cloud.revision.collectAsState()
+    var learners by remember { mutableStateOf(store.visible(cloud.uid)) }
+    LaunchedEffect(cloudRevision) { learners = store.visible(cloud.uid) }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var accountEntry by rememberSaveable { mutableStateOf(false) }
@@ -143,13 +146,19 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
         }
         updates.checkOnce()
     }
-    val active = learners.firstOrNull { it.id == activeId }
+    val available = learners.filter { GuestIdentityStore(context).peek(it)?.canOpen(cloud.uid) != false }
+    val active = available.firstOrNull { it.id == activeId }
+    DisposableEffect(active?.id, cloud.uid) {
+        val person = active
+        val listener = person?.let { cloud.watch(it) }
+        onDispose { if (person != null && listener != null) store.preferences(person).unregisterOnSharedPreferenceChangeListener(listener) }
+    }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
         if (active != null) {
             key(active.id) {
-                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onSwitchLearner = { lastId = active.id; activeId = null }, onUpdateLearner = { name, avatar ->
-                    try { store.update(active.id, name, avatar); learners = store.all(); null }
+                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                    try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                 })
@@ -166,15 +175,15 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                     Box(Modifier.fillMaxSize()) {
                         if (neon) NeonWaveBackground(Modifier.matchParentSize())
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                            if (accountEntry) AccountFlow(learners.firstOrNull { it.id == lastId } ?: learners.firstOrNull(), onBack = { accountEntry = false })
+                            if (accountEntry) AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(), onBack = { accountEntry = false }, onChooseLearner = { selected -> accountEntry = false; activeId = selected.id; lastId = selected.id; resumeLearning = false })
                             else if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
-                                learners = store.all(); creating = false; activeId = learner.id; lastId = learner.id
+                                learners = store.visible(cloud.uid); creating = false; activeId = learner.id; lastId = learner.id
                                 null
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
-                            }) else LearnerPicker(store, learners, lastId,
+                            }) else LearnerPicker(store, available, lastId,
                                 onAdd = { creating = true }, onAccount = { accountEntry = true },
                                 onStart = { resumeLearning = false; activeId = it.id; lastId = it.id },
                                 onResume = { resumeLearning = true; activeId = it.id; lastId = it.id })
@@ -187,7 +196,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onUpdateLearner: (String, Int) -> String?) {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?) {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
@@ -784,7 +793,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     status = "Đã khôi phục giọng nữ neural Anh-Mỹ gốc."
                                 }
                             )
-                            "account" -> AccountFlow(learner, onBack = { navigate("profile") }, onAuthScreen = { accountAuthScreen = it })
+                            "account" -> AccountFlow(learner, onBack = { navigate("profile") }, onAuthScreen = { accountAuthScreen = it }, onChooseLearner = onChooseLearner)
                             "profile" -> ProfileScreen(
                                 dark = dark, speed = playbackSpeed, goal = goal,
                                 version = APP_VERSION, learner = learner,

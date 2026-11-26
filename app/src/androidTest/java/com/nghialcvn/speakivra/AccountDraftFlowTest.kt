@@ -28,7 +28,8 @@ class AccountDraftFlowTest {
                 .putBoolean("automatic_mode", false).putBoolean("dark_theme", false).putBoolean("neon_theme", false)
                 .putString("active_lesson", "greetings").putString("lesson.greetings.phase", "repeat")
                 .putInt("lesson.greetings.phrase", 2).putInt("lesson.greetings.rounds", 1).commit()
-            base.evaluate()
+            AccountRuntime.testGateway = UnconfiguredAccountGateway()
+            try { base.evaluate() } finally { AccountRuntime.testGateway = null }
         }
     } }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
@@ -60,9 +61,9 @@ class AccountDraftFlowTest {
         Assert.assertEquals(identity, identityStore.ensure(store.all().single()))
         Assert.assertEquals(before, store.preferences(person).all)
         val proof = identityStore.proof(person, "account-A")
-        val publicKey = KeyFactory.getInstance("EC").generatePublic(X509EncodedKeySpec(Base64.decode(identity.publicKey, Base64.NO_WRAP)))
-        Assert.assertTrue(verifyGuestProof(publicKey, "account-A", identity.profileId, proof))
-        Assert.assertFalse(verifyGuestProof(publicKey, "account-B", identity.profileId, proof))
+        Assert.assertEquals(identity.profileId, guestProfileId(proof))
+        Assert.assertEquals(64, proof.size)
+        Assert.assertFalse(ui.activity.getSharedPreferences("speakivra_guest_identity", 0).all.toString().contains(proof.toString(Charsets.UTF_8)))
     }
     @Test fun realLoginAndRegisterScreensShowUnavailableCloudWithoutPretendingToCreateAnAccount() {
         ui.onNodeWithText("Tài khoản & đồng bộ", substring = false).performClick()

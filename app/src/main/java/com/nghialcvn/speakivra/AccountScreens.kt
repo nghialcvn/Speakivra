@@ -24,8 +24,9 @@ import kotlinx.coroutines.withContext
 @Composable
 internal fun GuestIdentityLabel(learner: Learner) {
     val context = LocalContext.current
-    val identity by produceState<GuestIdentity?>(null, learner.id) {
-        value = withContext(Dispatchers.IO) { runCatching { GuestIdentityStore(context).ensure(learner) }.getOrNull() }
+    var identity by remember(learner.id) { mutableStateOf<GuestIdentity?>(null) }
+    LaunchedEffect(learner.id) {
+        identity = withContext(Dispatchers.IO) { runCatching { GuestIdentityStore(context).ensure(learner) }.getOrNull() }
     }
     Text(if (identity?.ownerUid == null) "Hồ sơ khách • Chưa liên kết" else "Hồ sơ đã liên kết",
         color = studio.muted, fontSize = 11.sp)

@@ -7,7 +7,7 @@ import espeakng_loader
 from phonemizer.backend.espeak.wrapper import EspeakWrapper
 from phonemizer import phonemize
 root = Path(__file__).resolve().parents[1]
-source = (root / 'app/src/main/java/com/nghialcvn/speakivra/HotelCurriculum.kt').read_text()
+source = '\n'.join((root / 'app/src/main/java/com/nghialcvn/speakivra' / name).read_text() for name in ('HotelCurriculum.kt', 'HotelExpansion.kt'))
 quoted = r'"(?:[^"\\]|\\.)*"'
 texts = sorted({json.loads(m[1]) for m in re.finditer(r'\b(?:Phrase|ConversationTurn)\(\s*(' + quoted + ')', source)})
 def key(text):
@@ -16,7 +16,10 @@ EspeakWrapper.set_library(espeakng_loader.get_library_path())
 os.environ['ESPEAK_DATA_PATH'] = espeakng_loader.get_data_path()
 asset = root / 'app/src/main/assets/ipa.json'
 base = json.loads(asset.read_text())
-data = {lang: {key(text): value for text in texts if (value := base[lang].get(key(text)))} for lang in ('US', 'GB')}
+prior = json.loads((root / 'app/src/main/assets/hotel-ipa.json').read_text())
+data = {lang: dict(prior[lang]) for lang in ('US', 'GB')}
+for lang in data:
+    data[lang].update({key(text): value for text in texts if (value := base[lang].get(key(text)))})
 asset = root / 'app/src/main/assets/hotel-ipa.json'
 for accent, language in [('US', 'en-us'), ('GB', 'en-gb')]:
     missing = [text for text in texts if key(text) not in data[accent]]

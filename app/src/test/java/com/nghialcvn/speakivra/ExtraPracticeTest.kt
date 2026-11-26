@@ -42,16 +42,17 @@ class ExtraPracticeTest {
         assertEquals(0, nextUnfinishedQuestion(exercise, emptySet()))
         listOf("A1", "A2", "B1").forEach { level ->
             val passages = ExtraPracticeData.passages.filter { it.level == level }
-            assertEquals(5, passages.size)
-            assertEquals(3, passages.count { extraTopicOpen(it.lessonId) { LessonProgress() } })
+            assertEquals(if (level == "A1") 5 else 10, passages.size)
+            assertEquals(if (level == "A2") 6 else 3, passages.count { extraTopicOpen(it.lessonId) { LessonProgress() } })
         }
         assertFalse(extraTopicOpen("unknown") { LessonProgress(rounds = 1) })
     }
     @Test fun contentIsBilingualUniqueAndProgressivelyLongerWithFullIpaCoverage() {
         val data = JSONObject(File("src/main/assets/ipa.json").readText())
+        val expanded = JSONObject(File("src/main/assets/expanded-ipa.json").readText())
         val passages = ExtraPracticeData.passages
-        assertEquals(15, passages.size)
-        assertEquals(90, ExtraPracticeData.exercises.sumOf { it.questions.size })
+        assertEquals(25, passages.size)
+        assertEquals(230, ExtraPracticeData.exercises.sumOf { it.questions.size })
         val ids = passages.map { it.id } + passages.flatMap { it.sentences.map { it.id } } +
             ExtraPracticeData.exercises.flatMap { it.questions.map { it.id } }
         assertEquals(ids.size, ids.distinct().size)
@@ -64,7 +65,8 @@ class ExtraPracticeTest {
             ExtraPracticeData.exercises.flatMap { it.questions.flatMap { it.answers } }
         listOf("US", "GB").forEach { accent ->
             english.forEach { text ->
-                assertTrue("Missing IPA $accent: $text", data.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank())
+                assertTrue("Missing IPA $accent: $text", data.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank() ||
+                    expanded.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank())
             }
         }
         assertTrue(passages.all { it.sentences.all { s -> s.vietnamese.isNotBlank() } && it.vocabulary.size == 4 })

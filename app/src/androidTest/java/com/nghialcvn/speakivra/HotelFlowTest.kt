@@ -23,7 +23,7 @@ class HotelFlowTest {
             context.getSharedPreferences("speakivra_learners", 0).edit().clear().putString("profiles",
                 encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
             context.getSharedPreferences("speakivra_progress", 0).edit().clear()
-                .putBoolean("neon_theme", description.methodName != "approvedHubTabsOpenBothModesAndRepeatResetsMode")
+                .putBoolean("neon_theme", description.methodName !in setOf("approvedHubTabsOpenBothModesAndRepeatResetsMode", "newAccentedLearnerKeepsNameInConversationAndActualRecognition", "expandedCountsAndInstalledReleaseNotesShowCurrentContent"))
                 .putBoolean("dark_theme", false).putBoolean("automatic_mode", false)
                 .putInt("speed_calibration", 2).putInt("playback_speed", 75)
                 .putString("active_lesson", "greetings").commit()
@@ -70,6 +70,48 @@ class HotelFlowTest {
         ui.onNodeWithText("Tiếng Anh Khách sạn").performScrollTo().performClick()
         ui.onNodeWithText("Giao tiếp với khách quốc tế").assertIsDisplayed()
     }
+    @Test fun newAccentedLearnerKeepsNameInConversationAndActualRecognition() = provider {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
+        ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
+        ui.onNodeWithText("Thêm người học").performScrollTo().performClick()
+        ui.onNode(hasSetTextAction()).performTextInput("Nguyễn Đặng Ánh")
+        ui.onNode(hasSetTextAction()).performImeAction()
+        ui.onNodeWithText("Lưu và bắt đầu").performClick()
+        val created = LearnerStore(ui.activity).all().single { it.name == "Nguyễn Đặng Ánh" }
+        Assert.assertNotEquals(ORIGINAL_LEARNER, created.id)
+        ui.openLessonHub()
+        ui.onNodeWithText("Hội thoại mẫu", substring = false).performScrollTo().performClick()
+        ui.onNodeWithText("My name is Nguyễn Đặng Ánh.").assertExists()
+        answer("My name is Nguyen Dang Anh.")
+        ui.onNodeWithContentDescription("Đạt đối chiếu lời nói").performScrollTo().assertExists()
+        ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsEnabled()
+        shot("70-accented-name-recognition")
+    }
+    @Test fun expandedCountsAndInstalledReleaseNotesShowCurrentContent() {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.openLessonHub()
+        ui.onNodeWithText("Luyện nói theo đoạn văn", substring = false).performScrollTo().performClick()
+        listOf("A2", "B1").forEach {
+            ui.onNodeWithText(it, substring = false).performClick()
+            ui.onNodeWithText("10 bài • 100 câu").assertIsDisplayed()
+            shot("71-expanded-reading-$it")
+        }
+        ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Tiếng Anh nói thế nào?", substring = false).performScrollTo().performClick()
+        listOf("A2", "B1").forEach {
+            ui.onNodeWithText(it, substring = false).performClick()
+            ui.onNodeWithText("20 bài • 100 câu").assertIsDisplayed()
+        }
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.onNodeWithText("Ứng dụng", substring = false).performScrollTo().performClick()
+        InstalledReleaseNotes.forVersion(BuildConfig.VERSION_NAME).forEach { (_, text) ->
+            ui.onNodeWithText(text, substring = false).performScrollTo().assertIsDisplayed()
+        }
+        ui.onNodeWithText("Hồ sơ mới, mở khóa theo tiến độ").assertDoesNotExist()
+        shot("72-current-installed-release-notes")
+    }
     @Test fun approvedHubTabsOpenBothModesAndRepeatResetsMode() {
         hotel()
         ui.onNodeWithTag("hotel-role-FO").performScrollTo().assertIsSelected()
@@ -78,11 +120,11 @@ class HotelFlowTest {
             shot("64-hotel-hub-$role")
             listOf("Hội thoại phân vai", "Tiếng Anh nói thế nào?").forEach { mode ->
                 ui.onNodeWithText(mode, substring = false).performScrollTo().performClick()
-                ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 15 chủ đề").assertIsDisplayed()
+                ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 20 chủ đề").assertIsDisplayed()
                 ui.onNodeWithText(HotelCurriculum.lessons(role).first().vietnamese, substring = false)
                     .performScrollTo().performClick()
                 if (mode == "Hội thoại phân vai") ui.onNodeWithText("Hội thoại Khách sạn").assertIsDisplayed()
-                else ui.onNodeWithText("Câu 1/8", substring = true).assertExists()
+                else ui.onNodeWithText("Câu 1/25", substring = true).assertExists()
                 ui.onNodeWithContentDescription("Quay lại").performClick()
                 ui.onNodeWithContentDescription("Quay lại").performClick()
                 ui.onNodeWithTag("hotel-role-$role").performScrollTo().assertIsSelected()
@@ -95,17 +137,17 @@ class HotelFlowTest {
             ui.onNodeWithContentDescription("Quay lại").performClick()
         }
     }
-    @Test fun allFifteenTopicsInBothRolesOpenWithoutCefrPrerequisites() {
+    @Test fun allTwentyTopicsInBothRolesOpenWithoutCefrPrerequisites() {
         hotel()
         shot("60-hotel-role-picker")
         listOf("FO", "HK").forEach { role ->
             ui.onNodeWithTag("hotel-repeat-$role").performScrollTo().performClick()
-            ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 15 chủ đề").assertIsDisplayed()
+            ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 20 chủ đề").assertIsDisplayed()
             shot(if (role == "FO") "61-hotel-front-office" else "62-hotel-housekeeping")
             ui.onNodeWithText(HotelCurriculum.lessons(role).last().vietnamese, substring = false).performScrollTo().performClick()
             ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
             ui.onNodeWithContentDescription("Quay lại").performClick()
-            ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 15 chủ đề").assertIsDisplayed()
+            ui.onNodeWithText("${HotelCurriculum.roleEnglish(role)} • 20 chủ đề").assertIsDisplayed()
             ui.onNodeWithContentDescription("Quay lại").performClick()
         }
         ui.onNodeWithContentDescription("Quay lại").performClick()

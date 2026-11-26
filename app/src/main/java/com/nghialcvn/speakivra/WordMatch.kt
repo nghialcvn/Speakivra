@@ -3,12 +3,12 @@ package com.nghialcvn.speakivra
 import java.util.Locale
 import java.text.Normalizer
 
-internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean) {
+internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean, val requiredTokensMatched: Boolean = true) {
     val correct get() = matched.count { it }
     val matchPercent get() = if (tokens.isEmpty()) 0 else correct * 100 / tokens.size
     val incorrect get() = matched.count { !it }
     val percent get() = if (tokens.isEmpty()) 100 else (incorrect * 100f / tokens.size).toInt()
-    val canContinue get() = hasResult && tokens.isNotEmpty() && incorrect * 100 < tokens.size * 60
+    val canContinue get() = hasResult && requiredTokensMatched && tokens.isNotEmpty() && incorrect * 100 < tokens.size * 60
 }
 
 private data class MatchPart(val value: String, val owner: Int)
@@ -111,8 +111,26 @@ private fun canonical(tokens: List<String>): List<MatchAtom> {
  * no fuzzy guessing, invented transcript, or acoustic pronunciation score. */
 internal fun matchWords(reference: String, finalTranscript: String?): WordMatch {
     val tokens = Regex("\\S+").findAll(reference).map { it.value }.toList()
-    val expected = canonical(tokens)
-    val spoken = canonical(Regex("\\S+").findAll(finalTranscript.orEmpty()).map { it.value }.toList())
+    var expected = canonical(tokens)
+    var spoken = canonical(Regex("\\S+").findAll(finalTranscript.orEmpty()).map { it.value }.toList())
+    // Equivalent introduction frames only. Preserve owners for word colouring and require
+    // the complete name: accent folding is not permission to accept a different/missing name.
+    fun introSize(parts: List<MatchAtom>): Int = when {
+        parts.take(3).map { it.value } == listOf("my", "name", "is") -> 3
+        parts.take(2).map { it.value } == listOf("i", "am") -> 2
+        else -> 0
+    }
+    val nameIntroduction = expected.take(3).map { it.value } == listOf("my", "name", "is") ||
+        spoken.take(3).map { it.value } == listOf("my", "name", "is")
+    if (nameIntroduction) {
+        fun frame(parts: List<MatchAtom>): List<MatchAtom> {
+            val size = introSize(parts)
+            return if (size == 0) parts else listOf(MatchAtom("name-introduction",
+                parts.take(size).flatMap { it.owners }.toSet())) + parts.drop(size)
+        }
+        expected = frame(expected)
+        spoken = frame(spoken)
+    }
     val dp = Array(expected.size + 1) { IntArray(spoken.size + 1) }
     for (i in expected.indices.reversed()) for (j in spoken.indices.reversed()) {
         dp[i][j] = if (expected[i].value == spoken[j].value) 1 + dp[i + 1][j + 1]
@@ -128,5 +146,7 @@ internal fun matchWords(reference: String, finalTranscript: String?): WordMatch 
         val relevant = expected.indices.filter { owner in expected[it].owners }
         relevant.isNotEmpty() && relevant.all { aligned[it] }
     }
-    return WordMatch(tokens, matched, !finalTranscript.isNullOrBlank() && spoken.isNotEmpty())
+    return WordMatch(tokens, matched, !finalTranscript.isNullOrBlank() && spoken.isNotEmpty(),
+        !nameIntroduction || (expected.firstOrNull()?.value == "name-introduction" &&
+            spoken.firstOrNull()?.value == "name-introduction" && expected.drop(1).map { it.value } == spoken.drop(1).map { it.value }))
 }

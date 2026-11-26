@@ -514,7 +514,7 @@ internal object HotelCurriculum {
             ConversationTurn("I need help with the evacuation.", "Tôi cần hỗ trợ khi sơ tán.", "I will tell the team where you are and what assistance you need.", "Tôi sẽ báo đội ứng phó vị trí và nhu cầu hỗ trợ của anh/chị.", id = "hotel_hk_emergency_t5"),
             ConversationTurn("Is it safe to go back inside?", "Đã an toàn để quay lại bên trong chưa?", "Please wait for clearance from the emergency team before re-entering.", "Vui lòng chờ đội ứng phó cho phép trước khi quay lại bên trong.", id = "hotel_hk_emergency_t6"),
         ))),
-    )
+    ).let(HotelExpansion::expand)
     val all: List<Lesson> = topics.map { it.lesson }
     fun isHotel(lesson: Lesson) = lesson.id.startsWith("hotel_fo_") || lesson.id.startsWith("hotel_hk_")
     fun role(lesson: Lesson) = if (lesson.id.startsWith("hotel_fo_")) "FO" else "HK"

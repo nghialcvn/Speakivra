@@ -31,17 +31,19 @@ internal class SpeechCapture(
     private var capturing = false
     private var generation = 0L
     private var locale = "en-US"
+    private var nameHints = arrayListOf<String>()
     private var endpointSilenceMillis = 1400
     val hasRecording get() = audio.available
     val phase get() = session.phase
     fun replay() {
         if (phase == "idle") audio.play { update("idle", null, "Không phát được bản ghi. Hãy nói lại.") }
     }
-    fun start(languageTag: String = "en-US", silenceMillis: Int = 1400) {
+    fun start(languageTag: String = "en-US", silenceMillis: Int = 1400, properName: String? = null) {
         require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
         audio.clear(); recordingChanged(false)
         locale = languageTag
+        nameHints = arrayListOf<String>().apply { properName?.trim()?.takeIf { it.isNotBlank() }?.let { add(it) } }
         endpointSilenceMillis = silenceMillis.coerceIn(1400, 4000)
         update("listening", "", "Đang mở micro…")
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -150,6 +152,9 @@ internal class SpeechCapture(
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                // A recognition hint, never a replacement for the actual recognised words.
+                if (Build.VERSION.SDK_INT >= 33 && nameHints.isNotEmpty())
+                    putStringArrayListExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, nameHints)
             })
             armTimeout(token, 60_000)
             if (live != null) {

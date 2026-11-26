@@ -259,7 +259,7 @@ class ApprovedUiTest {
         shot("02-lessons")
         ui.onNodeWithText("Giao tiếp thường ngày").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Chào hỏi").performScrollTo().performClick()
-        ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()
+        ui.onNodeWithText("My name is Nghĩa.").assertIsDisplayed()
         shot("03-speaking")
         ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
         ui.onNodeWithText("Máy nhận dạng được:").assertDoesNotExist()
@@ -275,8 +275,8 @@ class ApprovedUiTest {
         ui.openLessonHub()
         ui.onNodeWithText("Hội thoại mẫu").performClick()
         ui.onNodeWithText("Mô phỏng theo kịch bản").assertIsDisplayed()
-        ui.onNodeWithText("I'm Nghĩa.").assertIsDisplayed()
-        ui.onNodeWithText("Tôi là Nghĩa.").assertIsDisplayed()
+        ui.onNodeWithText("My name is Nghĩa.").assertIsDisplayed()
+        ui.onNodeWithText("Tên tôi là Nghĩa.").assertIsDisplayed()
         shot("04-conversation")
         repeat(6) { ui.onNodeWithText("Câu hội thoại tiếp theo").performClick() }
         ui.onNodeWithText("Sang ôn tập").performClick()
@@ -396,7 +396,7 @@ class ApprovedUiTest {
                 SpeakivraTheme(false) {
                     androidx.compose.material3.Surface(color = studio.background, modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         PracticeScreen(personalizeLesson(Lessons.all.first(), "Nghĩa"), LessonProgress(phrase = 2), false, true,
-                            100, result.value.orEmpty(), "", "idle", matchWords("I'm Nghĩa.", result.value), Learner(ORIGINAL_LEARNER, "Nghĩa", 0),
+                            100, result.value.orEmpty(), "", "idle", matchWords("My name is Nghĩa.", result.value), Learner(ORIGINAL_LEARNER, "Nghĩa", 0),
                             onBack = {}, onMode = {}, onSpeed = {}, onTranslation = {}, onListen = {}, onSpeak = {}, onNext = { nextCalls++ })
                     }
                 }

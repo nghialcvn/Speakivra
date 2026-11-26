@@ -21,6 +21,7 @@ import java.util.Locale
 
 internal object IpaText {
     @Volatile private var data: JSONObject? = null
+    @Volatile private var expandedData: JSONObject? = null
     @Volatile private var hotelData: JSONObject? = null
     fun key(text: String) = text.trim().replace('’', '\'').replace('‘', '\'')
         .replace(Regex("\\s+"), " ").lowercase(Locale.US)
@@ -36,9 +37,16 @@ internal object IpaText {
         }
         val hotelValue = hotel.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
         if (hotelValue.isNotBlank()) return "/$hotelValue/"
+        val expanded = expandedData ?: synchronized(this) {
+            expandedData ?: JSONObject(context.assets.open("expanded-ipa.json").bufferedReader().use { it.readText() }).also { expandedData = it }
+        }
+        val expandedValue = expanded.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
+        if (expandedValue.isNotBlank()) return "/$expandedValue/"
         // Personal names remain in their own spelling outside IPA brackets, never a fabricated English pronunciation.
-        val name = Regex("(?i)^I'm (.+?)[.!?]?$").matchEntire(text.trim())?.groupValues?.get(1)
-        return if (name != null) "/${language.getString(key("I'm"))}/ $name" else null
+        val name = Regex("(?i)^(?:I'm|My name is) (.+?)[.!?]?$").matchEntire(text.trim())?.groupValues?.get(1)
+        val prefix = if (text.startsWith("My name is", ignoreCase = true)) "My name is" else "I'm"
+        val prefixIpa = language.optString(key(prefix)).ifBlank { if (prefix == "My name is") "maɪ neɪm ɪz" else "aɪm" }
+        return if (name != null) "/$prefixIpa/ $name" else null
     }
 }
 // A packaged italic face keeps IPA independent of Samsung's configurable system serif.

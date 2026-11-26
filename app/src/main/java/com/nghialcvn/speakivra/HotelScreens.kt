@@ -40,7 +40,7 @@ internal fun HotelHubScreen(role: String, onRole: (String) -> Unit,
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text(HotelCurriculum.roleLabel(item), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
                         Text(HotelCurriculum.roleEnglish(item), fontSize = 13.sp, color = p.muted)
-                        Text("15 chủ đề • " + if (item == "FO") "Đón tiếp & hỗ trợ khách" else "Chăm sóc phòng & khách",
+                        Text("${HotelCurriculum.lessons(item).size} chủ đề • ${HotelCurriculum.lessons(item).sumOf { it.phrases.size }} câu",
                             fontSize = 12.sp, color = p.muted)
                     }
                     StudioIcon("chevron", Modifier.size(16.dp), p.coral)
@@ -62,14 +62,18 @@ internal fun HotelHubScreen(role: String, onRole: (String) -> Unit,
                     }
                 }
             }
-            Text("${HotelCurriculum.roleLabel(role)} • 15 chủ đề", fontSize = 12.sp, color = p.muted)
+            Text("${HotelCurriculum.roleLabel(role)} • ${HotelCurriculum.lessons(role).size} chủ đề", fontSize = 12.sp, color = p.muted)
             listOf(Triple("chat", "Hội thoại phân vai", "family"),
                 Triple("exercise", "Tiếng Anh nói thế nào?", "chat")).forEach { (value, title, icon) ->
                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { onOpen(role, value) }.padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StudioIcon(icon, Modifier.size(24.dp), p.coral)
-                    Text(title, Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Column(Modifier.weight(1f)) {
+                        Text(title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        if (value == "exercise") Text("${HotelCurriculum.lessons(role).size} bài • ${HotelCurriculum.lessons(role).sumOf { it.phrases.size }} câu",
+                            fontSize = 12.sp, color = p.muted)
+                    }
                     StudioIcon("chevron", Modifier.size(18.dp), p.coral)
                 }
             }
@@ -86,7 +90,7 @@ internal fun HotelTopicsScreen(role: String, load: (Lesson) -> LessonProgress,
     val topics = HotelCurriculum.topics.filter { it.role == role }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PageHeading(HotelCurriculum.roleLabel(role), "${HotelCurriculum.roleEnglish(role)} • 15 chủ đề", onBack)
+        PageHeading(HotelCurriculum.roleLabel(role), "${HotelCurriculum.roleEnglish(role)} • ${HotelCurriculum.lessons(role).size} chủ đề", onBack)
         AchievementSummary(topics.sumOf { hearts(it.lesson) })
         topics.forEachIndexed { index, topic ->
             val lesson = topic.lesson

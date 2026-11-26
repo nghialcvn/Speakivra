@@ -366,7 +366,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
-        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400)
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name)
         else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
@@ -377,7 +377,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400)
+        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name)
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
     DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, hotelChatTurn, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {

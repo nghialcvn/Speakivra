@@ -12,14 +12,21 @@ Implemented independently of a Firebase project:
 - Portable learning export uses a whitelist. No credentials, voice recordings, device paths or device voice IDs are exported.
 - Approved sign-in, register, verification, link confirmation and account screens are prepared. The default gateway explicitly reports unavailable; it never creates fake accounts, verification messages or successful sync states.
 
-Configuration still required before implementing/deploying the Firebase gateway and ownership transaction:
+Firebase provisioning completed on 2026-11-26:
 
-1. Select a dedicated Speakivra Firebase project or provide an existing Project ID.
-2. Authorise administration of that project. The CLI in this environment is not signed in.
-3. Register the Android package and stable signing certificate; obtain public Android SDK configuration with the CLI.
-4. Confirm the database edition/location and deployment plan; do not create a paid resource or enable billing automatically.
-5. Enable Google and email/password, and register Microsoft OAuth with the agreed supported account types and redirect URI. Keep any Microsoft client secret on the provider/backend side, never in source or the APK.
-6. Implement the server claim transaction, idempotent learning merge, account-partitioned local access, account linking and background sync. Test concurrent claims, retries, offline use, account switching, restore, deletion and rule denial before release.
+- Dedicated project `speakivra-nghialcvn` (display name Speakivra, project number `941786313291`).
+- Android app `1:941786313291:android:58accdfe5fc0ae870b13ce`, package `com.nghialcvn.speakivra`.
+- Release SHA-1 and SHA-256 registered after checking the APK certificate against the pinned release fingerprint.
+- Google and email/password auth configuration deployed successfully with `firebase deploy --only auth`. Anonymous sign-in is not enabled; guest identity stays local until an explicit authenticated claim.
+- Authenticated CLI access was granted interactively. OAuth authorization codes and CLI credentials are never committed.
+- No billing account linked, no Firestore database created, and no learning data uploaded by this setup.
+- SDK config is public application configuration, not an admin credential. Android gateway/SDK wiring and complete visual verification remain pending; the app still uses the unavailable gateway.
+
+Remaining prerequisites before implementing/deploying the live Firebase gateway and ownership transaction:
+
+1. Select the database edition/location and deployment plan; do not create a paid resource or enable billing automatically. Firestore API was not yet enabled at initial inspection; the database-list request returned 403, not evidence of an existing database.
+2. Register Microsoft OAuth with the agreed supported account types and redirect URI. Keep any Microsoft client secret on the provider/backend side, never in source or the APK.
+3. Implement the server claim transaction, idempotent learning merge, account-partitioned local access, account linking and background sync. Test concurrent claims, retries, offline use, account switching, restore, deletion and rule denial before release.
 
 Required claim invariant: one immutable owner UID per full profile ID, across reinstalls and copied local data. Authenticate the UID, verify the P-256 signature and profile/public-key hash, and atomically create/verify the ownership record. A repeat claim from the same UID is idempotent; a different UID is rejected. No client may update or delete the ownership record to make an old serial claimable again.
 

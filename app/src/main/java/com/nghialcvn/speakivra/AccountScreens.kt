@@ -18,6 +18,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -63,11 +69,16 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         when (page) {
             "login", "register", "reset" -> {
-                Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(64.dp).align(Alignment.CenterHorizontally))
-                Text("Speakivra", fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+                    Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(48.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Speakivra", fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
+                }
+                if (page == "login") AccountDevices(Modifier.fillMaxWidth().height(115.dp))
                 Text(when (page) { "register" -> "Tạo tài khoản"; "reset" -> "Quên mật khẩu?"; else -> "Học tiếp trên mọi thiết bị" },
-                    fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
-                Text("Đăng nhập để đồng bộ hồ sơ, tiến độ và kim cương.", color = studio.muted, fontSize = 14.sp)
+                    fontSize = 23.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text("Đăng nhập để đồng bộ hồ sơ, tiến độ và kim cương.", color = studio.muted, fontSize = 14.sp,
+                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 AccountCredentialsForm(page, busy,
                     onProvider = { busy = true; message = null; gateway.signIn(it, "", "", ::loggedIn) },
                     onSubmit = { email, password, repeat ->
@@ -96,7 +107,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
             "verify" -> {
                 PageHeading("Xác minh email", "Xác minh trước khi liên kết hồ sơ", ::back)
                 Text("Mở email và làm theo hướng dẫn xác minh, sau đó quay lại Speakivra.")
-                CoralButton("Tôi đã xác minh", enabled = !busy) { busy = true; gateway.refreshSession(::loggedIn) }
+                CoralButton("Tôi đã xác minh", chevron = false, enabled = !busy) { busy = true; gateway.refreshSession(::loggedIn) }
                 OutlinedButton(onClick = { busy = true; gateway.verifyEmail { busy = false; message = it.fold(onSuccess = { "Đã gửi email xác minh." }, onFailure = { it.message }) } }, enabled = !busy) { Text("Gửi lại email xác minh") }
             }
             "link" -> {
@@ -108,7 +119,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                     Text("Hồ sơ này chỉ được liên kết một lần với một tài khoản Speakivra. Không thể chuyển sang tài khoản khác.", color = studio.muted)
                     Text("Mã hồ sơ chỉ để nhận diện, không phải mã đăng nhập hay mã khôi phục.", color = studio.muted, fontSize = 12.sp)
                 }
-                CoralButton("Liên kết và đồng bộ", enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
+                CoralButton("Liên kết và đồng bộ", chevron = false, enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
                 TextButton(onClick = onBack) { Text("Để sau") }
             }
             "account" -> {
@@ -188,11 +199,20 @@ private fun AccountCredentialsForm(page: String, busy: Boolean, onProvider: (Log
             }
             OutlinedButton(onClick = { onProvider(LoginProvider.MICROSOFT) }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    listOf(Color(0xFFF25022), Color(0xFF7FBA00)).forEach { color -> Box(Modifier.size(8.dp).background(color)) }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Box(Modifier.size(7.dp).background(Color(0xFFF25022)))
+                        Box(Modifier.size(7.dp).background(Color(0xFF00A4EF)))
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Box(Modifier.size(7.dp).background(Color(0xFF7FBA00)))
+                        Box(Modifier.size(7.dp).background(Color(0xFFFFB900)))
+                    }
                 }
                 Spacer(Modifier.width(10.dp)); Text("Tiếp tục với Microsoft")
             }
-            Text("hoặc", color = studio.muted, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                HorizontalDivider(Modifier.weight(1f)); Text("hoặc", color = studio.muted); HorizontalDivider(Modifier.weight(1f))
+            }
         }
         OutlinedTextField(email, { email = it }, label = { Text("Email") }, enabled = !busy, singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
@@ -203,7 +223,7 @@ private fun AccountCredentialsForm(page: String, busy: Boolean, onProvider: (Log
             singleLine = true, visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
         if (page == "login") TextButton(onClick = { onPage("reset") }, modifier = Modifier.align(Alignment.End)) { Text("Quên mật khẩu?") }
-        CoralButton(when (page) { "register" -> "Tạo tài khoản"; "reset" -> "Gửi hướng dẫn"; else -> "Đăng nhập" }, enabled = !busy) { onSubmit(email.trim(), password, repeat) }
+        CoralButton(when (page) { "register" -> "Tạo tài khoản"; "reset" -> "Gửi hướng dẫn"; else -> "Đăng nhập" }, chevron = false, enabled = !busy) { onSubmit(email.trim(), password, repeat) }
         if (page == "login") Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Chưa có tài khoản?", color = studio.muted, fontSize = 13.sp)
             TextButton(onClick = { onPage("register") }) { Text("Tạo tài khoản") }
@@ -222,6 +242,39 @@ internal fun GuestLinkSummary(learner: Learner, identity: GuestIdentity?) {
             }
         }
         identity?.let { Text(it.serial, color = studio.coral, fontSize = 11.sp) }
-        listOf("Bài học đã học", "Tiến độ từng câu", "Thành tích kim cương").forEach { Text("✓ $it") }
+        HorizontalDivider()
+        listOf("book" to "Bài học đã học", "progress" to "Tiến độ từng câu", "diamond" to "Thành tích kim cương").forEach { (icon, label) ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StudioIcon(icon, color = studio.coral); Text(label, Modifier.weight(1f)); StudioIcon("check", color = studio.green)
+            }
+        }
+    }
+}
+
+/** Native illustration keeps the approved three-device composition sharp in every appearance. */
+@Composable
+private fun AccountDevices(modifier: Modifier) {
+    val outline = studio.ink
+    val screen = studio.card
+    val accent = studio.coral
+    Canvas(modifier) {
+        val unit = size.height / 115f
+        val origin = Offset(size.width / 2f - 110f * unit, 0f)
+        fun point(x: Float, y: Float) = origin + Offset(x * unit, y * unit)
+        fun device(x: Float, y: Float, w: Float, h: Float) {
+            drawRoundRect(screen, point(x, y), Size(w * unit, h * unit), CornerRadius(7 * unit))
+            drawRoundRect(outline, point(x, y), Size(w * unit, h * unit), CornerRadius(7 * unit), style = Stroke(3 * unit))
+            val center = point(x + w / 2, y + h / 2)
+            drawCircle(accent.copy(alpha = .2f), 14 * unit, center)
+            val play = Path().apply { moveTo(center.x - 3 * unit, center.y - 6 * unit); lineTo(center.x + 6 * unit, center.y); lineTo(center.x - 3 * unit, center.y + 6 * unit); close() }
+            drawPath(play, accent)
+        }
+        device(55f, 13f, 112f, 77f)
+        drawLine(outline, point(43f, 93f), point(179f, 93f), 5 * unit)
+        device(14f, 40f, 43f, 65f)
+        device(164f, 48f, 52f, 54f)
+        listOf(24f to 8f, 38f to 4f, 184f to 12f, 199f to 18f).forEach { (x,y) ->
+            drawLine(accent, point(x, y), point(x + 3, y + 9), 2 * unit)
+        }
     }
 }

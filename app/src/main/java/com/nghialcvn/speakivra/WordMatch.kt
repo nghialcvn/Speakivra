@@ -122,7 +122,7 @@ internal fun matchWords(reference: String, finalTranscript: String?): WordMatch 
     }
     val nameIntroduction = expected.take(3).map { it.value } == listOf("my", "name", "is") ||
         spoken.take(3).map { it.value } == listOf("my", "name", "is")
-    if (nameIntroduction) {
+    if (nameIntroduction && introSize(expected) > 0 && introSize(spoken) > 0) {
         fun frame(parts: List<MatchAtom>): List<MatchAtom> {
             val size = introSize(parts)
             return if (size == 0) parts else listOf(MatchAtom("name-introduction",

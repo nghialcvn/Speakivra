@@ -210,7 +210,7 @@ ReadingSentence("passage_b1_services_s10", "Clear information and a specific fol
         listOf("A2", "B1").flatMap { level ->
             val lessons = if (level == "A2") Lessons.a2 else Lessons.b1
             val used = original.filter { it.level == level }.flatMap { it.questions.flatMap { q -> q.answers } }.toMutableSet()
-            lessons.take(15).mapIndexed { index, lesson ->
+            (if (level == "B1") lessons.drop(5) else lessons).take(15).mapIndexed { index, lesson ->
                 val count = if (index < 10) 5 else 4
                 val phrases = lesson.phrases.filter { it.english !in used }.distinctBy { it.english }.take(count)
                 check(phrases.size == count)

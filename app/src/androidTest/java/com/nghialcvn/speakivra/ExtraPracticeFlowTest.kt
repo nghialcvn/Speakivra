@@ -25,6 +25,7 @@ class ExtraPracticeFlowTest {
             val first = ExtraPracticeData.exercises.first { it.lessonId == "food" }
             context.getSharedPreferences("speakivra_progress", 0).edit().clear()
                 .putBoolean("neon_theme", true).putBoolean("automatic_mode", false)
+                .putInt("lesson.family.rounds", 1).putString("lesson.family.phase", "summary")
                 .putInt("lesson.routine.rounds", 1).putString("lesson.routine.phase", "summary")
                 .putInt("speed_calibration", 2).putInt("playback_speed", 100)
                 .putStringSet("extra.completed_ids", first.questions.take(3).map { it.id }.toSet()).commit()
@@ -64,6 +65,44 @@ class ExtraPracticeFlowTest {
         file.parentFile!!.mkdirs()
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
+    }
+    private fun assertWordColor(text: String, word: String, expected: androidx.compose.ui.graphics.Color) {
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        ui.onNodeWithText(text, useUnmergedTree = true).performSemanticsAction(
+            androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val value = layouts.single().layoutInput.text
+        val at = text.indexOf(word)
+        Assert.assertTrue(at >= 0)
+        Assert.assertTrue("Missing $expected on $word in $text", value.spanStyles.any {
+            it.start <= at && it.end >= at + word.length && it.item.color == expected
+        })
+    }
+    @Test fun clockAnswerShowsWordFeedbackAndUnlocksOnlyTheCorrectTime() = provider {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.openLessonHub()
+        ui.onNodeWithText("Tiếng Anh nói thế nào?").performScrollTo().performClick()
+        ui.onNodeWithText("Sinh hoạt hằng ngày", substring = false).performScrollTo().performClick()
+        answer("I wake up at 8:00")
+        ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
+        assertWordColor("I wake up at 8:00", "wake", NeonStudio.correctWord)
+        assertWordColor("I wake up at 8:00", "8:00", NeonStudio.incorrectWord)
+        ui.onNodeWithText("Nghe đáp án").performScrollTo().performClick()
+        assertWordColor("I wake up at seven.", "seven.", NeonStudio.incorrectWord)
+        assertWordColor("I wake up at seven.", "wake", NeonStudio.correctWord)
+        ui.onNodeWithText("I wake up at 8:00").performScrollTo()
+        shot("54-clock-wrong-word-feedback")
+        answer("I wake up at 7:00")
+        ui.onNodeWithText("Câu tiếp theo").assertIsEnabled()
+        assertWordColor("I wake up at 7:00", "7:00", NeonStudio.correctWord)
+        ui.onNodeWithText("I wake up at 7:00").performScrollTo()
+        shot("55-clock-correct-answer-unlocked")
+        ui.onNodeWithText("Câu tiếp theo").performClick()
+        ui.onNodeWithContentDescription("Nghe lại giọng vừa ghi").assertIsNotEnabled()
+        ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
+        val saved = instrumentation.targetContext.getSharedPreferences("speakivra_progress", 0)
+            .getStringSet("extra.completed_ids", emptySet()).orEmpty()
+        Assert.assertTrue("exercise_routine_q1" in saved)
+        Assert.assertFalse("exercise_routine_q2" in saved)
     }
     @Test fun paragraphUsesRealRecognitionAndClearsReplayAcrossSentenceWholeModeAndExit() = provider {
         ui.onNodeWithText("Bắt đầu học").performClick()

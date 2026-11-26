@@ -184,7 +184,7 @@ internal fun NeonConversationScreen(
                 else current.replyTranslation,
                 learner, true, onReply, neonTheme = neonTheme)
             if (capturePhase == "idle" && transcript.isNotBlank()) {
-                SpokenResult(learner, transcript, matchWords(current.reply, transcript).canContinue)
+                SpokenResult(learner, transcript, matchWords(current.reply, transcript).canContinue, current.reply)
             }
             if (showKeyboard) {
                 OutlinedTextField(

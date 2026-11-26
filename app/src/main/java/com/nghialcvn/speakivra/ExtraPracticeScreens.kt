@@ -159,7 +159,8 @@ internal fun PassagePracticeScreen(item: ReadingPassage, selected: Int, whole: B
             }
             ExtraMicrophone(phase, if (whole) "Chạm để đọc cả đoạn" else "Chạm để đọc câu đang chọn", onSpeak)
             SpokenResult(learner, if (phase == "idle") finalTranscript.orEmpty() else transcript,
-                if (phase == "idle" && result.hasResult) result.canContinue else null)
+                if (phase == "idle" && result.hasResult) result.canContinue else null,
+                reference = if (phase == "idle") { if (whole) item.english else sentence.english } else null)
             if (result.hasResult) Text("Khớp ${result.correct}/${result.tokens.size} từ · ${result.matchPercent}%", color = if (result.incorrect == 0) p.correctWord else p.incorrectWord, fontSize = 13.sp, lineHeight = 16.sp)
             if (status.isNotBlank() && (phase != "idle" || finalTranscript.isNullOrBlank())) Text(status, color = p.muted, fontSize = 12.sp, lineHeight = 15.sp)
         }
@@ -201,8 +202,11 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
                                 drawRoundRect(p.border, cornerRadius = CornerRadius(6.dp.toPx()),
                                     style = Stroke(1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
                             }).padding(horizontal = 7.dp, vertical = 4.dp), Alignment.Center) {
-                            Text(if (shown) { if (active && accepted) evaluation.reference else row.answer } else "?",
-                                color = if (active && accepted) p.correctWord else if (shown) p.ink else p.muted,
+                            val displayed = if (shown) { if (active && accepted) evaluation.reference else row.answer } else "?"
+                            val feedback = if (shown && active && phase == "idle" && !finalTranscript.isNullOrBlank())
+                                matchWords(displayed, finalTranscript) else null
+                            Text(if (shown) wordFeedback(displayed, feedback) else androidx.compose.ui.text.AnnotatedString("?"),
+                                color = if (shown) p.ink else p.muted,
                                 fontSize = 13.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         }
                         if (saved || (active && accepted)) StudioIcon("check", Modifier.size(18.dp), p.correctWord)
@@ -219,7 +223,8 @@ internal fun SpeakingExerciseScreen(item: SpeakingExercise, selected: Int, compl
             }
             ExtraMicrophone(phase, if (accepted) "Chạm để nói lại" else "Chạm để trả lời", onSpeak)
             SpokenResult(learner, if (phase == "idle") finalTranscript.orEmpty() else transcript,
-                if (phase == "idle" && !finalTranscript.isNullOrBlank()) accepted else null)
+                if (phase == "idle" && !finalTranscript.isNullOrBlank()) accepted else null,
+                reference = if (phase == "idle") evaluation.reference else null)
             if (!finalTranscript.isNullOrBlank() && phase == "idle") Row(
                 Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically) {

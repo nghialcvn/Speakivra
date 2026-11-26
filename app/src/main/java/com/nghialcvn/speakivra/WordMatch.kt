@@ -68,7 +68,7 @@ private fun canonical(tokens: List<String>): List<MatchAtom> {
     val parts = tokens.take(512).flatMapIndexed { owner, token ->
         val folded = Normalizer.normalize(token.lowercase(Locale.US), Normalizer.Form.NFD)
             .replace(Regex("\\p{M}"), "").replace('đ', 'd').replace('’', '\'').replace('‘', '\'')
-        Regex("[0-9]{1,3}(?:,[0-9]{3})+(?:\\.[0-9]+)?|[0-9]+(?:\\.[0-9]+)?|[\\p{L}]+(?:'[\\p{L}]+)*").findAll(folded).flatMap { match ->
+        Regex("[0-9]+:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+(?:\\.[0-9]+)?|[0-9]+(?:\\.[0-9]+)?|[\\p{L}]+(?:'[\\p{L}]+)*").findAll(folded).flatMap { match ->
             (contractions[match.value] ?: match.value).split(' ').map { MatchPart(it.replace("'", ""), owner) }
         }.toList()
     }
@@ -77,15 +77,30 @@ private fun canonical(tokens: List<String>): List<MatchAtom> {
     while (index < parts.size && atoms.size < 512) {
         val part = parts[index]
         val digits = part.value.replace(",", "")
-        if (digits.firstOrNull()?.isDigit() == true) {
-            atoms += MatchAtom("number:$digits", setOf(part.owner)); index++
+        if (':' in digits) {
+            val clock = digits.split(':')
+            val hour = clock[0].toIntOrNull()
+            val minute = clock[1].toIntOrNull()
+            if (hour != null && hour in 0..23 && minute != null && minute in 0..59 &&
+                clock[0].length <= 2 && clock[1].length == 2) {
+                // ASR may format "seven" as "7:00". Keep ownership of the
+                // complete clock token: "7:30" must never match just "seven".
+                atoms += MatchAtom("number:$hour", setOf(part.owner))
+                if (minute != 0) atoms += MatchAtom("number:$minute", setOf(part.owner))
+            } else atoms += MatchAtom("invalid-clock:$digits", setOf(part.owner))
+            index++
+        } else if (digits.firstOrNull()?.isDigit() == true) {
+            val end = if ((digits.toIntOrNull() ?: -1) in 0..23 && parts.getOrNull(index + 1)?.value == "oclock") index + 2 else index + 1
+            atoms += MatchAtom("number:$digits", parts.subList(index, end).map { it.owner }.toSet())
+            index = end
         } else {
             val number = cardinal(parts, index)
             if (number == null) {
                 atoms += MatchAtom(part.value, setOf(part.owner)); index++
             } else {
-                atoms += MatchAtom("number:${number.first}", parts.subList(index, number.second).map { it.owner }.toSet())
-                index = number.second
+                val end = if (number.first in 0..23 && parts.getOrNull(number.second)?.value == "oclock") number.second + 1 else number.second
+                atoms += MatchAtom("number:${number.first}", parts.subList(index, end).map { it.owner }.toSet())
+                index = end
             }
         }
     }

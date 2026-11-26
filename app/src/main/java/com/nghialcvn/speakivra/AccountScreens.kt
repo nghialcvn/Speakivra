@@ -161,7 +161,18 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                         Text("Giữ cả hồ sơ hiện có và hồ sơ đang liên kết. Mỗi hồ sơ có tiến độ riêng.", color = studio.muted, fontSize = 12.sp)
                     }
                 }
-                AccountPrimaryButton("Liên kết và đồng bộ", enabled = !busy && learner != null && identity != null && session?.verified == true) { confirm = true }
+                AccountPrimaryButton("Liên kết và đồng bộ", enabled = !busy && learner != null && identity != null && session?.verified == true) {
+                    val owner = session?.uid
+                    if (gateway is FirebaseAccountGateway && owner != null && runtime.needsRestore(owner)) {
+                        // Login is already complete. Load the account's existing profiles only before
+                        // the irreversible link, so its keep-both preview cannot race background sync.
+                        busy = true; message = null
+                        gateway.sync(org.json.JSONObject()) { result ->
+                            busy = false
+                            result.fold(onSuccess = { confirm = true }, onFailure = { message = it.message })
+                        }
+                    } else confirm = true
+                }
                 OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) { Text("Để sau", color = studio.ink) }
             }
             "account" -> {
@@ -232,7 +243,11 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
         if (!gateway.configured) Text("Chưa kết nối đám mây", color = studio.muted, fontSize = 11.sp)
     }
     if (confirm) AlertDialog(onDismissRequest = { confirm = false }, title = { Text("Xác nhận liên kết một lần") },
-        text = { Text("Hồ sơ ${learner?.name.orEmpty()} (${identity?.serial.orEmpty()}) sẽ thuộc tài khoản ${session?.email ?: session?.name.orEmpty()} và không thể chuyển sang tài khoản khác.") },
+        text = {
+            val existing = store.all().filter { item -> item.id != learner?.id && identityStore.peek(item)?.ownerUid == session?.uid && session != null }
+            Text("Hồ sơ ${learner?.name.orEmpty()} (${identity?.serial.orEmpty()}) sẽ thuộc tài khoản ${session?.email ?: session?.name.orEmpty()} và không thể chuyển sang tài khoản khác." +
+                if (existing.isEmpty()) "" else "\n\nGiữ cả hồ sơ đang liên kết và ${existing.size} hồ sơ đã có: ${existing.joinToString { it.name }}. Mỗi hồ sơ có tiến độ riêng.")
+        },
         confirmButton = { TextButton(onClick = {
             confirm = false
             val current = session; val guest = identity; val person = learner

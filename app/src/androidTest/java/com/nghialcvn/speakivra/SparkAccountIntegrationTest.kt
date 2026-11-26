@@ -103,6 +103,7 @@ class SparkAccountIntegrationTest {
         val guest=identities.ensure(original);val owner=runtime.uid!!;val proof=identities.proof(original,owner)
         shot("86-link-live-sdk")
         ui.onNodeWithText("Liên kết và đồng bộ").performScrollTo().performClick()
+        ui.waitUntil(10_000) { ui.onAllNodesWithText("Xác nhận liên kết", substring=false).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText("Xác nhận liên kết",substring=false).performClick()
         ui.waitUntil(25000) { ui.onAllNodesWithText("Đã đồng bộ",substring=false).fetchSemanticsNodes().isNotEmpty() }
         assertEquals(owner,identities.peek(original)!!.ownerUid)

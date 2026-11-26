@@ -3,6 +3,7 @@ package com.nghialcvn.speakivra
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -69,8 +70,10 @@ internal fun HotelTopicsScreen(role: String, load: (Lesson) -> LessonProgress,
             val value = load(lesson)
             StudioCard(Modifier.clickable { onOpen(lesson) }, contentPadding = 12.dp, spacing = 6.dp) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text((index + 1).toString().padStart(2, '0'), color = p.coral,
-                        fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                    Box(Modifier.size(33.dp).background(p.peach, CircleShape), contentAlignment = Alignment.Center) {
+                        Text((index + 1).toString().padStart(2, '0'), color = p.coral,
+                            fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+                    }
                     StudioIcon(topic.icon, Modifier.size(27.dp), p.coral)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(lesson.vietnamese, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
@@ -84,8 +87,8 @@ internal fun HotelTopicsScreen(role: String, load: (Lesson) -> LessonProgress,
                 }
                 val learned = value.learnedPhrases?.size ?: value.phrase
                 val spoken = value.learnedTurns.orEmpty().size
-                Text(if (learned > 0 || spoken > 0) "Đã học $learned/${lesson.phrases.size} câu • $spoken/${lesson.conversation.size} lượt hội thoại"
-                    else "${lesson.phrases.size} câu mẫu • ${lesson.conversation.size} lượt hội thoại", fontSize = 11.sp, color = p.muted)
+                if (learned > 0 || spoken > 0) Text("Đã học $learned/${lesson.phrases.size} câu • $spoken/${lesson.conversation.size} lượt hội thoại",
+                    fontSize = 11.sp, color = p.muted)
                 if (learned > 0 || value.rounds > 0) StudioProgress(learned.toFloat() / lesson.phrases.size)
             }
         }
@@ -108,28 +111,37 @@ internal fun HotelConversationScreen(lesson: Lesson, turnIndex: Int, translation
             Box(Modifier.weight(1f)) { StudioProgress((turnIndex + 1f) / lesson.conversation.size) }
             Text("Lượt ${turnIndex + 1}/${lesson.conversation.size}", fontSize = 11.sp, color = p.muted)
         }
-        Text("Bạn là nhân viên " + if (HotelCurriculum.role(lesson) == "FO") "lễ tân" else "buồng phòng",
-            color = p.coral, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Text("Bạn là nhân viên " + if (HotelCurriculum.role(lesson) == "FO") "lễ tân" else "buồng phòng",
+                color = p.coral, fontSize = 12.sp, textAlign = TextAlign.Center,
+                modifier = Modifier.border(1.dp, p.coral, RoundedCornerShape(18.dp)).padding(horizontal = 10.dp, vertical = 5.dp))
+        }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            StudioCard(color = p.mint) {
-                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    StudioIcon("profile", Modifier.size(26.dp), p.coral)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(turn.prompt, fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold)
-                        if (translation) Text(turn.translation, fontSize = 13.sp, color = p.muted)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                Box(Modifier.size(32.dp).background(p.peach, CircleShape)
+                    .border(1.dp, p.coral, CircleShape), contentAlignment = Alignment.Center) {
+                    StudioIcon("profile", Modifier.size(22.dp), p.coral)
+                }
+                StudioCard(Modifier.weight(1f), color = p.mint, contentPadding = 12.dp, spacing = 5.dp) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(turn.prompt, Modifier.weight(1f), fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold)
+                        IconButton(onClick = onPrompt, modifier = Modifier.size(35.dp)) { StudioIcon("speaker", color = p.coral) }
                     }
-                    IconButton(onClick = onPrompt, modifier = Modifier.size(35.dp)) { StudioIcon("speaker", color = p.coral) }
+                    if (translation) Text(turn.translation, fontSize = 13.sp, color = p.muted)
                 }
             }
-            StudioCard {
-                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(wordFeedback(turn.reply, words), fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold)
-                        if (translation) Text(turn.replyTranslation, fontSize = 13.sp, color = p.muted)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                StudioCard(Modifier.weight(1f), contentPadding = 12.dp, spacing = 5.dp) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(wordFeedback(turn.reply, words), Modifier.weight(1f), fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold)
+                        IconButton(onClick = onReply, modifier = Modifier.size(35.dp)) { StudioIcon("speaker", color = p.coral) }
                     }
-                    LearnerAvatar(learner.avatar, Modifier.size(30.dp))
+                    if (translation) Text(turn.replyTranslation, fontSize = 13.sp, color = p.muted)
+                    IpaLine(turn.reply, modifier = Modifier.fillMaxWidth())
                 }
-                IpaLine(turn.reply, modifier = Modifier.fillMaxWidth())
+                LearnerAvatar(learner.avatar, Modifier.size(32.dp))
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 OutlinedButton(onClick = onReply) { StudioIcon("speaker", Modifier.size(17.dp), p.coral); Spacer(Modifier.width(6.dp)); Text("Nghe mẫu") }
@@ -142,6 +154,6 @@ internal fun HotelConversationScreen(lesson: Lesson, turnIndex: Int, translation
             SpokenResult(learner, transcript, if (phase == "idle" && words.hasResult) allowed else null,
                 reference = if (phase == "idle") turn.reply else null)
         }
-        CoralButton(if (allowed) nextLabel else "Cần nói lại", enabled = allowed, onClick = onNext)
+        CoralButton(if (allowed) nextLabel else "Cần nói lại", enabled = allowed, chevron = false, onClick = onNext)
     }
 }

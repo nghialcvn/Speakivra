@@ -146,10 +146,12 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                     Text("Hồ sơ, tiến độ và kim cương", color = studio.muted)
                     OutlinedButton(onClick = {
                         val value = identity
-                        if (value == null || value.ownerUid != session?.uid || learner == null) message = "Hãy liên kết hồ sơ trước khi đồng bộ."
+                        if (session?.verified != true) message = "Hãy đăng nhập và xác minh tài khoản để đồng bộ."
                         else {
                             busy = true
-                            gateway.sync(profileSyncPayload(learner, value, store.preferences(learner).all)) { result ->
+                            val payload = if (value != null && value.ownerUid == session?.uid && learner != null)
+                                profileSyncPayload(learner, value, store.preferences(learner).all) else org.json.JSONObject()
+                            gateway.sync(payload) { result ->
                                 busy = false; synced = result.isSuccess
                                 result.exceptionOrNull()?.let { message = it.message }
                             }
@@ -195,6 +197,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
                             runCatching { identityStore.recordServerReceipt(person, receipt, current.uid) }.fold(
                                 onSuccess = {
                                     identity = it; synced = false; page = "account"; busy = true
+                                    runtime.markPending(person)
                                     val payload = profileSyncPayload(person, it, store.preferences(person).all)
                                     gateway.sync(payload) { syncResult ->
                                         busy = false; synced = syncResult.isSuccess

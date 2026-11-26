@@ -47,7 +47,12 @@ internal class AccountRuntime private constructor(private val context: Context, 
     private var noBackground = false
     var applyingCloud = false
         private set
-    init { auth.addAuthStateListener { changed(); if (it.currentUser?.isEmailVerified == true) schedule() } }
+    init { auth.addAuthStateListener {
+        changed()
+        it.currentUser?.takeIf { user -> user.isEmailVerified }?.let { user ->
+            syncPrefs.edit().putBoolean("restore.${user.uid}", true).apply(); schedule()
+        }
+    } }
     fun changed() { mutableRevision.value += 1 }
     fun lastSync(learner: Learner?) = learner?.let { syncPrefs.getLong("synced.${it.id}", 0) } ?: 0
     fun isSynced(learner: Learner?) = learner != null && lastSync(learner) > 0 && !syncPrefs.getBoolean("pending.${learner.id}", false)
@@ -111,7 +116,17 @@ internal class AccountRuntime private constructor(private val context: Context, 
             }
         }
         for (person in learnerStore.all().filter { identities.peek(it)?.ownerUid == expectedUid }) syncOne(person, expectedUid)
+        requireUser(expectedUid)
+        syncPrefs.edit().putBoolean("restore.$expectedUid", false).apply(); changed()
+    }
+    fun needsRestore(owner: String) = syncPrefs.getBoolean("restore.$owner", false)
+    suspend fun syncPending(expectedUid: String): Unit = mutex.withLock {
+        requireUser(expectedUid)
+        for (person in learnerStore.all().filter { identities.peek(it)?.ownerUid == expectedUid && syncPrefs.getBoolean("pending.${it.id}", false) }) syncOne(person, expectedUid)
         requireUser(expectedUid); changed()
+    }
+    fun markPending(person: Learner) {
+        syncPrefs.edit().putBoolean("pending.${person.id}", true).apply(); schedule()
     }
     private fun validateSnapshot(doc: DocumentSnapshot): Pair<String, Int> {
         check(doc.getLong("schema") == 1L && doc.getString("profileId") == doc.id && Regex("[a-f0-9]{64}").matches(doc.id))
@@ -147,7 +162,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
         val current = learnerStore.all().first { it.id == person.id }
         val newerMeta = current.name != person.name || current.avatar != person.avatar
         val now = profileSyncPayload(current, identity, learnerStore.preferences(current).all).getJSONObject("progress")
-        val combinedNow = sanitizedCloudProgress(identity.profileId, mergeCloudProgress(merged.third, now))
+        val combinedNow = sanitizedCloudProgress(identity.profileId, mergeCloudProgress(now, merged.third))
         applyImported(identity.profileId, owner, if (newerMeta) current.name else merged.first,
             if (newerMeta) current.avatar else merged.second, combinedNow)
         syncPrefs.edit().putLong("synced.${person.id}", System.currentTimeMillis())
@@ -171,7 +186,10 @@ class AccountSyncWorker(context: Context, parameters: WorkerParameters): Corouti
         val runtime = AccountRuntime.get(applicationContext)
         val expected = inputData.getString("uid") ?: return Result.success()
         if (runtime.uid != expected || runtime.auth.currentUser?.isEmailVerified != true) return Result.success()
-        return try { runtime.syncAll(expected); Result.success() }
+        return try {
+            if (runtime.needsRestore(expected)) runtime.syncAll(expected) else runtime.syncPending(expected)
+            Result.success()
+        }
         catch (_: Exception) { if (runAttemptCount < 5) Result.retry() else Result.failure() }
     }
 }

@@ -93,9 +93,11 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
     override fun verifyEmail(result: (Result<Unit>) -> Unit) = run(result) { requireNotNull(auth.currentUser).sendEmailVerification().cloudAwait(); Unit }
     override fun sync(payload: JSONObject, result: (Result<Unit>) -> Unit) = run(result) {
         val owner = requireNotNull(session); check(owner.verified)
-        val id = payload.getString("profileId")
-        val person = LearnerStore(activity).findCloud(id) ?: error("Không tìm thấy hồ sơ đã liên kết.")
-        check(GuestIdentityStore(activity).peek(person)?.ownerUid == owner.uid)
+        val id = payload.optString("profileId")
+        if (id.isNotEmpty()) {
+            val person = LearnerStore(activity).findCloud(id) ?: error("Không tìm thấy hồ sơ đã liên kết.")
+            check(GuestIdentityStore(activity).peek(person)?.ownerUid == owner.uid)
+        }
         runtime.syncAll(owner.uid)
     }
     override fun claim(identity: GuestIdentity, signature: ByteArray, result: (Result<GuestClaimReceipt>) -> Unit) = run(result) { runtime.claim(identity, signature) }

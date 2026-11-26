@@ -80,12 +80,17 @@ class SparkAccountIntegrationTest {
         ui.onNodeWithText("Xác nhận liên kết",substring=false).performClick()
         ui.waitUntil(25000) { ui.onAllNodesWithText("Đã đồng bộ",substring=false).fetchSemanticsNodes().isNotEmpty() }
         assertEquals(owner,identities.peek(original)!!.ownerUid)
+        val listener = runtime.watch(original)
         val achievement="achievement.greetings.${Lessons.a1.first().phrases.first().id}"
         store.preferences(original).edit().putInt(achievement,95).putString("active_lesson",Lessons.a1[2].id).commit()
         runBlocking { runtime.syncAll(owner);runtime.db.disableNetwork().cloudAwait() }
+        assertTrue(runtime.isSynced(original))
         store.preferences(original).edit().putInt("lesson.greetings.rounds",2).commit()
         assertEquals(2,store.preferences(original).getInt("lesson.greetings.rounds",0))
-        runBlocking { runtime.db.enableNetwork().cloudAwait();runtime.syncAll(owner) }
+        ui.waitUntil(10000) { !runtime.isSynced(original) }
+        runBlocking { runtime.db.enableNetwork().cloudAwait();runtime.syncPending(owner) }
+        assertTrue(runtime.isSynced(original))
+        store.preferences(original).unregisterOnSharedPreferenceChangeListener(listener)
         val other="other-${UUID.randomUUID()}@example.test"
         runBlocking { runtime.auth.createUserWithEmailAndPassword(other,password).cloudAwait() };verifyEmail(other)
         val otherUid=runtime.uid!!
@@ -96,7 +101,10 @@ class SparkAccountIntegrationTest {
         ui.activity.getSharedPreferences("speakivra_learners",0).edit().putString("profiles","[]").commit()
         ui.activity.getSharedPreferences("speakivra_guest_identity",0).edit().clear().commit()
         ui.activity.getSharedPreferences("speakivra_progress",0).edit().clear().commit()
-        runBlocking { runtime.auth.signInWithEmailAndPassword(email,password).cloudAwait();runtime.syncAll(owner) }
+        runBlocking { runtime.auth.signInWithEmailAndPassword(email,password).cloudAwait() };runtime.changed()
+        ui.waitUntil(20000) { ui.onAllNodesWithText("Đồng bộ ngay").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("Đồng bộ ngay").performScrollTo().performClick()
+        ui.waitUntil(25000) { store.visible(owner).isNotEmpty() }
         val restored=store.visible(owner).single();assertNotEquals(original.id,restored.id)
         assertEquals("Nghĩa",restored.name);assertEquals(guest.profileId,identities.peek(restored)!!.profileId)
         assertEquals(owner,identities.peek(restored)!!.ownerUid)

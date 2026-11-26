@@ -121,6 +121,8 @@ jobs:
             firebase-emulators.log
             ui-recognition-provider.txt
             real-speech-provider-probe.txt
+            app/build/reports/tests/**
+            app/build/test-results/**
             app/build/reports/androidTests/**
             app/build/outputs/androidTest-results/**
           if-no-files-found: warn

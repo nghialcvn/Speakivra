@@ -58,7 +58,7 @@ internal class LearnerStore(private val context: Context) {
         check(registry.edit().putString("profiles", encodeLearners(if (existing == null) list + person else list.map { if (it.id == person.id) person else it })).commit())
         val edit = preferences(person).edit()
         val localProgress = if (existing == null) JSONObject() else profileSyncPayload(existing, requireNotNull(GuestIdentityStore(context).peek(existing)), preferences(existing).all).getJSONObject("progress")
-        val combined = sanitizedCloudProgress(profileId, mergeCloudProgress(progress, localProgress))
+        val combined = sanitizedCloudProgress(profileId, mergeCloudProgress(localProgress, progress))
         cloudProgressValues(combined).forEach { (key,value) -> when(value) {
             is Int -> edit.putInt(key,value)
             is String -> edit.putString(key,value)

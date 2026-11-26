@@ -40,8 +40,12 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
         val state = restoreLessonProgress(lesson,
             { key, default -> (values[key] as? Int) ?: default },
             { key, default -> (values[key] as? String) ?: default })
-        if (state.learnedPhrases.orEmpty().isNotEmpty()) progress.put("lesson.${lesson.id}.learned_phrases", state.learnedPhrases.orEmpty().sorted().joinToString("|"))
-        if (state.learnedTurns.orEmpty().isNotEmpty()) progress.put("lesson.${lesson.id}.learned_turns", state.learnedTurns.orEmpty().sorted().joinToString("|"))
+        val knownPhrases = lesson.phrases.map { it.id }.toSet()
+        val knownTurns = lesson.conversation.map { it.id }.toSet()
+        val phrases = state.learnedPhrases.orEmpty().filter { it in knownPhrases }
+        val turns = state.learnedTurns.orEmpty().filter { it in knownTurns }
+        if (phrases.isNotEmpty()) progress.put("lesson.${lesson.id}.learned_phrases", phrases.sorted().joinToString("|"))
+        if (turns.isNotEmpty()) progress.put("lesson.${lesson.id}.learned_turns", turns.sorted().joinToString("|"))
     }
     return JSONObject().put("schema", 1).put("profileId", identity.profileId)
         .put("name", learner.name).put("avatar", learner.avatar).put("progress", progress)

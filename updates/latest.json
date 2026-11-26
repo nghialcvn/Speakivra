@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.1.8-beta",
+    "tag_name": "v1.1.9-beta",
     "draft": false,
-    "body": "# Speakivra V1.1.8 Beta\n\n- Đăng nhập bằng Google hoặc email; hỗ trợ tạo tài khoản, xác minh email và đặt lại mật khẩu.\n- Hồ sơ khách có mã riêng và chỉ liên kết một lần với một tài khoản.\n- Đồng bộ hồ sơ, tiến độ và kim cương để học tiếp trên thiết bị khác.\n- Học khi mất mạng, đồng bộ lại khi có kết nối.\n- Giữ nguyên bố cục đã duyệt và dữ liệu học hiện có.\n- Đăng nhập Microsoft tạm thời chưa khả dụng, sẽ xử lý trong bản sau.\n- Bản ghi giọng nói chỉ lưu tạm trên thiết bị, không đồng bộ lên đám mây.\n",
+    "body": "# Speakivra V1.1.9 Beta\n\n- Sửa luồng đăng nhập từ nút Tiếp tục với Google.\n- Không chờ tải dữ liệu đám mây để kết thúc đăng nhập; đồng bộ thực hiện riêng và hiển thị theo trạng thái thực tế.\n- Giới hạn thời gian chờ, báo rõ khi kết nối quá lâu để có thể thử lại.\n- Rút gọn mã hồ sơ hiển thị, ví dụ SPK-0660-23D9-B14C, trên một hàng.\n- Giữ nguyên mã định danh gốc, liên kết tài khoản, tiến độ và kim cương.\n- Microsoft tiếp tục được tạm bỏ.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.1.8-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.8-beta/Speakivra-v1.1.8-release.apk",
-        "size": 20601595,
-        "digest": "sha256:716388cc4738133f23b1214902a69c2d41794895c835cbb20505c7901ea5cfc9"
+        "name": "Speakivra-v1.1.9-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.1.9-beta/Speakivra-v1.1.9-release.apk",
+        "size": 20601591,
+        "digest": "sha256:3caa6837161e4c789c4424d0263e2864b12f168f3570eec8f0bfb1ceba68aac0"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 38,
-    "versionName": "1.1.8",
-    "apkName": "Speakivra-v1.1.8-release.apk",
-    "apkSha256": "716388cc4738133f23b1214902a69c2d41794895c835cbb20505c7901ea5cfc9",
+    "versionCode": 39,
+    "versionName": "1.1.9",
+    "apkName": "Speakivra-v1.1.9-release.apk",
+    "apkSha256": "3caa6837161e4c789c4424d0263e2864b12f168f3570eec8f0bfb1ceba68aac0",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

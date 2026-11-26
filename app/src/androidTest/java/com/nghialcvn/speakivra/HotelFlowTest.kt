@@ -50,7 +50,9 @@ class HotelFlowTest {
     }
     private fun answer(text: String) {
         fixture("answer", text)
-        ui.onNodeWithContentDescription("Nói và nhận dạng").performScrollTo().performClick()
+        val microphone = ui.onNodeWithContentDescription("Nói và nhận dạng")
+        if (!microphone.isDisplayed()) microphone.performScrollTo()
+        microphone.performClick()
         ui.waitUntil(15000) { ui.onAllNodesWithText(text, substring = false).fetchSemanticsNodes().isNotEmpty() &&
             ui.onAllNodesWithContentDescription("Nói và nhận dạng").fetchSemanticsNodes().isNotEmpty() }
         ui.waitForIdle()

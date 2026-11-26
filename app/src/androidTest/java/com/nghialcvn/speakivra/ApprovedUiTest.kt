@@ -402,13 +402,13 @@ class ApprovedUiTest {
                 }
             }
         }
-        ui.onNodeWithText("Khớp 2/2 từ · 100%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Khớp 4/4 từ · 100%").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Câu tiếp theo").assertIsEnabled().performClick()
         org.junit.Assert.assertEquals(1, nextCalls)
         ui.onNodeWithText("I’m Nghĩa.").performScrollTo().assertIsDisplayed()
         shot("11-speaking-pass")
         ui.runOnIdle { result.value = "hello there" }
-        ui.onNodeWithText("Khớp 0/2 từ · 0%").performScrollTo().assertIsDisplayed()
+        ui.onNodeWithText("Khớp 0/4 từ · 0%").performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Cần nói lại").assertIsNotEnabled()
         ui.onNodeWithText("Máy nhận dạng được:").assertDoesNotExist()
         ui.onNodeWithText("hello there").performScrollTo().assertIsDisplayed()

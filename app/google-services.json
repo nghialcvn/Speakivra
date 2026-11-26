@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "941786313291",
+    "project_id": "speakivra-nghialcvn",
+    "storage_bucket": "speakivra-nghialcvn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941786313291:android:58accdfe5fc0ae870b13ce",
+        "android_client_info": {
+          "package_name": "com.nghialcvn.speakivra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "941786313291-o7b960d3ol7papkc50n2lmec7a2d4q0a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nghialcvn.speakivra",
+            "certificate_hash": "45facd17e93510a0bab63563959458978c7aa3e6"
+          }
+        },
+        {
+          "client_id": "941786313291-o7ich39rh6tonvo6ijgn670bbch9kul3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZF6MZNNT8wiVBy-fTLMVkUzhONgyhb3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "941786313291-o7ich39rh6tonvo6ijgn670bbch9kul3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

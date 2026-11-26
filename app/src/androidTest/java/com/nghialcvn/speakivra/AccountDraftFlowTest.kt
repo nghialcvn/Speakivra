@@ -37,6 +37,8 @@ class AccountDraftFlowTest {
         ui.waitForIdle()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         dismissUnrelatedLauncherAnr(instrumentation)
+        instrumentation.uiAutomation.waitForIdle(500, 5000)
+        Thread.sleep(150) // Let the compositor present the settled frame before system capture.
         val file = File(instrumentation.targetContext.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs()
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())

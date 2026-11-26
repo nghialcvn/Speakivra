@@ -61,13 +61,26 @@ class SparkAccountIntegrationTest {
         requireNotNull(runtime.auth.currentUser).getIdToken(true).cloudAwait()
         assertTrue(runtime.auth.currentUser!!.isEmailVerified)
     }
+    private fun shot(name: String) {
+        ui.waitForIdle()
+        val instrumentation=InstrumentationRegistry.getInstrumentation()
+        dismissUnrelatedLauncherAnr(instrumentation)
+        instrumentation.uiAutomation.waitForIdle(500,5000)
+        Thread.sleep(150)
+        val file=File(ui.activity.getExternalFilesDir(null),"ui-screenshots/$name.png");file.parentFile!!.mkdirs()
+        val bitmap=requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) };bitmap.recycle()
+    }
     @Test fun registrationVerificationOneTimeClaimOfflineSyncAccountIsolationAndAnotherDeviceRestore() {
         val email="speakivra-${UUID.randomUUID()}@example.test";val password="Emulator-only-long-password-123"
         ui.onNodeWithText("Tài khoản & đồng bộ",substring=false).performClick()
+        ui.onNodeWithText("Tiếp tục với Google").assertExists()
+        shot("84-login-live-sdk")
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
         ui.onNodeWithText("Email",substring=false).performTextInput(email)
         ui.onNodeWithText("Mật khẩu",substring=false).performTextInput(password)
         ui.onNodeWithText("Nhập lại mật khẩu",substring=false).performTextInput(password)
+        shot("85-register-live-sdk")
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
         ui.waitUntil(20000) { ui.onAllNodesWithText("Tôi đã xác minh").fetchSemanticsNodes().isNotEmpty() }
         assertFalse(runtime.auth.currentUser!!.isEmailVerified)
@@ -76,6 +89,7 @@ class SparkAccountIntegrationTest {
         ui.waitUntil(20000) { ui.onAllNodesWithText("Liên kết và đồng bộ").fetchSemanticsNodes().isNotEmpty() }
         val store=LearnerStore(ui.activity);val original=store.all().single();val identities=GuestIdentityStore(ui.activity)
         val guest=identities.ensure(original);val owner=runtime.uid!!;val proof=identities.proof(original,owner)
+        shot("86-link-live-sdk")
         ui.onNodeWithText("Liên kết và đồng bộ").performScrollTo().performClick()
         ui.onNodeWithText("Xác nhận liên kết",substring=false).performClick()
         ui.waitUntil(25000) { ui.onAllNodesWithText("Đã đồng bộ",substring=false).fetchSemanticsNodes().isNotEmpty() }
@@ -106,14 +120,14 @@ class SparkAccountIntegrationTest {
         ui.onNodeWithText("Đồng bộ ngay").performScrollTo().performClick()
         ui.waitUntil(25000) { store.visible(owner).isNotEmpty() }
         val restored=store.visible(owner).single();assertNotEquals(original.id,restored.id)
+        ui.waitUntil(25000) { runtime.isSynced(restored) }
+        ui.onNodeWithText("Đã đồng bộ",substring=false).assertExists()
+        ui.onNodeWithText("Nghĩa",substring=false).assertExists()
         assertEquals("Nghĩa",restored.name);assertEquals(guest.profileId,identities.peek(restored)!!.profileId)
         assertEquals(owner,identities.peek(restored)!!.ownerUid)
         assertEquals(95,store.preferences(restored).getInt(achievement,0))
         assertEquals(2,store.preferences(restored).getInt("lesson.greetings.rounds",0))
         assertEquals(Lessons.a1[2].id,store.preferences(restored).getString("active_lesson",null))
-        ui.waitForIdle()
-        val instrumentation=InstrumentationRegistry.getInstrumentation();dismissUnrelatedLauncherAnr(instrumentation)
-        val file=File(ui.activity.getExternalFilesDir(null),"ui-screenshots/83-spark-cloud-restored.png");file.parentFile!!.mkdirs()
-        val bitmap=requireNotNull(instrumentation.uiAutomation.takeScreenshot());file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) };bitmap.recycle()
+        shot("83-spark-cloud-restored")
     }
 }

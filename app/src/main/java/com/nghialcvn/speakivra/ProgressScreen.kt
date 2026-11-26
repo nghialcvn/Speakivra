@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.sp
 internal fun ProgressScreen(
     lessons: List<Lesson>,
     load: (Lesson) -> LessonProgress,
-    onOpen: (Lesson) -> Unit
+    onOpen: (Lesson) -> Unit,
+    achievements: (Lesson) -> Int = { 0 }
 ) {
     val p = studio
     val finished = lessons.count { load(it).phase == "summary" }
@@ -29,11 +30,15 @@ internal fun ProgressScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Tiến độ học tập", "Được lưu riêng trên thiết bị của bạn")
         StudioCard(color = p.lavender, border = false) {
-            Text("$finished/${lessons.size} chủ đề đã hoàn thành", fontSize = 22.sp,
+            SingleLineInfo("$finished/${lessons.size} chủ đề đã hoàn thành", fontSize = 22.sp,
                 fontWeight = FontWeight.ExtraBold)
             StudioProgress(finished.toFloat() / lessons.size.coerceAtLeast(1))
-            Text("$touched chủ đề đã bắt đầu • $totalRounds lượt bài hoàn thành",
+            SingleLineInfo("$touched chủ đề đã bắt đầu • $totalRounds lượt bài hoàn thành",
                 color = p.muted, fontSize = 13.sp)
+            HorizontalDivider(color = p.muted.copy(alpha = .4f))
+            AchievementSummary(lessons.sumOf(achievements))
+            Text("Tổng thành tích cả khóa", color = p.muted, fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.CenterHorizontally))
         }
         Text("A1 • Căn bản", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
         lessons.filter { Lessons.levelOf(it) == "A1" }.forEach { lesson ->

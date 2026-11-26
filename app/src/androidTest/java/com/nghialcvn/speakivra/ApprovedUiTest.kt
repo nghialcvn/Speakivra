@@ -29,12 +29,12 @@ class ApprovedUiTest {
                     .putString("profiles", encodeLearners(listOf(Learner(ORIGINAL_LEARNER, "Nghĩa", 0)))).commit()
                 context.getSharedPreferences("speakivra_progress", 0).edit()
                     .putString("active_lesson", "greetings").putBoolean("dark_theme", false)
-                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub", "approvedHeartRewardsAndResume"))
+                    .putBoolean("neon_theme", description.methodName in setOf("neonHomeAndPracticeUseApprovedReplayRow", "homeLessonEntryAndSecondTabOpenSameDedicatedHub", "approvedDiamondRewardsAndResume"))
                     .putInt("daily_goal", 20).putInt("playback_speed", 100).putInt("speed_calibration", 2)
                     .putString("lesson.greetings.phase", "repeat").putInt("lesson.greetings.phrase", 2)
                     .putInt("lesson.greetings.turn", 0).putInt("lesson.greetings.review", 0)
                     .putInt("lesson.greetings.correct", 0).putInt("lesson.greetings.rounds", 0).commit()
-                if (description.methodName == "approvedHeartRewardsAndResume") {
+                if (description.methodName == "approvedDiamondRewardsAndResume") {
                     val prefs = context.getSharedPreferences("speakivra_progress", 0)
                     prefs.edit().apply { prefs.all.keys.filter { it.startsWith("achievement.") }.forEach { remove(it) } }.commit()
                     val rewards = TopicAchievements(prefs)
@@ -45,12 +45,20 @@ class ApprovedUiTest {
                         }
                     }
                 }
+                if (description.methodName == "approvedDiamondRewardsAndResume") {
+                    val rewards = TopicAchievements(context.getSharedPreferences("speakivra_progress", 0))
+                    val lesson = Lessons.b1.first()
+                    lesson.phrases.forEach { phrase ->
+                        rewards.record(lesson, phrase.id, WordMatch((1..100).map { "word$it" },
+                            (1..100).map { it <= 95 }, true))
+                    }
+                }
                 base.evaluate()
             }
         }
     }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
-    @Test fun approvedHeartRewardsAndResume() {
+    @Test fun approvedDiamondRewardsAndResume() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val prefs = context.getSharedPreferences("speakivra_progress", 0)
         val rewards = TopicAchievements(prefs)
@@ -61,23 +69,35 @@ class ApprovedUiTest {
                 rewards.record(lesson, phrase.id, WordMatch(tokens, (1..100).map { it <= listOf(95,75,60)[index] }, true))
             }
         }
-        ui.onNodeWithText("Thành tích đã đạt: 6 ❤️").assertIsDisplayed()
-        shot("50-profile-heart-achievements")
+        val courseTotal = "Thành tích đã đạt: 9"
+        ui.onNodeWithText(courseTotal).assertIsDisplayed()
+        shot("50-profile-diamond-achievements")
+        assertSingleLine(courseTotal)
+        val achievementBounds = ui.onNodeWithText(courseTotal, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val continueBounds = ui.onNodeWithText("Tiếp tục bài học ›", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        org.junit.Assert.assertTrue(achievementBounds.bottom < continueBounds.top)
         ui.onNodeWithText("Tiếp tục bài học ›").performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
+        ui.onNodeWithText("Tiến độ", substring = false).performClick()
+        ui.onNodeWithText(courseTotal).assertIsDisplayed()
+        ui.onNodeWithText("Tổng thành tích cả khóa").assertIsDisplayed()
+        assertSingleLine(courseTotal)
+        assertSingleLine("0/45 chủ đề đã hoàn thành")
+        assertSingleLine("1 chủ đề đã bắt đầu • 0 lượt bài hoàn thành")
+        shot("53-progress-course-diamonds")
         ui.openLessonHub()
         ui.onNodeWithText("A1 • Cơ bản").performClick()
-        ui.onNodeWithText("Thành tích đã đạt: 6 ❤️").assertIsDisplayed()
-        ui.onNodeWithContentDescription("Chào hỏi: 3 trên 3 tim").assertIsDisplayed()
-        ui.onNodeWithContentDescription("Gia đình: 2 trên 3 tim").assertIsDisplayed()
-        ui.onNodeWithContentDescription("Sinh hoạt hằng ngày: 1 trên 3 tim").assertIsDisplayed()
-        shot("51-topic-heart-achievements")
+        ui.onNodeWithText("Thành tích đã đạt: 6").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Chào hỏi: 3 trên 3 kim cương").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Gia đình: 2 trên 3 kim cương").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Sinh hoạt hằng ngày: 1 trên 3 kim cương").assertIsDisplayed()
+        shot("51-topic-diamond-achievements")
         ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.onNodeWithText("Hội thoại mẫu").performClick()
         shot("52-conversation-clear-logo")
         ui.onNodeWithText("🇺🇸 English (US)").assertIsDisplayed()
-        // A retry with a worse result must not erase earned hearts.
+        // A retry with a worse result must not erase earned diamonds.
         val lesson = Lessons.a1.first()
         rewards.record(lesson, lesson.phrases.first().id, matchWords(lesson.phrases.first().english, "unrelated"))
         org.junit.Assert.assertEquals(3, rewards.hearts(lesson))
@@ -89,6 +109,16 @@ class ApprovedUiTest {
         org.junit.Assert.assertEquals("US", VoiceChoices.read(prefs).accent)
         org.junit.Assert.assertEquals("old-british-voice", prefs.getString("speech_voice_GB_female", null))
         org.junit.Assert.assertEquals(3, rewards.hearts(lesson))
+    }
+    private fun assertSingleLine(text: String) {
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        ui.onNodeWithText(text, useUnmergedTree = true).performSemanticsAction(
+            androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        org.junit.Assert.assertTrue(layouts.isNotEmpty())
+        layouts.forEach {
+            org.junit.Assert.assertEquals(1, it.lineCount)
+            org.junit.Assert.assertFalse("$text: actual=${it.layoutInput.text}, size=${it.size}, paragraph=${it.multiParagraph.width}x${it.multiParagraph.height}, widthOverflow=${it.didOverflowWidth}, heightOverflow=${it.didOverflowHeight}", it.hasVisualOverflow)
+        }
     }
     private fun shot(name: String) {
         ui.waitForIdle()

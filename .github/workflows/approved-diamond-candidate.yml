@@ -1,0 +1,160 @@
+name: Verify approved diamond demo candidate
+on:
+  push:
+    branches: [feat/approved-diamond-demo]
+  workflow_dispatch:
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      VARIANT: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release secrets
+        if: true
+        env:
+          KEYSTORE: ${{ secrets.SPEAKIVRA_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+          CERTIFICATE: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          for value in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD CERTIFICATE; do
+            if [ -z "${!value}" ]; then
+              echo "::error::Missing signing secret: $value. Configure the fixed key before publishing."
+              exit 1
+            fi
+          done
+          umask 077
+          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/speakivra-release.jks"
+          echo "SPEAKIVRA_KEYSTORE_PATH=$RUNNER_TEMP/speakivra-release.jks" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check fixed signing certificate before building
+        if: true
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          keytool -exportcert -keystore "$SPEAKIVRA_KEYSTORE_PATH" -alias "$SPEAKIVRA_KEY_ALIAS" -storepass:env SPEAKIVRA_STORE_PASSWORD -file "$RUNNER_TEMP/speakivra-cert.der"
+          python3 - <<'PY'
+          import hashlib, os, pathlib, re
+          expected = os.environ['SPEAKIVRA_SIGNING_SHA256'].lower().replace(':', '')
+          actual = hashlib.sha256((pathlib.Path(os.environ['RUNNER_TEMP']) / 'speakivra-cert.der').read_bytes()).hexdigest()
+          if not re.fullmatch(r'[0-9a-f]{64}', expected) or actual != expected:
+              raise SystemExit('Signing certificate mismatch. Keep the original release key; do not generate a replacement.')
+          print('Fixed signing certificate verified.')
+          PY
+      - name: Prepare Android SDK
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          fi
+          test -n "$SDKMANAGER" && test -x "$SDKMANAGER"
+          "$SDKMANAGER" --install "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Test, lint and build once
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+          UI_CHECK: true
+        run: |
+          UI_TASKS=()
+          if [ "$UI_CHECK" = true ]; then UI_TASKS=(:app:assembleReleaseAndroidTest); fi
+          # Maven Central can intermittently return HTTP 429 on fresh runners.
+          # Retry only that transient infrastructure error, not compilation or tests.
+          for attempt in 1 2 3; do
+            if gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}" "${UI_TASKS[@]}" > build-attempt.log 2>&1; then
+              cat build-attempt.log
+              break
+            fi
+            cat build-attempt.log
+            if ! grep -Eq 'status code 429|Too Many Requests' build-attempt.log || [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 12))
+          done
+      - name: Verify APK and create update metadata
+        env:
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          mkdir -p dist
+          VERSION=$(python3 -c 'import json,os; print(json.load(open("app/build/outputs/apk/"+os.environ["VARIANT"]+"/output-metadata.json"))["elements"][0]["versionName"])')
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          cp "app/build/outputs/apk/$VARIANT/app-$VARIANT.apk" "dist/Speakivra-v$VERSION-$VARIANT.apk"
+          RELEASE_FLAG=()
+          if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
+          python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
+      - name: Prepare real microphone probe dependencies
+        if: true
+        run: |
+          python3 -m pip install grpcio==1.76.0
+      - name: Enable emulator acceleration for UI review
+        if: true
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Review approved screens on Android emulator
+        if: true
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7_pro
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -camera-back none -grpc 8554
+          disable-animations: true
+          script: |
+            adb shell wm size 1080x2340
+            adb shell wm density 420
+            adb install -r dist/*.apk
+            adb shell pm grant com.nghialcvn.speakivra android.permission.POST_NOTIFICATIONS
+            adb install -r -t app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
+            adb shell am instrument -w -e class com.nghialcvn.speakivra.ApprovedUiTest#approvedDiamondRewardsAndResume com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
+            mkdir -p ui-review
+            adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
+            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 1 and "FAILURES!!!" not in s, s'
+      - name: Upload UI review screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Speakivra-ui-review
+          path: |
+            ui-review/**
+            ui-test-output.txt
+            ui-recognition-provider.txt
+            real-speech-provider-probe.txt
+            app/build/reports/androidTests/**
+            app/build/outputs/androidTest-results/**
+          if-no-files-found: warn
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: Speakivra-${{ env.VARIANT }}-verification
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Remove temporary release key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/speakivra-release.jks" "$RUNNER_TEMP/speakivra-cert.der"

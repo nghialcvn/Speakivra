@@ -13,11 +13,12 @@ import java.util.UUID
 
 /** Migrate identities without changing learner IDs or any progress preference file. */
 internal class GuestIdentityStore(context: Context) {
+    private companion object { val identityLock = Any() }
     private val registry = context.getSharedPreferences("speakivra_guest_identity", 0)
     private fun keyStore() = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-    @Synchronized fun ensure(learner: Learner): GuestIdentity {
+    fun ensure(learner: Learner): GuestIdentity = synchronized(identityLock) {
         learnerPreferenceName(learner.id)
-        registry.getString(learner.id, null)?.let { return decode(it) }
+        registry.getString(learner.id, null)?.let { return@synchronized decode(it) }
         val alias = "speakivra-guest-v1-${UUID.randomUUID()}"
         val pair = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore").run {
             initialize(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
@@ -31,7 +32,7 @@ internal class GuestIdentityStore(context: Context) {
             keyStore().deleteEntry(alias)
             error("Chưa lưu được mã hồ sơ. Tiến độ vẫn được giữ trên máy.")
         }
-        return identity
+        identity
     }
     fun proof(learner: Learner, uid: String): ByteArray {
         val identity = ensure(learner)
@@ -43,10 +44,10 @@ internal class GuestIdentityStore(context: Context) {
         }
     }
     // No production caller until the live backend has authenticated and confirmed ownership.
-    @Synchronized fun recordServerReceipt(learner: Learner, receipt: GuestClaimReceipt, uid: String): GuestIdentity {
+    fun recordServerReceipt(learner: Learner, receipt: GuestClaimReceipt, uid: String): GuestIdentity = synchronized(identityLock) {
         val bound = acceptGuestClaim(ensure(learner), receipt, uid)
         check(registry.edit().putString(learner.id, encode(bound)).commit())
-        return bound
+        bound
     }
     private fun encode(value: GuestIdentity) = JSONObject().apply {
         put("profileId", value.profileId); put("publicKey", value.publicKey); put("keyAlias", value.keyAlias)

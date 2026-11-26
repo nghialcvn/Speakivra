@@ -77,8 +77,7 @@ class SparkAccountIntegrationTest {
         ui.onNodeWithText("Tài khoản & đồng bộ",substring=false).performClick()
         ui.onNodeWithText("Tiếp tục với Google").assertExists()
         shot("84-login-live-sdk")
-        ui.onNodeWithText("Tiếp tục với Microsoft").performClick()
-        ui.onNodeWithText("Đăng nhập Microsoft tạm thời chưa khả dụng. Hãy dùng Google hoặc email.").performScrollTo().assertExists()
+        ui.onNodeWithText("Tiếp tục với Microsoft").assertDoesNotExist()
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
         ui.onNodeWithText("Email",substring=false).performTextInput(email)
         ui.onNodeWithText("Mật khẩu",substring=false).performTextInput(password)
@@ -125,7 +124,7 @@ class SparkAccountIntegrationTest {
         val restored=store.visible(owner).single();assertNotEquals(original.id,restored.id)
         ui.waitUntil(25000) { runtime.isSynced(restored) }
         ui.onNodeWithText("Đã đồng bộ",substring=false).assertExists()
-        ui.onNodeWithText("Nghĩa",substring=false).assertExists()
+        assertTrue(ui.onAllNodesWithText("Nghĩa",substring=false).fetchSemanticsNodes().isNotEmpty())
         assertEquals("Nghĩa",restored.name);assertEquals(guest.profileId,identities.peek(restored)!!.profileId)
         assertEquals(owner,identities.peek(restored)!!.ownerUid)
         assertEquals(95,store.preferences(restored).getInt(achievement,0))

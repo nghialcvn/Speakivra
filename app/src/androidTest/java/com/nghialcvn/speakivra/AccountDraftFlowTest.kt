@@ -71,9 +71,9 @@ class AccountDraftFlowTest {
     @Test fun realLoginAndRegisterScreensShowUnavailableCloudWithoutPretendingToCreateAnAccount() {
         ui.onNodeWithText("Tài khoản & đồng bộ", substring = false).performClick()
         ui.onNodeWithText("Tiếp tục với Google").assertExists()
-        ui.onNodeWithText("Tiếp tục với Microsoft").assertExists()
+        ui.onNodeWithText("Tiếp tục với Microsoft").assertDoesNotExist()
         shot("81-approved-login-draft")
-        ui.onNodeWithText("Tiếp tục với Microsoft").performClick()
+        ui.onNodeWithText("Tiếp tục với Google").performClick()
         ui.onNodeWithText("Chưa kết nối dịch vụ tài khoản. Hồ sơ và tiến độ vẫn lưu trên máy.").performScrollTo().assertExists()
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
         ui.onNodeWithText("Nhập lại mật khẩu").assertExists()

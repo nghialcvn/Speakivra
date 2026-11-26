@@ -15,6 +15,10 @@ import androidx.compose.ui.unit.dp
 
 /** Small native outline icons: no emoji glyphs, remote icon fonts or extra SDKs. */
 private val Shapes = mapOf(
+    "email" to "M2 5 L22 5 L22 20 L2 20 Z M2 5 L12 13 L22 5",
+    "wifi" to "M2 8 Q12 -1 22 8 M5 12 Q12 5 19 12 M8 16 Q12 12 16 16 M12 20 L12 20.1",
+    "check-circle" to "M12 2 C25 2 25 22 12 22 C-1 22 -1 2 12 2 Z M7 12 L11 16 L18 8",
+    "cloud-sync" to "M6 18 C-1 18 -1 9 6 8 C7 0 20 0 21 9 C28 13 23 19 19 18 M8 17 L12 21 L16 17 M12 12 L12 21",
     "diamond" to "M2 8 L7 2 L17 2 L22 8 L12 22 Z M2 8 L22 8 M7 2 L9 8 L12 22 L15 8 L17 2 M9 8 L12 2 L15 8",
     "reception" to "M2 14 L22 14 L22 23 L2 23 Z M4 14 L4 10 Q4 7 8 7 Q12 7 12 10 L12 14 M8 1 C12 1 12 7 8 7 C4 7 4 1 8 1 Z M16 11 L23 11 M17 8 L22 8 L22 11 M19 5 L19 8",
     "housekeeping" to "M3 7 L20 7 L20 20 L3 20 Z M1 3 L3 3 L3 20 M5 20 L5 23 M18 20 L18 23 M8 7 L8 3 L11 3 L11 7 M14 7 L14 2 L18 2 L18 7 M3 14 L20 14",

@@ -6,19 +6,19 @@ import org.json.JSONObject
 import java.io.File
 
 class HotelCurriculumTest {
-    @Test fun standaloneRolesHaveFifteenCompleteTopicsAndStableIndependentIds() {
+    @Test fun standaloneRolesHaveTwentyCompleteTopicsAndStableIndependentIds() {
         assertEquals(45, Lessons.all.size)
-        assertEquals(75, Lessons.catalogue.size)
-        assertEquals(240, HotelCurriculum.all.sumOf { it.phrases.size })
-        assertEquals(180, HotelCurriculum.all.sumOf { it.conversation.size })
+        assertEquals(85, Lessons.catalogue.size)
+        assertEquals(1000, HotelCurriculum.all.sumOf { it.phrases.size })
+        assertEquals(240, HotelCurriculum.all.sumOf { it.conversation.size })
         listOf("FO", "HK").forEach { role ->
             val topics = HotelCurriculum.topics.filter { it.role == role }
-            assertEquals(15, topics.size)
+            assertEquals(20, topics.size)
             assertTrue(topics.count { it.incident } >= 6)
             topics.forEach { topic ->
                 assertEquals(role, Lessons.levelOf(topic.lesson))
                 assertTrue(topicIsOpen(topic.lesson, Lessons.catalogue) { LessonProgress() })
-                assertEquals(8, topic.lesson.phrases.size)
+                assertEquals(25, topic.lesson.phrases.size)
                 assertEquals(6, topic.lesson.conversation.size)
                 assertTrue(topic.lesson.conversation.all { it.translation.isNotBlank() && it.replyTranslation.isNotBlank() })
             }
@@ -30,9 +30,9 @@ class HotelCurriculumTest {
     }
     @Test fun hotelExerciseAnswersAndIpaCoverAllStaffAndGuestLines() {
         val data = JSONObject(File("src/main/assets/hotel-ipa.json").readText())
-        assertEquals(30, HotelCurriculum.exercises.size)
+        assertEquals(40, HotelCurriculum.exercises.size)
         HotelCurriculum.exercises.forEach { exercise ->
-            assertEquals(8, exercise.questions.size)
+            assertEquals(25, exercise.questions.size)
             exercise.questions.forEach { q -> assertTrue(q.id, evaluateExercise(q, q.answer).accepted) }
         }
         HotelCurriculum.all.forEach { lesson ->

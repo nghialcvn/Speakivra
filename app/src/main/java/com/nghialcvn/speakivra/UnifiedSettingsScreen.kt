@@ -200,9 +200,9 @@ internal fun UnifiedSettingsScreen(
                         }
                         Text("V$version", color = p.muted, fontSize = 11.sp)
                     }
-                    UpdateMiniRow("speaker", "Hồ sơ mới, mở khóa theo tiến độ")
-                    UpdateMiniRow("book", "A2: 15 chủ đề, 450 câu luyện nói")
-                    UpdateMiniRow("layers", "B1: 20 chủ đề, 700 câu luyện nói")
+                    InstalledReleaseNotes.forVersion(version).forEach { (icon, text) ->
+                        UpdateMiniRow(icon, text)
+                    }
                 }
                 SettingsTile("phone", "Kiểm tra cập nhật",
                     "Phiên bản đang dùng: v$version", neon, onUpdates)

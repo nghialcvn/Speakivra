@@ -234,7 +234,7 @@ internal fun LessonHubScreen(onLevel: (String) -> Unit, onChat: () -> Unit,
             LessonHubCard(title, "${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại",
                 "book") { onLevel(level) }
         }
-        LessonHubCard("Tiếng Anh Khách sạn", "Cấp độ riêng • Lễ tân 15 chủ đề • Buồng phòng 15 chủ đề", "reception", onHotel)
+        LessonHubCard("Tiếng Anh Khách sạn", "Cấp độ riêng • Lễ tân 20 chủ đề • Buồng phòng 20 chủ đề", "reception", onHotel)
         LessonHubCard("Hội thoại mẫu", "Mô phỏng theo kịch bản", "chat", onChat)
         LessonHubCard("Luyện nói theo đoạn văn", "A1 • A2 • B1", "book", onPassages)
         LessonHubCard("Tiếng Anh nói thế nào?", "A1 • A2 • B1", "book", onExercises)

@@ -32,10 +32,13 @@ internal fun ExtraCatalogueScreen(passages: Boolean, level: String, completed: S
                 FilterChip(selected = it == level, onClick = { onLevel(it) }, label = { Text(it) })
             }
         }
+        val items = if (passages) ExtraPracticeData.passages.filter { it.level == level }.size else ExtraPracticeData.exercises.count { it.level == level }
+        val sentences = if (passages) ExtraPracticeData.passages.filter { it.level == level }.sumOf { it.sentences.size } else ExtraPracticeData.exercises.filter { it.level == level }.sumOf { it.questions.size }
+        Text("$items bài • $sentences câu", color = studio.muted, fontSize = 13.sp)
         if (passages) ExtraPracticeData.passages.filter { it.level == level }.forEach { item ->
             ExtraCatalogueCard(item.title, item.vietnamese,
                 "${item.sentences.count { it.id in completed }}/${item.sentences.size} câu • ${item.english.split(' ').size} từ",
-                extraTopicOpen(item.lessonId, load), item.id in completed) { onPassage(item) }
+                extraTopicOpen(item.lessonId, load), item.sentences.all { it.id in completed }) { onPassage(item) }
         } else ExtraPracticeData.exercises.filter { it.level == level }.forEach { item ->
             ExtraCatalogueCard(item.topic, "Tiếng Anh nói thế nào?",
                 "${item.questions.count { it.id in completed }}/${item.questions.size} câu",

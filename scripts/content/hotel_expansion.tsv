@@ -1,0 +1,442 @@
+# id|request EN|request VI|question EN|question VI|action EN|action VI
+@hotel_fo_welcome|your arrival arrangements|việc đón tiếp anh/chị|whether you need help with your bags|anh/chị có cần hỗ trợ hành lý không|check who can assist with your arrival|kiểm tra người có thể hỗ trợ đón anh/chị
+Good morning. How was your journey?|Chào buổi sáng. Chuyến đi của anh/chị thế nào?
+Please follow me to the reception desk.|Mời anh/chị theo tôi đến quầy lễ tân.
+Are you checking in or visiting a guest?|Anh/chị đến nhận phòng hay thăm khách lưu trú?
+May I offer you a seat while you wait?|Tôi có thể mời anh/chị ngồi trong lúc chờ không?
+The entrance for step-free access is on your left.|Lối vào không có bậc thang ở bên trái anh/chị.
+Please keep your valuables with you.|Anh/chị vui lòng giữ đồ có giá trị bên mình.
+My colleague will assist the next guest.|Đồng nghiệp của tôi sẽ hỗ trợ vị khách tiếp theo.
+Thank you for waiting. I can help you now.|Cảm ơn anh/chị đã chờ. Bây giờ tôi có thể hỗ trợ.
+@hotel_fo_reservations|your reservation request|yêu cầu đặt phòng của anh/chị|which room type you prefer|anh/chị muốn loại phòng nào|check availability for your requested dates|kiểm tra phòng trống cho ngày anh/chị yêu cầu
+Is the booking for business or leisure?|Anh/chị đặt phòng để công tác hay nghỉ dưỡng?
+Do you need a connecting room for your family?|Anh/chị có cần phòng thông nhau cho gia đình không?
+Please confirm the arrival and departure dates.|Anh/chị vui lòng xác nhận ngày đến và ngày đi.
+The room rate depends on the dates and room type.|Giá phòng phụ thuộc vào ngày ở và loại phòng.
+Let me explain the cancellation terms before you confirm.|Để tôi giải thích điều kiện hủy trước khi anh/chị xác nhận.
+Breakfast is included only if your rate specifies it.|Bữa sáng chỉ được bao gồm nếu loại giá của anh/chị ghi rõ.
+May I send the booking details to your email address?|Tôi có thể gửi thông tin đặt phòng đến email của anh/chị không?
+Please check the spelling of the guest's name.|Anh/chị vui lòng kiểm tra cách viết tên khách.
+@hotel_fo_checkin|your check-in arrangements|việc nhận phòng của anh/chị|how many key cards you need|anh/chị cần bao nhiêu thẻ phòng|check the registration details|kiểm tra thông tin đăng ký
+May I see the identification required for registration?|Tôi có thể xem giấy tờ tùy thân cần để đăng ký không?
+Please complete the marked fields on this form.|Anh/chị vui lòng điền các mục được đánh dấu trên mẫu này.
+May I confirm the number of guests in your room?|Tôi có thể xác nhận số khách ở trong phòng không?
+I will explain any deposit requirement before taking payment.|Tôi sẽ giải thích yêu cầu đặt cọc trước khi nhận thanh toán.
+Please keep your key card away from strong magnets.|Anh/chị vui lòng để thẻ phòng tránh xa nam châm mạnh.
+Your room number is written inside this key holder.|Số phòng được ghi bên trong bao đựng thẻ này.
+For your privacy, I will not say your room number aloud.|Để bảo vệ riêng tư, tôi sẽ không đọc to số phòng.
+Please let reception know if your plans change.|Anh/chị vui lòng báo lễ tân nếu kế hoạch thay đổi.
+@hotel_fo_facilities|your question about hotel facilities|câu hỏi của anh/chị về tiện ích khách sạn|which facility you would like to use|anh/chị muốn sử dụng tiện ích nào|check today's opening hours|kiểm tra giờ mở cửa hôm nay
+The lifts are beside the reception desk.|Thang máy ở cạnh quầy lễ tân.
+Let me show you the restaurant on this map.|Để tôi chỉ nhà hàng trên bản đồ này.
+Please check the posted opening hours before visiting the pool.|Anh/chị vui lòng xem giờ mở cửa niêm yết trước khi đến hồ bơi.
+Some facilities may require an advance booking.|Một số tiện ích có thể cần đặt trước.
+I can check whether the gym is available today.|Tôi có thể kiểm tra phòng tập có hoạt động hôm nay không.
+Please follow the safety instructions displayed at the pool.|Anh/chị vui lòng làm theo hướng dẫn an toàn tại hồ bơi.
+The accessible restroom is near the lobby.|Nhà vệ sinh có hỗ trợ tiếp cận ở gần sảnh.
+May I explain how to connect to the guest Wi-Fi?|Tôi có thể hướng dẫn cách kết nối Wi-Fi dành cho khách không?
+@hotel_fo_requests|your service request|yêu cầu dịch vụ của anh/chị|when you would like the item delivered|anh/chị muốn nhận đồ vào lúc nào|check which team can fulfil your request|kiểm tra bộ phận có thể đáp ứng yêu cầu
+What would make your stay more comfortable?|Điều gì sẽ giúp anh/chị lưu trú thoải mái hơn?
+Let me check whether an extra blanket is available.|Để tôi kiểm tra xem còn chăn bổ sung không.
+Would you like the item left outside or handed to you?|Anh/chị muốn để đồ bên ngoài hay giao tận tay?
+Please tell us if you have a preferred delivery time.|Anh/chị vui lòng cho biết thời gian giao mong muốn.
+I cannot guarantee the timing until the team confirms.|Tôi chưa thể bảo đảm thời gian trước khi bộ phận phụ trách xác nhận.
+May we call your room when the item is ready?|Chúng tôi có thể gọi phòng khi đồ sẵn sàng không?
+This request may involve a charge; I will check first.|Yêu cầu này có thể phát sinh phí; tôi sẽ kiểm tra trước.
+I will pass your preference to the relevant department.|Tôi sẽ chuyển mong muốn của anh/chị đến bộ phận liên quan.
+@hotel_fo_checkout|your check-out arrangements|việc trả phòng của anh/chị|whether you need a printed receipt|anh/chị có cần biên lai giấy không|review the charges with you|xem lại các khoản phí cùng anh/chị
+Are you ready to check out now?|Anh/chị đã sẵn sàng trả phòng chưa?
+Please review the itemised bill before payment.|Anh/chị vui lòng xem hóa đơn chi tiết trước khi thanh toán.
+How would you like to settle the balance?|Anh/chị muốn thanh toán số tiền còn lại bằng cách nào?
+Would you like the receipt sent by email?|Anh/chị có muốn nhận biên lai qua email không?
+Please return all room key cards to reception.|Anh/chị vui lòng trả tất cả thẻ phòng cho lễ tân.
+Let me check the status of your deposit.|Để tôi kiểm tra tình trạng tiền đặt cọc.
+The release time may depend on your bank.|Thời gian giải tỏa có thể phụ thuộc vào ngân hàng của anh/chị.
+May I confirm that you have collected all your belongings?|Tôi có thể xác nhận anh/chị đã lấy đủ đồ đạc không?
+@hotel_fo_room_wait|your room readiness request|yêu cầu của anh/chị về tình trạng sẵn sàng của phòng|what time you arrived|anh/chị đến lúc mấy giờ|check the latest room status with housekeeping|kiểm tra tình trạng phòng mới nhất với buồng phòng
+I understand you are tired after your journey.|Tôi hiểu anh/chị mệt sau chuyến đi.
+Housekeeping is still preparing the room.|Buồng phòng vẫn đang chuẩn bị phòng.
+I will ask for an updated estimate rather than promise a time.|Tôi sẽ xin thời gian dự kiến mới thay vì hứa một giờ cụ thể.
+Would you like to wait in the lobby?|Anh/chị có muốn chờ ở sảnh không?
+We can check whether luggage storage is available.|Chúng tôi có thể kiểm tra xem có chỗ gửi hành lý không.
+Please keep any essential medication with you.|Anh/chị vui lòng giữ thuốc thiết yếu bên mình.
+May I have a contact number for the room update?|Tôi có thể xin số liên hệ để báo tình trạng phòng không?
+I will let you know as soon as the room is released.|Tôi sẽ báo ngay khi phòng được xác nhận sẵn sàng.
+@hotel_fo_booking_issue|the issue with your reservation|vấn đề với đặt phòng của anh/chị|which website issued your confirmation|trang web nào đã cấp xác nhận cho anh/chị|compare the confirmation with our reservation record|đối chiếu xác nhận với hồ sơ đặt phòng
+Could you show me the booking confirmation?|Anh/chị có thể cho tôi xem xác nhận đặt phòng không?
+May I check the reference number and booking date?|Tôi có thể kiểm tra mã xác nhận và ngày đặt không?
+The name may have been entered in a different order.|Tên có thể đã được nhập theo thứ tự khác.
+Let us check the arrival date on your confirmation.|Chúng ta hãy kiểm tra ngày đến trên xác nhận.
+I will contact reservations to investigate the mismatch.|Tôi sẽ liên hệ bộ phận đặt phòng để kiểm tra thông tin không khớp.
+Please do not make a duplicate payment while we check.|Anh/chị vui lòng chưa thanh toán trùng trong khi chúng tôi kiểm tra.
+Any change to the booking depends on the applicable terms.|Mọi thay đổi đặt phòng phụ thuộc vào điều kiện áp dụng.
+I will explain the available options after verification.|Tôi sẽ giải thích các lựa chọn sau khi xác minh.
+@hotel_fo_key_issue|your key card problem|sự cố thẻ phòng của anh/chị|whether the card reader shows a light|đầu đọc thẻ có hiện đèn không|verify your registration before issuing another key|xác minh đăng ký trước khi cấp thẻ khác
+Please tell me what happens when you tap the card.|Anh/chị vui lòng cho biết điều gì xảy ra khi chạm thẻ.
+Has the key card worked earlier today?|Thẻ phòng đã hoạt động trước đó trong hôm nay chưa?
+For security, only a verified registered guest can receive a replacement.|Vì an ninh, chỉ khách đăng ký đã được xác minh mới được nhận thẻ thay thế.
+I cannot give out a room key based only on a room number.|Tôi không thể cấp thẻ chỉ dựa vào số phòng.
+Let me check whether the key needs to be reactivated.|Để tôi kiểm tra xem thẻ có cần kích hoạt lại không.
+Please try this card after we complete the verification.|Anh/chị vui lòng thử thẻ này sau khi chúng tôi xác minh xong.
+If the lock still fails, I will contact engineering.|Nếu khóa vẫn không hoạt động, tôi sẽ liên hệ kỹ thuật.
+I will ask an authorised colleague to assist you at the door.|Tôi sẽ nhờ đồng nghiệp có thẩm quyền hỗ trợ tại cửa phòng.
+@hotel_fo_noise|your noise complaint|phản ánh tiếng ồn của anh/chị|where the noise seems to come from|tiếng ồn dường như phát ra từ đâu|ask the duty team to investigate the noise|nhờ bộ phận trực kiểm tra tiếng ồn
+I am sorry the noise has disturbed your rest.|Tôi xin lỗi vì tiếng ồn ảnh hưởng đến việc nghỉ ngơi.
+When did you first notice the disturbance?|Anh/chị bắt đầu nhận thấy tiếng ồn lúc nào?
+Is the sound continuous or occasional?|Âm thanh liên tục hay thỉnh thoảng mới có?
+Please do not confront another guest yourself.|Anh/chị vui lòng không tự đối chất với khách khác.
+I will ask the duty manager to review the situation.|Tôi sẽ nhờ quản lý trực xem xét tình hình.
+A room change depends on availability and approval.|Việc đổi phòng phụ thuộc vào phòng trống và phê duyệt.
+We will confirm any alternative before moving your luggage.|Chúng tôi sẽ xác nhận phương án trước khi chuyển hành lý.
+May I call back to check whether the disturbance has stopped?|Tôi có thể gọi lại để kiểm tra tiếng ồn đã dừng chưa không?
+@hotel_fo_billing|the disputed charge|khoản phí anh/chị đang thắc mắc|which item on the bill you want us to review|anh/chị muốn chúng tôi xem lại mục nào trên hóa đơn|check the transaction record with the cashier|kiểm tra giao dịch với thu ngân
+Which charge would you like me to explain?|Anh/chị muốn tôi giải thích khoản phí nào?
+Let me compare this amount with the supporting record.|Để tôi đối chiếu số tiền này với chứng từ.
+Please cover your card details while showing the transaction.|Anh/chị vui lòng che thông tin thẻ khi cho xem giao dịch.
+Do not share your PIN or one-time password with us.|Anh/chị đừng chia sẻ mã PIN hay mật khẩu dùng một lần với chúng tôi.
+An authorisation hold is different from a completed payment.|Khoản tạm giữ khác với một giao dịch thanh toán hoàn tất.
+I will ask the authorised manager to review any adjustment.|Tôi sẽ nhờ quản lý có thẩm quyền xem xét việc điều chỉnh.
+I cannot promise a refund before the review is complete.|Tôi không thể hứa hoàn tiền trước khi kiểm tra xong.
+We will provide a corrected document if an error is confirmed.|Chúng tôi sẽ cấp chứng từ điều chỉnh nếu xác nhận có sai sót.
+@hotel_fo_transport|your transport arrangements|việc đi lại của anh/chị|how many passengers will be travelling|sẽ có bao nhiêu hành khách|check the transport options and estimated fare|kiểm tra phương tiện và giá cước dự kiến
+Where would you like the driver to take you?|Anh/chị muốn tài xế đưa đến đâu?
+What time do you need to arrive at your destination?|Anh/chị cần đến nơi lúc mấy giờ?
+Do you have any large bags or special transport needs?|Anh/chị có hành lý lớn hoặc nhu cầu đi lại đặc biệt không?
+The fare and travel time may change with traffic.|Giá cước và thời gian đi có thể thay đổi theo giao thông.
+Please confirm the destination with the driver before departure.|Anh/chị vui lòng xác nhận điểm đến với tài xế trước khi đi.
+I can write the hotel's address for your return journey.|Tôi có thể viết địa chỉ khách sạn cho chuyến quay lại.
+Please allow extra time during busy hours.|Anh/chị vui lòng dành thêm thời gian vào giờ cao điểm.
+Let me check whether a suitable vehicle is available.|Để tôi kiểm tra xem có xe phù hợp không.
+@hotel_fo_lost|your lost property report|trình báo đồ thất lạc của anh/chị|where you last saw the item|anh/chị nhìn thấy món đồ lần cuối ở đâu|check the lost property register|kiểm tra sổ đồ thất lạc
+Could you describe the item and its colour?|Anh/chị có thể mô tả món đồ và màu sắc không?
+When did you last have it with you?|Anh/chị giữ món đồ bên mình lần cuối lúc nào?
+Please give us a contact method for any update.|Anh/chị vui lòng cho cách liên hệ để nhận thông tin mới.
+We need to verify ownership before returning an item.|Chúng tôi cần xác minh chủ sở hữu trước khi trả đồ.
+I cannot disclose another guest's personal information.|Tôi không thể tiết lộ thông tin cá nhân của khách khác.
+If the item is found, we will explain the collection process.|Nếu tìm thấy đồ, chúng tôi sẽ giải thích thủ tục nhận lại.
+Any delivery arrangements must follow the hotel procedure.|Việc gửi đồ phải theo quy trình khách sạn.
+Please contact security immediately if you suspect theft.|Anh/chị vui lòng liên hệ an ninh ngay nếu nghi bị trộm.
+@hotel_fo_accessibility|your accessibility request|yêu cầu hỗ trợ tiếp cận của anh/chị|what assistance would be most useful|hỗ trợ nào sẽ hữu ích nhất|check suitable facilities with the responsible team|kiểm tra tiện ích phù hợp với bộ phận phụ trách
+How would you prefer us to assist you?|Anh/chị muốn chúng tôi hỗ trợ như thế nào?
+May I check the clear doorway width for you?|Tôi có thể kiểm tra chiều rộng thông thủy của cửa cho anh/chị không?
+Please tell us if you need a step-free route.|Anh/chị vui lòng cho biết nếu cần lối đi không có bậc thang.
+I will confirm the room features rather than assume they meet your needs.|Tôi sẽ xác nhận tiện nghi phòng thay vì mặc định chúng phù hợp.
+May I speak directly with you about your preferences?|Tôi có thể trao đổi trực tiếp với anh/chị về mong muốn không?
+We will ask permission before moving any mobility aid.|Chúng tôi sẽ xin phép trước khi di chuyển thiết bị hỗ trợ đi lại.
+Let us check a suitable meeting point for assistance.|Chúng ta hãy xác nhận điểm gặp phù hợp để hỗ trợ.
+Please let us know if our explanation needs to be written down.|Anh/chị vui lòng cho biết nếu cần chúng tôi viết hướng dẫn ra.
+@hotel_fo_emergency|your request for urgent assistance|yêu cầu hỗ trợ khẩn cấp của anh/chị|your exact location|vị trí chính xác của anh/chị|alert the emergency team immediately|báo đội ứng phó khẩn cấp ngay
+I am contacting the emergency team now.|Tôi đang liên hệ đội ứng phó khẩn cấp.
+Please move away from immediate danger if you can do so safely.|Anh/chị vui lòng tránh nguy hiểm trước mắt nếu có thể làm vậy an toàn.
+Do not use the lifts during a fire alarm.|Đừng sử dụng thang máy khi có báo cháy.
+Please use the marked evacuation route.|Anh/chị vui lòng đi theo lối sơ tán được đánh dấu.
+Tell the responder if anyone needs help leaving the building.|Hãy báo người ứng phó nếu có ai cần hỗ trợ rời tòa nhà.
+Do not return for personal belongings.|Đừng quay lại lấy đồ cá nhân.
+Please follow the instructions of the emergency responders.|Anh/chị vui lòng làm theo hướng dẫn của lực lượng ứng phó.
+I will pass your location to the team without delay.|Tôi sẽ chuyển vị trí của anh/chị cho đội ứng phó ngay.
+@hotel_hk_entry|your room service permission|việc anh/chị cho phép phục vụ phòng|whether now is a convenient time|bây giờ có thuận tiện không|confirm permission before entering the room|xác nhận được phép trước khi vào phòng
+I will knock and identify my department before entering.|Tôi sẽ gõ cửa và xưng danh bộ phận trước khi vào.
+I will wait outside until you are ready.|Tôi sẽ chờ bên ngoài đến khi anh/chị sẵn sàng.
+Would you like me to return later?|Anh/chị có muốn tôi quay lại sau không?
+I will announce myself again before opening the door.|Tôi sẽ xưng danh lần nữa trước khi mở cửa.
+Please let me know if you prefer privacy now.|Anh/chị vui lòng cho biết nếu muốn riêng tư lúc này.
+I cannot open another guest's room for you.|Tôi không thể mở phòng của khách khác cho anh/chị.
+Reception can help after verifying your registration.|Lễ tân có thể hỗ trợ sau khi xác minh đăng ký.
+Thank you for allowing me to service the room.|Cảm ơn anh/chị đã cho phép tôi phục vụ phòng.
+@hotel_hk_schedule|your room cleaning appointment|lịch dọn phòng của anh/chị|when you plan to leave the room|anh/chị dự định rời phòng lúc nào|check the cleaning schedule with my supervisor|kiểm tra lịch dọn phòng với giám sát
+What time would you like us to clean the room?|Anh/chị muốn chúng tôi dọn phòng lúc mấy giờ?
+Would morning or afternoon be more convenient?|Buổi sáng hay buổi chiều thuận tiện hơn?
+I will note your preferred time for the team.|Tôi sẽ ghi lại thời gian mong muốn để báo bộ phận.
+Please tell us if you change your plans.|Anh/chị vui lòng báo nếu thay đổi kế hoạch.
+We will try to avoid disturbing your meeting.|Chúng tôi sẽ cố tránh làm gián đoạn cuộc họp của anh/chị.
+I will confirm the time after checking staff availability.|Tôi sẽ xác nhận thời gian sau khi kiểm tra nhân sự.
+Would you prefer a quick refresh or full cleaning?|Anh/chị muốn làm mới nhanh hay dọn đầy đủ?
+May we contact you if we need to adjust the time?|Chúng tôi có thể liên hệ nếu cần điều chỉnh giờ không?
+@hotel_hk_amenities|your towel and amenity request|yêu cầu khăn và đồ dùng của anh/chị|how many additional towels you need|anh/chị cần thêm bao nhiêu khăn|check the available towels and amenities|kiểm tra khăn và đồ dùng hiện có
+Would you like bath towels or hand towels?|Anh/chị muốn khăn tắm hay khăn lau tay?
+How many bottles of water do you need?|Anh/chị cần bao nhiêu chai nước?
+Let me check whether slippers are available.|Để tôi kiểm tra xem còn dép đi trong phòng không.
+May I leave the clean towels on this shelf?|Tôi có thể đặt khăn sạch trên kệ này không?
+Please keep the sealed toiletries for your own use.|Anh/chị vui lòng giữ đồ vệ sinh còn niêm phong để dùng riêng.
+I will check whether extra items carry a charge.|Tôi sẽ kiểm tra xem đồ bổ sung có tính phí không.
+Would you like me to collect the used towels?|Anh/chị có muốn tôi thu khăn đã dùng không?
+Please tell me if you need a different size of bathrobe.|Anh/chị vui lòng cho biết nếu cần áo choàng cỡ khác.
+@hotel_hk_laundry|your laundry collection request|yêu cầu nhận đồ giặt của anh/chị|when you need the garments returned|anh/chị cần nhận lại quần áo lúc nào|check the laundry service details|kiểm tra thông tin dịch vụ giặt là
+Please list the garments on the laundry form.|Anh/chị vui lòng liệt kê quần áo trên phiếu giặt.
+May we check the care labels before accepting these items?|Chúng tôi có thể kiểm tra nhãn chăm sóc trước khi nhận đồ không?
+Please remove valuables from all pockets.|Anh/chị vui lòng lấy đồ có giá trị ra khỏi tất cả các túi.
+Does this garment need special care?|Món quần áo này có cần chăm sóc đặc biệt không?
+I will ask laundry to confirm the return time.|Tôi sẽ nhờ bộ phận giặt là xác nhận giờ trả.
+Express service may cost extra; please check before confirming.|Dịch vụ nhanh có thể thêm phí; anh/chị vui lòng kiểm tra trước khi xác nhận.
+Please keep the collection receipt.|Anh/chị vui lòng giữ biên nhận nhận đồ.
+If an item is missing, I will report it for checking.|Nếu thiếu món đồ, tôi sẽ báo để kiểm tra.
+@hotel_hk_maintenance|your room maintenance report|báo hỏng trong phòng của anh/chị|which device is not working|thiết bị nào không hoạt động|report the fault to engineering|báo hỏng cho kỹ thuật
+Which part of the air conditioner is causing a problem?|Bộ phận nào của điều hòa đang có vấn đề?
+Please do not touch exposed wires or damaged sockets.|Anh/chị vui lòng không chạm dây điện hở hay ổ cắm hỏng.
+I am not authorised to repair electrical equipment.|Tôi không có thẩm quyền sửa thiết bị điện.
+May engineering enter the room to inspect the fault?|Kỹ thuật có thể vào phòng để kiểm tra lỗi không?
+Please keep clear of the affected area.|Anh/chị vui lòng tránh khu vực bị ảnh hưởng.
+I will give engineering the exact room location.|Tôi sẽ báo vị trí phòng chính xác cho kỹ thuật.
+If you notice smoke or a burning smell, contact emergency assistance immediately.|Nếu thấy khói hoặc mùi khét, hãy liên hệ hỗ trợ khẩn cấp ngay.
+We will update you when the responsible team responds.|Chúng tôi sẽ cập nhật khi bộ phận phụ trách phản hồi.
+@hotel_hk_complaints|your housekeeping concern|phản ánh của anh/chị về buồng phòng|which part of the service disappointed you|phần nào của dịch vụ khiến anh/chị chưa hài lòng|ask my supervisor to review the concern|nhờ giám sát xem xét phản ánh
+I am sorry the service did not meet your expectations.|Tôi xin lỗi vì dịch vụ chưa đáp ứng mong đợi.
+Please show me the area that needs attention.|Anh/chị vui lòng chỉ khu vực cần xử lý.
+I will listen to the full concern before responding.|Tôi sẽ nghe đầy đủ phản ánh trước khi trả lời.
+Would you like the supervisor to speak with you?|Anh/chị có muốn trao đổi với giám sát không?
+May we correct the issue while you are out?|Chúng tôi có thể khắc phục khi anh/chị ra ngoài không?
+I will not move your belongings without permission.|Tôi sẽ không di chuyển đồ của anh/chị khi chưa được phép.
+I cannot approve compensation, but I can refer your request.|Tôi không thể duyệt bồi thường nhưng có thể chuyển yêu cầu.
+May I check back after the room has been attended to?|Tôi có thể hỏi lại sau khi phòng được xử lý không?
+@hotel_hk_privacy|your privacy preference|mong muốn riêng tư của anh/chị|when we may contact you again|chúng tôi có thể liên hệ lại khi nào|check the privacy procedure with my supervisor|kiểm tra quy trình riêng tư với giám sát
+I see the do-not-disturb sign on your door.|Tôi thấy biển không làm phiền trên cửa phòng.
+We will follow the hotel's procedure for rooms requesting privacy.|Chúng tôi sẽ theo quy trình khách sạn với phòng yêu cầu riêng tư.
+Please contact reception if you need service while the sign is displayed.|Anh/chị vui lòng liên hệ lễ tân nếu cần phục vụ khi đang treo biển.
+I cannot share a guest's room number or schedule.|Tôi không thể tiết lộ số phòng hay lịch trình của khách.
+We need permission before taking photographs in an occupied room.|Chúng tôi cần được phép trước khi chụp ảnh trong phòng đang có khách.
+I will keep the door secure while working.|Tôi sẽ bảo đảm an ninh cửa phòng khi làm việc.
+Only authorised staff may handle access requests.|Chỉ nhân viên có thẩm quyền mới được xử lý yêu cầu vào phòng.
+I will report any safety concern through the proper channel.|Tôi sẽ báo vấn đề an toàn qua kênh phù hợp.
+@hotel_hk_cleanliness|your room cleanliness concern|phản ánh về độ sạch phòng của anh/chị|which area needs cleaning again|khu vực nào cần dọn lại|arrange a supervisor's cleanliness check|sắp xếp giám sát kiểm tra độ sạch
+I am sorry this area was missed.|Tôi xin lỗi vì khu vực này bị bỏ sót.
+May I clean the desk now?|Tôi có thể lau bàn ngay bây giờ không?
+Please allow me to replace the used glass.|Anh/chị vui lòng cho tôi thay ly đã dùng.
+We will use the approved cleaning products.|Chúng tôi sẽ dùng sản phẩm vệ sinh được phê duyệt.
+Please let us know if you are sensitive to cleaning scents.|Anh/chị vui lòng báo nếu nhạy cảm với mùi sản phẩm vệ sinh.
+I will bring fresh cleaning materials for this area.|Tôi sẽ mang dụng cụ vệ sinh sạch đến khu vực này.
+My supervisor can inspect the room after cleaning.|Giám sát có thể kiểm tra phòng sau khi dọn.
+Would you prefer to wait outside while we finish?|Anh/chị có muốn chờ bên ngoài trong khi chúng tôi hoàn tất không?
+@hotel_hk_lost|the belongings you left behind|đồ đạc anh/chị để quên|when you last used the room|anh/chị sử dụng phòng lần cuối khi nào|report the found item to lost property|báo món đồ tìm thấy cho bộ phận đồ thất lạc
+I found an item while servicing the room.|Tôi tìm thấy một món đồ khi phục vụ phòng.
+I will hand it to the authorised lost property team.|Tôi sẽ bàn giao cho bộ phận đồ thất lạc có thẩm quyền.
+Please describe a feature that identifies your item.|Anh/chị vui lòng mô tả đặc điểm nhận dạng món đồ.
+I cannot hand an item over without ownership verification.|Tôi không thể giao đồ khi chưa xác minh chủ sở hữu.
+Please contact reception about the collection process.|Anh/chị vui lòng liên hệ lễ tân về thủ tục nhận lại.
+Do not send full payment card details by message.|Đừng gửi đầy đủ thông tin thẻ thanh toán qua tin nhắn.
+We will record where and when the item was found.|Chúng tôi sẽ ghi nơi và thời điểm tìm thấy đồ.
+I will not open your bag to search for unrelated items.|Tôi sẽ không mở túi của anh/chị để tìm đồ không liên quan.
+@hotel_hk_damage|your report of damaged or missing property|báo cáo đồ hỏng hoặc nghi mất của anh/chị|what you noticed and when|anh/chị nhận thấy điều gì và khi nào|inform my supervisor of the reported damage|báo giám sát về đồ hỏng được phản ánh
+Please do not touch the broken glass.|Anh/chị vui lòng không chạm vào kính vỡ.
+I will keep people away from the unsafe area.|Tôi sẽ giữ mọi người tránh khu vực không an toàn.
+May I ask my supervisor to attend the room?|Tôi có thể mời giám sát đến phòng không?
+We will record the facts without making assumptions.|Chúng tôi sẽ ghi nhận sự việc mà không suy đoán.
+I cannot decide responsibility or charges myself.|Tôi không thể tự quyết trách nhiệm hay khoản phí.
+Please tell security if you believe an item has been stolen.|Anh/chị vui lòng báo an ninh nếu cho rằng đồ đã bị trộm.
+We will follow the reporting process before taking further action.|Chúng tôi sẽ theo quy trình báo cáo trước khi xử lý tiếp.
+Please keep any relevant receipts or photographs for the review.|Anh/chị vui lòng giữ biên lai hay ảnh liên quan để xem xét.
+@hotel_hk_linen|your linen replacement request|yêu cầu thay đồ vải của anh/chị|which bedding needs replacing|bộ phận đồ giường nào cần thay|arrange suitable clean linen|sắp xếp đồ vải sạch phù hợp
+Would you like the sheets changed today?|Anh/chị có muốn thay ga giường hôm nay không?
+May I remove the stained pillowcase?|Tôi có thể lấy vỏ gối bị bẩn ra không?
+Please avoid handling linen that may be contaminated.|Anh/chị vui lòng tránh cầm đồ vải có thể nhiễm bẩn.
+I will follow the approved procedure for this spill.|Tôi sẽ theo quy trình được phê duyệt cho vết đổ này.
+Would you prefer an additional light blanket?|Anh/chị có muốn thêm chăn mỏng không?
+I will check whether a suitable pillow is available.|Tôi sẽ kiểm tra xem có gối phù hợp không.
+We will keep clean and used linen separate.|Chúng tôi sẽ để riêng đồ vải sạch và đã dùng.
+Please tell me if you need the bed made differently.|Anh/chị vui lòng báo nếu cần sắp xếp giường khác đi.
+@hotel_hk_bathroom|your bathroom maintenance concern|phản ánh của anh/chị về sự cố phòng tắm|where the water is leaking|nước đang rò ở đâu|contact engineering about the bathroom fault|liên hệ kỹ thuật về lỗi phòng tắm
+Please step away from the wet floor.|Anh/chị vui lòng tránh sàn đang ướt.
+I will place a warning sign while help is arranged.|Tôi sẽ đặt biển cảnh báo trong khi sắp xếp hỗ trợ.
+Please do not use the damaged fitting.|Anh/chị vui lòng không sử dụng thiết bị bị hỏng.
+Is the leak coming from the tap or the pipe?|Nước đang rò từ vòi hay đường ống?
+I will report the lack of hot water to engineering.|Tôi sẽ báo kỹ thuật về việc không có nước nóng.
+Please keep electrical devices away from the water.|Anh/chị vui lòng để thiết bị điện tránh xa nước.
+Reception can review alternatives if the bathroom cannot be used.|Lễ tân có thể xem phương án khác nếu không dùng được phòng tắm.
+I will not attempt a repair outside my duties.|Tôi sẽ không cố sửa chữa ngoài phạm vi công việc.
+@hotel_hk_minibar|your minibar replenishment request|yêu cầu bổ sung minibar của anh/chị|which items you would like replaced|anh/chị muốn bổ sung món nào|check the minibar list and recorded usage|kiểm tra danh mục minibar và đồ dùng đã ghi nhận
+Please refer to the price list before opening an item.|Anh/chị vui lòng xem bảng giá trước khi mở món đồ.
+Would you like us to replenish the water in the minibar?|Anh/chị có muốn bổ sung nước trong minibar không?
+Some room refreshments may be chargeable.|Một số đồ ăn uống trong phòng có thể tính phí.
+I will ask reception to confirm whether this item is included.|Tôi sẽ nhờ lễ tân xác nhận món này có được bao gồm không.
+Please tell us if you notice a damaged seal.|Anh/chị vui lòng báo nếu thấy niêm phong bị hỏng.
+We will check the expiry date before placing an item.|Chúng tôi sẽ kiểm tra hạn dùng trước khi đặt đồ.
+I cannot change a disputed charge myself.|Tôi không thể tự thay đổi khoản phí đang có thắc mắc.
+May I refer your billing question to reception?|Tôi có thể chuyển câu hỏi về hóa đơn đến lễ tân không?
+@hotel_hk_communication|your communication preference|mong muốn giao tiếp của anh/chị|whether written instructions would help|hướng dẫn bằng văn bản có hữu ích không|find the appropriate communication support|tìm hỗ trợ giao tiếp phù hợp
+Would you like me to repeat the main point?|Anh/chị có muốn tôi nhắc lại ý chính không?
+I can use shorter sentences if that helps.|Tôi có thể dùng câu ngắn hơn nếu hữu ích.
+Please show me which item you mean.|Anh/chị vui lòng chỉ món đồ anh/chị muốn nói đến.
+May I write the service time on this card?|Tôi có thể viết giờ phục vụ lên tấm thẻ này không?
+Let me confirm that we have understood each other.|Để tôi xác nhận rằng chúng ta đã hiểu nhau.
+I will ask before touching your personal equipment.|Tôi sẽ hỏi trước khi chạm thiết bị cá nhân của anh/chị.
+Please take your time; there is no need to rush your reply.|Anh/chị cứ từ từ; không cần vội trả lời.
+May I ask a colleague to help explain the request?|Tôi có thể nhờ đồng nghiệp giúp giải thích yêu cầu không?
+@hotel_hk_emergency|your need for emergency support|nhu cầu hỗ trợ khẩn cấp của anh/chị|whether anyone is in immediate danger|có ai đang gặp nguy hiểm trước mắt không|alert security and the emergency team|báo an ninh và đội ứng phó khẩn cấp
+I am calling for emergency assistance now.|Tôi đang gọi hỗ trợ khẩn cấp.
+Please do not enter the area with broken glass.|Anh/chị vui lòng không vào khu vực có kính vỡ.
+I will tell the responder exactly where you are.|Tôi sẽ báo chính xác vị trí của anh/chị cho người ứng phó.
+Please avoid moving an injured person unless there is immediate danger.|Anh/chị vui lòng tránh di chuyển người bị thương trừ khi có nguy hiểm trước mắt.
+I am not qualified to provide a diagnosis.|Tôi không đủ chuyên môn để chẩn đoán.
+Keep the emergency access route clear for responders.|Hãy giữ lối tiếp cận khẩn cấp thông thoáng cho người ứng phó.
+Please follow the building's evacuation instructions.|Anh/chị vui lòng theo hướng dẫn sơ tán của tòa nhà.
+I will remain available to guide the response team.|Tôi sẽ sẵn sàng hướng dẫn đội ứng phó đến nơi.
+# New topics: sixteen staff lines, with guest prompt/translation on the first six.
+@hotel_fo_airport|your airport transfer request|yêu cầu đưa đón sân bay của anh/chị|which terminal your flight uses|chuyến bay của anh/chị ở nhà ga nào|check the transfer provider's availability|kiểm tra nhà cung cấp dịch vụ đưa đón còn xe không
+May I have your flight number and arrival date?|Tôi có thể xin số hiệu chuyến bay và ngày đến không?|Can you arrange an airport pickup?|Anh/chị có thể sắp xếp đón sân bay không?
+Let me check the pickup options and any charges.|Để tôi kiểm tra lựa chọn đón và các khoản phí.|Is the transfer free?|Xe đưa đón có miễn phí không?
+The driver will need the confirmed terminal information.|Tài xế sẽ cần thông tin nhà ga đã xác nhận.|What information does the driver need?|Tài xế cần thông tin gì?
+Please use the meeting point stated in your confirmation.|Anh/chị vui lòng đến điểm hẹn ghi trên xác nhận.|Where should I meet the driver?|Tôi nên gặp tài xế ở đâu?
+Please inform us of any flight changes as soon as possible.|Anh/chị vui lòng báo sớm nhất có thể nếu chuyến bay thay đổi.|My flight may be delayed.|Chuyến bay của tôi có thể bị trễ.
+I will contact the transport provider to check the driver's location.|Tôi sẽ liên hệ bên vận chuyển để kiểm tra vị trí tài xế.|I cannot find the driver.|Tôi không tìm thấy tài xế.
+How many suitcases will you be bringing?|Anh/chị sẽ mang bao nhiêu va li?
+Do you need a child seat or an accessible vehicle?|Anh/chị có cần ghế trẻ em hoặc xe hỗ trợ tiếp cận không?
+We must confirm special equipment before accepting the booking.|Chúng tôi phải xác nhận thiết bị đặc biệt trước khi nhận đặt xe.
+Please keep your phone available near the pickup time.|Anh/chị vui lòng giữ điện thoại có thể liên lạc gần giờ đón.
+The transfer is confirmed only after you receive confirmation.|Dịch vụ đưa đón chỉ được xác nhận khi anh/chị nhận xác nhận.
+Do not enter a vehicle that does not match the confirmed details.|Đừng lên xe không khớp thông tin đã xác nhận.
+Let me write the transport contact number for you.|Để tôi viết số liên hệ bên vận chuyển cho anh/chị.
+Traffic may affect the departure time we recommend.|Giao thông có thể ảnh hưởng giờ khởi hành chúng tôi khuyến nghị.
+Please check all belongings before leaving the vehicle.|Anh/chị vui lòng kiểm tra đồ đạc trước khi rời xe.
+I will pass your updated flight details to the provider.|Tôi sẽ chuyển thông tin chuyến bay mới cho nhà cung cấp.
+@hotel_fo_wakeup|your wake-up call request|yêu cầu gọi báo thức của anh/chị|whether the time is in the morning or evening|giờ đó là buổi sáng hay buổi tối|confirm the wake-up time in the system|xác nhận giờ báo thức trong hệ thống
+What time would you like your wake-up call?|Anh/chị muốn được gọi báo thức lúc mấy giờ?|Can I book a wake-up call?|Tôi có thể đặt gọi báo thức không?
+May I confirm that you mean five in the morning?|Tôi có thể xác nhận ý anh/chị là năm giờ sáng không?|Please call me at five.|Vui lòng gọi tôi lúc năm giờ.
+I will record the date as well as the time.|Tôi sẽ ghi cả ngày lẫn giờ.|The call is for tomorrow.|Cuộc gọi dành cho ngày mai.
+Let me check whether a second reminder can be arranged.|Để tôi kiểm tra xem có thể sắp xếp nhắc lần hai không.|Can you call twice?|Anh/chị có thể gọi hai lần không?
+I can update the request after verifying the room details.|Tôi có thể sửa yêu cầu sau khi xác minh thông tin phòng.|I want to change the time.|Tôi muốn đổi giờ.
+I am sorry. I will ask the duty manager to review the missed call.|Tôi xin lỗi. Tôi sẽ nhờ quản lý trực xem xét cuộc gọi bị lỡ.|I did not receive my wake-up call.|Tôi không nhận được cuộc gọi báo thức.
+Is this request for one day or several mornings?|Yêu cầu này cho một ngày hay nhiều buổi sáng?
+Please confirm your local departure time.|Anh/chị vui lòng xác nhận giờ khởi hành theo giờ địa phương.
+Your phone alarm can provide an additional reminder.|Báo thức điện thoại có thể nhắc thêm cho anh/chị.
+Please make sure the room telephone is connected.|Anh/chị vui lòng bảo đảm điện thoại phòng được kết nối.
+May we call your room to test the telephone?|Chúng tôi có thể gọi phòng để kiểm tra điện thoại không?
+I will read back the requested time to avoid confusion.|Tôi sẽ đọc lại giờ yêu cầu để tránh nhầm lẫn.
+The time shown here follows the hotel's local time zone.|Giờ hiển thị ở đây theo múi giờ địa phương của khách sạn.
+Please let us know if you no longer need the call.|Anh/chị vui lòng báo nếu không còn cần cuộc gọi.
+I have removed the previous time from the request.|Tôi đã xóa giờ trước khỏi yêu cầu.
+Let me check the record before confirming the change.|Để tôi kiểm tra hồ sơ trước khi xác nhận thay đổi.
+@hotel_fo_dining|your restaurant booking request|yêu cầu đặt bàn nhà hàng của anh/chị|how many people will be dining|sẽ có bao nhiêu người dùng bữa|check restaurant availability and booking conditions|kiểm tra bàn trống và điều kiện đặt nhà hàng
+Which restaurant would you like to book?|Anh/chị muốn đặt nhà hàng nào?|Can you book dinner for us?|Anh/chị có thể đặt bữa tối cho chúng tôi không?
+What time would you prefer to dine?|Anh/chị muốn dùng bữa lúc mấy giờ?|We would like a table tonight.|Chúng tôi muốn đặt bàn tối nay.
+I will ask the restaurant to confirm your dietary request.|Tôi sẽ nhờ nhà hàng xác nhận yêu cầu ăn uống của anh/chị.|One of us has a food allergy.|Một người trong nhóm bị dị ứng thực phẩm.
+I cannot guarantee an allergen-free meal on behalf of the kitchen.|Tôi không thể thay bếp bảo đảm bữa ăn không có chất gây dị ứng.|Can you guarantee the meal is safe for my allergy?|Anh/chị có bảo đảm món ăn an toàn với dị ứng của tôi không?
+Let me check whether a deposit is required.|Để tôi kiểm tra xem có cần đặt cọc không.|Do I need to pay in advance?|Tôi có cần trả trước không?
+I will contact the restaurant to request a change.|Tôi sẽ liên hệ nhà hàng để đề nghị thay đổi.|Can we move the booking to later?|Chúng tôi có thể chuyển giờ đặt bàn muộn hơn không?
+Would you prefer indoor or outdoor seating?|Anh/chị muốn ngồi trong nhà hay ngoài trời?
+A seating preference cannot be guaranteed until confirmed.|Chưa thể bảo đảm vị trí ngồi trước khi được xác nhận.
+Please tell the restaurant directly about serious allergies.|Anh/chị vui lòng báo trực tiếp nhà hàng về dị ứng nghiêm trọng.
+May I share your contact number with the restaurant for this booking?|Tôi có thể chia sẻ số liên hệ với nhà hàng để phục vụ đặt bàn này không?
+Please review the cancellation terms for the table.|Anh/chị vui lòng xem điều kiện hủy bàn.
+I will check whether children are included in the headcount.|Tôi sẽ kiểm tra xem trẻ em đã được tính vào số người chưa.
+Let me ask whether a high chair is available.|Để tôi hỏi xem có ghế ăn trẻ em không.
+Please inform us if your party size changes.|Anh/chị vui lòng báo nếu số người trong nhóm thay đổi.
+The restaurant will confirm any special menu separately.|Nhà hàng sẽ xác nhận riêng thực đơn đặc biệt.
+Here are the confirmed booking details for your review.|Đây là thông tin đặt bàn đã xác nhận để anh/chị kiểm tra.
+@hotel_fo_groups|your group arrival arrangements|việc đón đoàn của anh/chị|who is authorised to coordinate the group|ai được ủy quyền điều phối đoàn|check the agreed group arrival plan|kiểm tra kế hoạch đón đoàn đã thống nhất
+May I speak with the group coordinator?|Tôi có thể trao đổi với người điều phối đoàn không?|Our group has arrived.|Đoàn chúng tôi đã đến.
+Let me check the approved rooming list.|Để tôi kiểm tra danh sách xếp phòng đã duyệt.|How are the rooms assigned?|Phòng được phân như thế nào?
+Each guest must complete the required registration process.|Mỗi khách phải hoàn tất thủ tục đăng ký cần thiết.|Can one person register for everyone?|Một người có thể đăng ký cho tất cả không?
+We will explain individual and group charges separately.|Chúng tôi sẽ giải thích riêng khoản phí cá nhân và của đoàn.|Which charges go to the group account?|Khoản phí nào tính vào tài khoản đoàn?
+Please keep the reception walkway clear for other guests.|Anh/chị vui lòng giữ lối đi quầy lễ tân thông thoáng cho khách khác.|Where can everyone wait?|Mọi người có thể chờ ở đâu?
+Changes to the rooming list need authorised confirmation.|Thay đổi danh sách phòng cần xác nhận của người có thẩm quyền.|I want to swap rooms with another guest.|Tôi muốn đổi phòng với khách khác.
+Please send personal details through the approved secure channel.|Anh/chị vui lòng gửi thông tin cá nhân qua kênh an toàn được phê duyệt.
+I cannot display the full guest list in a public area.|Tôi không thể trưng danh sách đầy đủ của khách ở nơi công cộng.
+May we confirm the luggage labels with the coordinator?|Chúng tôi có thể xác nhận nhãn hành lý với người điều phối không?
+The meeting point for your group is shown on this map.|Điểm tập trung của đoàn được chỉ trên bản đồ này.
+Please tell us if some guests are arriving separately.|Anh/chị vui lòng báo nếu có khách đến riêng.
+We will issue keys only through the approved verification process.|Chúng tôi chỉ cấp thẻ theo quy trình xác minh được phê duyệt.
+Let me check the departure schedule for the coach.|Để tôi kiểm tra lịch khởi hành của xe khách.
+Any group meal changes must be confirmed with the restaurant.|Mọi thay đổi bữa ăn đoàn phải được xác nhận với nhà hàng.
+I will note the agreed arrangements for the next shift.|Tôi sẽ ghi các sắp xếp đã thống nhất cho ca sau.
+Please confirm which contact we should use for updates.|Anh/chị vui lòng xác nhận người chúng tôi nên liên hệ để cập nhật.
+@hotel_fo_wifi|your guest Wi-Fi support request|yêu cầu hỗ trợ Wi-Fi của anh/chị|what message appears on your device|thiết bị của anh/chị hiện thông báo gì|check the guest network instructions|kiểm tra hướng dẫn mạng dành cho khách
+Please select the guest network listed on this card.|Anh/chị vui lòng chọn mạng dành cho khách ghi trên thẻ này.|How do I connect to the Wi-Fi?|Tôi kết nối Wi-Fi như thế nào?
+Open your browser to see whether a sign-in page appears.|Anh/chị hãy mở trình duyệt để xem trang đăng nhập có hiện không.|My phone says it is connected but has no internet.|Điện thoại báo đã kết nối nhưng không có internet.
+Please check the spelling of the access details.|Anh/chị vui lòng kiểm tra cách nhập thông tin truy cập.|The access code is not accepted.|Mã truy cập không được chấp nhận.
+I will contact the technical support team about the connection.|Tôi sẽ liên hệ hỗ trợ kỹ thuật về kết nối.|The connection keeps dropping.|Kết nối liên tục bị ngắt.
+Please enter your password yourself; I do not need to see it.|Anh/chị vui lòng tự nhập mật khẩu; tôi không cần xem.|Do you need my account password?|Anh/chị có cần mật khẩu tài khoản của tôi không?
+Let me check whether the service is currently affected.|Để tôi kiểm tra dịch vụ có đang gặp sự cố không.|Is there a network outage?|Mạng có đang bị gián đoạn không?
+May I explain the steps without handling your device?|Tôi có thể hướng dẫn các bước mà không cầm thiết bị của anh/chị không?
+Please avoid sharing confidential information on an unfamiliar network.|Anh/chị vui lòng tránh chia sẻ thông tin bí mật trên mạng không quen thuộc.
+We cannot troubleshoot your private banking application.|Chúng tôi không thể xử lý lỗi ứng dụng ngân hàng riêng của anh/chị.
+Would you like the network name written down?|Anh/chị có muốn tôi viết tên mạng ra không?
+I will not ask you to disable your device's security protections.|Tôi sẽ không yêu cầu anh/chị tắt bảo vệ an ninh của thiết bị.
+Please tell support which device type you are using.|Anh/chị vui lòng báo hỗ trợ loại thiết bị đang dùng.
+A restart may interrupt your current call or download.|Khởi động lại có thể ngắt cuộc gọi hay tải xuống đang thực hiện.
+Please save your work before following troubleshooting steps.|Anh/chị vui lòng lưu công việc trước khi làm các bước khắc phục.
+I will ask support for an estimated update time.|Tôi sẽ hỏi hỗ trợ thời gian dự kiến có thông tin mới.
+Thank you for your patience while the team investigates.|Cảm ơn anh/chị kiên nhẫn trong khi bộ phận kiểm tra.
+@hotel_hk_turndown|your evening room service request|yêu cầu phục vụ phòng buổi tối của anh/chị|whether you want evening service today|hôm nay anh/chị có muốn phục vụ buổi tối không|check the evening service schedule|kiểm tra lịch phục vụ buổi tối
+Good evening. Would you like turndown service?|Chào buổi tối. Anh/chị có muốn dịch vụ chuẩn bị phòng buổi tối không?|What service are you offering?|Anh/chị đang cung cấp dịch vụ gì?
+We can prepare the bed and refresh the room according to our service.|Chúng tôi có thể chuẩn bị giường và làm mới phòng theo dịch vụ.|What does turndown include?|Dịch vụ chuẩn bị phòng buổi tối gồm những gì?
+May I return at a more convenient time?|Tôi có thể quay lại vào giờ thuận tiện hơn không?|I am on a call at the moment.|Hiện tôi đang gọi điện.
+I will leave your personal belongings where they are.|Tôi sẽ giữ nguyên vị trí đồ dùng cá nhân của anh/chị.|Please do not move my things.|Vui lòng đừng di chuyển đồ của tôi.
+Would you like the curtains closed?|Anh/chị có muốn kéo rèm không?|Could you make the room ready for sleep?|Anh/chị có thể chuẩn bị phòng để ngủ không?
+Of course. I will note that you do not need service tonight.|Vâng. Tôi sẽ ghi anh/chị không cần phục vụ tối nay.|We do not need turndown today.|Hôm nay chúng tôi không cần phục vụ buổi tối.
+May I replace the used towels before you rest?|Tôi có thể thay khăn đã dùng trước khi anh/chị nghỉ không?
+Please let me know if the room lighting should stay as it is.|Anh/chị vui lòng báo nếu muốn giữ nguyên ánh sáng phòng.
+I will avoid adjusting your electronic devices.|Tôi sẽ tránh điều chỉnh thiết bị điện tử của anh/chị.
+Would you like an extra pillow for the night?|Anh/chị có muốn thêm gối cho đêm nay không?
+I will check the bed area for any service items.|Tôi sẽ kiểm tra khu vực giường để bổ sung đồ phục vụ.
+Please contact reception if you need assistance overnight.|Anh/chị vui lòng liên hệ lễ tân nếu cần hỗ trợ ban đêm.
+I will close the door securely when I leave.|Tôi sẽ đóng cửa an toàn khi rời đi.
+May I clear the used cups from the table?|Tôi có thể dọn cốc đã dùng trên bàn không?
+We will keep noise to a minimum during evening service.|Chúng tôi sẽ hạn chế tiếng ồn khi phục vụ buổi tối.
+Have a restful evening.|Chúc anh/chị buổi tối nghỉ ngơi thoải mái.
+@hotel_hk_eco|your linen reuse preference|mong muốn tái sử dụng đồ vải của anh/chị|which towels you would like to keep using|anh/chị muốn tiếp tục dùng những khăn nào|check the hotel's linen reuse procedure|kiểm tra quy trình tái sử dụng đồ vải của khách sạn
+Would you like to reuse your towels today?|Anh/chị có muốn dùng lại khăn hôm nay không?|How can I request fewer towel changes?|Tôi có thể yêu cầu giảm thay khăn như thế nào?
+Please follow the room notice to mark towels for replacement.|Anh/chị vui lòng theo thông báo trong phòng để đánh dấu khăn cần thay.|Which towels will you replace?|Anh/chị sẽ thay những khăn nào?
+We can keep the sheets if you prefer and the service procedure allows.|Chúng tôi có thể giữ ga nếu anh/chị muốn và quy trình cho phép.|Can I keep the same sheets today?|Hôm nay tôi có thể giữ nguyên ga không?
+I will still remove rubbish and check the room as arranged.|Tôi vẫn sẽ thu rác và kiểm tra phòng theo thỏa thuận.|Does reusing linen mean no cleaning?|Dùng lại đồ vải có nghĩa là không dọn phòng không?
+Let me show you the designated recycling containers.|Để tôi chỉ các thùng tái chế được quy định.|Where should I put recyclable items?|Tôi nên để đồ tái chế ở đâu?
+Of course. I will replace the towel you need changed.|Vâng. Tôi sẽ thay khăn anh/chị cần đổi.|This towel is dirty, so I need a fresh one.|Khăn này bẩn nên tôi cần khăn sạch.
+Participation in the reuse programme is your choice.|Việc tham gia chương trình tái sử dụng là lựa chọn của anh/chị.
+Please do not place batteries in the ordinary waste bin.|Anh/chị vui lòng không bỏ pin vào thùng rác thường.
+I will ask how to dispose of that item safely.|Tôi sẽ hỏi cách thải bỏ món đồ đó an toàn.
+Would you like drinking water replenished as usual?|Anh/chị có muốn bổ sung nước uống như thường lệ không?
+I will not remove items that may still belong to you.|Tôi sẽ không dọn bỏ đồ có thể vẫn là của anh/chị.
+Please separate waste only as the room instructions request.|Anh/chị vui lòng phân loại rác theo đúng hướng dẫn trong phòng.
+I can explain the reuse card in simpler words.|Tôi có thể giải thích thẻ tái sử dụng bằng từ đơn giản hơn.
+Let me confirm the choice for today's service only.|Để tôi xác nhận lựa chọn chỉ cho lần phục vụ hôm nay.
+Please tell us whenever you would like fresh linen.|Anh/chị vui lòng báo bất cứ khi nào muốn đồ vải sạch.
+Thank you for telling us your service preference.|Cảm ơn anh/chị đã cho biết mong muốn phục vụ.
+@hotel_hk_family|your family room setup request|yêu cầu bố trí phòng gia đình của anh/chị|what equipment your family needs|gia đình anh/chị cần thiết bị gì|check suitable family equipment with my supervisor|kiểm tra thiết bị gia đình phù hợp với giám sát
+Let me check whether an approved cot is available.|Để tôi kiểm tra xem còn cũi được phê duyệt không.|Can you bring a cot for our baby?|Anh/chị có thể mang cũi cho em bé không?
+We will follow the manufacturer's instructions when setting it up.|Chúng tôi sẽ theo hướng dẫn nhà sản xuất khi lắp đặt.|How will the cot be assembled?|Cũi sẽ được lắp như thế nào?
+May I confirm the space where you want the extra bed?|Tôi có thể xác nhận chỗ anh/chị muốn đặt giường phụ không?|Where can the extra bed go?|Có thể đặt giường phụ ở đâu?
+We must keep the doorway and evacuation route clear.|Chúng tôi phải giữ cửa và lối sơ tán thông thoáng.|Can you put the bed in front of the door?|Anh/chị có thể đặt giường trước cửa không?
+Please ask reception to confirm any additional charge.|Anh/chị vui lòng nhờ lễ tân xác nhận phí bổ sung.|Is the extra bed free?|Giường phụ có miễn phí không?
+I will ask my supervisor to check the setup before use.|Tôi sẽ nhờ giám sát kiểm tra bố trí trước khi sử dụng.|Could someone check that everything is ready?|Có ai có thể kiểm tra mọi thứ đã sẵn sàng không?
+How many additional towels does your family need?|Gia đình anh/chị cần thêm bao nhiêu khăn?
+Please supervise children around the service trolley.|Anh/chị vui lòng trông trẻ khi ở gần xe phục vụ.
+Cleaning products must remain out of children's reach.|Sản phẩm vệ sinh phải được để ngoài tầm với của trẻ.
+I cannot provide equipment that has not been approved for use.|Tôi không thể cung cấp thiết bị chưa được phê duyệt sử dụng.
+May I move this chair to create more space?|Tôi có thể di chuyển ghế này để tạo thêm chỗ không?
+Please keep small personal items away from the baby area.|Anh/chị vui lòng để đồ cá nhân nhỏ xa khu vực em bé.
+Let me check the permitted occupancy with reception.|Để tôi kiểm tra số người được phép ở với lễ tân.
+I will confirm availability before promising an extra bed.|Tôi sẽ xác nhận còn giường trước khi hứa có giường phụ.
+Would you prefer the room serviced while your family is out?|Anh/chị có muốn dọn phòng khi cả gia đình ra ngoài không?
+Please tell us if you no longer need the cot.|Anh/chị vui lòng báo nếu không còn cần cũi.
+@hotel_hk_pests|your report of insects in the room|phản ánh có côn trùng trong phòng của anh/chị|where you noticed the insects|anh/chị thấy côn trùng ở đâu|inform the supervisor and the designated pest team|báo giám sát và đội xử lý côn trùng được chỉ định
+I am sorry. I will report this to my supervisor immediately.|Tôi xin lỗi. Tôi sẽ báo giám sát ngay.|I have seen insects in the room.|Tôi thấy côn trùng trong phòng.
+Could you show me where you noticed them without touching them?|Anh/chị có thể chỉ nơi nhìn thấy mà không chạm vào chúng không?|Do you need to see the area?|Anh/chị có cần xem khu vực đó không?
+I will arrange an inspection through the approved team.|Tôi sẽ sắp xếp kiểm tra qua đội được phê duyệt.|Can you inspect the room?|Anh/chị có thể kiểm tra phòng không?
+Only authorised staff may apply pest control products.|Chỉ nhân viên có thẩm quyền mới được dùng sản phẩm diệt côn trùng.|Can you spray something yourself?|Anh/chị có thể tự xịt thuốc không?
+Reception can review a room alternative after checking availability.|Lễ tân có thể xem phương án phòng khác sau khi kiểm tra phòng trống.|Can we change rooms?|Chúng tôi có thể đổi phòng không?
+Please wait for the authorised team to confirm when the area can be used.|Anh/chị vui lòng chờ đội có thẩm quyền xác nhận lúc có thể dùng lại khu vực.|When can we return to the room?|Khi nào chúng tôi có thể quay lại phòng?
+Please keep children and pets away from the affected area.|Anh/chị vui lòng giữ trẻ em và vật nuôi tránh khu vực bị ảnh hưởng.
+I will record the location and time of your report.|Tôi sẽ ghi vị trí và thời điểm anh/chị báo.
+We will not move your luggage without permission.|Chúng tôi sẽ không di chuyển hành lý khi chưa được phép.
+Please avoid using unapproved chemicals in the room.|Anh/chị vui lòng tránh dùng hóa chất không được phê duyệt trong phòng.
+I cannot identify a species without the proper inspection.|Tôi không thể xác định loài khi chưa kiểm tra phù hợp.
+Let me ask the team how to handle the affected linen.|Để tôi hỏi đội phụ trách cách xử lý đồ vải bị ảnh hưởng.
+The team will explain any preparation needed before treatment.|Đội phụ trách sẽ giải thích việc cần chuẩn bị trước khi xử lý.
+Please follow the instructions provided after the inspection.|Anh/chị vui lòng theo hướng dẫn được đưa ra sau khi kiểm tra.
+I will ask for an update on the inspection outcome.|Tôi sẽ xin cập nhật kết quả kiểm tra.
+Thank you for reporting the problem promptly.|Cảm ơn anh/chị đã báo vấn đề kịp thời.
+@hotel_hk_handover|your pending housekeeping request|yêu cầu buồng phòng đang chờ của anh/chị|what has already been agreed with the previous shift|anh/chị đã thống nhất gì với ca trước|review the handover record with the next shift|xem lại ghi chép bàn giao với ca sau
+Let me check the request recorded by the previous shift.|Để tôi kiểm tra yêu cầu ca trước đã ghi.|I already asked someone this morning.|Tôi đã nhờ một người vào sáng nay.
+I will confirm which part of the service is still outstanding.|Tôi sẽ xác nhận phần phục vụ nào còn chưa xong.|Only part of the request was completed.|Chỉ một phần yêu cầu được hoàn tất.
+May I read back the details to make sure they are correct?|Tôi có thể đọc lại thông tin để bảo đảm chính xác không?|How do I know you have the right details?|Làm sao tôi biết anh/chị có đúng thông tin?
+I will pass the agreed time to the next shift.|Tôi sẽ chuyển giờ đã thống nhất cho ca sau.|I need the service after your shift ends.|Tôi cần phục vụ sau khi ca của anh/chị kết thúc.
+I will ask my supervisor to confirm who will follow up.|Tôi sẽ nhờ giám sát xác nhận ai sẽ theo dõi.|Who will contact me about this?|Ai sẽ liên hệ tôi về việc này?
+Please contact reception if the agreed update does not arrive.|Anh/chị vui lòng liên hệ lễ tân nếu chưa nhận cập nhật đã hẹn.|What should I do if nobody calls back?|Tôi nên làm gì nếu không ai gọi lại?
+We will include only necessary service details in the handover.|Chúng tôi sẽ chỉ ghi thông tin phục vụ cần thiết khi bàn giao.
+I will not write sensitive personal details in a public note.|Tôi sẽ không ghi thông tin cá nhân nhạy cảm vào giấy công khai.
+Let me distinguish a confirmed arrangement from a pending request.|Để tôi phân biệt sắp xếp đã xác nhận với yêu cầu còn chờ.
+Please tell me if the room access permission has changed.|Anh/chị vui lòng báo nếu quyền cho vào phòng đã thay đổi.
+The next shift will need your preferred contact method.|Ca sau sẽ cần cách liên hệ anh/chị mong muốn.
+I will note that the item has not yet been delivered.|Tôi sẽ ghi món đồ vẫn chưa được giao.
+We will check the room status before marking the request complete.|Chúng tôi sẽ kiểm tra tình trạng phòng trước khi ghi hoàn tất yêu cầu.
+Please confirm whether you still need the service.|Anh/chị vui lòng xác nhận còn cần phục vụ không.
+I will update the record after speaking with you.|Tôi sẽ cập nhật ghi chép sau khi trao đổi với anh/chị.
+Thank you for helping us keep the handover accurate.|Cảm ơn anh/chị đã giúp chúng tôi bàn giao chính xác.

@@ -50,3 +50,6 @@ internal class SpeechEndpoint(
         return reason
     }
 }
+
+/** Longer passages need time for ten sentences; single-utterance behaviour is unchanged. */
+internal fun speechAttemptLimitMillis(wholePassage: Boolean) = if (wholePassage) 240000 else 60000

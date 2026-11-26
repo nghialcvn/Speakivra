@@ -292,7 +292,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
                 request.profile.parts.forEachIndexed { index, part ->
                     check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)
                     check(tts.setSpeechRate(SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)
-                    check(tts.speak(part.text, TextToSpeech.QUEUE_ADD, null, prefix + "repeat-$round-$index") == TextToSpeech.SUCCESS)
+                    check(tts.speak(personalNameSpeech(part.text), TextToSpeech.QUEUE_ADD, null, prefix + "repeat-$round-$index") == TextToSpeech.SUCCESS)
                     if (part.pauseAfterMs > 0 && index < request.profile.parts.lastIndex) {
                         check(tts.playSilentUtterance(part.pauseAfterMs, TextToSpeech.QUEUE_ADD, prefix + "gap-$round-$index") == TextToSpeech.SUCCESS)
                     }
@@ -322,5 +322,15 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     }
     fun close() {
         closed = true; stop(); runCatching { engine?.shutdown() }; engine = null
+    }
+}
+
+/** Hint the name's language without changing the displayed name or English voice selection. */
+internal fun personalNameSpeech(text: String): CharSequence {
+    val name = Regex("(?i)^My name is (.+?)[.!?]?$" ).matchEntire(text.trim())?.groups?.get(1) ?: return text
+    if (name.value.none { it.code > 127 }) return text
+    return android.text.SpannableString(text).apply {
+        setSpan(android.text.style.LocaleSpan(java.util.Locale.forLanguageTag("vi-VN")),
+            name.range.first, name.range.last + 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }

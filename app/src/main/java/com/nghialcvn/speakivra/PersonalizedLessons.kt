@@ -1,17 +1,14 @@
 package com.nghialcvn.speakivra
 
-/** Keep lesson IDs/order and progress positions intact; only learner-name fields change. */
+import java.text.Normalizer
+
+/** Only substitute the name slot; preserve its spelling, accents, sentence and stable content IDs. */
 internal fun personalizeLesson(lesson: Lesson, name: String): Lesson {
-    fun text(value: String) = value.replace("Alex", name)
+    val displayName = Normalizer.normalize(name.trim(), Normalizer.Form.NFC)
+    fun text(value: String) = value.replace("Alex", displayName)
     return lesson.copy(
-        phrases = lesson.phrases.map { phrase ->
-            if (phrase.english == "My name is Alex.") phrase.copy(english = "I'm $name.", vietnamese = "Tôi là $name.", tip = "Nói tự nhiên, nối I'm với tên của bạn.")
-            else phrase.copy(english = text(phrase.english), vietnamese = text(phrase.vietnamese), tip = text(phrase.tip))
-        },
-        conversation = lesson.conversation.map { turn ->
-            if (turn.reply == "My name is Alex.") turn.copy(prompt = text(turn.prompt), translation = text(turn.translation),
-                reply = "I'm $name.", replyTranslation = "Tôi là $name.")
-            else turn.copy(prompt = text(turn.prompt), translation = text(turn.translation), reply = text(turn.reply), replyTranslation = text(turn.replyTranslation))
-        }
+        phrases = lesson.phrases.map { it.copy(english = text(it.english), vietnamese = text(it.vietnamese), tip = text(it.tip)) },
+        conversation = lesson.conversation.map { it.copy(prompt = text(it.prompt), translation = text(it.translation),
+            reply = text(it.reply), replyTranslation = text(it.replyTranslation)) }
     )
 }

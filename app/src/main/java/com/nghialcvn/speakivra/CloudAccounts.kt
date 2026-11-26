@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -187,7 +188,9 @@ class AccountSyncWorker(context: Context, parameters: WorkerParameters): Corouti
         val expected = inputData.getString("uid") ?: return Result.success()
         if (runtime.uid != expected || runtime.auth.currentUser?.isEmailVerified != true) return Result.success()
         return try {
-            if (runtime.needsRestore(expected)) runtime.syncAll(expected) else runtime.syncPending(expected)
+            withTimeout(45_000L) {
+                if (runtime.needsRestore(expected)) runtime.syncAll(expected) else runtime.syncPending(expected)
+            }
             Result.success()
         }
         catch (_: Exception) { if (runAttemptCount < 5) Result.retry() else Result.failure() }

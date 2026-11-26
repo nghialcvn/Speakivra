@@ -9,12 +9,18 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.exceptions.NoCredentialException
+import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.CancellationException
 import org.json.JSONObject
 
 @Composable
@@ -36,34 +42,44 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
         }
         AccountSession(user.uid, user.displayName?.takeIf { it.isNotBlank() } ?: "Tài khoản Speakivra", provider, user.isEmailVerified, user.email)
     }
-    private fun <T> run(result: (Result<T>) -> Unit, action: suspend () -> T) {
+    private fun <T> run(result: (Result<T>) -> Unit, timeoutMillis: Long = 30_000L, action: suspend () -> T) {
         scope.launch {
-            val value = runCatching { action() }.recoverCatching { throw IllegalStateException(message(it), it) }
+            val value = try {
+                Result.success(withTimeout(timeoutMillis) { action() })
+            } catch (_: TimeoutCancellationException) {
+                Result.failure(IllegalStateException("Kết nối quá lâu. Hãy kiểm tra mạng và thử lại; dữ liệu học vẫn được giữ trên máy."))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Result.failure(IllegalStateException(message(error), error))
+            }
             result(value)
         }
     }
-    private suspend fun finishSession(): AccountSession {
+    private suspend fun finishSession(refresh: Boolean = false): AccountSession {
         val user = requireNotNull(auth.currentUser)
-        user.reload().cloudAwait(); user.getIdToken(true).cloudAwait()
+        // A completed sign-in already supplies the verified Firebase user and ID token.
+        // Reload only after email verification; never wait for Firestore before returning login.
+        if (refresh) { user.reload().cloudAwait(); user.getIdToken(true).cloudAwait() }
         runtime.changed()
-        if (auth.currentUser?.isEmailVerified == true) {
-            // Login remains valid if the connection drops; the account screen does not claim sync succeeded.
-            runCatching { runtime.syncAll() }; runtime.schedule()
-        }
+        if (auth.currentUser?.isEmailVerified == true) runtime.schedule()
         return requireNotNull(session)
     }
     private suspend fun authenticateProvider(provider: LoginProvider, linking: Boolean): AccountSession {
         when(provider) {
             LoginProvider.GOOGLE -> {
-                val option = GetGoogleIdOption.Builder().setServerClientId(activity.getString(R.string.default_web_client_id))
-                    .setFilterByAuthorizedAccounts(false).setAutoSelectEnabled(false).build()
-                val response = CredentialManager.create(activity).getCredential(activity, GetCredentialRequest.Builder().addCredentialOption(option).build())
+                val response = withTimeout(60_000L) {
+                    CredentialManager.create(activity).getCredential(activity,
+                        googleButtonRequest(activity.getString(R.string.default_web_client_id)))
+                }
                 val credential = response.credential
                 check(credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) { "Chưa nhận được tài khoản Google." }
                 val token = GoogleIdTokenCredential.createFrom(credential.data).idToken
                 val google = GoogleAuthProvider.getCredential(token, null)
-                if (linking) requireNotNull(auth.currentUser).linkWithCredential(google).cloudAwait()
-                else auth.signInWithCredential(google).cloudAwait()
+                withTimeout(25_000L) {
+                    if (linking) requireNotNull(auth.currentUser).linkWithCredential(google).cloudAwait()
+                    else auth.signInWithCredential(google).cloudAwait()
+                }
             }
             LoginProvider.MICROSOFT -> {
                 error("Đăng nhập Microsoft tạm thời chưa khả dụng. Hãy dùng Google hoặc email.")
@@ -72,11 +88,11 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
         }
         return finishSession()
     }
-    override fun signIn(provider: LoginProvider, email: String, password: String, result: (Result<AccountSession>) -> Unit) = run(result) {
+    override fun signIn(provider: LoginProvider, email: String, password: String, result: (Result<AccountSession>) -> Unit) = run(result, if (provider == LoginProvider.GOOGLE) 90_000L else 30_000L) {
         if (provider == LoginProvider.EMAIL) { auth.signInWithEmailAndPassword(email, password).cloudAwait(); finishSession() }
         else authenticateProvider(provider, false)
     }
-    override fun linkProvider(provider: LoginProvider, result: (Result<AccountSession>) -> Unit) = run(result) {
+    override fun linkProvider(provider: LoginProvider, result: (Result<AccountSession>) -> Unit) = run(result, 90_000L) {
         val before = requireNotNull(session); check(before.verified)
         val linked = authenticateProvider(provider, true); check(linked.uid == before.uid); linked
     }
@@ -85,7 +101,7 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
         requireNotNull(auth.currentUser).sendEmailVerification().cloudAwait(); runtime.changed()
     }
     override fun resetPassword(email: String, result: (Result<Unit>) -> Unit) = run(result) { auth.sendPasswordResetEmail(email).cloudAwait(); Unit }
-    override fun refreshSession(result: (Result<AccountSession>) -> Unit) = run(result) { finishSession() }
+    override fun refreshSession(result: (Result<AccountSession>) -> Unit) = run(result) { finishSession(refresh = true) }
     override fun verifyEmail(result: (Result<Unit>) -> Unit) = run(result) { requireNotNull(auth.currentUser).sendEmailVerification().cloudAwait(); Unit }
     override fun sync(payload: JSONObject, result: (Result<Unit>) -> Unit) = run(result) {
         val owner = requireNotNull(session); check(owner.verified)
@@ -102,9 +118,12 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
         auth.signOut()
         if (oldUid != null) androidx.work.WorkManager.getInstance(activity).cancelUniqueWork("speakivra-sync-$oldUid")
         runtime.changed()
+        scope.launch { runCatching { CredentialManager.create(activity).clearCredentialState(ClearCredentialStateRequest()) } }
     }
     private fun message(error: Throwable): String = when(error) {
         is GetCredentialCancellationException -> "Đã hủy chọn tài khoản."
+        is NoCredentialException -> "Chưa lấy được tài khoản Google. Hãy kiểm tra tài khoản Google và Dịch vụ Google Play trên máy rồi thử lại."
+        is GetCredentialException -> "Google chưa trả về tài khoản. Hãy kiểm tra kết nối và thử lại."
         is FirebaseAuthUserCollisionException -> "Tài khoản này đã được dùng. Hãy đăng nhập bằng cách đã liên kết trước đó; hồ sơ không được chuyển sang tài khoản khác."
         is FirebaseAuthInvalidCredentialsException -> "Email hoặc mật khẩu chưa đúng. Hãy kiểm tra lại."
         is FirebaseAuthInvalidUserException -> "Không đăng nhập được tài khoản này. Hãy kiểm tra email hoặc đặt lại mật khẩu."
@@ -123,3 +142,7 @@ internal class FirebaseAccountGateway(private val activity: ComponentActivity, p
             ?: "Chưa kết nối được dịch vụ tài khoản. Tiến độ vẫn được giữ trên máy."
     }
 }
+
+/** Explicit Google button flow, rather than the automatic bottom-sheet option. */
+internal fun googleButtonRequest(webClientId: String): GetCredentialRequest = GetCredentialRequest.Builder()
+    .addCredentialOption(GetSignInWithGoogleOption.Builder(webClientId).build()).build()

@@ -43,7 +43,7 @@ internal fun GuestIdentityLabel(learner: Learner) {
     }
     Text(if (identity?.ownerUid == null) "Hồ sơ khách • Chưa liên kết" else "Hồ sơ đã liên kết",
         color = studio.muted, fontSize = 11.sp)
-    identity?.let { Text(it.serial, color = studio.muted, fontSize = 10.sp) }
+    identity?.let { Text(it.serial, color = studio.muted, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
 
 /** Account screens retain the approved login, link and three-card sync composition. */
@@ -73,6 +73,7 @@ internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
             session = gateway.session
             page = if (session == null) "login" else if (session?.verified != true) "verify" else "account"
             synced = false
+            busy = false
         }
     }
     val displaySynced = if (gateway is FirebaseAccountGateway) remember(cloudRevision, learner?.id, synced) { runtime.isSynced(learner) } else synced
@@ -308,7 +309,7 @@ internal fun GuestLinkSummary(learner: Learner, identity: GuestIdentity?) {
                 Text("Hồ sơ trên máy này", color = studio.muted, fontSize = 12.sp, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(studio.muted.copy(alpha = .10f)).padding(horizontal = 8.dp, vertical = 4.dp))
             }
         }
-        identity?.let { Text(it.serial, color = studio.coral, fontSize = 11.sp) }
+        identity?.let { Text(it.serial, color = studio.coral, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         HorizontalDivider()
         listOf("book" to "Bài học đã học", "progress" to "Tiến độ từng câu", "diamond" to "Thành tích kim cương").forEach { (icon, label) ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

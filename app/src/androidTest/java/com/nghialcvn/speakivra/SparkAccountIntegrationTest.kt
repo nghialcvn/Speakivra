@@ -10,6 +10,13 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withTimeout
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import org.json.JSONObject
 import org.junit.*
 import org.junit.Assert.*
@@ -76,6 +83,9 @@ class SparkAccountIntegrationTest {
         val email="speakivra-${UUID.randomUUID()}@example.test";val password="Emulator-only-long-password-123"
         ui.onNodeWithText("Tài khoản & đồng bộ",substring=false).performClick()
         ui.onNodeWithText("Tiếp tục với Google").assertExists()
+        val request = googleButtonRequest(ui.activity.getString(R.string.default_web_client_id))
+        assertEquals(1, request.credentialOptions.size)
+        assertTrue(request.credentialOptions.single() is GetSignInWithGoogleOption)
         shot("84-login-live-sdk")
         ui.onNodeWithText("Tiếp tục với Microsoft").assertDoesNotExist()
         ui.onNode(hasText("Tạo tài khoản") and hasClickAction()).performScrollTo().performClick()
@@ -134,5 +144,29 @@ class SparkAccountIntegrationTest {
         shot("83-spark-cloud-restored")
         ui.onNodeWithText("Trang chủ", substring=false).performClick()
         ui.onNodeWithText("Tiếp tục học", substring=false).performScrollTo().assertExists()
+        // Sign-in must return even if Firestore cannot reach its server. A second app instance
+        // keeps Auth on the real emulator but points Firestore at an unused local port.
+        val isolated = FirebaseApp.initializeApp(ui.activity,
+            FirebaseOptions.Builder().setProjectId("demo-speakivra-spark")
+                .setApplicationId("1:123456:android:test").setApiKey("fake-api-key").build(),
+            "auth-with-unreachable-firestore-${UUID.randomUUID()}")
+        val slowAuth = FirebaseAuth.getInstance(isolated).apply { useEmulator("10.0.2.2", 9099) }
+        val unreachable = FirebaseFirestore.getInstance(isolated).apply { useEmulator("10.0.2.2", 1) }
+        AccountRuntime.installEmulated(ui.activity, slowAuth, unreachable)
+        val loginScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val completed = CompletableDeferred<Result<AccountSession>>()
+        try {
+            ui.runOnUiThread {
+                FirebaseAccountGateway(ui.activity, loginScope).signIn(LoginProvider.EMAIL, email, password) { completed.complete(it) }
+            }
+            val signedIn = runBlocking { withTimeout(5_000L) { completed.await() } }.getOrThrow()
+            assertEquals(owner, signedIn.uid)
+            assertTrue(signedIn.verified)
+        } finally {
+            slowAuth.signOut(); loginScope.cancel()
+            runBlocking { unreachable.terminate().cloudAwait() }
+            AccountRuntime.installEmulated(ui.activity, runtime.auth, runtime.db)
+            isolated.delete()
+        }
     }
 }

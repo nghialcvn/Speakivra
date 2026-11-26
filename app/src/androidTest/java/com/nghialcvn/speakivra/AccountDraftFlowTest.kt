@@ -45,7 +45,13 @@ class AccountDraftFlowTest {
         val store = LearnerStore(ui.activity); val person = store.all().single()
         val before = store.preferences(person).all.toMap()
         val identityStore = GuestIdentityStore(ui.activity)
+        val workers = java.util.concurrent.Executors.newFixedThreadPool(4)
+        val concurrent = try {
+            workers.invokeAll((1..8).map { java.util.concurrent.Callable { GuestIdentityStore(ui.activity).ensure(person) } }).map { it.get() }
+        } finally { workers.shutdownNow() }
+        Assert.assertEquals(1, concurrent.toSet().size)
         val identity = identityStore.ensure(person)
+        Assert.assertEquals(concurrent.first(), identity)
         ui.waitUntil(10000) { ui.onAllNodesWithText(identity.serial).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText("Hồ sơ khách • Chưa liên kết").assertExists()
         shot("80-guest-profile-serial")

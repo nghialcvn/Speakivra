@@ -24,10 +24,23 @@ Firebase provisioning completed on 2026-11-26:
 
 Remaining prerequisites before implementing/deploying the live Firebase gateway and ownership transaction:
 
-1. Select the database edition/location and deployment plan; do not create a paid resource or enable billing automatically. Firestore API was not yet enabled at initial inspection; the database-list request returned 403, not evidence of an existing database.
+1. Singapore (`asia-southeast1`) approved by the user. Select the database edition and deployment plan; do not create a paid resource or enable billing automatically. Firestore API was not yet enabled at initial inspection; the database-list request returned 403, not evidence of an existing database.
 2. Register Microsoft OAuth with the agreed supported account types and redirect URI. Keep any Microsoft client secret on the provider/backend side, never in source or the APK.
 3. Implement the server claim transaction, idempotent learning merge, account-partitioned local access, account linking and background sync. Test concurrent claims, retries, offline use, account switching, restore, deletion and rule denial before release.
 
 Required claim invariant: one immutable owner UID per full profile ID, across reinstalls and copied local data. Authenticate the UID, verify the P-256 signature and profile/public-key hash, and atomically create/verify the ownership record. A repeat claim from the same UID is idempotent; a different UID is rejected. No client may update or delete the ownership record to make an old serial claimable again.
 
 Provider linking (Google/Microsoft/password) attaches another login method to the same Speakivra account UID. It never transfers guest-profile ownership to a different UID. Do not automatically merge two different UIDs merely because their email addresses match.
+
+
+## Release preflight — 2026-11-26
+
+The user requested publication. Publication remains blocked; do not bump the version, merge or change the update feed while the account gateway is unavailable.
+
+- Firebase MCP `firebase_get_environment` confirmed `Billing Enabled: No` for `speakivra-nghialcvn`.
+- The approved one-owner design uses server verification of a P-256 signature and an atomic immutable claim. The planned Cloud Functions deployment requires Blaze billing; no billing account or payment method was enabled by the agent. A decision on paid infrastructure is required before committing to that deployment route.
+- Google and email/password providers are provisioned, but the Android Firebase gateway is not yet implemented. Microsoft OAuth registration is still missing.
+- No database exists from this setup and no learning data has been uploaded. No authentication or synchronization release has been published.
+- Release remains version 1.1.7 (code 37), with the existing signed update feed intact.
+
+Billing prerequisite reference: https://firebase.google.com/docs/functions/faq-and-troubleshooting

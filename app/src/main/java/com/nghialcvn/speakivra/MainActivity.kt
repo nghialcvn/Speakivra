@@ -612,7 +612,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
                         when (page) {
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
-                                onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
+                                onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonHubScreen(
                                 onLevel = { selectedLevel = it; navigate("level-lessons") },

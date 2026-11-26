@@ -196,7 +196,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                     StudioIcon("chat", Modifier.size(30.dp), p.purple)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(if (HotelCurriculum.isHotel(lesson)) "Khách sạn • ${lessonLabel(lesson)}" else "Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
                     Text(lesson.title, fontSize = 14.sp)
                 }
             }

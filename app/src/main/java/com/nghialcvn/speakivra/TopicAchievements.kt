@@ -21,5 +21,5 @@ internal class TopicAchievements(private val prefs: SharedPreferences) {
         prefs.edit().putInt(key, best).apply()
     }
     fun hearts(lesson: Lesson): Int = achievementHearts(topicAccuracy(lesson) { prefs.getInt(key(lesson, it), 0) })
-    fun total(lessons: List<Lesson> = Lessons.all): Int = lessons.sumOf(::hearts)
+    fun total(lessons: List<Lesson> = Lessons.catalogue): Int = lessons.sumOf(::hearts)
 }

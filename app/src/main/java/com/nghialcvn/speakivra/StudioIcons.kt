@@ -16,6 +16,15 @@ import androidx.compose.ui.unit.dp
 /** Small native outline icons: no emoji glyphs, remote icon fonts or extra SDKs. */
 private val Shapes = mapOf(
     "diamond" to "M2 8 L7 2 L17 2 L22 8 L12 22 Z M2 8 L22 8 M7 2 L9 8 L12 22 L15 8 L17 2 M9 8 L12 2 L15 8",
+    "reception" to "M2 14 L22 14 L22 23 L2 23 Z M4 14 L4 10 Q4 7 8 7 Q12 7 12 10 L12 14 M8 1 C12 1 12 7 8 7 C4 7 4 1 8 1 Z M16 11 L23 11 M17 8 L22 8 L22 11 M19 5 L19 8",
+    "housekeeping" to "M3 7 L20 7 L20 20 L3 20 Z M1 3 L3 3 L3 20 M5 20 L5 23 M18 20 L18 23 M8 7 L8 3 L11 3 L11 7 M14 7 L14 2 L18 2 L18 7 M3 14 L20 14",
+    "door" to "M5 23 L5 2 L19 2 L19 23 M2 23 L22 23 M15 12 L15 14",
+    "key" to "M10 10 C2 14 -1 3 6 2 C14 0 17 9 10 10 Z M10 10 L22 22 M18 18 L21 15 M15 15 L18 12",
+    "towel" to "M5 3 L19 3 Q23 3 23 6 Q23 9 19 9 L5 9 Q1 9 1 6 Q1 3 5 3 Z M5 10 L19 10 Q23 10 23 13 Q23 16 19 16 L5 16 Q1 16 1 13 Q1 10 5 10 Z M5 17 L19 17 Q23 17 23 20 Q23 23 19 23 L5 23 Q1 23 1 20 Q1 17 5 17 Z",
+    "laundry" to "M3 2 L22 2 L22 24 L3 24 Z M3 7 L22 7 M7 4 L8 4 M11 4 L12 4 M12 10 C21 10 21 22 12 22 C3 22 3 10 12 10 Z M8 16 Q12 12 16 16",
+    "tools" to "M3 3 L8 8 L12 4 L11 1 Q23 3 18 12 L23 21 L20 24 L11 15 Q1 18 1 9 L4 10 L7 7 Z",
+    "card" to "M2 5 L23 5 L23 21 L2 21 Z M2 10 L23 10 M6 16 L11 16",
+    "sparkle" to "M12 1 L15 9 L23 12 L15 15 L12 23 L9 15 L1 12 L9 9 Z",
     "pencil" to "M4 16 L16 4 L20 8 L8 20 L3 21 Z M13 7 L17 11",
     "lock" to "M7 10 L7 7 C7 0 17 0 17 7 L17 10 M5 10 L19 10 L19 22 L5 22 Z M12 14 L12 18",
     "home" to "M3 10 L12 3 L21 10 L21 21 L15 21 L15 14 L9 14 L9 21 L3 21 Z",

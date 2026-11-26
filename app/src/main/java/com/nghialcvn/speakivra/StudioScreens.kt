@@ -36,7 +36,7 @@ internal fun lessonLabel(lesson: Lesson): String = when (lesson.id) {
     "a2_health" -> "Sức khỏe & sinh hoạt"; "a2_work" -> "Công việc & phối hợp"
     "a2_learning" -> "Học tập & mục tiêu"; "a2_community" -> "Cộng đồng & dịch vụ"
     "a2_stories" -> "Kể chuyện & tình huống"
-    else -> if (lesson.id.startsWith("a2_") || lesson.id.startsWith("b1_")) lesson.vietnamese else "Giao tiếp thường ngày"
+    else -> if (HotelCurriculum.isHotel(lesson)) lesson.vietnamese else if (lesson.id.startsWith("a2_") || lesson.id.startsWith("b1_")) lesson.vietnamese else "Giao tiếp thường ngày"
 }
 internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" }
 
@@ -196,7 +196,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                     StudioIcon("chat", Modifier.size(30.dp), p.purple)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(if (HotelCurriculum.isHotel(lesson)) "Khách sạn • ${lessonLabel(lesson)}" else "Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
                     Text(lesson.title, fontSize = 14.sp)
                 }
             }
@@ -224,7 +224,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
 
 @Composable
 internal fun LessonHubScreen(onLevel: (String) -> Unit, onChat: () -> Unit,
-    onPassages: () -> Unit, onExercises: () -> Unit, onBack: () -> Unit) {
+    onPassages: () -> Unit, onExercises: () -> Unit, onBack: () -> Unit, onHotel: () -> Unit = {}) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Bài học", "Chọn cấp độ hoặc dạng luyện tập", onBack)
@@ -234,6 +234,7 @@ internal fun LessonHubScreen(onLevel: (String) -> Unit, onChat: () -> Unit,
             LessonHubCard(title, "${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại",
                 "book") { onLevel(level) }
         }
+        LessonHubCard("Tiếng Anh Khách sạn", "Cấp độ riêng • Lễ tân 15 chủ đề • Buồng phòng 15 chủ đề", "reception", onHotel)
         LessonHubCard("Hội thoại mẫu", "Mô phỏng theo kịch bản", "chat", onChat)
         LessonHubCard("Luyện nói theo đoạn văn", "A1 • A2 • B1", "book", onPassages)
         LessonHubCard("Tiếng Anh nói thế nào?", "A1 • A2 • B1", "book", onExercises)
@@ -515,7 +516,12 @@ internal fun ConversationScreen(lesson: Lesson, turnIndex: Int, translation: Boo
                                 voiceChoice: VoiceChoice = VoiceChoice(), onVoiceSettings: () -> Unit = {},
                                 neon: Boolean = false,
                                 explanationLanguage: String = LearningOptions.VIETNAMESE,
-                                onTypedText: (String) -> Unit = {}) {
+                                onTypedText: (String) -> Unit = {}, hotelSpeed: Int = 75, onHotelSpeed: (Int) -> Unit = {}) {
+    if (HotelCurriculum.isHotel(lesson)) {
+        HotelConversationScreen(lesson, turnIndex, translation, transcript, capturePhase, learner,
+            hotelSpeed, nextLabel, onBack, onPrompt, onReply, onSpeak, onHotelSpeed, onNext)
+        return
+    }
     // One approved conversation component tree for Sáng, Tối and Neon.
     // Only theme colors and depth differ; navigation and speech stay unchanged.
     NeonConversationScreen(lesson, turnIndex, translation, transcript, capturePhase,

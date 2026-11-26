@@ -190,13 +190,17 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
     var page by rememberSaveable { mutableStateOf(if (resumeLearning) {
-        val item = Lessons.all.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
+        val item = Lessons.catalogue.firstOrNull { it.id == preferences.getString("active_lesson", "greetings") } ?: Lessons.all.first()
         restoreLessonProgress(item, preferences::getInt) { key, default -> preferences.getString(key, default) ?: default }.phase
     } else "home") }
     LaunchedEffect(updateRequested) {
         if (updateRequested) { page = "updates"; updates.check(); onUpdateHandled() }
     }
     var selectedLevel by rememberSaveable { mutableStateOf("A1") }
+    var hotelRole by rememberSaveable { mutableStateOf("FO") }
+    var hotelMode by rememberSaveable { mutableStateOf("repeat") }
+    var hotelDirectChat by rememberSaveable { mutableStateOf(false) }
+    var hotelChatTurn by rememberSaveable { mutableIntStateOf(0) }
     val installation = updates.installation
     val updateState = updates.state
     val updateScope = rememberCoroutineScope()
@@ -236,13 +240,13 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         { key, default -> preferences.getInt(key, default) },
         { key, default -> preferences.getString(key, default) ?: default })
     var selectedId by rememberSaveable { mutableStateOf(preferences.getString("active_lesson", "greetings") ?: "greetings") }
-    val learnerLessons = remember(learner.name) { Lessons.all.map { personalizeLesson(it, learner.name) } }
+    val learnerLessons = remember(learner.name) { Lessons.catalogue.map { personalizeLesson(it, learner.name) } }
     val lesson = learnerLessons.firstOrNull { it.id == selectedId && topicIsOpen(it, learnerLessons, ::loadProgress) } ?: learnerLessons.first()
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
     val achievements = remember(learner.id) { TopicAchievements(preferences) }
     val index = progress.phrase
     val phrases = lesson.phrases
-    val chatIndex = progress.turn
+    val chatIndex = if (HotelCurriculum.isHotel(lesson) && hotelDirectChat) hotelChatTurn else progress.turn
     var completed by remember { mutableIntStateOf(preferences.getInt("completed", 0).coerceAtLeast(0) + learnerLessons.sumOf { loadProgress(it).rounds }) }
     var reviewSelection by rememberSaveable(lesson.id, progress.review) { mutableIntStateOf(-1) }
     fun saveProgress(value: LessonProgress) {
@@ -300,15 +304,23 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     fun completeExtra(ids: Collection<String>) {
         extraCompleted = extraCompleted + ids
         preferences.edit().putStringSet("extra.completed_ids", extraCompleted).apply()
+        HotelCurriculum.all.forEach { hotelLesson ->
+            val learned = hotelLesson.phrases.filter { "exercise_${it.id}" in ids }.map { it.id }
+            if (learned.isNotEmpty()) {
+                val key = "lesson.${hotelLesson.id}.learned_phrases"
+                val prior = preferences.getString(key, "").orEmpty().split('|').filter { it.isNotBlank() }.toSet()
+                preferences.edit().putString(key, (prior + learned).joinToString("|")).apply()
+            }
+        }
     }
     val passage = ExtraPracticeData.passages.first { it.id == passageId }
     val sentence = passage.sentences[sentenceIndex.coerceIn(passage.sentences.indices)]
-    val exercise = ExtraPracticeData.exercises.first { it.id == exerciseId }
+    val exercise = (ExtraPracticeData.exercises + HotelCurriculum.exercises).first { it.id == exerciseId }
     val question = exercise.questions[questionIndex.coerceIn(exercise.questions.indices)]
     var voiceReturnPage by rememberSaveable { mutableStateOf("profile") }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
-    var finalTranscript by remember(page, learner.name, voiceChoice.accent, voiceChoice.gender, voiceChoice.voiceId, lesson.id, progress.phrase, progress.turn, progress.review, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) { mutableStateOf<String?>(null) }
+    var finalTranscript by remember(page, learner.name, voiceChoice.accent, voiceChoice.gender, voiceChoice.voiceId, lesson.id, progress.phrase, progress.turn, progress.review, hotelChatTurn, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) { mutableStateOf<String?>(null) }
     val wordMatch = matchWords(phrases[index].english, finalTranscript)
     val speech = remember(context) { SpeechPlayback(context.applicationContext) { status = it } }
     var capturePhase by remember { mutableStateOf("idle") }
@@ -321,6 +333,19 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                 finalTranscript = words.takeIf { it.isNotBlank() }
                 if (page == "repeat" && finalTranscript != null)
                     achievements.record(lesson, phrases[index].id, matchWords(phrases[index].english, finalTranscript))
+                if (page == "chat" && HotelCurriculum.isHotel(lesson) && finalTranscript != null) {
+                    val reply = lesson.conversation[chatIndex].reply
+                    lesson.phrases.firstOrNull { it.english == reply }?.let { phrase ->
+                        achievements.record(lesson, phrase.id, matchWords(phrase.english, finalTranscript))
+                    }
+                }
+                if (page == "exercise" && finalTranscript != null) {
+                    HotelCurriculum.all.firstOrNull { it.id == exercise.lessonId }?.let { hotelLesson ->
+                        hotelLesson.phrases.firstOrNull { "exercise_${it.id}" == question.id }?.let { phrase ->
+                            achievements.record(hotelLesson, phrase.id, matchWords(phrase.english, finalTranscript))
+                        }
+                    }
+                }
             }
         }
         status = message
@@ -355,7 +380,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400)
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
-    DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {
+    DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, hotelChatTurn, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {
         onDispose { stopCapture() }
     }
     fun clearExtra() {
@@ -382,6 +407,8 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         if (automatic && page == "repeat") speak(phrases[progress.phrase].english)
     }
     fun openLesson(source: Lesson) {
+        hotelDirectChat = false
+        if (HotelCurriculum.isHotel(source)) hotelRole = HotelCurriculum.role(source)
         if (!topicIsOpen(source, learnerLessons, ::loadProgress)) return
         val item = personalizeLesson(source, learner.name)
         stopCapture(); speech.stop()
@@ -390,8 +417,26 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         selectedId = item.id
         preferences.edit().putString("active_lesson", item.id).apply()
         val saved = loadProgress(item)
+        if (item.id == lesson.id) saveProgress(saved)
         page = saved.phase
         if (automatic && page == "repeat") speak(item.phrases[saved.phrase].english)
+    }
+    fun openHotelTopic(source: Lesson) {
+        hotelRole = HotelCurriculum.role(source)
+        val directChat = hotelMode == "chat"
+        hotelDirectChat = false
+        if (hotelMode == "exercise") {
+            selectedId = source.id
+            openExercise(HotelCurriculum.exercises.first { it.lessonId == source.id })
+        } else {
+            openLesson(source)
+            hotelDirectChat = directChat
+            if (directChat) {
+                hotelChatTurn = preferences.getInt("hotel.dialogue.${source.id}", 0)
+                    .takeIf { it in source.conversation.indices } ?: 0
+                page = "chat"
+            }
+        }
     }
     var neon by rememberSaveable { mutableStateOf(appearance.getBoolean("neon_theme", false)) }
     var dark by rememberSaveable { mutableStateOf(appearance.getBoolean("dark_theme", false)) }
@@ -421,7 +466,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
             "voice-settings" -> voiceReturnPage
             "updates", "edit-profile" -> "profile"
             "passage" -> "passages"
-            "exercise" -> "exercises"
+            "exercise" -> if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises"
+            "hotel-topics" -> "hotel"
+            "hotel" -> "lessons"
+            "repeat", "chat", "review", "summary" -> if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home"
             "level-lessons", "passages", "exercises" -> "lessons"
             else -> "home"
         })
@@ -564,12 +612,17 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
                         when (page) {
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
-                                onContinue = { page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
+                                onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonHubScreen(
                                 onLevel = { selectedLevel = it; navigate("level-lessons") },
                                 onChat = { navigate("chat") }, onPassages = { navigate("passages") },
-                                onExercises = { navigate("exercises") }, onBack = { navigate("home") })
+                                onExercises = { navigate("exercises") }, onBack = { navigate("home") },
+                                onHotel = { navigate("hotel") })
+                            "hotel" -> HotelHubScreen(hotelMode, { hotelMode = it },
+                                onRole = { hotelRole = it; navigate("hotel-topics") }, onBack = { navigate("lessons") })
+                            "hotel-topics" -> HotelTopicsScreen(hotelRole, ::loadProgress, achievements::hearts,
+                                onOpen = ::openHotelTopic, onBack = { navigate("hotel") })
                             "passages", "exercises" -> ExtraCatalogueScreen(page == "passages", extraLevel,
                                 extraCompleted, ::loadProgress, onLevel = { extraLevel = it },
                                 onBack = { navigate("lessons") }, onPassage = ::openPassage, onExercise = ::openExercise)
@@ -591,11 +644,12 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 })
                             "exercise" -> SpeakingExerciseScreen(exercise, questionIndex, extraCompleted, voiceChoice,
                                 learner, finalTranscript, transcript, capturePhase, status,
-                                onBack = { navigate("exercises") }, onSpeak = ::listen, onListen = { speak(it) },
+                                onBack = { navigate(if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises") }, onSpeak = ::listen, onListen = { speak(it) },
                                 onNext = {
                                     if (capturePhase == "idle" && evaluateExercise(question, finalTranscript).accepted) {
                                         completeExtra(listOf(question.id)); clearExtra()
-                                        if (questionIndex < exercise.questions.lastIndex) questionIndex++ else page = "exercises"
+                                        if (questionIndex < exercise.questions.lastIndex) questionIndex++
+                                        else page = if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises"
                                     }
                                 })
                             "level-lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
@@ -603,18 +657,20 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onBack = { navigate("lessons") }, hearts = achievements::hearts)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson, achievements::hearts)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
-                                onBack = { navigate("home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
+                                onBack = { navigate(if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },
                                 onSpeed = ::selectSpeed, onTranslation = { showTranslation = !showTranslation },
                                 onListen = { speak(phrases[index].english) }, onSpeak = ::listen, onNext = ::next,
                                 voiceChoice = voiceChoice, onVoiceSettings = ::openVoiceSettings,
                                 explanationLanguage = explanationLanguage)
                             "chat" -> ConversationScreen(lesson, chatIndex, showTranslation, finalTranscript.orEmpty(), capturePhase, status, learner,
-                                nextLabel = if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
+                                nextLabel = if (HotelCurriculum.isHotel(lesson) && hotelDirectChat) {
+                                    if (chatIndex != lesson.conversation.lastIndex) "Lượt tiếp theo" else "Hoàn thành hội thoại"
+                                } else if (chatIndex != lesson.conversation.lastIndex) "Câu hội thoại tiếp theo" else when (progress.phase) {
                                     "summary" -> "Về tổng kết"; "review" -> "Tiếp tục ôn tập"; else -> "Sang ôn tập"
-                                }, onBack = { navigate("home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
+                                }, onBack = { navigate(if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home") }, onPrompt = { speak(lesson.conversation[chatIndex].prompt) },
                                 onReply = { speak(lesson.conversation[chatIndex].reply) }, onSpeak = ::listen,
                                 onTranslation = { showTranslation = !showTranslation }, voiceChoice = voiceChoice,
-                                onVoiceSettings = ::openVoiceSettings, neon = neon,
+                                onVoiceSettings = ::openVoiceSettings, neon = neon, hotelSpeed = playbackSpeed, onHotelSpeed = ::selectSpeed,
                                 explanationLanguage = explanationLanguage,
                                 onTypedText = { typed ->
                                     stopCapture()
@@ -622,6 +678,16 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     finalTranscript = typed
                                     status = "Câu trả lời bạn đã nhập, chưa qua nhận dạng giọng nói."
                                 }, onNext = {
+                                    if (HotelCurriculum.isHotel(lesson) && hotelDirectChat) {
+                                        if (capturePhase == "idle" && matchWords(lesson.conversation[chatIndex].reply, finalTranscript).canContinue) {
+                                            clearExtra()
+                                            val key = "lesson.${lesson.id}.learned_turns"
+                                            val prior = preferences.getString(key, "").orEmpty().split('|').filter { it.isNotBlank() }.toSet()
+                                            preferences.edit().putString(key, (prior + lesson.conversation[chatIndex].id).joinToString("|"))
+                                                .putInt("hotel.dialogue.${lesson.id}", maxOf(preferences.getInt("hotel.dialogue.${lesson.id}", 0), chatIndex + 1)).apply()
+                                            if (chatIndex < lesson.conversation.lastIndex) hotelChatTurn++ else navigate("hotel-topics")
+                                        }
+                                    } else {
                                     stopCapture(); speech.stop()
                                     if (progress.phase in listOf("repeat", "chat")) {
                                         saveProgress(progress.copy(phase = "chat").nextTurn(lesson)); page = progress.phase
@@ -629,9 +695,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     else page = progress.phase
                                     transcript = ""
                                     if (automatic && page == "chat") speak(lesson.conversation[progress.turn].prompt)
+                                    }
                                 })
                             "review" -> ReviewScreen(lesson, progress, reviewSelection, finalTranscript.orEmpty(), capturePhase, status, learner,
-                                onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate("home") },
+                                onSelect = { if (reviewSelection < 0) reviewSelection = it }, onBack = { navigate(if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home") },
                                 onListen = {
                                     speak(if (explanationLanguage == LearningOptions.ENGLISH)
                                         EnglishStudy.review(lesson, progress.review).prompt
@@ -650,7 +717,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     }
                                 })
                             "summary" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                PageHeading("Hoàn thành bài học", lessonLabel(lesson), onBack = { navigate("home") })
+                                PageHeading("Hoàn thành bài học", lessonLabel(lesson), onBack = { navigate(if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home") })
                                 StudioCard(color = palette.mint, border = false) {
                                     Text(lesson.title, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
                                     Text("${lesson.phrases.size} câu mẫu • ${lesson.conversation.size} lượt hội thoại • 3 câu ôn tập")
@@ -661,9 +728,15 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                     stopCapture(); speech.stop(); saveProgress(progress.restart()); transcript = ""; page = "repeat"
                                     if (automatic) speak(phrases[0].english)
                                 })
-                                val following = learnerLessons.getOrNull(learnerLessons.indexOf(lesson) + 1)
+                                val following = learnerLessons.getOrNull(learnerLessons.indexOf(lesson) + 1)?.takeIf {
+                                    if (HotelCurriculum.isHotel(lesson)) HotelCurriculum.isHotel(it) && HotelCurriculum.role(it) == HotelCurriculum.role(lesson)
+                                    else !HotelCurriculum.isHotel(it)
+                                }
                                 if (following != null) CoralButton("Bài tiếp theo: ${lessonLabel(following)}", onClick = { openLesson(following) })
-                                TextButton(onClick = { selectedLevel = Lessons.levelOf(lesson); navigate("level-lessons") }) { Text("Về danh sách bài học") }
+                                TextButton(onClick = {
+                                    if (HotelCurriculum.isHotel(lesson)) { hotelRole = HotelCurriculum.role(lesson); navigate("hotel-topics") }
+                                    else { selectedLevel = Lessons.levelOf(lesson); navigate("level-lessons") }
+                                }) { Text("Về danh sách bài học") }
                             }
                             "edit-profile" -> CreateLearnerScreen(initial = learner, onBack = { navigate("profile") }, onSave = { name, avatar ->
                                 val error = onUpdateLearner(name, avatar)
@@ -749,10 +822,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     }
                 }
                 // All three appearances use the same full-screen scripted conversation.
-                if (page !in listOf("edit-profile", "voice-settings", "chat"))
+                if (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson)))
                     StudioBottomNavigation(when (page) {
-                    "level-lessons", "passages", "exercises" -> "lessons"
-                    "passage", "exercise" -> "repeat"
+                    "hotel", "hotel-topics", "level-lessons", "passages", "exercises" -> "lessons"
+                    "chat", "passage", "exercise" -> "repeat"
                     else -> page
                 }) { dest ->
                     navigate(dest)

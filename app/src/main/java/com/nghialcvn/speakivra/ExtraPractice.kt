@@ -27,4 +27,4 @@ internal fun evaluateExercise(question: ExerciseQuestion, transcript: String?): 
 internal fun nextUnfinishedQuestion(exercise: SpeakingExercise, completed: Set<String>): Int =
     exercise.questions.indexOfFirst { it.id !in completed }.coerceAtLeast(0)
 internal fun extraTopicOpen(lessonId: String, load: (Lesson) -> LessonProgress): Boolean =
-    Lessons.all.firstOrNull { it.id == lessonId }?.let { topicIsOpen(it, Lessons.all, load) } ?: false
+    Lessons.catalogue.firstOrNull { it.id == lessonId }?.let { topicIsOpen(it, Lessons.catalogue, load) } ?: false

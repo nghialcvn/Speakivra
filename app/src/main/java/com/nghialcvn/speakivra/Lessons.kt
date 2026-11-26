@@ -149,10 +149,12 @@ internal object Lessons {
         )),
     ).map(ExpandedLessons::append).map(MoreA1Practice::append) + A2Lessons.all + B1Lessons.all
 
+    val catalogue: List<Lesson> get() = all + HotelCurriculum.all
     val a1: List<Lesson> get() = all.filter { levelOf(it) == "A1" }
     val a2: List<Lesson> get() = all.filter { it.id.startsWith("a2_") }
     val b1: List<Lesson> get() = all.filter { levelOf(it) == "B1" }
     fun levelOf(lesson: Lesson): String = when {
+        HotelCurriculum.isHotel(lesson) -> HotelCurriculum.role(lesson)
         lesson.id.startsWith("a2_") -> "A2"
         lesson.id.startsWith("b1_") -> "B1"
         else -> "A1"

@@ -84,5 +84,12 @@ internal fun restoreLessonProgress(
         supplemental = readInt(prefix + "supplemental", 0) == 1,
         learnedPhrases = restored("learned_phrases", phrasesDone.toSet()),
         learnedTurns = restored("learned_turns", turnsDone.toSet())
-    ).reconcile(lesson)
+    ).reconcile(lesson).let { value ->
+        // Hotel translation practice records the same stable phrase IDs as repetition.
+        if (HotelCurriculum.isHotel(lesson) && value.phase == "repeat" &&
+            value.learnedPhrases.orEmpty().containsAll(lesson.phrases.map { it.id })) {
+            val pending = lesson.conversation.indexOfFirst { it.id !in value.learnedTurns.orEmpty() }
+            value.copy(phase = if (pending >= 0) "chat" else "review", turn = pending.coerceAtLeast(0))
+        } else value
+    }
 }

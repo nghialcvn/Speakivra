@@ -35,7 +35,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          cache-read-only: false
       - name: Test, lint and build once
         env:
           UI_CHECK: true

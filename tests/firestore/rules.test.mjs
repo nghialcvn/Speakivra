@@ -42,7 +42,7 @@ test('caller cannot create another owner or privileged extra fields',async()=>{
 test('snapshots need a claim and validate all required fields on create AND update',async()=>{
  const g=guest(),a=db('A'),ref=profileRef(a,'A',g);await assertFails(setDoc(ref,snapshot(g)));await claim(a,'A',g);
  await assertSucceeds(setDoc(ref,snapshot(g)));await assertSucceeds(updateDoc(ref,{name:'Nghĩa An',revision:2,updatedAt:serverTimestamp()}));
- for(const mutation of [{name:5},{name:''},{name:'x'.repeat(31)},{avatar:-1},{avatar:6},{profileId:'f'.repeat(64)},{admin:true},{progressJson:'x'.repeat(524289)},{createdAt:Timestamp.fromMillis(1)},{revision:9000000001}])
+ for(const mutation of [{schema:1.5},{schema:'1'},{name:5},{name:''},{name:'x'.repeat(31)},{avatar:-1},{avatar:6},{profileId:'f'.repeat(64)},{admin:true},{progressJson:'x'.repeat(524289)},{createdAt:Timestamp.fromMillis(1)},{revision:9000000001}])
   await assertFails(updateDoc(ref,{revision:3,updatedAt:serverTimestamp(),...mutation}));
  await assertFails(setDoc(ref,{name:'missing fields'}));await assertFails(updateDoc(ref,{name:'No revision increment',updatedAt:serverTimestamp()}));
 });

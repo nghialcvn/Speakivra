@@ -19,7 +19,7 @@ service cloud.firestore {
   function uidNotModified(data) { return data.ownerUid == resource.data.ownerUid; }
   function isValidClaim(data) {
    return data.keys().hasAll(['schema','ownerUid','createdAt']) &&
-    data.keys().hasOnly(['schema','ownerUid','createdAt']) && data.schema == 2 &&
+    data.keys().hasOnly(['schema','ownerUid','createdAt']) && data.schema is int && data.schema == 2 &&
     data.ownerUid is string && data.ownerUid.size() > 0 && data.ownerUid.size() <= 128 &&
     data.createdAt is timestamp && data.createdAt == request.time;
   }
@@ -31,7 +31,7 @@ service cloud.firestore {
   function isValidProfile(data,id) {
    return data.keys().hasAll(['schema','profileId','name','avatar','progressJson','revision','createdAt','updatedAt']) &&
     data.keys().hasOnly(['schema','profileId','name','avatar','progressJson','revision','createdAt','updatedAt']) &&
-    data.schema == 1 && data.profileId == id && validId(id) &&
+    data.schema is int && data.schema == 1 && data.profileId == id && validId(id) &&
     data.name is string && data.name.size() > 0 && data.name.size() <= 30 &&
     data.avatar is int && data.avatar >= 0 && data.avatar <= 5 &&
     data.progressJson is string && data.progressJson.size() <= 524288 &&

@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -22,7 +23,7 @@ internal fun SingleLineInfo(text: String, modifier: Modifier = Modifier,
     val base = LocalTextStyle.current.copy(color = color, fontWeight = fontWeight)
     BoxWithConstraints(modifier) {
         fun fits(value: Float) = measurer.measure(text, base.copy(fontSize = value.sp),
-            softWrap = false, maxLines = 1).size.width <= constraints.maxWidth
+            softWrap = false, maxLines = 1).size.width + 2 <= constraints.maxWidth
         var fitted = fontSize.value
         if (!fits(fitted)) {
             var low = 1f
@@ -33,7 +34,12 @@ internal fun SingleLineInfo(text: String, modifier: Modifier = Modifier,
             }
             fitted = low
         }
-        Text(text, style = base.copy(fontSize = fitted.sp), maxLines = 1, softWrap = false)
+        val style = base.copy(fontSize = fitted.sp)
+        val measured = measurer.measure(text, style, softWrap = false, maxLines = 1)
+        val width = with(LocalDensity.current) {
+            (measured.size.width + 2).coerceAtMost(constraints.maxWidth).toDp()
+        }
+        Text(text, modifier = Modifier.width(width), style = style, maxLines = 1, softWrap = false)
     }
 }
 

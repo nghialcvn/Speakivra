@@ -71,11 +71,11 @@ class ApprovedUiTest {
         }
         val courseTotal = "Thành tích đã đạt: 9"
         ui.onNodeWithText(courseTotal).assertIsDisplayed()
+        shot("50-profile-diamond-achievements")
         assertSingleLine(courseTotal)
         val achievementBounds = ui.onNodeWithText(courseTotal, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         val continueBounds = ui.onNodeWithText("Tiếp tục bài học ›", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         org.junit.Assert.assertTrue(achievementBounds.bottom < continueBounds.top)
-        shot("50-profile-diamond-achievements")
         ui.onNodeWithText("Tiếp tục bài học ›").performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
@@ -117,7 +117,7 @@ class ApprovedUiTest {
         org.junit.Assert.assertTrue(layouts.isNotEmpty())
         layouts.forEach {
             org.junit.Assert.assertEquals(1, it.lineCount)
-            org.junit.Assert.assertFalse(it.hasVisualOverflow)
+            org.junit.Assert.assertFalse("$text: actual=${it.layoutInput.text}, size=${it.size}, paragraph=${it.multiParagraph.width}x${it.multiParagraph.height}, widthOverflow=${it.didOverflowWidth}, heightOverflow=${it.didOverflowHeight}", it.hasVisualOverflow)
         }
     }
     private fun shot(name: String) {

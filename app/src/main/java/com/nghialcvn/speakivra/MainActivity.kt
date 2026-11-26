@@ -831,6 +831,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                 // All three appearances use the same full-screen scripted conversation.
                 if ((page != "account" || !accountAuthScreen) && (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson))))
                     StudioBottomNavigation(when (page) {
+                    "account" -> "profile"
                     "hotel", "hotel-topics", "level-lessons", "passages", "exercises" -> "lessons"
                     "chat", "passage", "exercise" -> "repeat"
                     else -> page

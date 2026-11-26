@@ -6,6 +6,15 @@ import org.json.JSONObject
 import java.io.File
 
 class ExtraPracticeTest {
+    @Test fun screenshotClockAnswerPassesWithoutAcceptingWrongTimesOrNegation() {
+        val q = ExtraPracticeData.exercises.first { it.id == "exercise_routine" }.questions.first()
+        listOf("I wake up at 7:00", "I wake up at 07:00", "I wake up at seven", "I wake up at seven o'clock", "I get up at 7:00").forEach {
+            assertTrue(it, evaluateExercise(q, it).accepted)
+        }
+        listOf("I wake up at 8:00", "I wake up at 7:30", "I don't wake up at 7:00", "I wake at 7:00", "I wake up at 7:99").forEach {
+            assertFalse(it, evaluateExercise(q, it).accepted)
+        }
+    }
     @Test fun equivalentTranslationsAreAcceptedButWrongExtraOrMissingWordsAreNot() {
         val q = ExtraPracticeData.exercises.first { it.lessonId == "food" }.questions[3]
         assertTrue(evaluateExercise(q, "Could I have the bill please").accepted)

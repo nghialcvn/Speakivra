@@ -75,4 +75,19 @@ class WordMatchTest {
         assertEquals(1, matchWords("five five", "5").matched.count { it })
         assertFalse(matchWords("25", "twenty six").matched.single())
     }
+    @Test fun clockFormattingPreservesValuesAndOriginalTokenOwnership() {
+        val reference = "I wake up at seven."
+        for (spoken in listOf("I wake up at 7:00", "I wake up at 07:00", "I wake up at 7", "I wake up at seven o’clock")) {
+            assertTrue(spoken, matchWords(reference, spoken).matched.all { it })
+            assertTrue(spoken, matchWords(spoken, reference).matched.all { it })
+        }
+        assertEquals(listOf(true, true, true, true, false), matchWords("I wake up at 8:00", reference).matched)
+        assertFalse(matchWords("I wake up at 7:30", reference).matched.last())
+        assertTrue(matchWords("At seven thirty", "At 07:30").matched.all { it })
+        assertTrue(matchWords("At 07:30", "At seven thirty").matched.all { it })
+        for (invalid in listOf("7:99", "25:00", "7:000")) {
+            assertFalse(invalid, matchWords(invalid, "seven").matched.single())
+        }
+        assertFalse(matchWords("seven", "7.01").matched.single())
+    }
 }

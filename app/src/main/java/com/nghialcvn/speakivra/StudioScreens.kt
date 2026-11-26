@@ -486,7 +486,8 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }
             SpokenResult(learner, if (capturePhase == "listening" && transcript.isBlank()) "Đang ghi âm…" else transcript,
-                if (wordMatch.hasResult && capturePhase == "idle") wordMatch.canContinue else null)
+                if (wordMatch.hasResult && capturePhase == "idle") wordMatch.canContinue else null,
+                reference = if (capturePhase == "idle") wordMatch.tokens.joinToString(" ") else null)
             StudioCard(color = p.mint, border = p == NeonStudio) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StudioIcon("bulb", Modifier.size(27.dp), if (p == NeonStudio) NeonLook.cyan else p.green)
@@ -632,7 +633,23 @@ internal fun captureLabel(phase: String, idle: String) = when (phase) {
 }
 
 @Composable
-internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = null) {
+internal fun wordFeedback(text: String, result: WordMatch?): androidx.compose.ui.text.AnnotatedString {
+    val p = studio
+    return buildAnnotatedString {
+        var end = 0
+        Regex("\\S+").findAll(text).forEachIndexed { index, token ->
+            append(text.substring(end, token.range.first))
+            val color = if (result?.hasResult != true) p.ink
+                else if (result.matched.getOrElse(index) { false }) p.correctWord else p.incorrectWord
+            withStyle(SpanStyle(color = color)) { append(token.value) }
+            end = token.range.last + 1
+        }
+        append(text.substring(end))
+    }
+}
+
+@Composable
+internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = null, reference: String? = null) {
     val p = studio
     val replay = LocalSpeechReplay.current
     Row(Modifier.fillMaxWidth()
@@ -647,7 +664,9 @@ internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = nul
             modifier = Modifier.size(40.dp).semantics { contentDescription = "Nghe lại giọng vừa ghi" }) {
             StudioIcon("speaker", Modifier.size(24.dp), if (replay.available) p.coral else p.muted.copy(alpha = .35f))
         }
-        Text(text.ifBlank { "Chưa có lời nói nhận dạng" }, fontSize = 14.sp, fontStyle = FontStyle.Italic,
+        val display = text.ifBlank { "Chưa có lời nói nhận dạng" }
+        val words = if (passed != null && reference != null && text.isNotBlank()) matchWords(text, reference) else null
+        Text(wordFeedback(display, words), fontSize = 14.sp, fontStyle = FontStyle.Italic,
             lineHeight = 20.sp, modifier = Modifier.weight(1f))
         if (passed != null) Text(if (passed) "✅" else "❌", fontSize = 23.sp,
             modifier = Modifier.semantics { contentDescription = if (passed) "Đạt đối chiếu lời nói" else "Cần nói lại" })

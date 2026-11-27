@@ -82,14 +82,16 @@ run_check AccountDraftFlowTest 1
 run_check FreshInstallLearnerTest 1
 run_check 'ApprovedUiTest#approvedDiamondRewardsAndResume' 1
 run_check SparkAccountIntegrationTest 1
+run_check ChineseCloudSyncIntegrationTest 2
 python3 - <<'PY'
 from pathlib import Path
 rows = [line.split() for line in Path("ui-diagnostics/counts.txt").read_text().splitlines()]
-assert len(rows) == 15, rows
+assert len(rows) == 16, rows
 assert all(int(count) == 1 for _, count in rows[:4]), rows
 assert rows[4][0] == "ChineseCourseFlowTest" and int(rows[4][1]) >= 6, rows
 assert rows[5][0] == "LanguageAreaFlowTest" and int(rows[5][1]) >= 3, rows
 assert sum(int(count) for _, count in rows[6:]) >= 27, rows
+assert rows[-1][0] == "ChineseCloudSyncIntegrationTest" and int(rows[-1][1]) == 2, rows
 files = list(Path("ui-review").rglob("*.png"))
 missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 177)) if not any(f.name.startswith(f"{n}-") for f in files)]
 assert not missing, f"Missing required new screenshots: {missing}"

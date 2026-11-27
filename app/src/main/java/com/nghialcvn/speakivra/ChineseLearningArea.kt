@@ -45,7 +45,7 @@ internal fun ChineseLearningArea(preferences: SharedPreferences, learner: Learne
                         topics.sumOf { preferences.getInt("lesson.${it.id}.rounds", 0) }, learner.name, learner, preferences,
                         onContinue = { resume() }, onLessons = { courseTopic = null; courseMode = ""; coursePack = ""; page = "course" }, onProfile = onSettings,
                         lessonHeading = if (active.level in listOf("FO", "HK")) "Khách sạn • ${active.title}" else
-                            "Bài ${topics.filter { it.level == active.level }.indexOf(active) + 1} • ${active.title}",
+                            "Bài ${topics.filter { it.level == active.level }.indexOf(active) + 1} • ${if (active.id == "zh_a1_greetings") "Chào hỏi" else active.title}",
                         lessonNote = "Pinyin • Nghĩa tiếng Việt",
                         courseSummary = "A1 • A2 • B1 • B2 • C1 • C2 • Hội thoại • Đọc hiểu • Bài tập • Khách sạn")
                 }

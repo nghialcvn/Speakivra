@@ -167,9 +167,12 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
             val dark = appearance.getBoolean("dark_theme", false)
             val neon = appearance.getBoolean("neon_theme", false)
             SpeakivraTheme(dark, neon = neon) {
-                Surface(color = studio.background, contentColor = studio.ink) {
-                    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                        LanguageEntryScreen { studyLanguage = it }
+                Surface(color = if (neon) Color.Transparent else studio.background, contentColor = studio.ink) {
+                    Box(Modifier.fillMaxSize()) {
+                        if (neon) NeonWaveBackground(Modifier.matchParentSize())
+                        Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                            LanguageEntryScreen { studyLanguage = it }
+                        }
                     }
                 }
             }

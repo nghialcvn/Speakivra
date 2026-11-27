@@ -44,6 +44,11 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
     var catalogue by rememberSaveable { mutableStateOf(if (initialLevel != null || initialTopic != null) "level" else "hub") }
     var directMode by rememberSaveable { mutableStateOf("") }
     var topicId by rememberSaveable { mutableStateOf(initialTopic) }
+    LaunchedEffect(topicId) {
+        val id = topicId
+        if (id != null && topics.any { it.id == id && store.topicOpen(it, topics) } && preferences.getString("zh.active_lesson", null) != id)
+            preferences.edit().putString("zh.active_lesson", id).apply()
+    }
     var mode by rememberSaveable { mutableStateOf(initialMode) }
     var packId by rememberSaveable { mutableStateOf(initialPackId) }
     var wholeReading by rememberSaveable { mutableStateOf(false) }

@@ -94,6 +94,13 @@ class LanguageAreaFlowTest {
         ui.onNodeWithTag("zh_hotel_hk_entry").performScrollTo().performClick()
         ui.onNodeWithTag("zh-next").assertIsDisplayed().assertIsNotEnabled()
         shot("175-chinese-housekeeping-translation")
+        repeat(3) { ui.onNodeWithContentDescription("Quay lại").performScrollTo().performClick() }
+        ui.onNodeWithTag("zh-catalogue-readings").performScrollTo().performClick()
+        val readingTopic = ChineseCurriculum.topics.first { it.level == "A1" && it.id != "zh_a1_greetings" && it.readingPacks.isNotEmpty() }
+        ui.onNodeWithTag(readingTopic.readingPacks.first().id).performScrollTo().performClick()
+        ui.waitForIdle()
+        assertEquals(readingTopic.id, prefs.getString("zh.active_lesson", null))
+        shot("176-chinese-reading-catalogue-resume")
     }
     @Test fun expandedReadingResumeSkipsFinishedStarterAndDoesNotRelockEarnedLevels() {
         val prefs = ui.activity.getSharedPreferences("zh-migration-full", 0)

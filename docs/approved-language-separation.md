@@ -42,7 +42,8 @@ completing the speaking, dialogue and meaning review earns topic completion;
 reading and translation packs remain separately tracked practice. Replaying or adding
 content does not revoke an earned level. Existing A1/A2 access is preserved. New
 content resumes at the first unfinished stable ID, including a new reading pack
-after a completed starter reading. Historical starter diamonds are retained; the
+after a completed starter reading. Historical starter diamonds are retained, including old cloud snapshots restored
+onto a fresh device; the
 existing score thresholds and diamond artwork are used.
 
 ## Mandarin content and speech
@@ -75,7 +76,7 @@ Vulkan disabling and dp-equivalent display configuration. It adds real app start
 language switching, two home screens, full catalogue/hotel and upgrade-resume checks.
 The UI script requires all legacy tests and screenshots in addition to new coverage.
 Build success alone does not approve the appearance. Inspect the actual APK screenshots
-170–175 alongside the approved demo, and preserve the existing check-in screenshots.
+170–176 alongside the approved demo, and preserve the existing check-in screenshots.
 
 This development branch does not publish a release or modify updates/latest.json.
 Real microphone/accent and TTS behaviour on the user's Galaxy S24 Ultra still require

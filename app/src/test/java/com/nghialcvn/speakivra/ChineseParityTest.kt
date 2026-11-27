@@ -59,5 +59,10 @@ class ChineseParityTest {
         assertEquals(3, merged.getInt(reward))
         val wrong = sanitizedCloudProgress("profile-id", JSONObject().put("active_lesson", topic.id).put("zh.active_lesson", "family"))
         assertFalse(wrong.has("active_lesson")); assertFalse(wrong.has("zh.active_lesson"))
+        val legacyCloud = JSONObject()
+        ChineseStarterCurriculum.topics.first().phrases.forEach { legacyCloud.put("achievement.${topic.id}.${it.id}", 100) }
+        val restored = sanitizedCloudProgress("profile-id", legacyCloud)
+        assertEquals(3, restored.getInt(reward))
+        assertEquals(3, mergeCloudProgress(JSONObject().put(reward, 0), restored).getInt(reward))
     }
 }

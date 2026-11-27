@@ -39,6 +39,15 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
             if (lesson != null && lesson.phrases.any { it.id == parts.getOrNull(2) }) progress.put(key, value)
         }
     }
+    // A v1.2.7 cloud snapshot has no reward-history key. Preserve its old denominator
+    // before merging into a v1.2.8 device that may already have a zero-valued baseline.
+    ChineseStarterCurriculum.topics.forEach { old ->
+        val key = "lesson.${old.id}.diamonds_earned"
+        if (!values.containsKey(key)) {
+            val reward = achievementHearts(topicAccuracy(old.lesson) { id -> (values["achievement.${old.id}.$id"] as? Int) ?: 0 })
+            if (reward > 0) progress.put(key, reward)
+        }
+    }
     // Export stable completion IDs even for old preferences that only stored indices.
     allowedLessons.values.forEach { lesson ->
         val state = restoreLessonProgress(lesson,

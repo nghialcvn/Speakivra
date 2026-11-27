@@ -91,7 +91,7 @@ assert rows[4][0] == "ChineseCourseFlowTest" and int(rows[4][1]) >= 6, rows
 assert rows[5][0] == "LanguageAreaFlowTest" and int(rows[5][1]) >= 3, rows
 assert sum(int(count) for _, count in rows[6:]) >= 27, rows
 files = list(Path("ui-review").rglob("*.png"))
-missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 176)) if not any(f.name.startswith(f"{n}-") for f in files)]
+missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 177)) if not any(f.name.startswith(f"{n}-") for f in files)]
 assert not missing, f"Missing required new screenshots: {missing}"
-print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all twenty-six review screenshots")
+print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all twenty-seven review screenshots")
 PY

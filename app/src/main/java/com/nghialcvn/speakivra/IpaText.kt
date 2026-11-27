@@ -18,9 +18,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.sp
 import org.json.JSONObject
 import java.util.Locale
+import java.util.zip.GZIPInputStream
 
 internal object IpaText {
     @Volatile private var data: JSONObject? = null
+    @Volatile private var advancedData: JSONObject? = null
     @Volatile private var expandedData: JSONObject? = null
     @Volatile private var hotelData: JSONObject? = null
     fun key(text: String) = text.trim().replace('’', '\'').replace('‘', '\'')
@@ -42,6 +44,12 @@ internal object IpaText {
         }
         val expandedValue = expanded.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
         if (expandedValue.isNotBlank()) return "/$expandedValue/"
+        val advanced = advancedData ?: synchronized(this) {
+            advancedData ?: JSONObject(GZIPInputStream(context.assets.open("advanced-ipa.json.gz"))
+                .bufferedReader().use { it.readText() }).also { advancedData = it }
+        }
+        val advancedValue = advanced.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
+        if (advancedValue.isNotBlank()) return "/$advancedValue/"
         // Personal names remain in their own spelling outside IPA brackets, never a fabricated English pronunciation.
         val name = Regex("(?i)^(?:I'm|My name is) (.+?)[.!?]?$").matchEntire(text.trim())?.groupValues?.get(1)
         val prefix = if (text.startsWith("My name is", ignoreCase = true)) "My name is" else "I'm"

@@ -1,0 +1,35 @@
+{
+  "B2": {
+    "topics": 20,
+    "speaking_units": 700,
+    "conversation_turns": 300,
+    "reading_passages": 10,
+    "reading_units": 100,
+    "translation_exercises": 20,
+    "translation_questions": 100,
+    "mean_words_per_speaking_unit": 32.159,
+    "unique_speaking_units": 700
+  },
+  "C1": {
+    "topics": 20,
+    "speaking_units": 700,
+    "conversation_turns": 300,
+    "reading_passages": 10,
+    "reading_units": 100,
+    "translation_exercises": 20,
+    "translation_questions": 100,
+    "mean_words_per_speaking_unit": 95.993,
+    "unique_speaking_units": 700
+  },
+  "C2": {
+    "topics": 20,
+    "speaking_units": 700,
+    "conversation_turns": 300,
+    "reading_passages": 10,
+    "reading_units": 100,
+    "translation_exercises": 20,
+    "translation_questions": 100,
+    "mean_words_per_speaking_unit": 39.64,
+    "unique_speaking_units": 700
+  }
+}

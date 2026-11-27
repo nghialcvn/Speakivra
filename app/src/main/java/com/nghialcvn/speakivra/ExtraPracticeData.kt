@@ -173,7 +173,7 @@ internal object ExtraPracticeData {
             PracticeVocabulary("Indoor activities", "Hoạt động trong nhà"),
             PracticeVocabulary("Unexpected experiences", "Trải nghiệm bất ngờ"),
         )),
-    ).let(ExtraPracticeExpansion::passages)
+    ).let(ExtraPracticeExpansion::passages) + AdvancedCurriculum.passages
     val exercises = listOf(
         SpeakingExercise("exercise_greetings", "A1", "greetings", "Chào hỏi", listOf(
             ExerciseQuestion("exercise_greetings_q1", "Rất vui được gặp bạn.", listOf("Nice to meet you!", "It's nice to meet you!", "Pleased to meet you!")),
@@ -295,5 +295,5 @@ internal object ExtraPracticeData {
             ExerciseQuestion("exercise_b1_travel_q5", "Nếu kế hoạch đi lại đổi, tôi sẽ báo người đang chờ.", listOf("If our travel plans change, I'll update the people expecting us.", "I'll let the people waiting for us know if our travel arrangements change.")),
             ExerciseQuestion("exercise_b1_travel_q6", "Tôi giữ bản sao thông tin đặt chỗ quan trọng.", listOf("I kept copies of the important booking details.", "I saved copies of my essential reservation information.")),
         )),
-    ).let(ExtraPracticeExpansion::exercises)
+    ).let(ExtraPracticeExpansion::exercises) + AdvancedCurriculum.exercises
 }

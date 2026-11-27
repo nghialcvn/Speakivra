@@ -147,7 +147,7 @@ internal object Lessons {
             ConversationTurn("Let's meet at a quarter past nine.", "Hãy gặp nhau lúc chín giờ mười lăm.", "Could you say that again, please?", "Bạn có thể nói lại được không?", id = "bd99c09cb76e85439d53"),
             ConversationTurn("Thanks for the chat. See you soon!", "Cảm ơn cuộc trò chuyện. Hẹn sớm gặp lại!", "It was nice talking to you.", "Rất vui được trò chuyện với bạn.", id = "574023d1f8114d662c0d")
         )),
-    ).map(ExpandedLessons::append).map(MoreA1Practice::append) + A2Lessons.all + B1Lessons.all
+    ).map(ExpandedLessons::append).map(MoreA1Practice::append) + A2Lessons.all + B1Lessons.all + AdvancedCurriculum.lessons
 
     val catalogue: List<Lesson> get() = all + HotelCurriculum.all
     val a1: List<Lesson> get() = all.filter { levelOf(it) == "A1" }
@@ -157,6 +157,9 @@ internal object Lessons {
         HotelCurriculum.isHotel(lesson) -> HotelCurriculum.role(lesson)
         lesson.id.startsWith("a2_") -> "A2"
         lesson.id.startsWith("b1_") -> "B1"
+        lesson.id.startsWith("b2_") -> "B2"
+        lesson.id.startsWith("c1_") -> "C1"
+        lesson.id.startsWith("c2_") -> "C2"
         else -> "A1"
     }
 }

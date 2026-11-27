@@ -45,14 +45,21 @@ internal object StudyReminders {
         }
         createChannel(app)
         val now = LocalDateTime.now()
-        val tonight = now.toLocalDate().atTime(LocalTime.of(19, 0))
-        val next = if (now.isBefore(tonight)) tonight else tonight.plusDays(1)
+        val next = nextStudyReminder(now)
         val delay = Duration.between(now, next).toMinutes().coerceAtLeast(1)
         val work = PeriodicWorkRequestBuilder<StudyReminderWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(delay, TimeUnit.MINUTES)
             .addTag("speakivra-study")
             .build()
         WorkManager.getInstance(app).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, work)
+        app.getSharedPreferences("speakivra_progress", 0).edit().putInt("study_reminder_hour", 20).apply()
+    }
+
+    fun rescheduleIfNeeded(context: Context) {
+        val prefs = context.getSharedPreferences("speakivra_progress", 0)
+        if (isEnabled(context) && hasPermission(context) && prefs.getInt("study_reminder_hour", 0) != 20) {
+            setEnabled(context, true)
+        }
     }
 
     fun createChannel(context: Context) {
@@ -91,4 +98,10 @@ class StudyReminderWorker(context: Context, parameters: WorkerParameters) : Work
         StudyReminders.deliver(applicationContext)
         return Result.success()
     }
+}
+
+/** Device-local time; a reminder already due is scheduled for the following evening. */
+internal fun nextStudyReminder(now: LocalDateTime): LocalDateTime {
+    val evening = now.toLocalDate().atTime(LocalTime.of(20, 0))
+    return if (now.isBefore(evening)) evening else evening.plusDays(1)
 }

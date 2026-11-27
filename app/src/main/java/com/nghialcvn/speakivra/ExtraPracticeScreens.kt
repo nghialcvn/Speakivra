@@ -26,12 +26,13 @@ internal fun ExtraCatalogueScreen(passages: Boolean, level: String, completed: S
     onPassage: (ReadingPassage) -> Unit, onExercise: (SpeakingExercise) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        PageHeading(if (passages) "Luyện nói theo đoạn văn" else "Tiếng Anh nói thế nào?", "A1 • A2 • B1", onBack)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("A1", "A2", "B1").forEach {
+        PageHeading(if (passages) "Luyện nói theo đoạn văn" else "Tiếng Anh nói thế nào?", "A1 • A2 • B1 • B2 • C1 • C2", onBack)
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CourseLevels.all.forEach {
                 FilterChip(selected = it == level, onClick = { onLevel(it) }, label = { Text(it) })
             }
         }
+        if (!levelIsOpen(level, Lessons.catalogue, load)) Text(CourseLevels.lockMessage(level), color = studio.coral, fontSize = 13.sp)
         val items = if (passages) ExtraPracticeData.passages.filter { it.level == level }.size else ExtraPracticeData.exercises.count { it.level == level }
         val sentences = if (passages) ExtraPracticeData.passages.filter { it.level == level }.sumOf { it.sentences.size } else ExtraPracticeData.exercises.filter { it.level == level }.sumOf { it.questions.size }
         Text("$items bài • $sentences câu", color = studio.muted, fontSize = 13.sp)

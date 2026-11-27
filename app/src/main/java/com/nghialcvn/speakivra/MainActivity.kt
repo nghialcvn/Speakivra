@@ -147,6 +147,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
             settings.edit().putBoolean("permission_requested", true).apply()
             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+        StudyReminders.rescheduleIfNeeded(context)
         updates.checkOnce()
     }
     val available = learners.filter { GuestIdentityStore(context).peek(it)?.canOpen(cloud.uid) != false }
@@ -346,6 +347,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     val sentence = passage.sentences[sentenceIndex.coerceIn(passage.sentences.indices)]
     val exercise = (ExtraPracticeData.exercises + HotelCurriculum.exercises).first { it.id == exerciseId }
     val question = exercise.questions[questionIndex.coerceIn(exercise.questions.indices)]
+    LaunchedEffect(page, passageId, exerciseId) {
+        if (page == "passage" && !extraTopicOpen(passage.lessonId, ::loadProgress)) page = "passages"
+        if (page == "exercise" && !extraTopicOpen(exercise.lessonId, ::loadProgress)) page = "exercises"
+    }
     var voiceReturnPage by rememberSaveable { mutableStateOf("profile") }
     var transcript by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Nhấn Nghe mẫu để bắt đầu") }
@@ -392,13 +397,24 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
     fun speak(text: String) { stopCapture(false); speech.speak(text, playbackSpeed, voiceChoice, sampleRepeats) }
+    fun captureBudget(): Int {
+        val expected = when (page) {
+            "passage" -> if (wholePassage) passage.english else sentence.english
+            "exercise" -> question.answer
+            "chat" -> lesson.conversation[chatIndex].reply
+            else -> phrases[index].english
+        }
+        return speechAttemptLimitMillis(page == "passage" && wholePassage, expected.split(Regex("\\s+")).size)
+    }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
-        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, speechAttemptLimitMillis(page == "passage" && wholePassage))
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, captureBudget())
         else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
+        if (page == "passage" && !extraTopicOpen(passage.lessonId, ::loadProgress)) return
+        if (page == "exercise" && !extraTopicOpen(exercise.lessonId, ::loadProgress)) return
         if (capture.phase == "listening") { capture.stop(); return }
         if (capture.phase == "processing" || pendingMicrophone) return
         stopCapture(); speech.stop()
@@ -406,7 +422,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, speechAttemptLimitMillis(page == "passage" && wholePassage))
+        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, captureBudget())
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
     DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, hotelChatTurn, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {
@@ -563,15 +579,15 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                             }
                             "study" -> {
                                 Text("Chọn cấp độ thực hành", fontWeight = FontWeight.Bold)
-                                Text("A1: 10 chủ đề • A2: 15 chủ đề • B1: 20 chủ đề", color = palette.muted,
+                                Text("A1: 10 chủ đề • A2: 15 chủ đề • B1/B2/C1/C2: 20 chủ đề mỗi cấp", color = palette.muted,
                                     fontSize = 12.sp)
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    listOf("A1", "A2", "B1").forEach { level ->
+                                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    CourseLevels.all.forEach { level ->
                                         OutlinedButton(onClick = {
                                             selectedLevel = level
                                             settingDialog = ""
                                             navigate("level-lessons")
-                                        }, modifier = Modifier.weight(1f)) {
+                                        }, enabled = levelIsOpen(level, learnerLessons, ::loadProgress), modifier = Modifier.widthIn(min = 64.dp)) {
                                             Text(level)
                                         }
                                     }
@@ -609,7 +625,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 }) { Text("Chọn giọng và nghe thử") }
                                 HorizontalDivider()
                                 Text("Nhắc học cục bộ", fontWeight = FontWeight.Bold)
-                                Text("Nếu bật, Speakivra nhắc học khoảng 19:00 hằng ngày. Android có thể trì hoãn để tiết kiệm pin.",
+                                Text("Nếu bật, Speakivra nhắc học khoảng 20:00 hằng ngày. Android có thể trì hoãn để tiết kiệm pin.",
                                     color = palette.muted, fontSize = 12.sp)
                                 OutlinedButton(onClick = {
                                     toggleReminder(!reminderEnabled)
@@ -645,10 +661,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonHubScreen(
-                                onLevel = { selectedLevel = it; navigate("level-lessons") },
+                                onLevel = { if (levelIsOpen(it, learnerLessons, ::loadProgress)) { selectedLevel = it; navigate("level-lessons") } },
                                 onChat = { navigate("chat") }, onPassages = { navigate("passages") },
                                 onExercises = { navigate("exercises") }, onBack = { navigate("home") },
-                                onHotel = { navigate("hotel") })
+                                onHotel = { navigate("hotel") }, load = ::loadProgress)
                             "hotel" -> HotelHubScreen(hotelRole, onRole = { hotelRole = it },
                                 onOpen = { role, mode -> hotelRole = role; hotelMode = mode; navigate("hotel-topics") },
                                 onBack = { navigate("lessons") })
@@ -665,7 +681,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onListen = { speak(it) }, onSpeed = ::selectSpeed,
                                 onTranslation = { showTranslation = !showTranslation }, onNext = {
                                     val result = matchWords(if (wholePassage) passage.english else sentence.english, finalTranscript)
-                                    if (capturePhase == "idle" && result.canContinue) {
+                                    if (extraTopicOpen(passage.lessonId, ::loadProgress) && capturePhase == "idle" && result.canContinue) {
                                         completeExtra(if (wholePassage) passage.sentences.map { it.id } + passage.id else listOf(sentence.id))
                                         clearExtra()
                                         if (wholePassage) page = "passages"
@@ -677,7 +693,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 learner, finalTranscript, transcript, capturePhase, status,
                                 onBack = { navigate(if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises") }, onSpeak = ::listen, onListen = { speak(it) },
                                 onNext = {
-                                    if (capturePhase == "idle" && evaluateExercise(question, finalTranscript).accepted) {
+                                    if (extraTopicOpen(exercise.lessonId, ::loadProgress) && capturePhase == "idle" && evaluateExercise(question, finalTranscript).accepted) {
                                         completeExtra(listOf(question.id)); clearExtra()
                                         if (questionIndex < exercise.questions.lastIndex) questionIndex++
                                         else page = if (exercise.lessonId.startsWith("hotel_")) "hotel-topics" else "exercises"
@@ -685,7 +701,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 })
                             "level-lessons" -> LessonsScreen(lesson.id, ::loadProgress, ::openLesson,
                                 learnerLessons.filter { Lessons.levelOf(it) == selectedLevel }, selectedLevel,
-                                onBack = { navigate("lessons") }, hearts = achievements::hearts)
+                                onBack = { navigate("lessons") }, hearts = achievements::hearts, accessCatalogue = learnerLessons)
                             "progress" -> ProgressScreen(learnerLessons, ::loadProgress, ::openLesson, achievements::hearts)
                             "repeat" -> PracticeScreen(lesson, progress, automatic, showTranslation, playbackSpeed, if (capturePhase == "idle") finalTranscript.orEmpty() else transcript, status, capturePhase, wordMatch, learner,
                                 onBack = { navigate(if (HotelCurriculum.isHotel(lesson)) "hotel-topics" else "home") }, onMode = { automatic = it; preferences.edit().putBoolean("automatic_mode", it).apply() },

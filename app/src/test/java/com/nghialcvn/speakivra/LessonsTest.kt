@@ -29,7 +29,7 @@ class LessonsTest {
             assertEquals(10, lesson.conversation.size)
         }
         assertEquals("A1", Lessons.levelOf(Lessons.a1.first()))
-        assertEquals(45, Lessons.all.map { it.id }.distinct().size)
+        assertEquals(45, Lessons.all.filter { Lessons.levelOf(it) in listOf("A1", "A2", "B1") }.map { it.id }.distinct().size)
     }
 
     @Test fun everyTopicHasVietnameseTranslationsPronunciationTipsAndWorkingReview() {

@@ -52,6 +52,7 @@ internal class SpeechEndpoint(
 }
 
 /** Longer passages need time for ten sentences; short-utterance behaviour is unchanged. */
+internal const val MAX_SPEECH_ATTEMPT_MILLIS = 900000
 internal fun speechAttemptLimitMillis(wholePassage: Boolean, wordCount: Int = 0): Int =
     maxOf(if (wholePassage) 240000 else 60000,
-        wordCount.coerceIn(0, 870).times(1000) + 30000).coerceAtMost(900000)
+        wordCount.coerceIn(0, 870).times(1000) + 30000).coerceAtMost(MAX_SPEECH_ATTEMPT_MILLIS)

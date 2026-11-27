@@ -43,7 +43,7 @@ internal class SpeechCapture(
         require(languageTag in setOf("en-US", "en-GB"))
         val token = session.begin() ?: return
         audio.clear(); recordingChanged(false)
-        maximumAttemptMillis = maximumMillis.coerceIn(60000, 900000)
+        maximumAttemptMillis = maximumMillis.coerceIn(60000, MAX_SPEECH_ATTEMPT_MILLIS)
         locale = languageTag
         nameHints = arrayListOf<String>().apply { properName?.trim()?.takeIf { it.isNotBlank() }?.let { add(it) } }
         endpointSilenceMillis = silenceMillis.coerceIn(1400, 4000)

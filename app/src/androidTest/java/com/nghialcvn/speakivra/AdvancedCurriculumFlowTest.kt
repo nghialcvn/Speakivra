@@ -128,6 +128,9 @@ class AdvancedCurriculumFlowTest {
         ui.onNodeWithText(lesson.phrases.first().english, substring = false).assertExists()
         ui.onNodeWithContentDescription("Phiên âm IPA").assertExists()
         shot("107-c1-sustained-response")
+        ui.onNodeWithText("Nghe mẫu", substring = false).performScrollTo().assertIsDisplayed()
+        ui.onNodeWithContentDescription("Nói và nhận dạng").performScrollTo().assertIsDisplayed()
+        shot("109-c1-practice-controls")
     }
     @Test fun restoredAdvancedSelectionCannotBypassTheGate() {
         ui.startLocalStudy()

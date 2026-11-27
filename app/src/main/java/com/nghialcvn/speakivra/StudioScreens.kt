@@ -379,7 +379,7 @@ internal fun VoiceSelectionChips(choice: VoiceChoice, onOpen: () -> Unit) {
                           else Modifier.clip(RoundedCornerShape(16.dp))
                               .background(studio.lavender)
                               .border(1.dp, studio.border, RoundedCornerShape(16.dp)))
-                    .then(if (description == "Giọng đọc") Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onOpen).semantics { if (!enabled) disabled() } else Modifier)
+                    .then(if (description == "Giọng đọc") Modifier.clickable(role = Role.Button, onClick = onOpen) else Modifier)
                     .semantics { contentDescription = description }
                     .padding(horizontal = 10.dp, vertical = 9.dp),
                 horizontalArrangement = Arrangement.Center,

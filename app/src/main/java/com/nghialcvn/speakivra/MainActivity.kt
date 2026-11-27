@@ -162,7 +162,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
         if (active != null) {
             key(active.id) {
-                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
@@ -215,7 +215,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, initialPage: String = "home") {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, onResumeConsumed: () -> Unit, initialPage: String = "home") {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
@@ -276,7 +276,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
     // A restored saveable home page must not swallow an explicit resume action.
     LaunchedEffect(learner.id, resumeLearning) {
-        if (resumeLearning) page = progress.phase
+        if (resumeLearning) { page = progress.phase; onResumeConsumed() }
     }
     val achievements = remember(learner.id) { TopicAchievements(preferences) }
     val index = progress.phrase

@@ -59,6 +59,8 @@ class DailyCheckInFlowTest {
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithText(personalizeLesson(Lessons.a1.first(), "Nghĩa").phrases[2].english, substring = false).assertExists()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.activityRule.scenario.recreate()
+        ui.onNodeWithText("Chạm để mở một nhóm cài đặt. Nhóm trước tự thu lại.").assertIsDisplayed()
         ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Tiếp tục học với Nghĩa").performTouchInput { click() }
@@ -77,7 +79,7 @@ class DailyCheckInFlowTest {
         val text = "Hồ sơ đã liên kết tài khoản"
         ui.waitUntil(10000) { ui.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
         val results = mutableListOf<TextLayoutResult>()
-        ui.onNodeWithText(text).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
+        ui.onNodeWithText(text, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
         shot("113-profile-linked-single-line")
         Assert.assertEquals(1, results.single().lineCount)
         Assert.assertFalse("Label overflow: width=${results.single().didOverflowWidth}, height=${results.single().didOverflowHeight}, size=${results.single().size}, input=${results.single().layoutInput}", results.single().hasVisualOverflow)

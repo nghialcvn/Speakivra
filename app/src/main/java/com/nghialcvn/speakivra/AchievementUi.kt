@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.*
 @Composable
 internal fun SingleLineInfo(text: String, modifier: Modifier = Modifier,
                             fontSize: TextUnit = 13.sp, color: Color = studio.ink,
-                            fontWeight: FontWeight = FontWeight.Normal, fillTextWidth: Boolean = false) {
+                            fontWeight: FontWeight = FontWeight.Normal) {
     val measurer = rememberTextMeasurer()
     val base = LocalTextStyle.current.copy(color = color, fontWeight = fontWeight)
     BoxWithConstraints(modifier) {
@@ -39,7 +39,7 @@ internal fun SingleLineInfo(text: String, modifier: Modifier = Modifier,
         val width = with(LocalDensity.current) {
             (measured.size.width + 2).coerceAtMost(constraints.maxWidth).toDp()
         }
-        Text(text, modifier = if (fillTextWidth) Modifier.fillMaxWidth() else Modifier.width(width), style = style, maxLines = 1, softWrap = false)
+        Text(text, modifier = Modifier.width(width), style = style, maxLines = 1, softWrap = false)
     }
 }
 

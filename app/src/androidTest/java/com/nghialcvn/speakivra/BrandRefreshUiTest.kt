@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -29,7 +30,7 @@ class BrandRefreshUiTest {
         ui.waitForIdle()
         val i = InstrumentationRegistry.getInstrumentation(); dismissUnrelatedLauncherAnr(i)
         i.uiAutomation.waitForIdle(500, 5000)
-        val bitmap = requireNotNull(i.uiAutomation.takeScreenshot())
+        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
     }
@@ -95,3 +96,4 @@ class BrandRefreshUiTest {
     @Test fun lightPracticeKeepsReplayAndNext() = practice(false)
     @Test fun darkPracticeKeepsReplayAndNext() = practice(true)
 }
+

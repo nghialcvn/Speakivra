@@ -108,7 +108,8 @@ class ChineseCloudSyncIntegrationTest {
         val owner = requireNotNull(first.runtime.uid)
         val ref = first.runtime.db.collection("accounts").document(owner).collection("profiles").document(identity.profileId)
         val old = ChineseStarterCurriculum.topics.first()
-        val legacy = JSONObject().put("lesson.${old.id}.phrase", old.phrases.size).put("lesson.${old.id}.rounds", 1)
+        val legacy = JSONObject().put("lesson.${old.id}.learned_phrases", old.phrases.map { it.id }.sorted().joinToString("|"))
+            .put("lesson.${old.id}.rounds", 1)
         old.phrases.forEach { legacy.put("achievement.${old.id}.${it.id}", 95) }
         ref.set(mapOf("schema" to 1, "profileId" to identity.profileId, "name" to "Lan", "avatar" to 2,
             "progressJson" to legacy.toString(), "revision" to 1, "createdAt" to FieldValue.serverTimestamp(),

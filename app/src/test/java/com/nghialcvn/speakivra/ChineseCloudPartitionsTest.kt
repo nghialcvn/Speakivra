@@ -53,7 +53,7 @@ class ChineseCloudPartitionsTest {
             "achievement.${topic.id}.${newlyAdded.id}" to 90, "lesson.${topic.id}.rounds" to 1,
             "zh.active_lesson" to topic.id))
         // An old installation later writes its original eight sentences back to the root.
-        val oldValues = mutableMapOf<String, Any>("lesson.${topic.id}.phrase" to old.phrases.size)
+        val oldValues = mutableMapOf<String, Any>("lesson.${topic.id}.learned_phrases" to old.phrases.map { it.id }.sorted().joinToString("|"))
         old.phrases.forEach { oldValues["achievement.${topic.id}.${it.id}"] = 100 }
         val legacy = exported(oldValues)
         val combined = sanitizedCloudProgress(profile, mergeCloudProgress(legacy, ChineseCloudPartitions.levelProgress(newer, "A1")))

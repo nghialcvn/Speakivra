@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.2.3-beta",
+    "tag_name": "v1.2.4-beta",
     "draft": false,
-    "body": "# Speakivra 1.2.3 Beta\n\n- Sửa câu giới thiệu tên khớp 3/4 từ (75%) nhưng không cho chuyển câu.\n- Áp dụng cùng ngưỡng đối chiếu đang dùng cho mọi câu; bỏ điều kiện chặn riêng khi tên chưa khớp tuyệt đối.\n- Gợi ý tên hồ sơ có dấu, không dấu và các mẫu câu giới thiệu cho dịch vụ nhận dạng hỗ trợ gợi ý.\n- Yêu cầu tối đa 5 phương án nhận dạng; chỉ ưu tiên tên đúng khi chính dịch vụ có trả về phương án đó. Không tự thay “India” bằng “Nghĩa”.\n- Từ chưa khớp vẫn hiện đỏ, nút và dòng kết quả phản ánh cùng điều kiện qua câu.\n- Giữ logo hiện tại trong lúc chờ duyệt mẫu mới; giữ nguyên bố cục và tiến độ.\n",
+    "body": "# Speakivra 1.2.4 Beta\n\n- Logo mới theo bộ đã duyệt: chữ S góc cạnh, mũ tốt nghiệp và sóng âm cyan.\n- Thay giao diện Sáng–Tối bằng tông navy–tím–cyan; giữ Neon là lựa chọn riêng.\n- Đồng bộ nền, thẻ, nút, thanh tiến độ và thanh điều hướng trên các màn hình.\n- Trang chủ có thương hiệu mới, avatar nổi trên logo chìm trong khung điểm danh.\n- Màn luyện nói gọn theo mẫu: lời nhận dạng và tỷ lệ khớp chung một thẻ; lời chưa khớp vẫn đỏ, câu đạt ngưỡng mở nút chuyển tiếp.\n- Giữ nguyên hồ sơ, tài khoản, nội dung học và tiến độ.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.2.3-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.3-beta/Speakivra-v1.2.3-release.apk",
-        "size": 21403209,
-        "digest": "sha256:c21f12c53b4ac506276182d01da3b3ff84835c9f929b3b07f0fe82b2c310ca22"
+        "name": "Speakivra-v1.2.4-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.4-beta/Speakivra-v1.2.4-release.apk",
+        "size": 21188531,
+        "digest": "sha256:2cf6668789e27eb76f7d5bb5ab998d912480eecd05fc881490f8f4dec9e3d799"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 43,
-    "versionName": "1.2.3",
-    "apkName": "Speakivra-v1.2.3-release.apk",
-    "apkSha256": "c21f12c53b4ac506276182d01da3b3ff84835c9f929b3b07f0fe82b2c310ca22",
+    "versionCode": 44,
+    "versionName": "1.2.4",
+    "apkName": "Speakivra-v1.2.4-release.apk",
+    "apkSha256": "2cf6668789e27eb76f7d5bb5ab998d912480eecd05fc881490f8f4dec9e3d799",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

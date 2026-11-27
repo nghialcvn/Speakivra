@@ -71,7 +71,7 @@ internal fun Modifier.neonGlass(radius: Int = 18, strong: Boolean = false): Modi
 /** Transparent speech symbol is painted natively. No white-square icon overlay. */
 @Composable
 internal fun NeonBrandMark(modifier: Modifier = Modifier) {
-    Image(painterResource(R.drawable.neon_brand_mark), "Logo Speakivra", modifier.graphicsLayer(scaleX = 1.2f, scaleY = 1.2f))
+    Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", modifier.graphicsLayer(scaleX = 1.2f, scaleY = 1.2f))
 }
 
 /** Sculpted headphones artwork without a pasted square or external image. */

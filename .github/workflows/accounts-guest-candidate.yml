@@ -112,6 +112,8 @@ jobs:
             ui-test-output.txt
             ui-diagnostics/**
             firebase-emulators.log
+            firestore-debug.log
+            firebase-debug.log
             ui-recognition-provider.txt
             real-speech-provider-probe.txt
             app/build/reports/tests/**

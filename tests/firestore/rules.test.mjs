@@ -3,7 +3,7 @@ import {createHash, randomBytes} from 'node:crypto';
 import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc,setDoc,getDoc,getDocs,collection,query,limit,deleteDoc,writeBatch,serverTimestamp,updateDoc,Timestamp} from 'firebase/firestore';
+import {doc,setDoc,getDoc,getDocs,collection,query,limit,deleteDoc,writeBatch,runTransaction,serverTimestamp,updateDoc,Timestamp} from 'firebase/firestore';
 let env;
 before(async()=>{env=await initializeTestEnvironment({projectId:'demo-speakivra-spark',firestore:{rules:readFileSync('../../firestore.rules','utf8')}});});
 beforeEach(async()=>env.clearFirestore());
@@ -97,4 +97,22 @@ test('a later old-client root update cannot overwrite migrated level documents',
  const ref=languageRef(a,'A',g);await setDoc(ref,languageSnapshot(g,'A1','new-progress'));
  await updateDoc(root,{progressJson:'old-client-progress',revision:2,updatedAt:serverTimestamp()});
  assert.equal((await getDoc(ref)).data().progressJson,'new-progress');await assertSucceeds(deleteDoc(ref));
+});
+test('concurrent root and level transactions keep ownership and revision guards under contention',async()=>{
+ const g=guest(),a=db('A'),other=db('A'),root=profileRef(a,'A',g);await claim(a,'A',g);
+ const initial=writeBatch(a);initial.set(root,snapshot(g));initial.set(languageRef(a,'A',g),languageSnapshot(g));await initial.commit();
+ let arrived=0,release;const barrier=new Promise(resolve=>{release=resolve;});
+ async function writeLevel(d,level){return runTransaction(d,async tx=>{
+  const parent=profileRef(d,'A',g),refs=levels.map(l=>languageRef(d,'A',g,l));
+  const old=await tx.get(parent),parts=await Promise.all(refs.map(ref=>tx.get(ref)));
+  if(arrived<2){arrived++;if(arrived===2)release();await barrier;}
+  const n=levels.indexOf(level),part=parts[n];
+  tx.set(refs[n],{...(part.exists()?part.data():languageSnapshot(g,level)),progressJson:level,
+   revision:part.exists()?part.data().revision+1:1,updatedAt:serverTimestamp()});
+  tx.set(parent,{...old.data(),progressJson:level,revision:old.data().revision+1,updatedAt:serverTimestamp()});
+ });}
+ await Promise.all([writeLevel(a,'A1'),writeLevel(other,'A2')]);
+ assert.equal((await getDoc(root)).data().revision,3);
+ assert.equal((await getDoc(languageRef(a,'A',g,'A1'))).data().progressJson,'A1');
+ assert.equal((await getDoc(languageRef(a,'A',g,'A2'))).data().progressJson,'A2');
 });

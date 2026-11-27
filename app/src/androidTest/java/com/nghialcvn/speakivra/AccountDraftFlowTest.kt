@@ -83,9 +83,21 @@ class AccountDraftFlowTest {
         ui.onNodeWithText("Xác minh email", substring = false).assertDoesNotExist()
         ui.onNodeWithText("Quay lại đăng nhập").performScrollTo().performClick()
         ui.onNodeWithText("Tiếp tục học trên máy này").performScrollTo().performClick()
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("My name is Nghĩa.").assertExists()
+    }
+    @Test fun unlinkedStartShowsApprovedReminderAndOpensLogin() {
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("Giữ an toàn tiến độ học").assertIsDisplayed()
+        shot("90-approved-guest-link-reminder")
+        ui.onNodeWithText("Liên kết ngay").performScrollTo().performClick()
+        ui.onNodeWithText("Học tiếp trên mọi thiết bị").assertIsDisplayed()
+        ui.onNodeWithText("Tiếp tục với Google").assertIsDisplayed()
+        ui.onNodeWithText("Tiếp tục học trên máy này").performScrollTo().performClick()
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
+        ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
     @Test fun bindingReceiptCannotAssignTheSameIdentityToAnotherAccount() {
         val store = LearnerStore(ui.activity); val person = store.add("Linh", 1)

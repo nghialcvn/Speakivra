@@ -70,7 +70,7 @@ class CurriculumUpgradeTest {
     }
 
     @Test fun b1StartsWithThreeTopicsAndFinishingThirdUnlocksOnlyFourth() {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("B1 • Trung cấp").performScrollTo().performClick()
         ui.onNodeWithText("20 chủ đề B1 • 700 câu nói • 300 lượt hội thoại").assertIsDisplayed()
@@ -89,7 +89,7 @@ class CurriculumUpgradeTest {
             .putString("lesson.${third.id}.learned_turns", third.conversation.joinToString("|") { it.id }).commit()
         ui.activityRule.scenario.recreate()
         if (ui.onAllNodesWithText("Bắt đầu học").fetchSemanticsNodes().isNotEmpty())
-            ui.onNodeWithText("Bắt đầu học").performClick()
+            ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("B1 • Trung cấp").performScrollTo().performClick()
         ui.onNodeWithText(Lessons.b1[3].vietnamese).assertIsEnabled()

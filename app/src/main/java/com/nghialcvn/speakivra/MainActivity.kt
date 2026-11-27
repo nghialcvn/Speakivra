@@ -132,6 +132,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var accountEntry by rememberSaveable { mutableStateOf(false) }
+    var linkOnEntry by rememberSaveable { mutableStateOf(false) }
     var accountAuthScreen by remember { mutableStateOf(true) }
     var entryPage by rememberSaveable { mutableStateOf("home") }
     var creating by rememberSaveable { mutableStateOf(false) }
@@ -179,7 +180,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                             if (accountEntry) Column(Modifier.fillMaxSize()) {
                                 Box(Modifier.weight(1f)) {
-                                    AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(),
+                                    AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(), linkOnEntry = linkOnEntry,
                                         onBack = { accountEntry = false }, onAuthScreen = { accountAuthScreen = it },
                                         onChooseLearner = { selected -> accountEntry = false; entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false })
                                 }
@@ -199,7 +200,8 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, available, lastId,
-                                onAdd = { creating = true }, onAccount = { accountAuthScreen = true; accountEntry = true },
+                                onAdd = { creating = true }, onAccount = { linkOnEntry = false; accountAuthScreen = true; accountEntry = true },
+                                onLink = { lastId = it.id; linkOnEntry = true; accountAuthScreen = true; accountEntry = true },
                                 onStart = { entryPage = "home"; resumeLearning = false; activeId = it.id; lastId = it.id },
                                 onResume = { entryPage = "home"; resumeLearning = true; activeId = it.id; lastId = it.id })
                         }

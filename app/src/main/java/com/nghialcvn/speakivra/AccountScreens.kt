@@ -49,11 +49,11 @@ internal fun GuestIdentityLabel(learner: Learner) {
 /** Account screens retain the approved login, link and three-card sync composition. */
 @Composable
 internal fun AccountFlow(learner: Learner?, onBack: () -> Unit,
-    gateway: AccountGateway = rememberAccountGateway(), onAuthScreen: (Boolean) -> Unit = {}, onChooseLearner: (Learner) -> Unit = { onBack() }) {
+    gateway: AccountGateway = rememberAccountGateway(), linkOnEntry: Boolean = false, onAuthScreen: (Boolean) -> Unit = {}, onChooseLearner: (Learner) -> Unit = { onBack() }) {
     val context = LocalContext.current
     val identityStore = remember { GuestIdentityStore(context.applicationContext) }
     val store = remember { LearnerStore(context.applicationContext) }
-    var page by rememberSaveable { mutableStateOf(if (gateway.session == null) "login" else if (gateway.session?.verified != true) "verify" else "account") }
+    var page by rememberSaveable { mutableStateOf(if (gateway.session == null) "login" else if (gateway.session?.verified != true) "verify" else if (linkOnEntry && learner != null && identityStore.peek(learner)?.ownerUid == null) "link" else "account") }
     var session by remember { mutableStateOf(gateway.session) }
     var message by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }

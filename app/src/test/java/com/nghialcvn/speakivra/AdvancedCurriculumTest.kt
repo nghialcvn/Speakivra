@@ -23,10 +23,13 @@ class AdvancedCurriculumTest {
             assertTrue(passages.all { it.vocabulary.size == 4 && it.sentences.all { s -> s.vietnamese.isNotBlank() } })
             assertTrue(exercises.all { it.questions.size == 5 && it.questions.all { q -> q.vietnamese.isNotBlank() } })
         }
-        val ids = Lessons.catalogue.flatMap { listOf(it.id) + it.phrases.map { p -> p.id } + it.conversation.map { t -> t.id } } +
-            ExtraPracticeData.passages.flatMap { listOf(it.id) + it.sentences.map { s -> s.id } } +
-            ExtraPracticeData.exercises.flatMap { listOf(it.id) + it.questions.map { q -> q.id } }
+        val ids = AdvancedCurriculum.lessons.flatMap { listOf(it.id) + it.phrases.map { p -> p.id } + it.conversation.map { t -> t.id } } +
+            AdvancedCurriculum.passages.flatMap { listOf(it.id) + it.sentences.map { s -> s.id } } +
+            AdvancedCurriculum.exercises.flatMap { listOf(it.id) + it.questions.map { q -> q.id } }
         assertEquals(ids.size, ids.distinct().size)
+        val olderIds = Lessons.catalogue.filter { Lessons.levelOf(it) !in listOf("B2", "C1", "C2") }
+            .flatMap { listOf(it.id) + it.phrases.map { p -> p.id } + it.conversation.map { t -> t.id } }.toSet()
+        assertTrue(ids.none { it in olderIds })
         // Reproducible input for the offline phonemizer, exported from the real Kotlin data.
         val file = File("build/reports/tests/advanced-content.tsv"); file.parentFile.mkdirs()
         fun row(kind: String, level: String, id: String, en: String, vi: String) =

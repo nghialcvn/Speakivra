@@ -20,6 +20,13 @@ root; later sync unions its legacy progress with the level documents, preserving
 new content. The shared Chinese resume key stays in the root so stale resumes in
 different levels cannot compete.
 
+Rules may reject a stale revision/create as PERMISSION_DENIED before the SDK can
+classify it as an ABORTED transaction. After that error, the client re-reads only
+the same owned paths and retries up to three attempts only if a server snapshot
+has changed since the failed attempt. Stable permission failures and foreign
+account access are not retried by this path. Every retry still performs the full
+ownership/schema/revision checks and unions the fresh progress before committing.
+
 Fresh restores fetch the eight exact level paths from the server before importing
 the profile. Offline failures leave local progress pending. Study changes made
 during a sync are merged back and scheduled for the next sync. Every document

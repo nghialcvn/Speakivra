@@ -152,19 +152,44 @@ internal class AccountRuntime private constructor(private val context: Context, 
         check((doc.getLong("revision") ?: 0) in 1L..1000000000L)
         return ChineseCloudPartitions.levelProgress(sanitizedCloudProgress(profileId, JSONObject(text)), level)
     }
+    private suspend fun <T : Any> profileTransaction(owner: String, ref: DocumentReference,
+        update: (Transaction, DocumentSnapshot, Map<String, DocumentSnapshot>) -> T): T {
+        for (attempt in 0 until 3) {
+            val observed = java.util.concurrent.atomic.AtomicReference<List<DocumentSnapshot>>(emptyList())
+            try {
+                return db.runTransaction { transaction ->
+                    requireUser(owner)
+                    val old = transaction.get(ref)
+                    val parts = ChineseCloudPartitions.levels.associateWith { level ->
+                        transaction.get(ref.collection("languageProgress").document(ChineseCloudPartitions.documentId(level)))
+                    }
+                    observed.set(listOf(old) + parts.values)
+                    update(transaction, old, parts)
+                }.cloudAwait()
+            } catch (failure: FirebaseFirestoreException) {
+                // A stale revision/create can be rejected by rules before the SDK's ABORTED
+                // retry. Re-read only our owned paths; stable denials are never retried here.
+                if (failure.code != FirebaseFirestoreException.Code.PERMISSION_DENIED || attempt == 2 || observed.get().isEmpty()) throw failure
+                requireUser(owner)
+                var changedOnServer = false
+                for (old in observed.get()) {
+                    val fresh = old.reference.get(Source.SERVER).cloudAwait()
+                    if (fresh.data != old.data) { changedOnServer = true; break }
+                }
+                requireUser(owner)
+                if (!changedOnServer) throw failure
+            }
+        }
+        error("Không thể hoàn tất giao dịch đồng bộ.")
+    }
     private suspend fun syncOne(person: Learner, owner: String) {
         requireUser(owner)
         val identity = requireNotNull(identities.peek(person)); check(identity.ownerUid == owner)
         val input = profileSyncPayload(person, identity, learnerStore.preferences(person).all).getJSONObject("progress")
         val dirtyName = syncPrefs.getBoolean("metadataDirty.${person.id}", false)
         val ref = db.collection("accounts").document(owner).collection("profiles").document(identity.profileId)
-        val merged = db.runTransaction { transaction ->
-            requireUser(owner)
-            val old = transaction.get(ref)
-            // All reads precede writes. Migration and all eight level snapshots commit atomically.
-            val parts = ChineseCloudPartitions.levels.associateWith { level ->
-                transaction.get(ref.collection("languageProgress").document(ChineseCloudPartitions.documentId(level)))
-            }
+        // All reads precede writes. Migration and all eight level snapshots commit atomically.
+        val merged = profileTransaction(owner, ref) { transaction, old, parts ->
             val oldMeta = if (old.exists()) validateSnapshot(old) else person.name to person.avatar
             val name = if (dirtyName) person.name else oldMeta.first
             val avatar = if (dirtyName) person.avatar else oldMeta.second
@@ -189,7 +214,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
                     "createdAt" to (old.getTimestamp("createdAt") ?: FieldValue.serverTimestamp()), "updatedAt" to FieldValue.serverTimestamp()))
             }
             Triple(name, avatar, combined)
-        }.cloudAwait()
+        }
         requireUser(owner)
         // Learning or editing may have continued during network I/O. Keep those newer local changes.
         val current = learnerStore.all().first { it.id == person.id }

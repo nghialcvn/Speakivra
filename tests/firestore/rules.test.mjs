@@ -98,7 +98,7 @@ test('a later old-client root update cannot overwrite migrated level documents',
  await updateDoc(root,{progressJson:'old-client-progress',revision:2,updatedAt:serverTimestamp()});
  assert.equal((await getDoc(ref)).data().progressJson,'new-progress');await assertSucceeds(deleteDoc(ref));
 });
-test('concurrent root and level transactions keep ownership and revision guards under contention',async()=>{
+test('concurrent updates retain revision guards and retry changed snapshots safely',async()=>{
  const g=guest(),a=db('A'),other=db('A'),root=profileRef(a,'A',g);await claim(a,'A',g);
  const initial=writeBatch(a);initial.set(root,snapshot(g));initial.set(languageRef(a,'A',g),languageSnapshot(g));await initial.commit();
  let arrived=0,release;const barrier=new Promise(resolve=>{release=resolve;});
@@ -111,7 +111,13 @@ test('concurrent root and level transactions keep ownership and revision guards 
    revision:part.exists()?part.data().revision+1:1,updatedAt:serverTimestamp()});
   tx.set(parent,{...old.data(),progressJson:level,revision:old.data().revision+1,updatedAt:serverTimestamp()});
  });}
- await Promise.all([writeLevel(a,'A1'),writeLevel(other,'A2')]);
+ const outcomes=await Promise.allSettled([writeLevel(a,'A1'),writeLevel(other,'A2')]);
+ const committed=outcomes.filter(r=>r.status==='fulfilled').length;assert.ok(committed>=1);
+ assert.equal((await getDoc(root)).data().revision,1+committed);
+ // ABORTED may be retried by the SDK. A rules-level stale denial needs a fresh read.
+ for(let n=0;n<outcomes.length;n++)if(outcomes[n].status==='rejected'){
+  assert.equal(outcomes[n].reason.code,'permission-denied');await writeLevel(n===0?a:other,n===0?'A1':'A2');
+ }
  assert.equal((await getDoc(root)).data().revision,3);
  assert.equal((await getDoc(languageRef(a,'A',g,'A1'))).data().progressJson,'A1');
  assert.equal((await getDoc(languageRef(a,'A',g,'A2'))).data().progressJson,'A2');

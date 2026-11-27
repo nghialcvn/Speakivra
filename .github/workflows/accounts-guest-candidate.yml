@@ -111,7 +111,7 @@ jobs:
             adb shell am instrument -w -e class com.nghialcvn.speakivra.GuestLinkReminderUiTest,com.nghialcvn.speakivra.AccountDraftFlowTest,com.nghialcvn.speakivra.FreshInstallLearnerTest,com.nghialcvn.speakivra.ApprovedUiTest#approvedDiamondRewardsAndResume,com.nghialcvn.speakivra.SparkAccountIntegrationTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
             mkdir -p ui-review
             adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
-            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 10 and "FAILURES!!!" not in s, s'
+            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 11 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports
         if: always()
         uses: actions/upload-artifact@v4

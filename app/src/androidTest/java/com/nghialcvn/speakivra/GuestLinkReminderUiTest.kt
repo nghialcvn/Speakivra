@@ -60,6 +60,19 @@ class GuestLinkReminderUiTest {
         ui.runOnIdle { assertEquals(selected, linked); assertFalse(started) }
         ui.onNodeWithText("Giữ an toàn tiến độ học").assertDoesNotExist()
     }
+    @Test fun signedInAccountCanEnterLinkPreviewDirectlyWithoutClaimingTheGuest() {
+        val learner = person("Linh")
+        val gateway = object : AccountGateway by UnconfiguredAccountGateway() {
+            override val session = AccountSession("test-owner", "Test", "Google", true)
+        }
+        show { SpeakivraTheme(false) {
+            AccountFlow(learner, onBack = {}, gateway = gateway, linkOnEntry = true)
+        } }
+        ui.onNodeWithText("Liên kết dữ liệu hiện tại", substring = false).assertIsDisplayed()
+        ui.onNodeWithText("Linh", substring = false).assertIsDisplayed()
+        ui.onNodeWithText("Liên kết và đồng bộ").performScrollTo().assertIsDisplayed()
+        assertNull(GuestIdentityStore(context).peek(learner)?.ownerUid)
+    }
     @Test fun ownedProfileSkipsReminderButUnlinkedProfileOnSameDeviceDoesNot() {
         val owned = person("Nghĩa")
         val guest = person("Linh")

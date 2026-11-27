@@ -50,20 +50,20 @@ class DailyCheckInFlowTest {
         val other = store.add("Linh", 1)
         Assert.assertTrue(store.preferences(other).getStringSet(CHECK_IN_DATES, emptySet()).orEmpty().isEmpty())
         shot("111-attendance-after")
-        ui.onNodeWithText("Bài học", substring = false).performClick()
+        ui.onNodeWithContentDescription("Mở mục Bài học").performClick()
         ui.onNodeWithText("Trang chủ", substring = false).performClick()
         ui.onNodeWithText("✓ Đã điểm danh").assertIsNotEnabled()
     }
     @Test fun resumeWorksByRealTouchAfterLeavingAndReturningToPicker() {
         ui.onNodeWithText("Tiếp tục bài học ›").performTouchInput { click() }
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
-        ui.onNodeWithText(Lessons.a1.first().phrases[2].english, substring = false).assertExists()
+        ui.onNodeWithText(personalizeLesson(Lessons.a1.first(), "Nghĩa").phrases[2].english, substring = false).assertExists()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithContentDescription("Tiếp tục học với Nghĩa").performTouchInput { click() }
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
-        ui.onNodeWithText(Lessons.a1.first().phrases[2].english, substring = false).assertExists()
+        ui.onNodeWithText(personalizeLesson(Lessons.a1.first(), "Nghĩa").phrases[2].english, substring = false).assertExists()
         shot("112-profile-resumed")
     }
     @Test fun linkedLabelFitsOneLineAndResumeActionHasATouchTarget() {
@@ -78,8 +78,9 @@ class DailyCheckInFlowTest {
         ui.waitUntil(10000) { ui.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
         val results = mutableListOf<TextLayoutResult>()
         ui.onNodeWithText(text).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
-        Assert.assertEquals(1, results.single().lineCount); Assert.assertFalse(results.single().hasVisualOverflow)
         shot("113-profile-linked-single-line")
+        Assert.assertEquals(1, results.single().lineCount)
+        Assert.assertFalse("Label overflow: width=${results.single().didOverflowWidth}, height=${results.single().didOverflowHeight}, size=${results.single().size}, input=${results.single().layoutInput}", results.single().hasVisualOverflow)
         ui.onNodeWithText("Tiếp tục bài học ›").performTouchInput { click() }
         ui.runOnIdle { Assert.assertTrue(resumed) }
     }

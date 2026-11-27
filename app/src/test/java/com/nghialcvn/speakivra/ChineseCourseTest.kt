@@ -9,11 +9,11 @@ class ChineseCourseTest {
         val topics = ChineseCurriculum.topics
         assertEquals(10, topics.count { it.level == "A1" })
         assertEquals(15, topics.count { it.level == "A2" })
-        assertEquals(200, topics.sumOf { it.phrases.size })
-        assertEquals(100, topics.sumOf { it.turns.size })
-        assertEquals(100, topics.sumOf { it.reading.size })
-        assertEquals(100, topics.sumOf { it.exercises.size })
-        assertEquals(75, topics.sumOf { it.comprehension.size })
+        assertEquals(4450, topics.sumOf { it.phrases.size })
+        assertEquals(1660, topics.sumOf { it.turns.size })
+        assertEquals(620, topics.sumOf { it.reading.size })
+        assertEquals(1630, topics.sumOf { it.exercises.size })
+        assertEquals(435, topics.sumOf { it.comprehension.size })
         assertTrue(topics.flatMap { it.comprehension }.all { it.options.size == 3 && it.options.distinct().size == 3 && it.answer in 0..2 })
         assertTrue(Lessons.catalogue.none { it.id.startsWith("zh_") })
         assertEquals(10, Lessons.a1.size)
@@ -21,9 +21,9 @@ class ChineseCourseTest {
         val ids = topics.flatMap { t -> t.phrases + t.turns.map { it.prompt } + t.reading + t.exercises }.map { it.id }
         assertEquals(ids.size, ids.distinct().size)
         topics.forEach { topic ->
-            assertTrue(topic.id.startsWith("zh_${topic.level.lowercase()}_"))
+            assertTrue(topic.id.startsWith(if (topic.level in listOf("FO", "HK")) "zh_hotel_${topic.level.lowercase()}_" else "zh_${topic.level.lowercase()}_"))
             assertTrue(topic.title.isNotBlank() && topic.tip.isNotBlank())
-            assertTrue(topic.turns.all { it.answerIndex in topic.phrases.indices })
+            assertTrue(topic.turns.all { it.answer != null || it.answerIndex in topic.phrases.indices })
             (topic.phrases + topic.turns.map { it.prompt }).forEach { line ->
                 assertTrue(line.id, Regex("\\p{IsHan}").containsMatchIn(line.hanzi))
                 assertTrue(line.id, line.pinyin.isNotBlank() && line.vietnamese.isNotBlank())

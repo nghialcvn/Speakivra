@@ -1,0 +1,58 @@
+package com.nghialcvn.speakivra
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+internal enum class StudyLanguage(val label: String) { ENGLISH("Tiếng Anh"), CHINESE("Tiếng Trung") }
+
+/** Approved entry: two independent learning areas, with the same profile and attendance. */
+@Composable
+internal fun LanguageEntryScreen(onSelect: (StudyLanguage) -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 36.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Spacer(Modifier.height(30.dp))
+        Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(136.dp, 112.dp))
+        Text("Speakivra", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+        Spacer(Modifier.height(20.dp))
+        Text("Hôm nay bạn muốn học gì?", fontSize = 23.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+        Text("Chọn ngôn ngữ để bắt đầu", color = studio.muted, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(8.dp))
+        StudyLanguage.entries.forEach { language ->
+            StudioCard(Modifier.fillMaxWidth().clickable { onSelect(language) }.testTag(if (language == StudyLanguage.ENGLISH) "language-en" else "language-zh")) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(Modifier.size(64.dp).background(studio.peach, RoundedCornerShape(18.dp)), Alignment.Center) {
+                        Text(if (language == StudyLanguage.ENGLISH) "Aa" else "汉", fontSize = 32.sp, color = studio.purple, fontWeight = FontWeight.Bold)
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(language.label, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(if (language == StudyLanguage.ENGLISH) "English" else "中文", color = studio.muted)
+                        Text("A1 → C2 • Khách sạn", color = studio.purple, fontSize = 12.sp)
+                    }
+                    StudioIcon("chevron", Modifier.size(18.dp), studio.purple)
+                }
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+        Text("Mỗi ngôn ngữ, một hành trình riêng.", color = studio.muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+internal fun StudyLanguageBar(language: StudyLanguage, onSwitch: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+        AssistChip(onClick = onSwitch, label = { Text(language.label + " ⌄") })
+        TextButton(onClick = onSwitch, modifier = Modifier.testTag("switch-study-language")) { Text("Đổi ngôn ngữ") }
+    }
+}

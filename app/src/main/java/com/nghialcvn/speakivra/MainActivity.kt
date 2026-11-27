@@ -130,6 +130,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     val cloudRevision by cloud.revision.collectAsState()
     var learners by remember { mutableStateOf(store.visible(cloud.uid)) }
     LaunchedEffect(cloudRevision) { learners = store.visible(cloud.uid) }
+    var studyLanguage by rememberSaveable { mutableStateOf<StudyLanguage?>(null) }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var accountEntry by rememberSaveable { mutableStateOf(false) }
@@ -153,6 +154,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     }
     val available = learners.filter { GuestIdentityStore(context).peek(it)?.canOpen(cloud.uid) != false }
     val active = available.firstOrNull { it.id == activeId }
+    BackHandler(enabled = studyLanguage != null && active == null && !creating && !accountEntry) { studyLanguage = null }
     DisposableEffect(active?.id, cloud.uid) {
         val person = active
         val listener = person?.let { cloud.watch(it) }
@@ -160,9 +162,20 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
-        if (active != null) {
-            key(active.id) {
-                LearnerApp(updates, active, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+        if (studyLanguage == null) {
+            val appearance = context.getSharedPreferences("speakivra_progress", 0)
+            val dark = appearance.getBoolean("dark_theme", false)
+            val neon = appearance.getBoolean("neon_theme", false)
+            SpeakivraTheme(dark, neon = neon) {
+                Surface(color = studio.background, contentColor = studio.ink) {
+                    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                        LanguageEntryScreen { studyLanguage = it }
+                    }
+                }
+            }
+        } else if (active != null) {
+            key(active.id, studyLanguage) {
+                LearnerApp(updates, active, studyLanguage!!, { studyLanguage = null; resumeLearning = false; entryPage = "home" }, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
@@ -215,7 +228,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
 }
 
 @Composable
-private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, onResumeConsumed: () -> Unit, initialPage: String = "home") {
+private fun LearnerApp(updates: InAppUpdates, learner: Learner, studyLanguage: StudyLanguage, onSwitchLanguage: () -> Unit, resumeLearning: Boolean, updateRequested: Boolean, onUpdateHandled: () -> Unit, onSwitchLearner: () -> Unit, onChooseLearner: (Learner) -> Unit, onUpdateLearner: (String, Int) -> String?, onResumeConsumed: () -> Unit, initialPage: String = "home") {
     val context = LocalContext.current
     val preferences = remember(learner.id) { context.getSharedPreferences(learnerPreferenceName(learner.id), 0) }
     val appearance = remember { context.getSharedPreferences("speakivra_progress", 0) }
@@ -297,8 +310,9 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     var automatic by rememberSaveable { mutableStateOf(preferences.getBoolean("automatic_mode", true)) }
     var showTranslation by rememberSaveable { mutableStateOf(true) }
     var playbackSpeed by rememberSaveable {
-        val value = SpeechProfiles.initialSpeed(preferences.getInt("playback_speed", 100), preferences.getInt("speed_calibration", 0))
-        preferences.edit().putInt("playback_speed", value).putInt("speed_calibration", 2).apply()
+        val value = if (studyLanguage == StudyLanguage.CHINESE) preferences.getInt("zh_playback_speed", 75)
+            else SpeechProfiles.initialSpeed(preferences.getInt("playback_speed", 100), preferences.getInt("speed_calibration", 0))
+        if (studyLanguage == StudyLanguage.ENGLISH) preferences.edit().putInt("playback_speed", value).putInt("speed_calibration", 2).apply()
         mutableIntStateOf(value)
     }
     var voiceChoice by remember(learner.id) { mutableStateOf(VoiceChoices.read(preferences)) }
@@ -496,7 +510,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     var settingDialog by rememberSaveable { mutableStateOf("") }
     fun selectSpeed(value: Int) {
         playbackSpeed = value
-        preferences.edit().putInt("playback_speed", value).apply()
+        preferences.edit().putInt(if (studyLanguage == StudyLanguage.CHINESE) "zh_playback_speed" else "playback_speed", value).apply()
     }
     fun changeVoice(accent: String = voiceChoice.accent, gender: String = voiceChoice.gender) {
         stopCapture(); speech.stop()
@@ -660,18 +674,21 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                 // Never attach the wave to a short scrolling panel.
                 if (neon) NeonWaveBackground(Modifier.matchParentSize())
                 Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                if (page == "home" && studyLanguage == StudyLanguage.ENGLISH) StudyLanguageBar(studyLanguage, onSwitchLanguage)
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     // Each screen owns its scroll area; speaking/review keep the next action visible.
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
-                        when (page) {
+                        if (studyLanguage == StudyLanguage.CHINESE && page in listOf("home", "lessons", "repeat", "progress")) {
+                            ChineseLearningArea(preferences, learner, page, onSwitchLanguage, { navigate("profile") })
+                        } else when (page) {
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name, learner, preferences,
                                 onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
-                            "lessons" -> StudyHubScreen(preferences, learner, onBack = { navigate("home") }) { LessonHubScreen(
+                            "lessons" -> LessonHubScreen(
                                 onLevel = { if (levelIsOpen(it, learnerLessons, ::loadProgress)) { selectedLevel = it; navigate("level-lessons") } },
                                 onChat = { navigate("chat") }, onPassages = { navigate("passages") },
                                 onExercises = { navigate("exercises") }, onBack = { navigate("home") },
-                                onHotel = { navigate("hotel") }, load = ::loadProgress) }
+                                onHotel = { navigate("hotel") }, load = ::loadProgress)
                             "hotel" -> HotelHubScreen(hotelRole, onRole = { hotelRole = it },
                                 onOpen = { role, mode -> hotelRole = role; hotelMode = mode; navigate("hotel-topics") },
                                 onBack = { navigate("lessons") })
@@ -797,7 +814,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 if (error == null) navigate("profile")
                                 error
                             })
-                            "voice-settings" -> VoiceSettingsScreen(
+                            "voice-settings" -> if (studyLanguage == StudyLanguage.CHINESE) ChineseVoiceSettings(preferences, onBack = { navigate(voiceReturnPage) }) else VoiceSettingsScreen(
                                 choice = voiceChoice,
                                 available = speech.installedVoices(voiceChoice.accent),
                                 speed = playbackSpeed,
@@ -868,7 +885,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                                 onReminderToggle = ::toggleReminder,
                                 onSound = { settingDialog = "sound" },
                                 onAbout = { settingDialog = "about" },
-                                onAccount = { navigate("account") }
+                                onAccount = { navigate("account") }, chinese = studyLanguage == StudyLanguage.CHINESE
                             )
                             "updates" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PageHeading("Cập nhật ứng dụng", onBack = { navigate("profile") })
@@ -878,7 +895,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     }
                 }
                 // All three appearances use the same full-screen scripted conversation.
-                if ((page != "account" || !accountAuthScreen) && (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson))))
+                if (!(studyLanguage == StudyLanguage.CHINESE && page in listOf("home", "lessons", "repeat", "progress")) && (page != "account" || !accountAuthScreen) && (page !in listOf("edit-profile", "voice-settings", "chat") || (page == "chat" && HotelCurriculum.isHotel(lesson))))
                     StudioBottomNavigation(when (page) {
                     "account" -> "profile"
                     "hotel", "hotel-topics", "level-lessons", "passages", "exercises" -> "lessons"

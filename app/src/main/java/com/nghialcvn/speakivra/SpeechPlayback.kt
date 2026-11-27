@@ -54,13 +54,13 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
         .sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
         .map { InstalledSpeechVoice(it.name, "CN", it.quality) }
 
-    fun speakMandarin(text: String, speed: Int, voiceId: String? = null) {
+    fun speakMandarin(text: String, speed: Int, voiceId: String? = null, repeatCount: Int = 1) {
         if (closed || text.isBlank()) return
         stop()
         hasFocus = runCatching { audio.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED }.getOrDefault(false)
         if (!hasFocus) { status("Chưa thể phát âm thanh lúc này. Hãy thử nghe lại."); return }
         fallback(Request(SpeechProfile(text, null, listOf(SpeechPart(text, 1f, 1f, 0))),
-            speed, session, VoiceChoice(voiceId = voiceId), language = "zh-CN"))
+            speed, session, VoiceChoice(voiceId = voiceId), repeats = repeatCount.coerceIn(1, 3), language = "zh-CN"))
     }
 
 

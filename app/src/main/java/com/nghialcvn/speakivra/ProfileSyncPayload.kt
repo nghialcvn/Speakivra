@@ -8,7 +8,8 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
     val allowedLessons = (Lessons.catalogue + ChineseCurriculum.lessons).associateBy { it.id }
     val progress = JSONObject()
     values.forEach { (key, value) ->
-        if (key == "active_lesson" && value is String && value in allowedLessons) progress.put(key, value)
+        if (key in setOf("active_lesson", "zh.active_lesson") && value is String && value in allowedLessons &&
+            ((key == "zh.active_lesson") == value.startsWith("zh_"))) progress.put(key, value)
         else if (key == CHECK_IN_DATES && value is Set<*>) {
             progress.put(key, JSONArray(validCheckInDates(value.filterIsInstance<String>()).sorted()))
         } else if (key == "extra.completed_ids" && value is Set<*>) {
@@ -24,6 +25,7 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
                     val known = if (parts[2] == "learned_phrases") lesson.phrases.map { it.id } else lesson.conversation.map { it.id }
                     progress.put(key, value.split('|').filter { it in known }.distinct().joinToString("|"))
                 }
+                "diamonds_earned" -> if (lesson.id.startsWith("zh_") && value is Int && value in 0..3) progress.put(key, value)
                 "phrase" -> if (value is Int && value in 0..lesson.phrases.size) progress.put(key, value)
                 "turn" -> if (value is Int && value in 0..lesson.conversation.size) progress.put(key, value)
                 "review", "correct" -> if (value is Int && value in 0..3) progress.put(key, value)

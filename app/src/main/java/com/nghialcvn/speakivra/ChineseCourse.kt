@@ -3,27 +3,46 @@ package com.nghialcvn.speakivra
 import java.text.Normalizer
 import java.util.Locale
 
-internal data class ChineseLine(val id: String, val hanzi: String, val pinyin: String, val vietnamese: String)
-internal data class ChineseTurn(val prompt: ChineseLine, val answerIndex: Int)
+internal data class ChineseLine(val id: String, val hanzi: String, val pinyin: String, val vietnamese: String, val alternatives: List<String> = emptyList(), val alternativePinyin: List<String> = emptyList())
+internal data class ChineseTurn(val prompt: ChineseLine, val answerIndex: Int, val answer: ChineseLine? = null) {
+    fun reply(phrases: List<ChineseLine>) = answer ?: phrases[answerIndex]
+}
+internal data class ChineseReadingPack(val id: String, val title: String, val lines: List<ChineseLine>, val vocabulary: List<ChineseLine> = emptyList())
+internal data class ChineseExercisePack(val id: String, val title: String, val lines: List<ChineseLine>)
 internal data class ChineseComprehension(val id: String, val prompt: ChineseLine, val options: List<String>, val answer: Int)
 internal data class ChineseTopic(val id: String, val level: String, val title: String, val readingTitle: String,
-    val tip: String, val phrases: List<ChineseLine>, val turns: List<ChineseTurn>) {
+    val tip: String, val phrases: List<ChineseLine>, val turns: List<ChineseTurn>,
+    val readingPacks: List<ChineseReadingPack> = emptyList(), val exercisePacks: List<ChineseExercisePack> = emptyList(),
+    val starter: Boolean = true, val selectedReading: List<ChineseLine>? = null, val selectedExercises: List<ChineseLine>? = null) {
     // The first four authored lines form the short passage, also practised individually.
-    val reading get() = phrases.take(4).mapIndexed { n, line -> line.copy(id = "${id}_r${n + 1}") }
-    val exercises get() = phrases.drop(4).mapIndexed { n, line -> line.copy(id = "${id}_e${n + 1}") }
-    val comprehension get() = turns.take(3).mapIndexed { n, turn ->
-        val correct = phrases[turn.answerIndex].vietnamese
+    val legacyReading get() = if (starter) phrases.take(4).mapIndexed { n, line -> line.copy(id = "${id}_r${n + 1}") } else emptyList()
+    val reading get() = selectedReading ?: (legacyReading + readingPacks.flatMap { it.lines })
+    val legacyExercises get() = if (starter) phrases.take(8).drop(4).mapIndexed { n, line -> line.copy(id = "${id}_e${n + 1}") } else emptyList()
+    val exercises get() = selectedExercises ?: (legacyExercises + exercisePacks.flatMap { it.lines })
+    val comprehension get() = (if (starter) turns.take(3).map { it.prompt to it.reply(phrases) }
+        else phrases.take(3).map { it to it }).mapIndexed { n, (prompt, reply) ->
+        val correct = reply.vietnamese
         val options = (listOf(correct) + phrases.map { it.vietnamese }.filter { it != correct }.distinct().take(2))
             .let { it.drop(n % 3) + it.take(n % 3) }
-        ChineseComprehension("${id}_c${n + 1}", turn.prompt, options, options.indexOf(correct))
+        ChineseComprehension("${id}_c${n + 1}", prompt, options, options.indexOf(correct))
     }
     val lesson get() = Lesson(id, readingTitle, title,
         phrases.map { Phrase(it.hanzi, it.vietnamese, tip, it.id) },
-        turns.map { turn -> val answer = phrases[turn.answerIndex]
+        turns.map { turn -> val answer = turn.reply(phrases)
             ConversationTurn(turn.prompt.hanzi, turn.prompt.vietnamese, answer.hanzi, answer.vietnamese, turn.prompt.id) })
-    fun personalize(name: String): ChineseTopic = if (id != "zh_a1_greetings") this else copy(
-        phrases = phrases.map { line -> if (line.id.endsWith("_p01")) line.copy(
-            hanzi = "我叫$name。", pinyin = "Wǒ jiào $name.", vietnamese = "Tôi tên là $name.") else line })
+    fun personalize(name: String): ChineseTopic {
+        val display = Normalizer.normalize(name.trim(), Normalizer.Form.NFC)
+        fun line(value: ChineseLine): ChineseLine {
+            if (id == "zh_a1_greetings" && value.id == "zh_a1_greetings_p01")
+                return value.copy(hanzi = "我叫$display。", pinyin = "Wǒ jiào $display.", vietnamese = "Tôi tên là $display.")
+            if (value.hanzi == "我叫Alex。") return value.copy(hanzi = "我叫$display。", pinyin = "Wǒ jiào $display.",
+                vietnamese = value.vietnamese.replace("Alex", display), alternatives = value.alternatives.map { it.replace("Alex", display) })
+            return value
+        }
+        return copy(phrases = phrases.map(::line), turns = turns.map { it.copy(prompt = line(it.prompt), answer = it.answer?.let(::line)) },
+            readingPacks = readingPacks.map { it.copy(lines = it.lines.map(::line), vocabulary = it.vocabulary.map(::line)) },
+            exercisePacks = exercisePacks.map { it.copy(lines = it.lines.map(::line)) })
+    }
 }
 
 /** Character alignment for Hanzi, whole tokens for Latin names. No Pinyin/acoustic scoring. */
@@ -69,10 +88,11 @@ internal fun chineseTokens(value: String): List<String> {
     val equivalentNumbers = numbers.replace(Regex("两(?=个|点|天|晚|碗|张|件|小时|百|千|人|年|月|本|位|次)"), "二")
     val folded = Normalizer.normalize(equivalentNumbers, Normalizer.Form.NFD)
         .replace(Regex("\\p{M}"), "").replace('đ', 'd')
-    return Regex("\\p{IsHan}|[a-z]+|[0-9]+|\\p{L}+").findAll(folded).map { it.value }.take(512).toList()
+    return Regex("\\p{IsHan}|[a-z]+|[0-9]+|\\p{L}+").findAll(folded).map { it.value }.take(4097).toList()
 }
 internal fun matchChinese(reference: String, transcript: String?): ChineseMatch {
     val expected = chineseTokens(reference); val spoken = chineseTokens(transcript.orEmpty())
+    if (expected.size > 4096 || spoken.size > 4096) return ChineseMatch(expected, List(expected.size) { false }, spoken.size, spoken.size, false, false)
     val dp = Array(expected.size + 1) { IntArray(spoken.size + 1) }
     for (i in expected.indices.reversed()) for (j in spoken.indices.reversed())
         dp[i][j] = if (expected[i] == spoken[j]) 1 + dp[i + 1][j + 1] else maxOf(dp[i + 1][j], dp[i][j + 1])

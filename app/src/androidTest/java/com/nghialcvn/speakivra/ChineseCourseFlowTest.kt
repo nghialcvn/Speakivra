@@ -2,7 +2,9 @@ package com.nghialcvn.speakivra
 
 import android.graphics.Bitmap
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Modifier
 import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
@@ -29,8 +31,14 @@ class ChineseCourseFlowTest {
                 val density = LocalDensity.current.density
                 CompositionLocalProvider(LocalDensity provides Density(density, font)) {
                     Surface(color = studio.background, contentColor = studio.ink) {
-                        StudyHubScreen(prefs, learner, {}) {
-                            LessonHubScreen({}, {}, {}, {}, {})
+                        var selected by remember { mutableStateOf<StudyLanguage?>(if (chinese) StudyLanguage.CHINESE else StudyLanguage.ENGLISH) }
+                        if (selected == null) LanguageEntryScreen { selected = it }
+                        else Column(Modifier.fillMaxSize()) {
+                            StudyLanguageBar(selected!!) { selected = null }
+                            Box(Modifier.weight(1f)) {
+                                if (selected == StudyLanguage.CHINESE) ChineseCourseScreen(prefs, learner, {}, initialLevel = "A1")
+                                else LessonHubScreen({}, {}, {}, {}, {})
+                            }
                         }
                     }
                 }
@@ -47,14 +55,16 @@ class ChineseCourseFlowTest {
     }
     @Test fun languageSelectionAndBothLevelsUseRealCounts() {
         render(chinese = false)
-        ui.onNodeWithTag("language-en").assertIsSelected()
+        ui.onNodeWithText("Tiếng Anh ⌄").assertIsDisplayed()
         ui.onNodeWithText("A1 • Cơ bản").assertIsDisplayed()
+        ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()
-        ui.onNodeWithText("10 chủ đề • 80 câu nói • 40 lượt hội thoại").assertIsDisplayed()
+        ui.onNodeWithText("10 chủ đề • 200 câu nói • 70 lượt hội thoại").assertIsDisplayed()
         shot("160-chinese-a1-light")
         ui.onNodeWithTag("zh-level-A2").performClick()
-        ui.onNodeWithText("15 chủ đề • 120 câu nói • 60 lượt hội thoại").assertIsDisplayed()
+        ui.onNodeWithText("15 chủ đề • 450 câu nói • 150 lượt hội thoại").assertIsDisplayed()
         shot("161-chinese-a2-light")
+        ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-en").performClick()
         ui.onNodeWithText("A1 • Cơ bản").assertIsDisplayed()
     }
@@ -76,7 +86,9 @@ class ChineseCourseFlowTest {
         assertTrue(prefs.getStringSet("extra.completed_ids", emptySet())!!.contains("zh_a1_greetings_e1"))
         assertEquals("english-sentinel", prefs.getString(english, ""))
         assertEquals(0, TopicAchievements(prefs).hearts(ChineseCurriculum.topics.first().lesson))
+        ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-en").performClick()
+        ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()
         ui.onNodeWithTag("zh_a1_greetings").performScrollTo().performClick()
         ui.onNodeWithTag("zh-mode-exercise").performClick()
@@ -165,7 +177,7 @@ class ChineseCourseFlowTest {
                     return@item
                 }
                 val reference = when (mode) {
-                    "chat" -> topic.phrases[topic.turns[n].answerIndex].hanzi
+                    "chat" -> topic.turns[n].reply(topic.phrases).hanzi
                     "read" -> topic.reading[n].hanzi
                     "exercise" -> topic.exercises[n].hanzi
                     else -> topic.phrases[n].hanzi
@@ -178,7 +190,7 @@ class ChineseCourseFlowTest {
         assertEquals(0, ChineseProgress(second).done(topic, "repeat"))
         val expanded = topic.copy(phrases = topic.phrases + ChineseLine("zh_a1_greetings_p09", "早上好。", "Zǎoshang hǎo.", "Chào buổi sáng."))
         assertFalse(state.finished(expanded))
-        assertEquals(8, state.firstPending(expanded, "repeat"))
+        assertEquals(topic.phrases.size, state.firstPending(expanded, "repeat"))
         assertEquals(1, first.getInt("lesson.${topic.id}.rounds", 0))
         assertEquals(3, state.diamonds(topic))
     }

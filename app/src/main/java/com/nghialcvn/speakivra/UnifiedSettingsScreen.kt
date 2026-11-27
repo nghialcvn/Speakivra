@@ -53,7 +53,8 @@ internal fun UnifiedSettingsScreen(
     onSound: () -> Unit,
     onUpdates: () -> Unit,
     onAbout: () -> Unit,
-    onAccount: () -> Unit = {}
+    onAccount: () -> Unit = {},
+    chinese: Boolean = false
 ) {
     val p = studio
     var expanded by rememberSaveable { mutableStateOf<String?>(null) }
@@ -72,7 +73,7 @@ internal fun UnifiedSettingsScreen(
             .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(11.dp)) {
             AccordionSection(
-                title = "Học tập", summary = (if (language == LearningOptions.ENGLISH)
+                title = "Học tập", summary = if (chinese) "Trung – Việt • Phổ thông Trung Quốc" else (if (language == LearningOptions.ENGLISH)
                     "Anh – Anh" else "Anh – Việt") + " • " + choice.accentLabel,
                 icon = "book", neon = neon,
                 open = expanded == "study", onToggle = {
@@ -80,13 +81,17 @@ internal fun UnifiedSettingsScreen(
                 }
             ) {
                 SettingsTile("globe", "Ngôn ngữ học",
-                    if (language == LearningOptions.ENGLISH) "Anh – Anh • Hướng dẫn bằng tiếng Anh"
+                    if (chinese) "Trung – Việt • Chữ giản thể • Pinyin" else if (language == LearningOptions.ENGLISH) "Anh – Anh • Hướng dẫn bằng tiếng Anh"
                     else "Anh – Việt • Giải thích bằng tiếng Việt", neon, onVoice)
                 SettingsTile("speaker", "Giọng đọc & Ngôn ngữ",
-                    "${choice.accentLabel} • ${choice.genderLabel}", neon, onVoice)
+                    if (chinese) "Tiếng Trung phổ thông • Giọng ngoại tuyến trên máy" else "${choice.accentLabel} • ${choice.genderLabel}", neon, onVoice)
                 InnerPanel(neon) {
                     Text("Tùy chọn ngôn ngữ", color = p.ink,
                         fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                    if (chinese) {
+                        Text("Tiếng Trung phổ thông • Trung Quốc (zh-CN)", color = p.muted, fontSize = 13.sp)
+                        Text("Chữ giản thể • Pinyin • Nghĩa tiếng Việt", color = p.muted, fontSize = 13.sp)
+                    } else {
                     RadioChoice("🇺🇸", "Anh – Mỹ (US)", "English (American)",
                         choice.accent == "US", neon) { onAccent("US") }
                     Text("Chế độ giải thích", color = p.ink,
@@ -108,6 +113,7 @@ internal fun UnifiedSettingsScreen(
                             Modifier.weight(1f)) { onGender("female") }
                         GenderChip("Giọng nam", choice.gender == "male", neon,
                             Modifier.weight(1f)) { onGender("male") }
+                    }
                     }
                     TextButton(onClick = onVoice, modifier = Modifier.fillMaxWidth()) {
                         Text("Nghe thử và chọn giọng có thật trên máy", color = p.coral, fontSize = 12.sp)

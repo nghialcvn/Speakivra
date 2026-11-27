@@ -1,7 +1,7 @@
 package com.nghialcvn.speakivra
 
 /** Authored Mandarin starter course. Stable IDs are language-prefixed; never derive them from translated text. */
-internal object ChineseCurriculum {
+internal object ChineseStarterCurriculum {
     val topics: List<ChineseTopic> = listOf(
         ChineseTopic("zh_a1_greetings", "A1", "Chào hỏi và giới thiệu", "认识新朋友", "Nhẹ giọng ở 吗 (ma); phân biệt 你 nǐ và 好 hǎo. Hai thanh ba liền nhau: âm đầu thường đọc gần thanh hai.", listOf(
             ChineseLine("zh_a1_greetings_p01", "我叫小明。", "Wǒ jiào Xiǎomíng.", "Tôi tên là Tiểu Minh."),

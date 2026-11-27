@@ -12,7 +12,9 @@ class GuestIdentityTest {
         val id = guestProfileId(secret.toByteArray(Charsets.UTF_8))
         val serial = guestSerial(id)
         assertEquals(serial, guestSerial(id))
-        assertTrue(Regex("SPK-(?:[A-F0-9]{4}-){4}[A-F0-9]{4}").matches(serial))
+        assertEquals("SPK-0660-23D9-B14C", guestSerial("066023d9b14c" + "e".repeat(52)))
+        assertEquals(64, id.length)
+        assertTrue(Regex("SPK-(?:[A-F0-9]{4}-){2}[A-F0-9]{4}").matches(serial))
         assertNotEquals(id, guestProfileId("2".repeat(64).toByteArray(Charsets.UTF_8)))
         assertFalse(serial.contains(secret))
     }

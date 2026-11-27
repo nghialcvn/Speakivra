@@ -7,7 +7,7 @@ internal fun guestProfileId(publicKey: ByteArray): String =
     MessageDigest.getInstance("SHA-256").digest(publicKey).joinToString("") { "%02x".format(it.toInt() and 255) }
 internal fun guestSerial(profileId: String): String {
     require(Regex("[a-f0-9]{64}").matches(profileId))
-    return "SPK-" + profileId.take(20).uppercase().chunked(4).joinToString("-")
+    return "SPK-" + profileId.take(12).uppercase().chunked(4).joinToString("-")
 }
 internal data class GuestIdentity(val profileId: String, val keyAlias: String,
     val ownerUid: String? = null) {

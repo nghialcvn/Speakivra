@@ -3,6 +3,10 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.1.9" to listOf(
+            "profile" to "Sửa luồng đăng nhập Google và thoát chờ khi kết nối quá lâu",
+            "layers" to "Đồng bộ hồ sơ chạy riêng, không chặn đăng nhập",
+            "info" to "Rút gọn mã hiển thị còn SPK và ba nhóm ký tự; giữ nguyên mã gốc và dữ liệu học"),
         "1.1.8" to listOf(
             "profile" to "Hồ sơ khách có mã riêng, liên kết một lần với tài khoản",
             "layers" to "Đồng bộ hồ sơ, tiến độ và kim cương trên nhiều thiết bị",

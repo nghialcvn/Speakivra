@@ -499,7 +499,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 }
             }
             if (wordMatch.hasResult) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Khớp ${wordMatch.correct}/${wordMatch.tokens.size} từ · ${wordMatch.matchPercent}%", color = if (wordMatch.incorrect == 0) p.correctWord else p.incorrectWord, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Khớp ${wordMatch.correct}/${wordMatch.tokens.size} từ · ${wordMatch.matchPercent}%", color = if (wordMatch.canContinue) p.correctWord else p.incorrectWord, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text(if (wordMatch.canContinue) "✓ Có thể chuyển câu" else "Hãy nghe mẫu và nói lại nhé", color = if (wordMatch.canContinue) p.correctWord else p.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
             }
             Text("Đối chiếu từ nhận dạng, chưa chấm phát âm.", fontSize = 12.sp, color = p.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())

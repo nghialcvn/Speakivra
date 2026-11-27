@@ -1,7 +1,7 @@
 name: Verify Spark accounts and guest identity
 on:
   push:
-    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement]
+    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126]
   workflow_dispatch:
 concurrency:
   group: android-apk-${{ github.ref }}

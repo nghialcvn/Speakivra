@@ -56,56 +56,77 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
             if (!error) dates = updated
         }
     }
-    val strip = if (p == LightStudio) Color(0xFFE6E8EF) else Color(0xFF29324A)
+    val strip = if (p == LightStudio) Color(0xFFF8F9FC) else Color(0xFF29324A)
     val shape = RoundedCornerShape(18.dp)
-    // The figure's virtual ledge is at 91% of its 76dp sprite; hands overlap the strip.
+    // Keep the approved three blocks on one row at every supported phone width.
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val accessible = maxWidth < 330.dp || androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
-        val stripHeight = if (accessible) 106.dp else 64.dp
-        val cardHeight = stripHeight + 124.dp
-        Box(Modifier.fillMaxWidth().height(cardHeight).shadow(4.dp, shape).clip(shape)
-            .background(brandPanelBrush(p)).border(1.dp, p.border, shape)
+        val scale = (maxWidth.value / 330f).coerceIn(.50f, 1.25f)
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        fun fitText(dp: Float) = with(density) { (dp * scale).dp.toSp() }
+        val blockHeight = maxOf(48.dp, (46f * scale).dp)
+        val stripHeight = blockHeight + (12f * scale).dp
+        val headerHeight = (92f * scale).dp
+        val cardHeight = headerHeight + stripHeight + (10f * scale).dp
+        val avatarSize = (64f * scale).dp
+        val avatarEnd = (18f * scale).dp
+        val watermarkWidth = (164f * scale).dp
+        val watermarkHeight = watermarkWidth * (518f / 668f)
+        val logo = ImageBitmap.imageResource(R.drawable.brand_logo_clear)
+        Box(Modifier.fillMaxWidth().height(cardHeight).testTag("checkin-compact-card")
+            .shadow(4.dp, shape).clip(shape).background(brandPanelBrush(p)).border(1.dp, p.border, shape)
             .semantics { contentDescription = "Điểm danh hằng ngày" }) {
-            Image(painterResource(R.drawable.brand_logo_clear), null,
-                Modifier.align(Alignment.TopEnd).offset(x = 52.dp, y = (-15).dp).size(220.dp)
-                    .alpha(if (p == LightStudio) .28f else .34f).testTag("checkin-watermark"))
-            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(start = 16.dp, top = 18.dp, end = 112.dp),
-                fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-            val button: @Composable () -> Unit = {
+            // Crop the transparent margins of the existing official logo, as in the picker.
+            Canvas(Modifier.align(Alignment.TopEnd)
+                .offset(x = (watermarkWidth - avatarSize) / 2 - avatarEnd, y = (3f * scale).dp)
+                .size(watermarkWidth, watermarkHeight)
+                .alpha(if (p == LightStudio) .27f else .34f).testTag("checkin-watermark")) {
+                drawImage(logo, srcOffset = IntOffset(50, 36), srcSize = IntSize(668, 518),
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt()), filterQuality = FilterQuality.High)
+            }
+            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(
+                start = (16f * scale).dp, top = (16f * scale).dp, end = (100f * scale).dp),
+                fontSize = fitText(26f), fontWeight = FontWeight.ExtraBold)
+            Row(Modifier.align(Alignment.BottomCenter)
+                .padding(start = (8f * scale).dp, end = (8f * scale).dp, bottom = (10f * scale).dp)
+                .fillMaxWidth().height(stripHeight).testTag("checkin-gray-strip")
+                .shadow(2.dp, RoundedCornerShape(15.dp)).clip(RoundedCornerShape(15.dp))
+                .background(strip).border(1.dp, p.border, RoundedCornerShape(15.dp))
+                .padding((6f * scale).dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy((7f * scale).dp)) {
+                Box(Modifier.width((44f * scale).dp).height(blockHeight)
+                    .testTag("checkin-flame").background(p.peach, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center) {
+                    BrandFlame(Modifier.size((28f * scale).dp, (36f * scale).dp))
+                }
+                Column(Modifier.weight(1f).height(blockHeight).testTag("checkin-counter")
+                    .padding(vertical = (2f * scale).dp),
+                    verticalArrangement = Arrangement.SpaceBetween) {
+                    Text("${state.streak} ngày", fontSize = fitText(21f), lineHeight = fitText(26f),
+                        color = p.ink, fontWeight = FontWeight.ExtraBold, maxLines = 1, softWrap = false)
+                    Row(Modifier.testTag("checkin-week"), horizontalArrangement = Arrangement.spacedBy((4f * scale).dp)) {
+                        state.week.forEach { day ->
+                            CheckInBead(day, day.toString() in dates, day == today, (10f * scale).dp)
+                        }
+                    }
+                }
                 Button(onClick = onCheckIn, enabled = !state.checkedToday,
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.White,
                         disabledContainerColor = Color(0xFF0BA757), disabledContentColor = Color.White),
-                    contentPadding = PaddingValues(horizontal = 9.dp, vertical = 8.dp),
-                    modifier = Modifier.widthIn(min = 112.dp).height(44.dp)
+                    contentPadding = PaddingValues(horizontal = (5f * scale).dp),
+                    modifier = Modifier.size((128f * scale).dp, blockHeight)
+                        .testTag("checkin-action")
                         .then(if (!state.checkedToday) Modifier.background(BrandLook.action, RoundedCornerShape(14.dp)) else Modifier)) {
-                    Text(if (state.checkedToday) "✓ Đã điểm danh" else "Điểm danh", fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                    Text(if (state.checkedToday) "✓ Đã điểm danh" else "Điểm danh",
+                        fontSize = fitText(13f), lineHeight = fitText(16f), fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1, softWrap = false)
                 }
             }
-            val counter: @Composable RowScope.() -> Unit = {
-                BrandFlame(Modifier.size(29.dp, 37.dp))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    SingleLineInfo("${state.streak} ngày", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                        state.week.forEach { day -> CheckInBead(day, day.toString() in dates, day == today) }
-                    }
-                }
-            }
-            Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = 10.dp, vertical = 10.dp)
-                .fillMaxWidth().height(stripHeight).shadow(2.dp, RoundedCornerShape(16.dp))
-                .clip(RoundedCornerShape(16.dp)).background(strip).testTag("checkin-gray-strip")
-                .border(1.dp, p.border, RoundedCornerShape(16.dp)).padding(8.dp)) {
-                if (accessible) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp), content = counter)
-                    Box(Modifier.align(Alignment.End)) { button() }
-                } else Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) { counter(); button() }
-            }
-            // Both sprites share the same horizontal centre, 58dp from the right edge.
-            Box(Modifier.align(Alignment.TopEnd).offset(y = (114f - 76f * .91f).dp)
-                .padding(end = 20.dp).size(76.dp).testTag("checkin-gripping-avatar")
+            // The existing cutout's hands sit at 91% of its height.
+            Box(Modifier.align(Alignment.TopEnd)
+                .offset(x = -avatarEnd, y = headerHeight - avatarSize * .91f)
+                .size(avatarSize).testTag("checkin-gripping-avatar")
                 .clickable(role = Role.Button, onClick = onProfile)
                 .semantics { contentDescription = "Mở hồ sơ ${learner.name}" }) {
                 GrippingLearnerAvatar(learner.avatar, Modifier.fillMaxSize())
@@ -116,11 +137,11 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
 }
 
 @Composable
-private fun CheckInBead(day: LocalDate, checked: Boolean, today: Boolean) {
+private fun CheckInBead(day: LocalDate, checked: Boolean, today: Boolean, diameter: Dp) {
     val p = studio
     val violet = if (p == LightStudio) Color(0xFF7838EE) else Color(0xFFB494FF)
     val gray = if (p == LightStudio) Color(0xFFBBC0CF) else Color(0xFF68718A)
-    Canvas(Modifier.size(10.dp).semantics { contentDescription = "$day: ${if (checked) "Đã điểm danh" else "Chưa điểm danh"}" }) {
+    Canvas(Modifier.size(diameter).semantics { contentDescription = "$day: ${if (checked) "Đã điểm danh" else "Chưa điểm danh"}" }) {
         val radius = size.minDimension / 2
         if (today && !checked) {
             drawCircle(violet, style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()))

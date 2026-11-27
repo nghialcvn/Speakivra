@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -103,4 +106,58 @@ class CheckInRefinementUiTest {
             shot("${144 + index}-gray-checkin-avatar-$index-dark")
         }
     }
+    @Test fun compactRowStaysAlignedAtNarrowWidthsAndLargeFont() {
+        val prefs = ui.activity.getSharedPreferences("checkin-compact-width-test", 0)
+        val today = LocalDate.now().toString()
+        prefs.edit().clear().commit()
+        var width by mutableStateOf(284)
+        var fontScale by mutableStateOf(1f)
+        var dark by mutableStateOf(false)
+        ui.runOnUiThread { ui.activity.setContent {
+            val density = LocalDensity.current.density
+            Frame(dark) {
+                CompositionLocalProvider(LocalDensity provides Density(density, fontScale)) {
+                    Box(Modifier.width(width.dp)) {
+                        DailyCheckInCard(learner, prefs, {})
+                    }
+                }
+            }
+        } }
+        fun bounds(tag: String) = ui.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        fun aligned() {
+            val flame = bounds("checkin-flame")
+            val counter = bounds("checkin-counter")
+            val action = bounds("checkin-action")
+            val strip = bounds("checkin-gray-strip")
+            val card = bounds("checkin-compact-card")
+            val week = bounds("checkin-week")
+            assertEquals("Flame and counter share top", flame.top, counter.top, 2f)
+            assertEquals("Counter and action share top", counter.top, action.top, 2f)
+            assertEquals("Flame and counter share bottom", flame.bottom, counter.bottom, 2f)
+            assertEquals("Counter and action share bottom", counter.bottom, action.bottom, 2f)
+            assertTrue("Three blocks ordered on a single row", flame.right <= counter.left && counter.right <= action.left)
+            assertTrue("Seven dots must fit within counter", week.left >= counter.left - 1 && week.right <= counter.right + 1)
+            assertTrue("Button must remain inside strip", action.right <= strip.right && action.bottom <= strip.bottom)
+            assertTrue("Compact strip is under one third of its width", strip.height < strip.width / 3)
+            assertTrue("Card keeps the compact proportions", card.height < card.width * .70f)
+        }
+        for (w in listOf(284, 300, 324, 360)) {
+            for (f in listOf(1f, 1.5f)) {
+                ui.runOnIdle { width = w; fontScale = f }
+                aligned()
+                ui.onNodeWithText("Điểm danh", substring = false).assertIsDisplayed()
+            }
+        }
+        ui.runOnIdle { width = 284; fontScale = 1f }
+        shot("150-compact-narrow-before")
+        ui.onNodeWithText("Điểm danh", substring = false).performTouchInput { click() }
+        ui.onNodeWithText("✓ Đã điểm danh").assertIsNotEnabled()
+        assertEquals(setOf(today), prefs.getStringSet(CHECK_IN_DATES, emptySet()))
+        aligned()
+        shot("151-compact-narrow-after")
+        ui.runOnIdle { dark = true; fontScale = 1.5f }
+        aligned()
+        shot("152-compact-narrow-dark-large-font")
+    }
+
 }

@@ -52,7 +52,7 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
         Image(painterResource(R.drawable.brand_logo_clear), null,
             Modifier.align(Alignment.TopEnd).offset(x = if (p == NeonStudio) 24.dp else 12.dp).size(140.dp).alpha(.13f))
         Column(Modifier.fillMaxWidth().padding(9.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(start = 5.dp, top = 8.dp, end = 78.dp),
+            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(start = 5.dp, top = 8.dp, end = if (p == NeonStudio) 78.dp else 102.dp),
                 fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
             Spacer(Modifier.height(if (p == NeonStudio) 6.dp else 30.dp))
             Row(Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(17.dp)).clip(RoundedCornerShape(17.dp))

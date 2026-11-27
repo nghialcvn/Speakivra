@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.2.0-beta",
+    "tag_name": "v1.2.1-beta",
     "draft": false,
-    "body": "# Speakivra 1.2.0 Beta\n\n- Nhắc liên kết khi nhấn **Bắt đầu học** với hồ sơ chưa liên kết.\n- **Liên kết ngay** mở tài khoản và đồng bộ cho hồ sơ đang chọn.\n- **Tiếp tục học** vào học bình thường trên thiết bị hiện tại.\n- Hồ sơ đã liên kết vào học ngay, không hiện nhắc.\n- Giữ nguyên hồ sơ, tiến độ, kim cương và mã định danh.\n\nNội dung hộp thoại theo demo đã duyệt:\n\n**Giữ an toàn tiến độ học**\n\nLiên kết tài khoản để lưu hồ sơ, tiến độ và kim cương, giúp bạn tiếp tục học khi đổi máy.\n\nKhi chưa liên kết, dữ liệu chỉ được lưu trên thiết bị này và có thể mất nếu bạn gỡ ứng dụng hoặc đổi máy.\n",
+    "body": "# Speakivra 1.2.1 Beta\n\n- Tiến độ thu gọn theo từng cấp độ; mở mục khác sẽ tự thu mục đang mở.\n- Lễ tân và Buồng phòng có nhãn **Bài học riêng**, giữ cách học độc lập.\n- Nhắc học chuyển sang khoảng **20:00** theo giờ trên thiết bị; lịch đã bật được cập nhật khi mở app.\n- Thêm **B2 • Trung cao cấp**, **C1 • Cao cấp**, **C2 • Chuyên nghiệp**.\n- Mỗi cấp mới: **20 chủ đề, 700 câu luyện nói, 300 lượt hội thoại**.\n- Mỗi cấp mới: **10 bài đọc/100 câu** và **20 bài Tiếng Anh nói thế nào?/100 câu**.\n- Toàn bộ bài của cấp mới khóa đến khi hoàn thành 20/20 chủ đề của cấp trước: **B1 → B2 → C1 → C2**.\n- Giữ tiến độ và thành tích hiện có; học lại một chủ đề đã hoàn thành không làm khóa lại cấp đã mở.\n- B2 có lượt trả lời trung bình khoảng 32 từ; C1 khoảng 96 từ. C2 ưu tiên hàm ý, sắc thái, thành ngữ và phản biện chính xác, không tăng độ dài theo hệ số.\n- Phiên âm ngoại tuyến và thời gian thu âm hỗ trợ nội dung dài; bản ghi vẫn chỉ lưu tạm trên thiết bị.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.2.0-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.0-beta/Speakivra-v1.2.0-release.apk",
-        "size": 20601605,
-        "digest": "sha256:2b88716f2a39e4962c6d2535ec7bf7ac63d5c4c8f5049a105d758b6a1464d08b"
+        "name": "Speakivra-v1.2.1-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.1-beta/Speakivra-v1.2.1-release.apk",
+        "size": 21386822,
+        "digest": "sha256:c76567f4781856ad78e2d81a33fa5d29d3dfdf6e6d241f40c44a056510416688"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 40,
-    "versionName": "1.2.0",
-    "apkName": "Speakivra-v1.2.0-release.apk",
-    "apkSha256": "2b88716f2a39e4962c6d2535ec7bf7ac63d5c4c8f5049a105d758b6a1464d08b",
+    "versionCode": 41,
+    "versionName": "1.2.1",
+    "apkName": "Speakivra-v1.2.1-release.apk",
+    "apkSha256": "c76567f4781856ad78e2d81a33fa5d29d3dfdf6e6d241f40c44a056510416688",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

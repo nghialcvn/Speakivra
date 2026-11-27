@@ -37,7 +37,9 @@ turns and stable completion IDs. The original 25 short readings (100 sentences),
 supplemental practice rather than being deleted to force exact totals. Full course
 meaning checks total 435. No lessons are duplicated merely to fill counts.
 
-The B1 → B2 → C1 → C2 progression uses earned completion history. Replaying or adding
+The B1 → B2 → C1 → C2 progression uses earned completion history. As in English,
+completing the speaking, dialogue and meaning review earns topic completion;
+reading and translation packs remain separately tracked practice. Replaying or adding
 content does not revoke an earned level. Existing A1/A2 access is preserved. New
 content resumes at the first unfinished stable ID, including a new reading pack
 after a completed starter reading. Historical starter diamonds are retained; the

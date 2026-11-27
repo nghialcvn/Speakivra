@@ -43,7 +43,7 @@ internal class ChineseProgress(private val prefs: SharedPreferences) {
     fun done(topic: ChineseTopic, mode: String) = itemIds(topic, mode).count { it in completed(topic, mode) }
     fun finished(topic: ChineseTopic): Boolean {
         val full = topic.copy(selectedReading = null, selectedExercises = null)
-        return modes.all { done(full, it) == itemIds(full, it).size }
+        return listOf("repeat", "chat", "review").all { done(full, it) == itemIds(full, it).size }
     }
     fun firstPending(topic: ChineseTopic, mode: String) = itemIds(topic, mode).indexOfFirst { it !in completed(topic, mode) }.coerceAtLeast(0)
     fun resume(topic: ChineseTopic): ChineseResume {

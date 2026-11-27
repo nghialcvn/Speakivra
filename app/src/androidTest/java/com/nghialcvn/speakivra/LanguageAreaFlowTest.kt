@@ -110,6 +110,10 @@ class LanguageAreaFlowTest {
         assertEquals("read", next.mode)
         assertEquals(topic.readingPacks.first().id, next.packId)
         assertEquals(0, next.index)
+        prefs.edit().putStringSet("extra.completed_ids", (topic.legacyReading.map { it.id } + topic.comprehension.take(2).map { it.id }).toSet()).commit()
+        assertTrue(state.completeComprehension(topic, 2, topic.comprehension[2].answer))
+        assertEquals(1, prefs.getInt("lesson.${topic.id}.rounds", 0))
+        assertTrue(topic.readingPacks.flatMap { it.lines }.any { it.id !in prefs.getStringSet("extra.completed_ids", emptySet()).orEmpty() })
         ChineseCurriculum.topics.filter { it.level == "B1" }.forEach { edit.putInt("lesson.${it.id}.rounds", 1) }
         edit.commit()
         assertTrue(state.levelOpen("B2", ChineseCurriculum.topics))

@@ -52,6 +52,9 @@ class UpdateNotificationUiTest {
             context.startActivity(requireNotNull(context.packageManager.getLaunchIntentForPackage(context.packageName))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
             requireNotNull(device.wait(Until.findObject(By.text("Bắt đầu học")), 15000)).click()
+            device.wait(Until.findObject(By.text("Giữ an toàn tiến độ học")), 5000)?.let {
+                requireNotNull(device.wait(Until.findObject(By.text("Tiếp tục học")), 5000)).click()
+            }
             assertTrue(device.wait(Until.hasObject(By.text("Chào Nghĩa!")), 10000))
             val original = requireNotNull(resumed()) { "Speakivra did not resume before the notification" }
             val current = currentInstallation(context)

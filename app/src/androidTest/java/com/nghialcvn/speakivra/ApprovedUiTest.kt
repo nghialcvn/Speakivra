@@ -183,7 +183,7 @@ class ApprovedUiTest {
     }
     @Test fun neonHomeAndPracticeUseApprovedReplayRow() {
         shot("26-neon-choose-learner")
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
         shot("18-neon-home")
         ui.onNodeWithText("Tiếp tục học").performClick()
@@ -197,7 +197,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
     }
     @Test fun homeLessonEntryAndSecondTabOpenSameDedicatedHub() {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Học tập", substring = false).assertDoesNotExist()
         ui.onNodeWithText("A2 • Sơ trung cấp").assertDoesNotExist()
         ui.onNodeWithText("Luyện nói theo đoạn văn").assertDoesNotExist()
@@ -234,7 +234,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
         ui.onNodeWithContentDescription("Logo Speakivra").assertIsDisplayed()
         shot("09-choose-learner")
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
         ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         shot("01-home")
@@ -362,7 +362,7 @@ class ApprovedUiTest {
         ui.onNodeWithText("Hồ sơ").performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
         ui.onNodeWithText("Nghĩa", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Chào Nghĩa!").assertIsDisplayed()
         ui.onNodeWithText("Câu 3/20").assertIsDisplayed()
         org.junit.Assert.assertEquals("review", preferences.getString("lesson.greetings.phase", ""))

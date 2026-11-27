@@ -31,3 +31,11 @@ internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.openLessonHu
         androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab)).performClick()
     onNodeWithText("Chọn cấp độ hoặc dạng luyện tập").assertIsDisplayed()
 }
+
+/** Follow the visible, optional reminder when an existing journey starts local study. */
+internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.startLocalStudy() {
+    onNodeWithText("Bắt đầu học").performClick()
+    if (onAllNodesWithText("Giữ an toàn tiến độ học").fetchSemanticsNodes().isNotEmpty()) {
+        onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
+    }
+}

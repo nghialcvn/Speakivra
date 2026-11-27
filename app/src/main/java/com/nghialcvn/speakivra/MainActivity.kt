@@ -200,6 +200,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, available, lastId,
                                 onAdd = { creating = true }, onAccount = { accountAuthScreen = true; accountEntry = true },
+                                onLink = { lastId = it.id; accountAuthScreen = true; accountEntry = true },
                                 onStart = { entryPage = "home"; resumeLearning = false; activeId = it.id; lastId = it.id },
                                 onResume = { entryPage = "home"; resumeLearning = true; activeId = it.id; lastId = it.id })
                         }

@@ -67,13 +67,13 @@ class HotelFlowTest {
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
     }
     private fun hotel() {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("Tiếng Anh Khách sạn").performScrollTo().performClick()
         ui.onNodeWithText("Giao tiếp với khách quốc tế").assertIsDisplayed()
     }
     @Test fun newAccentedLearnerKeepsNameInConversationAndActualRecognition() = provider {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
@@ -92,7 +92,7 @@ class HotelFlowTest {
         shot("70-accented-name-recognition")
     }
     @Test fun expandedCountsAndInstalledReleaseNotesShowCurrentContent() {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("Luyện nói theo đoạn văn", substring = false).performScrollTo().performClick()
         listOf("A2", "B1").forEach {

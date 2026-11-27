@@ -78,7 +78,7 @@ class ExtraPracticeFlowTest {
         })
     }
     @Test fun clockAnswerShowsWordFeedbackAndUnlocksOnlyTheCorrectTime() = provider {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("Tiếng Anh nói thế nào?").performScrollTo().performClick()
         ui.onNodeWithText("Sinh hoạt hằng ngày", substring = false).performScrollTo().performClick()
@@ -105,7 +105,7 @@ class ExtraPracticeFlowTest {
         Assert.assertFalse("exercise_routine_q2" in saved)
     }
     @Test fun paragraphUsesRealRecognitionAndClearsReplayAcrossSentenceWholeModeAndExit() = provider {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("Luyện nói theo đoạn văn").performScrollTo().performClick()
         ui.onNodeWithText("A2", substring = false).performClick()
@@ -141,7 +141,7 @@ class ExtraPracticeFlowTest {
         Assert.assertEquals(1, context.getSharedPreferences("speakivra_progress", 0).getInt("lesson.routine.rounds", 0))
     }
     @Test fun exerciseAcceptsEquivalentAnswerButHintAndListeningNeverCompleteAQuestion() = provider {
-        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.startLocalStudy()
         ui.openLessonHub()
         ui.onNodeWithText("Tiếng Anh nói thế nào?").performScrollTo().performClick()
         ui.onNodeWithText("Ăn uống", substring = false).performScrollTo().performClick()

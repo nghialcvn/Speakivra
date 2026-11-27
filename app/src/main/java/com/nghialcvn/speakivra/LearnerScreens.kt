@@ -21,6 +21,9 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.*
 
 internal val LocalLearnerArtwork = staticCompositionLocalOf<ImageBitmap?> { null }
@@ -40,7 +43,7 @@ internal fun LearnerAvatar(avatar: Int, modifier: Modifier = Modifier, square: B
 }
 
 @Composable
-internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit, onResume: (Learner) -> Unit = onStart, onAccount: () -> Unit = {}) {
+internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial: String?, onAdd: () -> Unit, onStart: (Learner) -> Unit, onResume: (Learner) -> Unit = onStart, onAccount: () -> Unit = {}, onLink: (Learner) -> Unit = { onAccount() }) {
     val p = studio
     if (learners.isEmpty()) {
         // First install: no default named person, and no empty progress profile.
@@ -67,6 +70,14 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
         return
     }
     var selected by rememberSaveable { mutableStateOf(initial ?: learners.first().id) }
+    var reminderId by rememberSaveable { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val identities = remember(context) { GuestIdentityStore(context.applicationContext) }
+    val pending = learners.firstOrNull { it.id == reminderId }
+    if (pending != null) GuestLinkReminder(
+        onDismiss = { reminderId = null },
+        onLink = { reminderId = null; onLink(pending) },
+        onContinue = { reminderId = null; onStart(pending) })
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.align(Alignment.CenterHorizontally).size(112.dp))
@@ -101,7 +112,43 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
         }
         TextButton(onClick = onAccount, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Tài khoản & đồng bộ") }
         Text("Không cần mật khẩu • Tiến độ lưu riêng trên máy", color = p.muted, fontSize = 12.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
-        CoralButton("Bắt đầu học", onClick = { learners.firstOrNull { it.id == selected }?.let(onStart) })
+        CoralButton("Bắt đầu học", onClick = {
+            learners.firstOrNull { it.id == selected }?.let { learner ->
+                // A signed-in session alone is not proof that this learner is linked.
+                if (identities.peek(learner)?.ownerUid == null) reminderId = learner.id
+                else onStart(learner)
+            }
+        })
+    }
+}
+
+/** Approved reminder: study stays available, and linking remains an explicit action. */
+@Composable
+internal fun GuestLinkReminder(onDismiss: () -> Unit, onLink: () -> Unit, onContinue: () -> Unit) {
+    val p = studio
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = RoundedCornerShape(24.dp), color = p.background,
+            contentColor = p.ink, shadowElevation = 12.dp) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Box(Modifier.size(68.dp).background(p.peach, CircleShape), contentAlignment = Alignment.Center) {
+                    StudioIcon("cloud-check", Modifier.size(44.dp), p.coral)
+                }
+                Text("Giữ an toàn tiến độ học", fontSize = 23.sp, lineHeight = 29.sp,
+                    fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+                Text("Liên kết tài khoản để lưu hồ sơ, tiến độ và kim cương, giúp bạn tiếp tục học khi đổi máy.",
+                    fontSize = 15.sp, lineHeight = 22.sp, textAlign = TextAlign.Center)
+                Text("Khi chưa liên kết, dữ liệu chỉ được lưu trên thiết bị này và có thể mất nếu bạn gỡ ứng dụng hoặc đổi máy.",
+                    color = p.muted, fontSize = 13.sp, lineHeight = 19.sp, textAlign = TextAlign.Center)
+                CoralButton("Liên kết ngay", chevron = false, onClick = onLink)
+                OutlinedButton(onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(26.dp), border = BorderStroke(1.dp, p.coral)) {
+                    Text("Tiếp tục học", color = p.coral, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold,
+                        textAlign = TextAlign.Center)
+                }
+            }
+        }
     }
 }
 

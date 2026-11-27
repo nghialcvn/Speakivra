@@ -1,6 +1,8 @@
 package com.nghialcvn.speakivra
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /** Local-only real progress; never guesses scores or records user speech. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ProgressScreen(
     lessons: List<Lesson>,
@@ -49,25 +52,39 @@ internal fun ProgressScreen(
             val hotel = group in listOf("FO", "HK")
             val unlocked = hotel || levelIsOpen(group, lessons, load)
             val title = if (hotel) "Khách sạn • ${HotelCurriculum.roleLabel(group)}" else CourseLevels.title(group)
-            StudioCard(Modifier.semantics { contentDescription = "Nhóm tiến độ $group" },
-                spacing = 10.dp, contentPadding = 12.dp) {
-                Row(Modifier.fillMaxWidth().clickable(role = Role.Button) {
-                    expanded = if (expanded == group) null else group
-                }.semantics { stateDescription = if (expanded == group) "Đang mở" else "Đang thu gọn" },
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StudioIcon(if (unlocked) "book" else "lock", Modifier.size(24.dp), p.coral)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(title, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                        if (hotel) Text("Bài học riêng", color = p.coral, fontSize = 12.sp,
-                            modifier = Modifier.background(p.peach, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
-                        else if (!unlocked) Text(CourseLevels.lockMessage(group), color = p.muted, fontSize = 12.sp)
-                    }
-                    StudioIcon(if (expanded == group) "up" else "down", Modifier.size(18.dp), p.coral)
-                }
+            val anchor = remember(group) { BringIntoViewRequester() }
+            LaunchedEffect(expanded) {
                 if (expanded == group) {
-                    if (!hotel) Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu • ${items.sumOf { it.conversation.size }} lượt hội thoại",
-                        color = p.muted, fontSize = 12.sp)
-                    items.forEach { item -> LessonProgressRow(item, load(item), topicIsOpen(item, lessons, load), onOpen) }
+                    withFrameNanos { }
+                    anchor.bringIntoView()
+                }
+            }
+            StudioCard(Modifier.semantics { contentDescription = "Nhóm tiến độ $group" }
+                .border(1.dp, if (expanded == group) p.coral else p.border, RoundedCornerShape(18.dp)),
+                border = p == NeonStudio && expanded == group, spacing = 10.dp, contentPadding = 12.dp) {
+                // Anchor the header plus the first topic, not the entire potentially long list.
+                Column(Modifier.bringIntoViewRequester(anchor), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(Modifier.fillMaxWidth().clickable(role = Role.Button) {
+                        expanded = if (expanded == group) null else group
+                    }.semantics { stateDescription = if (expanded == group) "Đang mở" else "Đang thu gọn" },
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        StudioIcon(if (unlocked) "book" else "lock", Modifier.size(24.dp), p.coral)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(title, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                            if (hotel) Text("Bài học riêng", color = p.coral, fontSize = 12.sp,
+                                modifier = Modifier.background(p.peach, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
+                            else if (!unlocked) Text(CourseLevels.lockMessage(group), color = p.muted, fontSize = 12.sp)
+                        }
+                        StudioIcon(if (expanded == group) "up" else "down", Modifier.size(18.dp), p.coral)
+                    }
+                    if (expanded == group) {
+                        if (!hotel) Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu • ${items.sumOf { it.conversation.size }} lượt hội thoại",
+                            color = p.muted, fontSize = 12.sp)
+                        items.firstOrNull()?.let { item -> LessonProgressRow(item, load(item), topicIsOpen(item, lessons, load), onOpen) }
+                    }
+                }
+                if (expanded == group) items.drop(1).forEach { item ->
+                    LessonProgressRow(item, load(item), topicIsOpen(item, lessons, load), onOpen)
                 }
             }
         }

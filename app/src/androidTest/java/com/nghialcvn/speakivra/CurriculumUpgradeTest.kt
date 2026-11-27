@@ -42,6 +42,7 @@ class CurriculumUpgradeTest {
         }
     }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @org.junit.Before fun enterEnglishArea() { ui.selectEnglishAreaIfNeeded() }
 
     @Test fun upgradeResetRunsOnceAndPreservesNewProfile() {
         ui.onNodeWithText("Chưa có hồ sơ người học").assertIsDisplayed()

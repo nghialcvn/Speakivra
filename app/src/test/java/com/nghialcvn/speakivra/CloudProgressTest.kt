@@ -29,6 +29,7 @@ class CloudProgressTest {
     }
     @Test fun completeCurrentCatalogueFitsOnePrivateSnapshotWithoutDroppingAchievements() {
         val values = mutableMapOf<String,Any>()
+        values[CHECK_IN_DATES] = (0 until 3660).map { java.time.LocalDate.of(2016, 1, 1).plusDays(it.toLong()).toString() }.toSet()
         Lessons.catalogue.forEach { lesson ->
             values["lesson.${lesson.id}.phase"] = "summary"
             values["lesson.${lesson.id}.rounds"] = 1

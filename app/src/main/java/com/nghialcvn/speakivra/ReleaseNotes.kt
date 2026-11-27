@@ -3,6 +3,11 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.2.2" to listOf(
+            "bell" to "Điểm danh mỗi ngày, theo dõi chuỗi ngày riêng từng hồ sơ",
+            "profile" to "Khung chào và điểm danh theo demo, avatar nổi trên logo chìm",
+            "cloud-check" to "Đồng bộ ngày điểm danh khi hồ sơ đã liên kết tài khoản",
+            "tools" to "Sửa Tiếp tục bài học và giữ trạng thái liên kết trên một hàng"),
         "1.2.1" to listOf(
             "layers" to "Tiến độ thu gọn từng mục; Khách sạn có nhãn Bài học riêng",
             "book" to "B2, C1 và C2 • Chuyên nghiệp: 20 chủ đề, 700 câu và 300 lượt hội thoại mỗi cấp",

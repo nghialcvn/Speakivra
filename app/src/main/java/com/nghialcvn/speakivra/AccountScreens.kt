@@ -41,8 +41,8 @@ internal fun GuestIdentityLabel(learner: Learner) {
     LaunchedEffect(learner.id) {
         identity = withContext(Dispatchers.IO) { runCatching { GuestIdentityStore(context).ensure(learner) }.getOrNull() }
     }
-    Text(if (identity?.ownerUid == null) "Hồ sơ khách • Chưa liên kết" else "Hồ sơ đã liên kết",
-        color = studio.muted, fontSize = 11.sp)
+    SingleLineInfo(if (identity?.ownerUid == null) "Hồ sơ khách • Chưa liên kết" else "Hồ sơ đã liên kết tài khoản",
+        modifier = Modifier.fillMaxWidth(), color = studio.muted, fontSize = 11.sp)
     identity?.let { Text(it.serial, color = studio.muted, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
 

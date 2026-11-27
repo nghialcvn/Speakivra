@@ -5,7 +5,7 @@ import org.json.JSONObject
 
 /** Portable learning data only. Auth tokens, audio, device paths and TTS voice IDs cannot enter this payload. */
 internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, values: Map<String, *>): JSONObject {
-    val allowedLessons = Lessons.catalogue.associateBy { it.id }
+    val allowedLessons = (Lessons.catalogue + ChineseCurriculum.lessons).associateBy { it.id }
     val progress = JSONObject()
     values.forEach { (key, value) ->
         if (key == "active_lesson" && value is String && value in allowedLessons) progress.put(key, value)
@@ -14,7 +14,7 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
         } else if (key == "extra.completed_ids" && value is Set<*>) {
             val known = (ExtraPracticeData.passages.flatMap { p -> p.sentences.map { it.id } + p.id } +
                 ExtraPracticeData.exercises.flatMap { it.questions.map { q -> q.id } } +
-                HotelCurriculum.exercises.flatMap { it.questions.map { q -> q.id } }).toSet()
+                HotelCurriculum.exercises.flatMap { it.questions.map { q -> q.id } } + ChineseCurriculum.extraIds).toSet()
             progress.put(key, JSONArray(value.filterIsInstance<String>().filter { it in known }.sorted()))
         } else if (key.startsWith("lesson.")) {
             val parts = key.split('.', limit = 3)

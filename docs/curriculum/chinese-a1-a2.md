@@ -29,10 +29,14 @@ Chinese progress/diamonds are displayed within the Chinese course. The home Cont
 
 New JVM tests cover content/ID integrity, English catalogue isolation, negations, insertion penalties, numeric formatting, learner names and cloud round trips. Android tests cover language selection, both levels, typed translations, per-profile isolation, continued learning, large-font dark reading/conversation and screenshots 160–166. A separate recognizer protocol fixture verifies the `zh-CN` request, final result gating and result cleanup, without claiming real Mandarin accuracy. Existing Android check groups and screenshots remain required. The established SwiftShader/Vulkan-disabled emulator setup is retained.
 
-This is development work, not a published APK. Device microphone accuracy, installed Mandarin voice quality and S24 Ultra visual acceptance still require real-device review.
+V1.2.7 Beta is approved for release so the user can test on the S24 Ultra. Device microphone accuracy, installed Mandarin voice quality and final S24 Ultra acceptance remain real-device checks.
 
-## Local verification status (2026-11-27)
+## Verified candidate and approved release (2026-11-27)
 
-The 114 JVM tests passed locally (including four Mandarin test methods). App and instrumentation APK builds succeeded; package verification confirmed com.nghialcvn.speakivra, version 1.2.7/code 47 and intact approved icon/font/English audio assets. The final local test/lint/app-build/instrumentation-build run passed (114 JVM tests, zero failures). The existing APK metadata verification script also passed. No release APK has been signed or published.
+Candidate: `a7867e8099d7c09c9aa31912d7614fde298f490a`.
 
-The six Mandarin Android tests compile, but have not been executed successfully: this workspace has no hardware CPU accelerator, and software-emulated Android did not finish stable startup. No new UI screenshot or real-user Mandarin microphone result is claimed. GitHub write access returned HTTP 403, so this branch has not been pushed and CI has not run.
+[CI run 46030698099](https://github.com/nghialcvn/Speakivra/actions/runs/46030698099) passed 114 JVM tests, lint, APK identity/asset verification, Firebase ownership checks and 37 Android tests (all 31 earlier checks plus six Chinese tests). All 20 required screenshots were captured. Actual APK captures were inspected for A1/A2, typed translation, conversation/reading at fontScale 1.5 in dark mode, recognition feedback, comprehension and the compact check-in card. Artifact ZIP SHA-256: `d3de00d6a76745c1a56469284287d4cc62af86dcab629546a65a5fd173b0f07b`.
+
+The user explicitly requested release to test on their phone. The V1.2.7 release workflow pins the verified candidate and CI run, permits only this workflow/release-documentation change, uses the original signing secrets, verifies the signer against the current published update index, rejects an existing release tag and updates the index only after publication.
+
+Recognition protocol tests use a synthetic test provider and do not establish real Mandarin accuracy. Real S24 Ultra microphone and installed TTS voice review remain pending. No claim is made that Play Protect warnings have been resolved.

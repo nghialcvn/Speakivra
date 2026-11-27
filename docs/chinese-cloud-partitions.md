@@ -32,6 +32,9 @@ Tests cover complete English + Chinese payloads, legacy starter migration, old
 client compatibility, UTF-8 limits, failed atomic writes, independent Android SDK
 clients with isolated preferences, offline retry, concurrent merge and foreign
 account denial. Existing UI tests and screenshot requirements remain mandatory.
+The outage check uses an unreachable emulator endpoint with the same local device
+preferences, then retries through the healthy SDK client. It does not assume that
+Firestore's stream-level disableNetwork switch blocks transaction RPCs.
 
 ## Deployment
 

@@ -30,21 +30,23 @@ class ChineseCloudSyncIntegrationTest {
     }
     private val devices = mutableListOf<Device>()
     private val password = "Emulator-only-long-password-123"
-    private fun device(seed: Boolean = false): Device {
+    private fun device(seed: Boolean = false, existingContext: Context? = null, firestorePort: Int = 8080): Device {
         check(BuildConfig.DEBUG)
         val base = InstrumentationRegistry.getInstrumentation().targetContext
         val prefix = "cloud-test-${UUID.randomUUID()}-"
-        val context = object : ContextWrapper(base) {
+        val context = existingContext ?: object : ContextWrapper(base) {
             override fun getApplicationContext(): Context = this
             override fun getSharedPreferences(name: String, mode: Int): SharedPreferences = base.getSharedPreferences(prefix + name, mode)
         }
-        context.getSharedPreferences(CURRICULUM_MIGRATIONS, 0).edit().putBoolean(RESET_108, true).commit()
-        context.getSharedPreferences("speakivra_learners", 0).edit().putString("profiles",
-            encodeLearners(if (seed) listOf(Learner(ORIGINAL_LEARNER, "Lan", 2)) else emptyList())).commit()
+        if (existingContext == null) {
+            context.getSharedPreferences(CURRICULUM_MIGRATIONS, 0).edit().putBoolean(RESET_108, true).commit()
+            context.getSharedPreferences("speakivra_learners", 0).edit().putString("profiles",
+                encodeLearners(if (seed) listOf(Learner(ORIGINAL_LEARNER, "Lan", 2)) else emptyList())).commit()
+        }
         val app = FirebaseApp.initializeApp(base, FirebaseOptions.Builder().setProjectId("demo-speakivra-spark")
             .setApplicationId("1:123456:android:test").setApiKey("fake-api-key").build(), prefix)
         val auth = FirebaseAuth.getInstance(app).apply { useEmulator("10.0.2.2", 9099) }
-        val db = FirebaseFirestore.getInstance(app).apply { useEmulator("10.0.2.2", 8080) }
+        val db = FirebaseFirestore.getInstance(app).apply { useEmulator("10.0.2.2", firestorePort) }
         return Device(context, app, AccountRuntime.installEmulated(context, auth, db)).also { devices += it }
     }
     @After fun cleanup() { devices.forEach { d ->
@@ -151,16 +153,23 @@ class ChineseCloudSyncIntegrationTest {
         first.runtime.syncAll(owner)
         val second = device(); second.runtime.auth.signInWithEmailAndPassword(email, password).cloudAwait(); second.runtime.syncAll(owner)
         val otherLearner = second.store.visible(owner).single()
-        second.runtime.db.disableNetwork().cloudAwait()
+        // disableNetwork() stops listener/write streams, but transaction RPCs can still reach
+        // Datastore. Use a real unreachable endpoint with the SAME local device preferences.
+        val offline = device(existingContext = second.context, firestorePort = 1)
+        offline.runtime.auth.signInWithEmailAndPassword(email, password).cloudAwait()
         write(second.store.preferences(otherLearner), mapOf("lesson.${b.id}.learned_phrases" to b.phrases[0].id,
             "achievement.${b.id}.${b.phrases[0].id}" to 90))
-        second.runtime.markPending(otherLearner); assertFalse(second.runtime.isSynced(otherLearner))
-        assertTrue(runCatching { withTimeout(5000) { second.runtime.syncPending(owner) } }.isFailure)
-        assertFalse(second.runtime.isSynced(otherLearner))
+        offline.runtime.markPending(otherLearner)
+        assertEquals(owner, offline.identities.peek(otherLearner)!!.ownerUid)
+        assertTrue(offline.store.all().any { it.id == otherLearner.id })
+        assertTrue(offline.context.getSharedPreferences("speakivra_cloud_sync", 0).getBoolean("pending.${otherLearner.id}", false))
+        assertTrue("An unreachable server must never mark progress synced",
+            runCatching { withTimeout(5000) { offline.runtime.syncPending(owner) } }.isFailure)
+        assertFalse(offline.runtime.isSynced(otherLearner))
         val ref = first.runtime.db.collection("accounts").document(owner).collection("profiles").document(identity.profileId)
         assertFalse(ref.collection("languageProgress").document("zh_A2").get(Source.SERVER).cloudAwait().exists())
         write(first.store.preferences(learner), mapOf("lesson.${a.id}.learned_phrases" to a.phrases.take(2).map { it.id }.sorted().joinToString("|")))
-        first.runtime.markPending(learner); second.runtime.db.enableNetwork().cloudAwait()
+        first.runtime.markPending(learner)
         listOf(async(Dispatchers.IO) { first.runtime.syncPending(owner) }, async(Dispatchers.IO) { second.runtime.syncPending(owner) }).awaitAll()
         first.runtime.syncAll(owner); second.runtime.syncAll(owner)
         for ((d, person) in listOf(first to learner, second to otherLearner)) {

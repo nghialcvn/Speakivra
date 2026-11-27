@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RecognitionProtocolService extends RecognitionService {
     static volatile boolean ignorePipe, nativeResultsWithPipe, waitForEnd;
     static volatile String answer = "Hello there.";
+    static volatile String lastLanguage = "";
     static final AtomicInteger directStarts = new AtomicInteger();
     static final AtomicInteger liveBytes = new AtomicInteger();
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -25,6 +26,7 @@ public class RecognitionProtocolService extends RecognitionService {
     private ParcelFileDescriptor input;
     @Override protected void onStartListening(Intent intent, Callback callback) {
         active = callback;
+        lastLanguage = intent.getStringExtra(RecognizerIntent.EXTRA_LANGUAGE);
         try {
             callback.readyForSpeech(new Bundle());
             ParcelFileDescriptor source = intent.getParcelableExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE);

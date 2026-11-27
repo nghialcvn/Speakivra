@@ -41,7 +41,7 @@ internal class SpeechCapture(
         if (phase == "idle") audio.play { update("idle", null, "Không phát được bản ghi. Hãy nói lại.") }
     }
     fun start(languageTag: String = "en-US", silenceMillis: Int = 1400, properName: String? = null, maximumMillis: Int = 60000) {
-        require(languageTag in setOf("en-US", "en-GB"))
+        require(languageTag in setOf("en-US", "en-GB", "zh-CN"))
         val token = session.begin() ?: return
         audio.clear(); recordingChanged(false)
         maximumAttemptMillis = maximumMillis.coerceIn(60000, MAX_SPEECH_ATTEMPT_MILLIS)

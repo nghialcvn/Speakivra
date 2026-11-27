@@ -667,11 +667,11 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                             "home" -> HomeScreen(lesson, progress, goal, completed, learner.name, learner, preferences,
                                 onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
-                            "lessons" -> LessonHubScreen(
+                            "lessons" -> StudyHubScreen(preferences, learner, onBack = { navigate("home") }) { LessonHubScreen(
                                 onLevel = { if (levelIsOpen(it, learnerLessons, ::loadProgress)) { selectedLevel = it; navigate("level-lessons") } },
                                 onChat = { navigate("chat") }, onPassages = { navigate("passages") },
                                 onExercises = { navigate("exercises") }, onBack = { navigate("home") },
-                                onHotel = { navigate("hotel") }, load = ::loadProgress)
+                                onHotel = { navigate("hotel") }, load = ::loadProgress) }
                             "hotel" -> HotelHubScreen(hotelRole, onRole = { hotelRole = it },
                                 onOpen = { role, mode -> hotelRole = role; hotelMode = mode; navigate("hotel-topics") },
                                 onBack = { navigate("lessons") })

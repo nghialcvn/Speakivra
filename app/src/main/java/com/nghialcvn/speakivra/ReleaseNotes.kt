@@ -3,6 +3,11 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.2.7" to listOf(
+            "book" to "Thêm tiếng Trung A1/A2 trong Bài học, chữ giản thể, Pinyin và nghĩa tiếng Việt",
+            "chat" to "Nghe, luyện nói, hội thoại, bài đọc ngắn và bài dịch Việt → Trung",
+            "layers" to "Tiến độ và kim cương tiếng Trung lưu riêng theo hồ sơ, đồng bộ khi liên kết",
+            "speaker" to "Hỗ trợ nhận dạng tiếng Trung và giọng đọc phổ thông Trung Quốc ngoại tuyến đã cài trên máy"),
         "1.2.6" to listOf(
             "bell" to "Khung điểm danh một hàng gọn theo mẫu đã duyệt",
             "profile" to "Đốm lửa, chuỗi ngày và nút điểm danh thẳng hàng, logo chìm chính thức"),

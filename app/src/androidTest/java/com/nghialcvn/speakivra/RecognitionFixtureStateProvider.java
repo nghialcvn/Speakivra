@@ -17,12 +17,14 @@ public class RecognitionFixtureStateProvider extends ContentProvider {
                 RecognitionProtocolService.nativeResultsWithPipe = false;
                 RecognitionProtocolService.directStarts.set(0);
                 RecognitionProtocolService.liveBytes.set(0);
+                RecognitionProtocolService.lastLanguage = "";
                 break;
             case "answer": RecognitionProtocolService.answer = arg; break;
             case "nativeResultsWithPipe": RecognitionProtocolService.nativeResultsWithPipe = true; break;
             case "waitForEnd": RecognitionProtocolService.waitForEnd = true; break;
         }
         Bundle result = new Bundle();
+        result.putString("language", RecognitionProtocolService.lastLanguage);
         result.putInt("directStarts", RecognitionProtocolService.directStarts.get());
         result.putInt("liveBytes", RecognitionProtocolService.liveBytes.get());
         return result;

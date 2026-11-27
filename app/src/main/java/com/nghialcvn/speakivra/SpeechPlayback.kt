@@ -32,7 +32,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     private var closed = false
     private var session = 0L
     private var lastUtterance: String? = null
-    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long, val choice: VoiceChoice, val repeats: Int = 1)
+    private data class Request(val profile: SpeechProfile, val speed: Int, val session: Long, val choice: VoiceChoice, val repeats: Int = 1, val language: String = "en-US")
     private var pending: Request? = null
     private var defaultVoice: Voice? = null
     private var remainingAudioRepeats = 0
@@ -46,6 +46,21 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
                 TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features.orEmpty() }
             .sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
             .map { InstalledSpeechVoice(it.name, accent, it.quality) }
+    }
+
+    fun mandarinVoices(): List<InstalledSpeechVoice> = engine?.voices.orEmpty()
+        .filter { it.locale.language == "zh" && it.locale.country == "CN" &&
+            !it.isNetworkConnectionRequired && TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features.orEmpty() }
+        .sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
+        .map { InstalledSpeechVoice(it.name, "CN", it.quality) }
+
+    fun speakMandarin(text: String, speed: Int, voiceId: String? = null) {
+        if (closed || text.isBlank()) return
+        stop()
+        hasFocus = runCatching { audio.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED }.getOrDefault(false)
+        if (!hasFocus) { status("Chưa thể phát âm thanh lúc này. Hãy thử nghe lại."); return }
+        fallback(Request(SpeechProfile(text, null, listOf(SpeechPart(text, 1f, 1f, 0))),
+            speed, session, VoiceChoice(voiceId = voiceId), language = "zh-CN"))
     }
 
 
@@ -271,16 +286,21 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             status("Không có dịch vụ giọng đọc trên thiết bị.", request.session)
             return
         }
-        val selected = if (request.choice.usesBundledAudio) defaultVoice
+        val chinese = request.language == "zh-CN"
+        val selected = if (chinese) {
+            val voices = mandarinVoices()
+            val chosen = if (request.choice.voiceId == null) voices.firstOrNull() else voices.firstOrNull { it.id == request.choice.voiceId }
+            tts.voices.orEmpty().firstOrNull { it.name == chosen?.id }
+        } else if (request.choice.usesBundledAudio) defaultVoice
             else tts.voices.orEmpty().firstOrNull { voice ->
                 voice.name == request.choice.voiceId &&
                     voice.locale.language == "en" && voice.locale.country == request.choice.accent &&
                     !voice.isNetworkConnectionRequired &&
                     TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
             }
-        if (selected == null || (request.choice.usesBundledAudio && !fallbackAvailable)) {
+        if (selected == null || (!chinese && request.choice.usesBundledAudio && !fallbackAvailable)) {
             releaseFocus()
-            status("Chưa chọn giọng ngoại tuyến phù hợp. Vào Giọng đọc & Ngôn ngữ để nghe thử.", request.session)
+            status(if (chinese) "Chưa có giọng tiếng Trung ngoại tuyến phù hợp. Hãy cài dữ liệu giọng Trung Quốc trong cài đặt Chuyển văn bản thành giọng nói của Android, rồi mở lại Speakivra." else "Chưa chọn giọng ngoại tuyến phù hợp. Vào Giọng đọc & Ngôn ngữ để nghe thử.", request.session)
             return
         }
         try {
@@ -291,8 +311,8 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             repeat(request.repeats) { round ->
                 request.profile.parts.forEachIndexed { index, part ->
                     check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)
-                    check(tts.setSpeechRate(SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)
-                    check(tts.speak(personalNameSpeech(part.text), TextToSpeech.QUEUE_ADD, null, prefix + "repeat-$round-$index") == TextToSpeech.SUCCESS)
+                    check(tts.setSpeechRate(if (chinese) request.speed / 100f else SpeechProfiles.fallbackRate(request.speed, part)) == TextToSpeech.SUCCESS)
+                    check(tts.speak(if (chinese) part.text else personalNameSpeech(part.text), TextToSpeech.QUEUE_ADD, null, prefix + "repeat-$round-$index") == TextToSpeech.SUCCESS)
                     if (part.pauseAfterMs > 0 && index < request.profile.parts.lastIndex) {
                         check(tts.playSilentUtterance(part.pauseAfterMs, TextToSpeech.QUEUE_ADD, prefix + "gap-$round-$index") == TextToSpeech.SUCCESS)
                     }

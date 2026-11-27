@@ -74,10 +74,11 @@ private val Shapes = mapOf(
 )
 @Composable
 internal fun StudioIcon(name: String, modifier: Modifier = Modifier, color: Color = studio.ink) {
-    val path = remember(name) { PathParser().parsePathString(Shapes[name] ?: Shapes.getValue("chat")).toPath() }
+    val path = remember(name) { PathParser().parsePathString(Shapes[if (name == "home-filled") "home" else name] ?: Shapes.getValue("chat")).toPath() }
     Canvas(modifier.size(24.dp)) {
         scale(size.width / 26f, size.height / 26f, pivot = androidx.compose.ui.geometry.Offset.Zero) {
-            drawPath(path, color, style = Stroke(if (name == "tab-mic") 1.9f else 1.65f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            if (name == "home-filled") drawPath(path, color)
+            else drawPath(path, color, style = Stroke(if (name == "tab-mic") 1.9f else 1.65f, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
 }

@@ -35,6 +35,8 @@ class BrandRefreshUiTest {
     }
     @Composable private fun Frame(dark: Boolean, page: String, content: @Composable () -> Unit) {
         SpeakivraTheme(dark) {
+            val palette = studio
+            SideEffect { updateSystemBars(ui.activity, dark, palette.background) }
             val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
             CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
                 Surface(color = studio.background, contentColor = studio.ink) {

@@ -1,5 +1,6 @@
 package com.nghialcvn.speakivra
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 
 /** Approved Sáng/Tối brand treatments; the separate Neon effects live in NeonVisuals. */
@@ -37,4 +42,38 @@ internal fun Modifier.brandPanel(color: Color = studio.card, border: Boolean = t
 internal fun brandNavigationAccent(p: StudioColors): Color = when (p) {
     DarkStudio -> BrandLook.cyan
     else -> p.coral
+}
+
+@Composable
+internal fun BrandFlame(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        scale(size.width / 24f, size.height / 30f, pivot = Offset.Zero) {
+            val outer = Path().apply {
+                moveTo(13f, 0f); cubicTo(14f, 9f, 20f, 9f, 19f, 17f)
+                lineTo(22f, 12f); cubicTo(28f, 31f, -2f, 36f, 2f, 16f)
+                lineTo(6f, 20f); cubicTo(3f, 10f, 13f, 10f, 13f, 0f); close()
+            }
+            drawPath(outer, Brush.verticalGradient(listOf(Color(0xFFAC44FF), Color(0xFF6120D8)), endY = 30f))
+            val inner = Path().apply {
+                moveTo(12f, 15f); cubicTo(21f, 25f, 12f, 32f, 8f, 26f)
+                cubicTo(6f, 23f, 10f, 19f, 12f, 15f); close()
+            }
+            drawPath(inner, Color.White)
+        }
+    }
+}
+
+@Composable
+internal fun BrandResultMark(passed: Boolean, modifier: Modifier = Modifier) {
+    val p = studio
+    Canvas(modifier) {
+        if (passed) {
+            drawCircle(Color(0xFF0BA757))
+            val tick = Path().apply { moveTo(size.width * .25f, size.height * .52f); lineTo(size.width * .43f, size.height * .7f); lineTo(size.width * .76f, size.height * .32f) }
+            drawPath(tick, Color.White, style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx(), cap = StrokeCap.Round))
+        } else {
+            drawLine(p.incorrectWord, Offset(size.width * .2f, size.height * .2f), Offset(size.width * .8f, size.height * .8f), 3.dp.toPx(), cap = StrokeCap.Round)
+            drawLine(p.incorrectWord, Offset(size.width * .8f, size.height * .2f), Offset(size.width * .2f, size.height * .8f), 3.dp.toPx(), cap = StrokeCap.Round)
+        }
+    }
 }

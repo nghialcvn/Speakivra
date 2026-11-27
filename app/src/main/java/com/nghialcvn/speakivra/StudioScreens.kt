@@ -36,7 +36,7 @@ internal fun lessonLabel(lesson: Lesson): String = when (lesson.id) {
     "a2_health" -> "Sức khỏe & sinh hoạt"; "a2_work" -> "Công việc & phối hợp"
     "a2_learning" -> "Học tập & mục tiêu"; "a2_community" -> "Cộng đồng & dịch vụ"
     "a2_stories" -> "Kể chuyện & tình huống"
-    else -> if (HotelCurriculum.isHotel(lesson)) lesson.vietnamese else if (lesson.id.startsWith("a2_") || lesson.id.startsWith("b1_")) lesson.vietnamese else "Giao tiếp thường ngày"
+    else -> if (HotelCurriculum.isHotel(lesson)) lesson.vietnamese else if (CourseLevels.all.drop(1).any { lesson.id.startsWith(it.lowercase() + "_") }) lesson.vietnamese else "Giao tiếp thường ngày"
 }
 internal fun speedLabel(speed: Int): String = when (speed) { 75 -> "0.75x"; 125 -> "1.25x"; else -> "1x" }
 
@@ -213,7 +213,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 StudioIcon("book", Modifier.size(28.dp), p.coral)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Bài học", fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("A1 • A2 • B1 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
+                    Text("A1 • A2 • B1 • B2 • C1 • C2 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
                         fontSize = 12.sp, lineHeight = 17.sp)
                 }
                 StudioIcon("chevron", Modifier.size(17.dp), p.coral)
@@ -224,25 +224,27 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
 
 @Composable
 internal fun LessonHubScreen(onLevel: (String) -> Unit, onChat: () -> Unit,
-    onPassages: () -> Unit, onExercises: () -> Unit, onBack: () -> Unit, onHotel: () -> Unit = {}) {
+    onPassages: () -> Unit, onExercises: () -> Unit, onBack: () -> Unit, onHotel: () -> Unit = {}, load: (Lesson) -> LessonProgress = { LessonProgress() }) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         PageHeading("Bài học", "Chọn cấp độ hoặc dạng luyện tập", onBack)
-        listOf(Triple("A1", "A1 • Cơ bản", Lessons.a1),
-            Triple("A2", "A2 • Sơ trung cấp", Lessons.a2),
-            Triple("B1", "B1 • Trung cấp", Lessons.b1)).forEach { (level, title, items) ->
-            LessonHubCard(title, "${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại",
-                "book") { onLevel(level) }
+        CourseLevels.all.forEach { level ->
+            val items = Lessons.all.filter { Lessons.levelOf(it) == level }
+            val unlocked = levelIsOpen(level, Lessons.catalogue, load)
+            LessonHubCard(if (level == "A1") "A1 • Cơ bản" else CourseLevels.title(level),
+                "${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu luyện nói • ${items.sumOf { it.conversation.size }} lượt hội thoại" +
+                    if (unlocked) "" else "\n${CourseLevels.lockMessage(level)}",
+                if (unlocked) "book" else "lock", enabled = unlocked) { onLevel(level) }
         }
-        LessonHubCard("Tiếng Anh Khách sạn", "Cấp độ riêng • Lễ tân 20 chủ đề • Buồng phòng 20 chủ đề", "reception", onHotel)
-        LessonHubCard("Hội thoại mẫu", "Mô phỏng theo kịch bản", "chat", onChat)
-        LessonHubCard("Luyện nói theo đoạn văn", "A1 • A2 • B1", "book", onPassages)
-        LessonHubCard("Tiếng Anh nói thế nào?", "A1 • A2 • B1", "book", onExercises)
+        LessonHubCard("Tiếng Anh Khách sạn", "Bài học riêng • Lễ tân 20 chủ đề • Buồng phòng 20 chủ đề", "reception", onOpen = onHotel)
+        LessonHubCard("Hội thoại mẫu", "Mô phỏng theo kịch bản", "chat", onOpen = onChat)
+        LessonHubCard("Luyện nói theo đoạn văn", "A1 • A2 • B1 • B2 • C1 • C2", "book", onOpen = onPassages)
+        LessonHubCard("Tiếng Anh nói thế nào?", "A1 • A2 • B1 • B2 • C1 • C2", "book", onOpen = onExercises)
     }
 }
 @Composable
-private fun LessonHubCard(title: String, detail: String, icon: String, onOpen: () -> Unit) {
-    StudioCard(Modifier.clickable(role = Role.Button, onClick = onOpen)) {
+private fun LessonHubCard(title: String, detail: String, icon: String, enabled: Boolean = true, onOpen: () -> Unit) {
+    StudioCard(Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onOpen).semantics { if (!enabled) disabled() }) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StudioIcon(icon, Modifier.size(27.dp), studio.coral)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -256,7 +258,7 @@ private fun LessonHubCard(title: String, detail: String, icon: String, onOpen: (
 
 @Composable
 internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, onOpen: (Lesson) -> Unit,
-                           lessons: List<Lesson> = Lessons.a1, level: String = "A1", onBack: (() -> Unit)? = null, hearts: (Lesson) -> Int = { 0 }) {
+                           lessons: List<Lesson> = Lessons.a1, level: String = "A1", onBack: (() -> Unit)? = null, hearts: (Lesson) -> Int = { 0 }, accessCatalogue: List<Lesson> = Lessons.catalogue) {
     val p = studio
     val icons = listOf("handshake", "family", "calendar", "food", "bag", "map", "book", "clock", "plane", "chat")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -265,7 +267,7 @@ internal fun LessonsScreen(selected: String, load: (Lesson) -> LessonProgress, o
         Spacer(Modifier.height(3.dp))
         lessons.forEachIndexed { index, lesson ->
             val value = load(lesson)
-            val open = topicIsOpen(lesson, lessons, load)
+            val open = topicIsOpen(lesson, accessCatalogue, load)
             Row(Modifier.fillMaxWidth()
                 .then(if (p == NeonStudio) Modifier.neonGlass(16, selected == lesson.id)
                 else Modifier.clip(RoundedCornerShape(16.dp))

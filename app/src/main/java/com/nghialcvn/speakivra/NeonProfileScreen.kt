@@ -189,7 +189,7 @@ internal fun NeonProfileScreen(
                     color = neonGrey, fontSize = 11.sp)
             }
             NeonSettingsTile("sliders", "Tùy chỉnh bài học",
-                "A1 / A2 / B1 • ${speedLabel(speed)} • lặp $repeatCount lần", onStudyOptions)
+                "A1 / A2 / B1 / B2 / C1 / C2 • ${speedLabel(speed)} • lặp $repeatCount lần", onStudyOptions)
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(neonPanel).border(1.dp, neonLine, RoundedCornerShape(16.dp))
                 .clickable { onReminderToggle(!reminderEnabled) }
@@ -200,7 +200,7 @@ internal fun NeonProfileScreen(
                 Column(Modifier.weight(1f)) {
                     Text("Thông báo nhắc học", color = neonWhite,
                         fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                    Text(if (reminderEnabled) "Đang bật • khoảng 19:00 hằng ngày"
+                    Text(if (reminderEnabled) "Đang bật • khoảng 20:00 hằng ngày"
                          else "Đang tắt • chỉ nhắc khi bạn bật",
                         color = neonGrey, fontSize = 12.sp)
                 }

@@ -18,6 +18,7 @@ private val Shapes = mapOf(
     "email" to "M2 5 L22 5 L22 20 L2 20 Z M2 5 L12 13 L22 5",
     "wifi" to "M2 8 Q12 -1 22 8 M5 12 Q12 5 19 12 M8 16 Q12 12 16 16 M12 20 L12 20.1",
     "check-circle" to "M12 2 C25 2 25 22 12 22 C-1 22 -1 2 12 2 Z M7 12 L11 16 L18 8",
+    "up" to "M6 16 L13 9 L20 16",
     "cloud-check" to "M6 20 C-1 20 -1 10 6 9 C7 1 20 1 21 10 C28 14 23 21 19 20 Z M8 13 L11 16 L17 10",
     "cloud-sync" to "M6 18 C-1 18 -1 9 6 8 C7 0 20 0 21 9 C28 13 23 19 19 18 M8 17 L12 21 L16 17 M12 12 L12 21",
     "diamond" to "M2 8 L7 2 L17 2 L22 8 L12 22 Z M2 8 L22 8 M7 2 L9 8 L12 22 L15 8 L17 2 M9 8 L12 2 L15 8",

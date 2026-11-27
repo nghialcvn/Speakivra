@@ -7,8 +7,8 @@ import java.io.File
 
 class HotelCurriculumTest {
     @Test fun standaloneRolesHaveTwentyCompleteTopicsAndStableIndependentIds() {
-        assertEquals(45, Lessons.all.size)
-        assertEquals(85, Lessons.catalogue.size)
+        assertEquals(105, Lessons.all.size)
+        assertEquals(145, Lessons.catalogue.size)
         assertEquals(1000, HotelCurriculum.all.sumOf { it.phrases.size })
         assertEquals(240, HotelCurriculum.all.sumOf { it.conversation.size })
         listOf("FO", "HK").forEach { role ->

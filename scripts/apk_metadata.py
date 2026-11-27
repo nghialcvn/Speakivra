@@ -45,6 +45,8 @@ with zipfile.ZipFile(args.apk) as apk:
     font_hash = hashlib.sha256((root / "app/src/main/res/font/nunito.ttf").read_bytes()).digest()
     assert any(hashlib.sha256(apk.read(name)).digest() == font_hash for name in apk.namelist() if name.endswith(".ttf")), "Bundled font changed or missing"
     assert apk.read("assets/fonts/Nunito-OFL.txt") == (root / "app/src/main/assets/fonts/Nunito-OFL.txt").read_bytes()
+    # Check the packaged name too: AAPT strips .gz suffixes from asset names.
+    assert apk.read("assets/advanced-ipa.bin") == (root / "app/src/main/assets/advanced-ipa.bin").read_bytes(), "Advanced IPA dictionary missing or changed"
 
 # Generated neural lesson audio must survive release resource path optimization.
 speech_manifest = json.loads((root / "app/src/main/assets/speech/manifest.json").read_text())

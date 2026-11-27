@@ -10,7 +10,7 @@ val signingPath = providers.environmentVariable("SPEAKIVRA_KEYSTORE_PATH").orNul
 android {
     namespace = "com.nghialcvn.speakivra"
     compileSdk = 35
-    val approvedVersion = "1.2.0"
+    val approvedVersion = "1.2.1"
     require(Regex("""[0-9]+\.[0-9]\.[0-9]""").matches(approvedVersion)) {
         "Speakivra version must roll 1.0.9 -> 1.1.0, never 1.0.10"
     }
@@ -19,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 40
+        versionCode = 41
         versionName = approvedVersion
     }
     testBuildType = providers.gradleProperty("uiTestBuildType").getOrElse("release")
@@ -61,6 +61,8 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test:runner:1.6.2")
+    // WorkManager exposes ListenableFuture in the schedule verification API.
+    androidTestImplementation("com.google.guava:guava:32.1.3-android")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     implementation("androidx.activity:activity-compose:1.9.3")

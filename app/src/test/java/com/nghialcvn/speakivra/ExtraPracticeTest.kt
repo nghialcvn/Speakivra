@@ -50,9 +50,10 @@ class ExtraPracticeTest {
     @Test fun contentIsBilingualUniqueAndProgressivelyLongerWithFullIpaCoverage() {
         val data = JSONObject(File("src/main/assets/ipa.json").readText())
         val expanded = JSONObject(File("src/main/assets/expanded-ipa.json").readText())
+        val advanced = JSONObject(java.util.zip.GZIPInputStream(File("src/main/assets/advanced-ipa.bin").inputStream()).bufferedReader().use { it.readText() })
         val passages = ExtraPracticeData.passages
-        assertEquals(25, passages.size)
-        assertEquals(230, ExtraPracticeData.exercises.sumOf { it.questions.size })
+        assertEquals(55, passages.size)
+        assertEquals(530, ExtraPracticeData.exercises.sumOf { it.questions.size })
         val ids = passages.map { it.id } + passages.flatMap { it.sentences.map { it.id } } +
             ExtraPracticeData.exercises.flatMap { it.questions.map { it.id } }
         assertEquals(ids.size, ids.distinct().size)
@@ -66,7 +67,8 @@ class ExtraPracticeTest {
         listOf("US", "GB").forEach { accent ->
             english.forEach { text ->
                 assertTrue("Missing IPA $accent: $text", data.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank() ||
-                    expanded.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank())
+                    expanded.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank() ||
+                    advanced.getJSONObject(accent).optString(IpaText.key(text)).isNotBlank())
             }
         }
         assertTrue(passages.all { it.sentences.all { s -> s.vietnamese.isNotBlank() } && it.vocabulary.size == 4 })

@@ -25,7 +25,7 @@ internal class TemporarySpeechAudio {
     @SuppressLint("MissingPermission")
     fun start(onEndpoint: (() -> Unit)? = null, onPcm: ((ByteArray, Int) -> Boolean)? = null, silenceMillis: Int = 1400, maximumMillis: Int = 60000) {
         clear()
-        val duration = maximumMillis.coerceIn(60000, 240000)
+        val duration = maximumMillis.coerceIn(60000, MAX_SPEECH_ATTEMPT_MILLIS)
         val maximumBytes = RATE * 2 * (duration / 1000)
         val minimum = AudioRecord.getMinBufferSize(RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         check(minimum > 0)

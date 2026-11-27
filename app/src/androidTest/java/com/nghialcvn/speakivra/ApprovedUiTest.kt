@@ -94,7 +94,7 @@ class ApprovedUiTest {
         ui.onNodeWithContentDescription("Sinh hoạt hằng ngày: 1 trên 3 kim cương").assertIsDisplayed()
         shot("51-topic-diamond-achievements")
         ui.onNodeWithContentDescription("Quay lại").performClick()
-        ui.onNodeWithText("Hội thoại mẫu").performClick()
+        ui.onNodeWithText("Hội thoại mẫu").performScrollTo().performClick()
         shot("52-conversation-clear-logo")
         ui.onNodeWithText("🇺🇸 English (US)").assertIsDisplayed()
         // A retry with a worse result must not erase earned diamonds.
@@ -273,7 +273,7 @@ class ApprovedUiTest {
         ui.onNodeWithContentDescription("Tốc độ đọc: 1x").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.openLessonHub()
-        ui.onNodeWithText("Hội thoại mẫu").performClick()
+        ui.onNodeWithText("Hội thoại mẫu").performScrollTo().performClick()
         ui.onNodeWithText("Mô phỏng theo kịch bản").assertIsDisplayed()
         ui.onNodeWithText("My name is Nghĩa.").assertIsDisplayed()
         ui.onNodeWithText("Tên tôi là Nghĩa.").assertIsDisplayed()

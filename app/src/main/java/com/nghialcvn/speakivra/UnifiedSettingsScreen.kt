@@ -116,7 +116,7 @@ internal fun UnifiedSettingsScreen(
                         fontSize = 11.sp, color = p.muted, lineHeight = 16.sp)
                 }
                 SettingsTile("sliders", "Tùy chỉnh bài học",
-                    "A1 / A2 / B1 • Lặp $repeats lần", neon, onStudy)
+                    "A1 / A2 / B1 / B2 / C1 / C2 • Lặp $repeats lần", neon, onStudy)
                 InnerPanel(neon) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -124,7 +124,7 @@ internal fun UnifiedSettingsScreen(
                         Column(Modifier.weight(1f)) {
                             Text("Thông báo nhắc học", fontSize = 13.sp,
                                 color = p.ink, fontWeight = FontWeight.Bold)
-                            Text(if (reminder) "Đang bật • khoảng 19:00" else "Đang tắt",
+                            Text(if (reminder) "Đang bật • khoảng 20:00" else "Đang tắt",
                                 fontSize = 11.sp, color = p.muted)
                         }
                         Switch(checked = reminder, onCheckedChange = onReminder)

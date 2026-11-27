@@ -1,10 +1,14 @@
 package com.nghialcvn.speakivra
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -12,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /** Local-only real progress; never guesses scores or records user speech. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ProgressScreen(
     lessons: List<Lesson>,
@@ -40,22 +45,47 @@ internal fun ProgressScreen(
             Text("Tổng thành tích cả khóa", color = p.muted, fontSize = 12.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally))
         }
-        Text("A1 • Căn bản", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-        lessons.filter { Lessons.levelOf(it) == "A1" }.forEach { lesson ->
-            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
-        }
-        Text("A2 • Sơ trung cấp", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-        lessons.filter { Lessons.levelOf(it) == "A2" }.forEach { lesson ->
-            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
-        }
-        Text("B1 • Trung cấp", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-        lessons.filter { Lessons.levelOf(it) == "B1" }.forEach { lesson ->
-            LessonProgressRow(lesson, load(lesson), topicIsOpen(lesson, lessons, load), onOpen)
-        }
-        listOf("FO", "HK").forEach { role ->
-            Text("Khách sạn • ${HotelCurriculum.roleLabel(role)}", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-            lessons.filter { HotelCurriculum.isHotel(it) && HotelCurriculum.role(it) == role }.forEach { lesson ->
-                LessonProgressRow(lesson, load(lesson), true, onOpen)
+        var expanded by rememberSaveable { mutableStateOf<String?>(null) }
+        val groups = CourseLevels.all + listOf("FO", "HK")
+        groups.forEach { group ->
+            val items = lessons.filter { Lessons.levelOf(it) == group }
+            val hotel = group in listOf("FO", "HK")
+            val unlocked = hotel || levelIsOpen(group, lessons, load)
+            val title = if (hotel) "Khách sạn • ${HotelCurriculum.roleLabel(group)}" else CourseLevels.title(group)
+            val anchor = remember(group) { BringIntoViewRequester() }
+            LaunchedEffect(expanded) {
+                if (expanded == group) {
+                    withFrameNanos { }
+                    anchor.bringIntoView()
+                }
+            }
+            StudioCard(Modifier.semantics { contentDescription = "Nhóm tiến độ $group" }
+                .border(1.dp, if (expanded == group) p.coral else p.border, RoundedCornerShape(18.dp)),
+                border = p == NeonStudio && expanded == group, spacing = 10.dp, contentPadding = 12.dp) {
+                // Anchor the header plus the first topic, not the entire potentially long list.
+                Column(Modifier.bringIntoViewRequester(anchor), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(Modifier.fillMaxWidth().clickable(role = Role.Button) {
+                        expanded = if (expanded == group) null else group
+                    }.semantics { stateDescription = if (expanded == group) "Đang mở" else "Đang thu gọn" },
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        StudioIcon(if (unlocked) "book" else "lock", Modifier.size(24.dp), p.coral)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(title, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                            if (hotel) Text("Bài học riêng", color = p.coral, fontSize = 12.sp,
+                                modifier = Modifier.background(p.peach, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
+                            else if (!unlocked) Text(CourseLevels.lockMessage(group), color = p.muted, fontSize = 12.sp)
+                        }
+                        StudioIcon(if (expanded == group) "up" else "down", Modifier.size(18.dp), p.coral)
+                    }
+                    if (expanded == group) {
+                        if (!hotel) Text("${items.size} chủ đề • ${items.sumOf { it.phrases.size }} câu • ${items.sumOf { it.conversation.size }} lượt hội thoại",
+                            color = p.muted, fontSize = 12.sp)
+                        items.firstOrNull()?.let { item -> LessonProgressRow(item, load(item), topicIsOpen(item, lessons, load), onOpen) }
+                    }
+                }
+                if (expanded == group) items.drop(1).forEach { item ->
+                    LessonProgressRow(item, load(item), topicIsOpen(item, lessons, load), onOpen)
+                }
             }
         }
     }
@@ -78,7 +108,7 @@ private fun LessonProgressRow(lesson: Lesson, value: LessonProgress, open: Boole
             Text(if (!open) "Chủ đề đang khóa" else if (value.phase == "summary") "${value.rounds} lượt hoàn thành"
                  else "${value.phrase + 1}/${lesson.phrases.size} câu • ${value.phase}",
                 color = p.muted, fontSize = 12.sp)
-            StudioProgress((value.phrase + 1f) / lesson.phrases.size)
+            StudioProgress(if (!open) 0f else if (value.phase == "summary") 1f else value.learnedPhrases?.size?.toFloat()?.div(lesson.phrases.size) ?: (value.phrase.toFloat() / lesson.phrases.size))
         }
         StudioIcon("chevron", Modifier.size(14.dp), p.muted)
     }

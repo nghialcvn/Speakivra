@@ -46,7 +46,7 @@ class Expansion117Test {
         val oldExercise = ExtraPracticeData.exercises.first { it.id == "exercise_a2_plans" }
         assertEquals(6, oldExercise.questions.size)
     }
-    @Test fun namesKeepAccentsAcceptEquivalentIntroductionsButRejectOtherNamesAndNegation() {
+    @Test fun namesKeepAccentsAndExactNameSignalWithoutOverridingThePercentGate() {
         listOf("Nghĩa", "Nguyễn Đặng Ánh", "Đỗ Mỹ Linh").forEach { name ->
             val reference = "My name is $name."
             val plain = Normalizer.normalize(name, Normalizer.Form.NFD).replace(Regex("\\p{M}"), "").replace('Đ','D').replace('đ','d')
@@ -55,10 +55,13 @@ class Expansion117Test {
                 assertTrue(it, result.canContinue)
                 assertTrue(it, result.matched.all { m -> m })
             }
-            listOf("My name is", "My name is Alex", "I'm not $plain").forEach { assertFalse(it, matchWords(reference, it).canContinue) }
+            // Exact-name recognition is used to choose provider alternatives, not as a hidden progression veto.
+            listOf("My name is", "My name is Alex", "I'm not $plain").forEach {
+                assertFalse(it, matchWords(reference, it).nameMatchesExactly)
+            }
             assertEquals(reference, personalizeLesson(Lessons.a1.first(), name).phrases[2].english)
         }
-        assertFalse(matchWords("My name is Nguyễn Đặng Ánh.", "My name is Nguyen Anh").canContinue)
+        assertFalse(matchWords("My name is Nguyễn Đặng Ánh.", "My name is Nguyen Anh").nameMatchesExactly)
     }
     @Test fun installedNotesCannotSilentlyRepeatAnOlderVersion() {
         val current = InstalledReleaseNotes.forVersion(BuildConfig.VERSION_NAME)

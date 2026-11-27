@@ -25,6 +25,7 @@ class SpeechNamesTest {
         assertEquals("my name is Nghia", selectNameHypothesis(listOf("my name is India", "my name is Nghia"), "Nghĩa"))
         assertEquals("I'm Đặng Minh", selectNameHypothesis(listOf("I'm Dang", "I'm Đặng Minh"), "Đặng Minh"))
         assertEquals("my name is India", selectNameHypothesis(listOf("my name is India"), "Nghĩa"))
+        assertEquals("my name is India", selectNameHypothesis(listOf("my name is India", "I'm not Nghia"), "Nghĩa"))
         assertEquals("my name is Linh", selectNameHypothesis(listOf("my name is Linh", "my name is Nghia"), "Linh"))
         assertEquals("I am going home", selectNameHypothesis(listOf("I am going home", "I am going home now"), "Nghĩa"))
         assertEquals("Nghia", selectNameHypothesis(listOf("India", "Nghia"), "Nghĩa", "my name is"))

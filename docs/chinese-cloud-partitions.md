@@ -35,8 +35,8 @@ account denial. Existing UI tests and screenshot requirements remain mandatory.
 
 ## Deployment
 
-The new Firestore rules must be deployed to the existing Firebase project before
-this client is released. The additive rules preserve the current parent profile
+The new Firestore rules and the languageProgress progressJson index exemption must
+be deployed to the existing Firebase project before this client is released. The additive rules preserve the current parent profile
 schema and old-client access. Deploying the APK without the matching rules will
 cause level reads/writes to be denied and leave progress pending; it does not
 permit an unsafe fallback that discards Chinese progress. Rule deployment and APK

@@ -364,9 +364,10 @@ internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, larg
 internal fun DecorativeWave() {
     val neon = studio == NeonStudio
     val color = if (neon) NeonLook.cyan else BrandLook.cyan
-    Canvas(Modifier.width(64.dp).height(48.dp)) {
-        listOf(.2f, .42f, .72f, 1f, .62f, .32f).forEachIndexed { i, h ->
-            val x = size.width * (i + .5f) / 6
+    Canvas(Modifier.width(if (neon) 64.dp else 42.dp).height(if (neon) 48.dp else 40.dp)) {
+        val bars = if (neon) listOf(.2f, .42f, .72f, 1f, .62f, .32f) else listOf(.5f, 1f, .5f)
+        bars.forEachIndexed { i, h ->
+            val x = size.width * (i + .5f) / bars.size
             drawLine(if (neon) listOf(NeonLook.cyan, NeonLook.cyan, NeonLook.azure, NeonLook.azure, NeonLook.lilac, NeonLook.violet)[i] else color, Offset(x, size.height * (1 - h) / 2), Offset(x, size.height * (1 + h) / 2),
                 strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
         }

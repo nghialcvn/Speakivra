@@ -96,4 +96,3 @@ class BrandRefreshUiTest {
     @Test fun lightPracticeKeepsReplayAndNext() = practice(false)
     @Test fun darkPracticeKeepsReplayAndNext() = practice(true)
 }
-

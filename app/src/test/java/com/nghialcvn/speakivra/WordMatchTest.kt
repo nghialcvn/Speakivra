@@ -21,8 +21,8 @@ class WordMatchTest {
         val pass = matchWords("My name is Alex.", "my name is I like")
         assertEquals(listOf(true, true, true, false), pass.matched)
         assertEquals(25, pass.percent)
-        // A recognised introduction with a different name must not pass on the frame alone.
-        assertFalse(pass.canContinue)
+        // The same percentage gate applies to names; mismatched words stay red.
+        assertTrue(pass.canContinue)
         val fail = matchWords("My name is Alex.", "my family likes music")
         assertEquals(listOf(true, false, false, false), fail.matched)
         assertEquals(75, fail.percent)

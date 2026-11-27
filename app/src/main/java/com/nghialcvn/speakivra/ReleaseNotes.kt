@@ -3,6 +3,10 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.2.3" to listOf(
+            "speaker" to "Sửa câu giới thiệu tên đạt 75% nhưng vẫn bị chặn",
+            "profile" to "Gợi ý tên có dấu và không dấu; ưu tiên phương án nhận dạng có đúng tên hồ sơ",
+            "check" to "Giữ xanh–đỏ theo chữ nhận dạng và thống nhất điều kiện chuyển câu"),
         "1.2.2" to listOf(
             "bell" to "Điểm danh mỗi ngày, theo dõi chuỗi ngày riêng từng hồ sơ",
             "profile" to "Khung chào và điểm danh theo demo, avatar nổi trên logo chìm",

@@ -402,19 +402,21 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         onDispose { lifecycle?.removeObserver(observer); capture.cancel(); speech.close() }
     }
     fun speak(text: String) { stopCapture(false); speech.speak(text, playbackSpeed, voiceChoice, sampleRepeats) }
-    fun captureBudget(): Int {
-        val expected = when (page) {
+    fun captureExpected(): String = when (page) {
             "passage" -> if (wholePassage) passage.english else sentence.english
             "exercise" -> question.answer
             "chat" -> lesson.conversation[chatIndex].reply
             else -> phrases[index].english
         }
-        return speechAttemptLimitMillis(page == "passage" && wholePassage, expected.split(Regex("\\s+")).size)
+    fun captureNameHint(): String? = learner.name.takeIf {
+        matchWords("My name is $it", captureExpected()).nameMatchesExactly
     }
+    fun captureBudget(): Int = speechAttemptLimitMillis(page == "passage" && wholePassage,
+        captureExpected().split(Regex("\\s+")).size)
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         val requested = pendingMicrophone
         pendingMicrophone = false
-        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, captureBudget())
+        if (granted && requested && (context as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true) capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, captureNameHint(), captureBudget())
         else if (!granted) status = "Cần cấp quyền micro để sử dụng nhận dạng giọng nói."
     }
     fun listen() {
@@ -427,7 +429,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             pendingMicrophone = true
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, learner.name, captureBudget())
+        } else capture.start(voiceChoice.languageTag, if (page == "passage" && wholePassage) 2400 else 1400, captureNameHint(), captureBudget())
     }
     // Changing the learning context invalidates pending permissions and old callbacks.
     DisposableEffect(page, voiceChoice, lesson.id, progress.phrase, progress.turn, progress.review, hotelChatTurn, passageId, sentenceIndex, wholePassage, exerciseId, questionIndex) {

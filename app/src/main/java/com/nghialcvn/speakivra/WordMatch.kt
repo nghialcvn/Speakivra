@@ -3,12 +3,12 @@ package com.nghialcvn.speakivra
 import java.util.Locale
 import java.text.Normalizer
 
-internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean, val requiredTokensMatched: Boolean = true) {
+internal data class WordMatch(val tokens: List<String>, val matched: List<Boolean>, val hasResult: Boolean, val nameMatchesExactly: Boolean = true) {
     val correct get() = matched.count { it }
     val matchPercent get() = if (tokens.isEmpty()) 0 else correct * 100 / tokens.size
     val incorrect get() = matched.count { !it }
     val percent get() = if (tokens.isEmpty()) 100 else (incorrect * 100f / tokens.size).toInt()
-    val canContinue get() = hasResult && requiredTokensMatched && tokens.isNotEmpty() && incorrect * 100 < tokens.size * 60
+    val canContinue get() = hasResult && tokens.isNotEmpty() && incorrect * 100 < tokens.size * 60
 }
 
 private data class MatchPart(val value: String, val owner: Int)
@@ -114,7 +114,7 @@ internal fun matchWords(reference: String, finalTranscript: String?): WordMatch 
     var expected = canonical(tokens)
     var spoken = canonical(Regex("\\S+").findAll(finalTranscript.orEmpty()).map { it.value }.toList())
     // Equivalent introduction frames only. Preserve owners for word colouring and require
-    // the complete name: accent folding is not permission to accept a different/missing name.
+    // the exact name for hypothesis selection; word colours remain honest when ASR mishears it.
     fun introSize(parts: List<MatchAtom>): Int = when {
         parts.take(3).map { it.value } == listOf("my", "name", "is") -> 3
         parts.take(2).map { it.value } == listOf("i", "am") -> 2

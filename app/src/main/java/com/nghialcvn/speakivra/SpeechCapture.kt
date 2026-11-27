@@ -32,6 +32,7 @@ internal class SpeechCapture(
     private var generation = 0L
     private var locale = "en-US"
     private var nameHints = arrayListOf<String>()
+    private var learnerName: String? = null
     private var endpointSilenceMillis = 1400
     private var maximumAttemptMillis = 60000
     val hasRecording get() = audio.available
@@ -45,7 +46,8 @@ internal class SpeechCapture(
         audio.clear(); recordingChanged(false)
         maximumAttemptMillis = maximumMillis.coerceIn(60000, MAX_SPEECH_ATTEMPT_MILLIS)
         locale = languageTag
-        nameHints = arrayListOf<String>().apply { properName?.trim()?.takeIf { it.isNotBlank() }?.let { add(it) } }
+        learnerName = properName
+        nameHints = speechNameHints(properName)
         endpointSilenceMillis = silenceMillis.coerceIn(1400, 4000)
         update("listening", "", "Đang mở micro…")
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -103,7 +105,7 @@ internal class SpeechCapture(
                 }
                 override fun onSegmentResults(segmentResults: Bundle) {
                     if (!current(token, attempt)) return
-                    words(segmentResults)?.takeIf(String::isNotBlank)?.let(segments::add)
+                    words(segmentResults, segments.joinToString(" "))?.takeIf(String::isNotBlank)?.let(segments::add)
                     update(phase, segments.joinToString(" "), "Đang nhận dạng…")
                     if (!streamingStarted && phase == "listening") stop()
                 }
@@ -153,7 +155,7 @@ internal class SpeechCapture(
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
                 // A recognition hint, never a replacement for the actual recognised words.
                 if (Build.VERSION.SDK_INT >= 33 && nameHints.isNotEmpty())
                     putStringArrayListExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, nameHints)
@@ -217,7 +219,8 @@ internal class SpeechCapture(
             armTimeout(token, 15_000)
         }
     }
-    private fun words(bundle: Bundle?) = bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+    private fun words(bundle: Bundle?, prefix: String = "") = selectNameHypothesis(
+        bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty(), learnerName, prefix)
     private fun armTimeout(token: Long, delay: Long) {
         timeout?.let(handler::removeCallbacks)
         timeout = Runnable {

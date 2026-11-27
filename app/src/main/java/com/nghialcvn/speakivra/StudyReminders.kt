@@ -51,7 +51,9 @@ internal object StudyReminders {
             .setInitialDelay(delay, TimeUnit.MINUTES)
             .addTag("speakivra-study")
             .build()
-        WorkManager.getInstance(app).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, work)
+        // Reset the old enqueue time too: UPDATE preserves an existing periodic schedule.
+        // An enabled 19:00 reminder must be re-anchored to the newly calculated 20:00 time.
+        WorkManager.getInstance(app).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, work)
         app.getSharedPreferences("speakivra_progress", 0).edit().putInt("study_reminder_hour", 20).apply()
     }
 

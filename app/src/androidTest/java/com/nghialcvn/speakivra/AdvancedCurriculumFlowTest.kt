@@ -11,9 +11,18 @@ import org.junit.runner.Description
 import org.junit.runner.RunWith
 import org.junit.runners.model.Statement
 import java.io.File
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import androidx.work.WorkManager
+import androidx.work.WorkInfo
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
 
 @RunWith(AndroidJUnit4::class)
 class AdvancedCurriculumFlowTest {
+    private var legacyReminderId: UUID? = null
     @get:Rule(order = 0) val seed = TestRule { base, description: Description -> object : Statement() {
         override fun evaluate() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -38,8 +47,14 @@ class AdvancedCurriculumFlowTest {
             }
             if (description.methodName == "restoredAdvancedSelectionCannotBypassTheGate")
                 edit.putString("active_lesson", "c2_viewpoints")
-            if (description.methodName == "enabledReminderMigratesToTwentyHundredWithoutLosingTheToggle")
+            if (description.methodName == "enabledReminderMigratesToTwentyHundredWithoutLosingTheToggle") {
                 edit.putBoolean("study_reminder_enabled", true).putInt("study_reminder_hour", 19)
+                val old = PeriodicWorkRequestBuilder<StudyReminderWorker>(1, TimeUnit.DAYS)
+                    .setInitialDelay(2, TimeUnit.HOURS).build()
+                legacyReminderId = old.id
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork("speakivra-evening-practice",
+                    ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, old).result.get(10, TimeUnit.SECONDS)
+            }
             edit.commit()
             AccountRuntime.testGateway = UnconfiguredAccountGateway()
             try { base.evaluate() } finally {
@@ -144,6 +159,14 @@ class AdvancedCurriculumFlowTest {
         val prefs = ui.activity.getSharedPreferences("speakivra_progress", 0)
         ui.waitUntil(10000) { prefs.getInt("study_reminder_hour", 0) == 20 }
         Assert.assertTrue(StudyReminders.isEnabled(ui.activity))
+        val expected = nextStudyReminder(LocalDateTime.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        var replacement: WorkInfo? = null
+        ui.waitUntil(10000) {
+            replacement = WorkManager.getInstance(ui.activity).getWorkInfosForUniqueWork("speakivra-evening-practice")
+                .get(5, TimeUnit.SECONDS).firstOrNull { it.state == WorkInfo.State.ENQUEUED && it.id != legacyReminderId }
+            replacement?.let { kotlin.math.abs(it.nextScheduleTimeMillis - expected) < 65000L } == true
+        }
+        Assert.assertNotEquals(legacyReminderId, replacement?.id)
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Học tập", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Đang bật • khoảng 20:00").performScrollTo().assertIsDisplayed()

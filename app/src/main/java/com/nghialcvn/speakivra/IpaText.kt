@@ -45,7 +45,7 @@ internal object IpaText {
         val expandedValue = expanded.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")
         if (expandedValue.isNotBlank()) return "/$expandedValue/"
         val advanced = advancedData ?: synchronized(this) {
-            advancedData ?: JSONObject(GZIPInputStream(context.assets.open("advanced-ipa.json.gz"))
+            advancedData ?: JSONObject(GZIPInputStream(context.assets.open("advanced-ipa.bin"))
                 .bufferedReader().use { it.readText() }).also { advancedData = it }
         }
         val advancedValue = advanced.getJSONObject(if (accent == "GB") "GB" else "US").optString(key(text), "")

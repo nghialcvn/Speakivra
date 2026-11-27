@@ -50,7 +50,7 @@ class ExtraPracticeTest {
     @Test fun contentIsBilingualUniqueAndProgressivelyLongerWithFullIpaCoverage() {
         val data = JSONObject(File("src/main/assets/ipa.json").readText())
         val expanded = JSONObject(File("src/main/assets/expanded-ipa.json").readText())
-        val advanced = JSONObject(java.util.zip.GZIPInputStream(File("src/main/assets/advanced-ipa.json.gz").inputStream()).bufferedReader().use { it.readText() })
+        val advanced = JSONObject(java.util.zip.GZIPInputStream(File("src/main/assets/advanced-ipa.bin").inputStream()).bufferedReader().use { it.readText() })
         val passages = ExtraPracticeData.passages
         assertEquals(55, passages.size)
         assertEquals(530, ExtraPracticeData.exercises.sumOf { it.questions.size })

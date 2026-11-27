@@ -11,7 +11,7 @@ parser=argparse.ArgumentParser();parser.add_argument('export');args=parser.parse
 root=Path(__file__).resolve().parents[1]
 texts={base64.b64decode(line.split('\t')[3]).decode() for line in Path(args.export).read_text().splitlines()}
 key=lambda s:re.sub(r'\s+',' ',s.strip().replace('’',"'").replace('‘',"'")).lower()
-asset=root/'app/src/main/assets/advanced-ipa.json.gz'
+asset=root/'app/src/main/assets/advanced-ipa.bin'
 data=json.loads(gzip.decompress(asset.read_bytes())) if asset.exists() else {'US':{},'GB':{}}
 EspeakWrapper.set_library(espeakng_loader.get_library_path())
 os.environ['ESPEAK_DATA_PATH']=espeakng_loader.get_data_path()

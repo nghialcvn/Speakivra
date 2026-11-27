@@ -1,0 +1,3 @@
+# Approved compact check-in correction (1.2.6)
+
+User-approved visual: one compact horizontal strip, left violet flame tile, stacked streak and seven dots in the middle, green checked-in action at right. All three blocks share identical top/bottom bounds. Use the existing official Speakivra logo, not the older generated watermark. Existing theme palette and avatar artwork remain. The prior width <330dp / fontScale >1.3 two-row fallback is removed; the strip scales to available card width, preserving 48dp action height and single-line labels. Test widths 284, 300, 324, 360dp and font scales 1.0, 1.5; capture real narrow before/after and dark large-font screens. No speech-scoring changes in this UI correction; incorrect provider transcripts remain genuine.

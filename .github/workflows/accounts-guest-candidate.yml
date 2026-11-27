@@ -1,7 +1,7 @@
 name: Verify Spark accounts and guest identity
 on:
   push:
-    branches: [feat/accounts-guest, feat/approved-brand-refresh]
+    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126]
   workflow_dispatch:
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -11,7 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: read
     env:
@@ -99,19 +99,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_7_pro
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -camera-back none -grpc 8554
+          emulator-options: -no-window -gpu swiftshader -feature -Vulkan -no-snapshot -no-boot-anim -camera-back none -grpc 8554
           disable-animations: true
-          script: |
-            adb shell wm size 1080x2340
-            adb shell wm density 420
-            adb install -r dist/*.apk
-            adb shell pm grant com.nghialcvn.speakivra android.permission.POST_NOTIFICATIONS
-            adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-            adb shell settings get secure voice_recognition_service | tee ui-recognition-provider.txt
-            adb shell am instrument -w -e class com.nghialcvn.speakivra.BrandRefreshUiTest,com.nghialcvn.speakivra.ProperNameFeedbackTest,com.nghialcvn.speakivra.DailyCheckInFlowTest,com.nghialcvn.speakivra.AdvancedCurriculumFlowTest,com.nghialcvn.speakivra.GuestLinkReminderUiTest,com.nghialcvn.speakivra.AccountDraftFlowTest,com.nghialcvn.speakivra.FreshInstallLearnerTest,com.nghialcvn.speakivra.ApprovedUiTest#approvedDiamondRewardsAndResume,com.nghialcvn.speakivra.SparkAccountIntegrationTest com.nghialcvn.speakivra.test/androidx.test.runner.AndroidJUnitRunner | tee ui-test-output.txt
-            mkdir -p ui-review
-            adb pull /sdcard/Android/data/com.nghialcvn.speakivra/files/ui-screenshots ui-review/
-            python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 27 and "FAILURES!!!" not in s, s'
+          script: bash scripts/run_android_ui_review.sh
       - name: Upload UI review screenshots and reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,6 +110,7 @@ jobs:
           path: |
             ui-review/**
             ui-test-output.txt
+            ui-diagnostics/**
             firebase-emulators.log
             ui-recognition-provider.txt
             real-speech-provider-probe.txt

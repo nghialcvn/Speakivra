@@ -3,6 +3,10 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.2.4" to listOf(
+            "layers" to "Diện mạo Sáng–Tối mới theo tông navy–tím–cyan",
+            "book" to "Logo Speakivra mới: chữ S, mũ tốt nghiệp và sóng âm",
+            "profile" to "Trang chủ, điểm danh và luyện nói đồng bộ theo mẫu đã duyệt"),
         "1.2.3" to listOf(
             "speaker" to "Sửa câu giới thiệu tên đạt 75% nhưng vẫn bị chặn",
             "profile" to "Gợi ý tên có dấu và không dấu; ưu tiên phương án nhận dạng có đúng tên hồ sơ",

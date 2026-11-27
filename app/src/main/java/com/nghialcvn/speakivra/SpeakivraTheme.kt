@@ -16,14 +16,21 @@ internal data class StudioColors(
     val green: Color, val purple: Color,
     val correctWord: Color = green, val incorrectWord: Color = coral
 )
-internal val LightStudio = StudioColors(Color(0xFFFFF9F4), Color.White, Color(0xFF201C2B),
-    Color(0xFF655E6B), Color(0xFFE8DEE0), Color(0xFFFFE5DA), Color(0xFFF0E8FF),
-    Color(0xFFE0F6E9), green = Color(0xFF20723F), purple = Color(0xFF7560B0))
-internal val DarkStudio = StudioColors(Color(0xFF211D24), Color(0xFF2C2730), Color(0xFFFFF7F2),
-    Color(0xFFD0C5D2), Color(0xFF514750), Color(0xFF4B302A), Color(0xFF3C304F),
-    Color(0xFF263F32), coral = Color(0xFFFF9A85), coralLight = Color(0xFFE77761),
-    green = Color(0xFFA6E6BA), purple = Color(0xFFD3BDF5))
-/** Approved third appearance. Light/Dark palettes remain unchanged. */
+internal val LightStudio = StudioColors(
+    background = Color(0xFFF5F7FF), card = Color(0xFFFCFDFF), ink = Color(0xFF101744),
+    muted = Color(0xFF505B79), border = Color(0xFFDADFF3), peach = Color(0xFFEDE5FF),
+    lavender = Color(0xFFF1EDFF), mint = Color(0xFFE1F8EC),
+    coral = Color(0xFF6022D8), coralLight = Color(0xFF9451F4),
+    green = Color(0xFF176B3B), purple = Color(0xFF6022D8),
+    correctWord = Color(0xFF137338), incorrectWord = Color(0xFFCE252E))
+internal val DarkStudio = StudioColors(
+    background = Color(0xFF090F29), card = Color(0xFF182344), ink = Color(0xFFF7F9FF),
+    muted = Color(0xFFC1CCE9), border = Color(0xFF46557F), peach = Color(0xFF2D285C),
+    lavender = Color(0xFF202C50), mint = Color(0xFF153D36),
+    coral = Color(0xFFBFA7FF), coralLight = Color(0xFF9D74FF),
+    green = Color(0xFF81EEB0), purple = Color(0xFFC8B5FF),
+    correctWord = Color(0xFF80E99F), incorrectWord = Color(0xFFFF777F))
+/** The separate Neon appearance keeps its approved palette and effects. */
 internal val NeonStudio = StudioColors(
     background = Color(0xFF061332),
     card = Color(0xEA112453),

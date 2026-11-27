@@ -44,20 +44,22 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
     }
     LaunchedEffect(Unit) { while (true) { today = LocalDate.now(); delay(30000) } }
     val state = DailyCheckIn(dates, today)
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(if (p == NeonStudio) 22.dp else 18.dp)
     Box(Modifier.fillMaxWidth().shadow(5.dp, shape).clip(shape)
-        .background(if (p == LightStudio) Color(0xFFFFF9EE) else p.card)
+        .background(if (p == NeonStudio) androidx.compose.ui.graphics.Brush.linearGradient(listOf(p.card, p.card)) else brandPanelBrush(p))
         .border(1.dp, p.border, shape).heightIn(min = 142.dp)
         .semantics { contentDescription = "Điểm danh hằng ngày" }) {
+        Image(painterResource(R.drawable.brand_logo_clear), null,
+            Modifier.align(Alignment.TopEnd).offset(x = if (p == NeonStudio) 24.dp else 12.dp).size(140.dp).alpha(.13f))
         Column(Modifier.fillMaxWidth().padding(9.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(start = 5.dp, top = 8.dp, end = 78.dp),
+            SingleLineInfo("Chào ${learner.name}!", Modifier.fillMaxWidth().padding(start = 5.dp, top = 8.dp, end = if (p == NeonStudio) 78.dp else 102.dp),
                 fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(if (p == NeonStudio) 6.dp else 30.dp))
             Row(Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(17.dp)).clip(RoundedCornerShape(17.dp))
-                .background(p.card).border(1.dp, p.border, RoundedCornerShape(17.dp)).padding(7.dp),
+                .background(p.card.copy(alpha = if (p == NeonStudio) 1f else .7f)).border(1.dp, p.border, RoundedCornerShape(17.dp)).padding(7.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 Box(Modifier.size(43.dp).background(p.peach, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                    Text("🔥", fontSize = 26.sp)
+                    if (p == NeonStudio) Text("🔥", fontSize = 26.sp) else BrandFlame(Modifier.size(26.dp, 32.dp))
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     SingleLineInfo("${state.streak} ngày", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
@@ -80,10 +82,12 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
                         if (!error) dates = updated
                     }
                 }, enabled = !state.checkedToday, shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = p.coral,
+                    colors = ButtonDefaults.buttonColors(containerColor = if (p == NeonStudio) p.coral else Color.Transparent,
+                        contentColor = if (p == NeonStudio) p.background else Color.White,
                         disabledContainerColor = p.mint, disabledContentColor = p.green),
                     contentPadding = PaddingValues(horizontal = 9.dp, vertical = 10.dp),
-                    modifier = Modifier.widthIn(min = 112.dp).heightIn(min = 45.dp)) {
+                    modifier = Modifier.widthIn(min = 112.dp).heightIn(min = 45.dp)
+                        .then(if (p != NeonStudio && !state.checkedToday) Modifier.background(BrandLook.selection, RoundedCornerShape(14.dp)) else Modifier)) {
                     if (state.checkedToday) Text("✓ Đã điểm danh", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                     else {
                         Canvas(Modifier.size(12.dp, 16.dp)) {
@@ -103,12 +107,10 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
                 }
             }
         }
-        // Both drawings share the same horizontal centre: 46dp from the card's right edge.
+        // Both drawings share the same horizontal centre: 58dp (46dp for Neon) from the right edge.
         // The large watermark spans the button; only the learner avatar is opaque and in front.
-        Image(painterResource(R.drawable.brand_logo_clear), null,
-            Modifier.align(Alignment.TopEnd).offset(x = 24.dp).size(140.dp).alpha(.13f))
         Box(Modifier.align(Alignment.TopEnd).padding(end = 18.dp, top = 23.dp)
-            .size(56.dp).clickable(role = Role.Button, onClick = onProfile)
+            .size(if (p == NeonStudio) 56.dp else 80.dp).clickable(role = Role.Button, onClick = onProfile)
             .semantics { contentDescription = "Mở hồ sơ ${learner.name}" }) {
             LearnerAvatar(learner.avatar, Modifier.fillMaxSize())
         }

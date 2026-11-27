@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/speakivra_icon"
+    android:drawable="@drawable/brand_logo_clear"
     android:insetLeft="24dp"
     android:insetTop="24dp"
     android:insetRight="24dp"

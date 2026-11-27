@@ -896,7 +896,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
 }
 
 @Suppress("DEPRECATION")
-private fun updateSystemBars(activity: ComponentActivity, dark: Boolean, color: Color) {
+internal fun updateSystemBars(activity: ComponentActivity, dark: Boolean, color: Color) {
     val transparent = android.graphics.Color.TRANSPARENT
     val style = if (dark) SystemBarStyle.dark(transparent) else SystemBarStyle.light(transparent, transparent)
     activity.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)

@@ -274,6 +274,10 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
     val learnerLessons = remember(learner.name) { Lessons.catalogue.map { personalizeLesson(it, learner.name) } }
     val lesson = learnerLessons.firstOrNull { it.id == selectedId && topicIsOpen(it, learnerLessons, ::loadProgress) } ?: learnerLessons.first()
     var progress by remember(lesson.id) { mutableStateOf(loadProgress(lesson)) }
+    // A restored saveable home page must not swallow an explicit resume action.
+    LaunchedEffect(learner.id, resumeLearning) {
+        if (resumeLearning) page = progress.phase
+    }
     val achievements = remember(learner.id) { TopicAchievements(preferences) }
     val index = progress.phrase
     val phrases = lesson.phrases
@@ -658,7 +662,7 @@ private fun LearnerApp(updates: InAppUpdates, learner: Learner, resumeLearning: 
                     // Each screen owns its scroll area; speaking/review keep the next action visible.
                     key(page, lesson.id, progress.phrase, progress.turn, progress.review) {
                         when (page) {
-                            "home" -> HomeScreen(lesson, progress, goal, completed, learner.name,
+                            "home" -> HomeScreen(lesson, progress, goal, completed, learner.name, learner, preferences,
                                 onContinue = { hotelDirectChat = false; page = progress.phase; if (automatic && page == "repeat") speak(phrases[index].english) },
                                 onLessons = { navigate("lessons") }, onProfile = { navigate("profile") })
                             "lessons" -> LessonHubScreen(

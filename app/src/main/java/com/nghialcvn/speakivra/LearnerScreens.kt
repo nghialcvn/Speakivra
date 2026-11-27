@@ -93,7 +93,8 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                         .border(if (chosen) 1.5.dp else 1.dp, if (chosen) p.coral else p.border, RoundedCornerShape(18.dp)))
                     .clickable(role = Role.RadioButton) { selected = learner.id }.semantics { this.selected = chosen }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    LearnerAvatar(learner.avatar, Modifier.size(112.dp))
+                    LearnerAvatar(learner.avatar, Modifier.size(112.dp).clickable(role = Role.Button) { onResume(learner) }
+                        .semantics { contentDescription = "Tiếp tục học với ${learner.name}" })
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                         GuestIdentityLabel(learner)
@@ -101,8 +102,10 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                         SingleLineInfo("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
                         AchievementSummary(TopicAchievements(store.preferences(learner)).total(),
                             fontSize = 12.sp, fontWeight = FontWeight.Normal)
-                        SingleLineInfo("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp,
-                            modifier = Modifier.clickable(role = Role.Button) { onResume(learner) }.padding(vertical = 5.dp))
+                        Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { onResume(learner) },
+                            contentAlignment = Alignment.CenterStart) {
+                            SingleLineInfo("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp)
+                        }
                     }
                 }
             }

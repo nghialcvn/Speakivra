@@ -169,15 +169,13 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 }
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
+                        learner: Learner, preferences: android.content.SharedPreferences,
                         onContinue: () -> Unit, onLessons: () -> Unit, onProfile: () -> Unit) {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Brand(Modifier.clickable(onClick = onProfile))
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Chào $learnerName!", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = p.ink)
-            Text("Hôm nay, mình cùng luyện nói nhé.", color = p.muted, fontSize = 14.sp)
-        }
+        DailyCheckInCard(learner, preferences, onProfile)
+        Text("Hôm nay, mình cùng luyện nói nhé.", color = p.muted, fontSize = 14.sp)
         Row(Modifier.fillMaxWidth()
             .then(if (p == NeonStudio) Modifier.neonGlass(strong = true)
                 else Modifier.clip(RoundedCornerShape(18.dp)).background(p.peach))

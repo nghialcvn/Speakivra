@@ -9,7 +9,9 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
     val progress = JSONObject()
     values.forEach { (key, value) ->
         if (key == "active_lesson" && value is String && value in allowedLessons) progress.put(key, value)
-        else if (key == "extra.completed_ids" && value is Set<*>) {
+        else if (key == CHECK_IN_DATES && value is Set<*>) {
+            progress.put(key, JSONArray(validCheckInDates(value.filterIsInstance<String>()).sorted()))
+        } else if (key == "extra.completed_ids" && value is Set<*>) {
             val known = (ExtraPracticeData.passages.flatMap { p -> p.sentences.map { it.id } + p.id } +
                 ExtraPracticeData.exercises.flatMap { it.questions.map { q -> q.id } } +
                 HotelCurriculum.exercises.flatMap { it.questions.map { q -> q.id } }).toSet()

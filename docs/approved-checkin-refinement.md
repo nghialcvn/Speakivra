@@ -1,0 +1,9 @@
+# Approved check-in and picker refinement
+
+Approved reference: `exec-ee968a16-673b-4c6c-83ea-edffb3bb574c.png`, the three-screen profile-picker and before/after check-in demo. The user's subsequent approval also includes a cyan/blue/violet light sweep from left to right inside the Speakivra wordmark only; the symbol stands still.
+
+Profile heading uses visible logo bounds 668x518 at (50,36) of the existing 768x576 symbol. It displays at 64dp high beside the tightly cropped wordmark at 32dp high, preserving the 2:1 ratio. A six-second infinite transition sweeps for 3.6 seconds and pauses outside the letters for 2.4 seconds. SrcAtop on an offscreen wordmark layer keeps the colours inside the glyph alpha; leaving the picker disposes the animation. Fixed phases are available only through an internal composition local for deterministic image review.
+
+Home removes the separate brand heading. Light/dark check-in uses a single uniform gray strip, no flame tile, purple/gray round beads and a tick on today's completed bead. A smaller cutout avatar has fingers overlapping the strip edge. Its horizontal centre matches the enlarged low-opacity watermark. The existing circular portraits remain in the profile picker. The distinct Neon home check-in retains its prior presentation.
+
+The six-character gripping atlas preserves the six existing identities in 3x2 order. It was derived using the built-in image tool from the existing profile atlas and approved hand-grip pose, with a transparent background and no circular frames. Prompt: 'Same six people, same order and clothes, clean head/upper-body cutouts; both hands curled over an invisible horizontal ledge at the same height in each equal cell; no text, circles, backgrounds, shadows or glow.' The production WebP is resized to 1152x768 for bundled use. The virtual ledge is at 91% of each cell's height. No profile or check-in data schema changes.

@@ -51,8 +51,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Spacer(Modifier.weight(1f))
-            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra",
-                Modifier.size(112.dp))
+            PickerBrandHeading()
             Text("Ai học hôm nay?", fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold)
             Text("Lần đầu sử dụng Speakivra, hãy tạo hồ sơ để bắt đầu.",
@@ -80,7 +79,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
         onContinue = { reminderId = null; onStart(pending) })
     Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.align(Alignment.CenterHorizontally).size(112.dp))
+            PickerBrandHeading()
             Spacer(Modifier.height(8.dp))
             Text("Ai học hôm nay?", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.CenterHorizontally))
             Text("Chọn hồ sơ để tiếp tục", color = p.muted, modifier = Modifier.align(Alignment.CenterHorizontally))

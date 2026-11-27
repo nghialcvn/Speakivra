@@ -178,7 +178,6 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(if (p == NeonStudio) 16.dp else 14.dp)) {
-        if (p != NeonStudio) Brand()
         DailyCheckInCard(learner, preferences, onProfile)
         Text("Hôm nay, mình cùng luyện nói nhé.", color = if (p == NeonStudio) p.muted else p.ink,
             fontWeight = if (p == NeonStudio) FontWeight.Normal else FontWeight.Bold, fontSize = 14.sp)

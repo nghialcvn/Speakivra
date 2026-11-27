@@ -1,7 +1,9 @@
 package com.nghialcvn.speakivra
 
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
@@ -13,7 +15,10 @@ import java.util.UUID
 /** Isolated local ownership fixtures; no cloud claim or account login is simulated. */
 @RunWith(AndroidJUnit4::class)
 class GuestLinkReminderUiTest {
-    @get:Rule val ui = createComposeRule()
+    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    private fun show(content: @Composable () -> Unit) {
+        ui.runOnUiThread { ui.activity.setContent(content = content) }
+    }
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val store get() = LearnerStore(context)
     private fun person(name: String) = Learner(UUID.randomUUID().toString(), name, 0)
@@ -23,7 +28,7 @@ class GuestLinkReminderUiTest {
         prefs.edit().putInt("lesson.greetings.phrase", 2).commit()
         val before = prefs.all.toMap()
         var started: Learner? = null
-        ui.setContent { SpeakivraTheme(false) {
+        show { SpeakivraTheme(false) {
             LearnerPicker(store, listOf(learner), learner.id, {}, { started = it })
         } }
         ui.onNodeWithText("Bắt đầu học").performClick()
@@ -45,7 +50,7 @@ class GuestLinkReminderUiTest {
         val selected = person("Linh")
         var linked: Learner? = null
         var started = false
-        ui.setContent { SpeakivraTheme(false) {
+        show { SpeakivraTheme(false) {
             LearnerPicker(store, listOf(first, selected), first.id, {}, { started = true },
                 onLink = { linked = it })
         } }
@@ -62,7 +67,7 @@ class GuestLinkReminderUiTest {
         val identity = identities.ensure(owned)
         identities.recordServerReceipt(owned, GuestClaimReceipt(identity.profileId, "test-owner"), "test-owner")
         var started: Learner? = null
-        ui.setContent { SpeakivraTheme(false) {
+        show { SpeakivraTheme(false) {
             LearnerPicker(store, listOf(owned, guest), owned.id, {}, { started = it })
         } }
         ui.onNodeWithText("Bắt đầu học").performClick()

@@ -46,9 +46,10 @@ internal fun SingleLineInfo(text: String, modifier: Modifier = Modifier,
 @Composable
 internal fun AchievementSummary(total: Int, modifier: Modifier = Modifier,
                                 fontSize: TextUnit = 13.sp,
-                                fontWeight: FontWeight = FontWeight.Bold) {
+                                fontWeight: FontWeight = FontWeight.Bold,
+                                horizontalArrangement: Arrangement.Horizontal = Arrangement.Center) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center) {
+        horizontalArrangement = horizontalArrangement) {
         SingleLineInfo("Thành tích đã đạt: $total", Modifier.weight(1f, fill = false),
             fontSize = fontSize, fontWeight = fontWeight)
         Spacer(Modifier.width(5.dp))

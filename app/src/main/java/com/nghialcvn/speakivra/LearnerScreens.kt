@@ -88,6 +88,23 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                 val learnerPrefs = store.preferences(learner)
                 val chineseProgress = remember(learner.id) { ChineseProgress(learnerPrefs) }
                 var language by remember(learner.id) { mutableStateOf(savedStudyLanguage(learnerPrefs)) }
+                var revision by remember(learner.id) { mutableIntStateOf(0) }
+                DisposableEffect(learner.id, learnerPrefs) {
+                    val refresh = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                        if (key == "study_language") language = savedStudyLanguage(learnerPrefs)
+                        revision++
+                    }
+                    learnerPrefs.registerOnSharedPreferenceChangeListener(refresh)
+                    val sync = AccountRuntime.get(context).watch(learner)
+                    language = savedStudyLanguage(learnerPrefs)
+                    onDispose {
+                        learnerPrefs.unregisterOnSharedPreferenceChangeListener(refresh)
+                        learnerPrefs.unregisterOnSharedPreferenceChangeListener(sync)
+                    }
+                }
+                val diamonds = remember(learner.id, revision) {
+                    TopicAchievements(learnerPrefs).total() + ChineseCurriculum.topics.sumOf { chineseProgress.diamonds(it) }
+                }
                 Column(Modifier.fillMaxWidth().then(if (p == NeonStudio) Modifier.neonGlass(18, chosen)
                     else Modifier.clip(RoundedCornerShape(18.dp))
                         .background(if (chosen) p.peach.copy(alpha = .35f) else p.card)
@@ -101,9 +118,8 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                                 Text(learner.name, Modifier.weight(1f, fill = false), maxLines = 2, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                                 LearnerAccountMark(learner)
                             }
-                            AchievementSummary(TopicAchievements(learnerPrefs).total() +
-                                ChineseCurriculum.topics.sumOf { chineseProgress.diamonds(it) },
-                                fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                            AchievementSummary(diamonds,
+                                fontSize = 12.sp, fontWeight = FontWeight.Normal, horizontalArrangement = Arrangement.Start)
                         }
                     }
                     Text("Chọn ngôn ngữ học", Modifier.align(Alignment.CenterHorizontally), fontWeight = FontWeight.Bold)

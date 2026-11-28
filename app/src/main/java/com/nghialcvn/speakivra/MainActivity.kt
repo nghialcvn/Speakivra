@@ -163,7 +163,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     if (choosingLanguage && active != null) {
         val appearance = context.getSharedPreferences("speakivra_progress", 0)
         SpeakivraTheme(appearance.getBoolean("dark_theme", false), neon = appearance.getBoolean("neon_theme", false)) {
-            StudyLanguageDialog(studyLanguage ?: StudyLanguage.ENGLISH,
+            StudyLanguageDialog(studyLanguage ?: savedStudyLanguage(store.preferences(active)),
                 onDismiss = { choosingLanguage = false }, onSelect = {
                     saveStudyLanguage(store.preferences(active), it)
                     studyLanguage = it; choosingLanguage = false; resumeLearning = false; entryPage = "home"
@@ -194,7 +194,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
             }
         } else if (active != null) {
             key(active.id, studyLanguage) {
-                LearnerApp(updates, active, studyLanguage!!, { choosingLanguage = true }, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; studyLanguage = savedStudyLanguage(store.preferences(selected)); activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                LearnerApp(updates, active, studyLanguage ?: savedStudyLanguage(store.preferences(active)), { choosingLanguage = true }, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; studyLanguage = savedStudyLanguage(store.preferences(selected)); activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }

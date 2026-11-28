@@ -23,7 +23,11 @@ internal fun StudyLanguageBar(language: StudyLanguage, onSwitch: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Surface(onClick = onSwitch, modifier = Modifier.testTag("study-language-flag"), color = studio.peach, shape = RoundedCornerShape(50)) {
-            Text(language.flag() + " ⌄", Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                StudyLanguageFlag(language, Modifier.size(20.dp))
+                Text("⌄", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            }
         }
         TextButton(onClick = onSwitch, modifier = Modifier.testTag("switch-study-language")) { Text("Đổi ngôn ngữ") }
     }

@@ -55,7 +55,7 @@ class ChineseCourseFlowTest {
     }
     @Test fun languageSelectionAndBothLevelsUseRealCounts() {
         render(chinese = false)
-        ui.onNodeWithText("🇺🇸 ⌄").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Tiếng Anh").assertIsDisplayed()
         ui.onNodeWithText("A1 • Cơ bản").assertIsDisplayed()
         ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()

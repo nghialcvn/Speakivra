@@ -61,6 +61,7 @@ class AccountDraftFlowTest {
         ui.startLocalStudy()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
         ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
+        ui.waitUntil(10000) { ui.onAllNodesWithText(identity.serial).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText(identity.serial).performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Hồ sơ khách • Chưa liên kết").assertExists()
         shot("80-guest-profile-serial")

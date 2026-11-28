@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,7 +34,6 @@ internal fun savedStudyLanguage(prefs: SharedPreferences): StudyLanguage =
 internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage) {
     prefs.edit().putString("study_language", language.name).apply()
 }
-internal fun StudyLanguage.flag() = if (this == StudyLanguage.ENGLISH) "🇺🇸" else "🇨🇳"
 
 @Composable internal fun ProfileSplashScreen() {
     val shine = rememberBrandSweepPhase()
@@ -62,8 +62,8 @@ internal fun StudyLanguage.flag() = if (this == StudyLanguage.ENGLISH) "🇺🇸
             Box(Modifier.size(48.dp).border(if (selected == language) 2.dp else 1.dp,
                 if (selected == language) studio.purple else studio.border, RoundedCornerShape(12.dp))
                 .then(if (selected == language) Modifier.border(2.dp, Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), RoundedCornerShape(12.dp)) else Modifier)
-                .clickable { onSelect(language) }.testTag(if (language == StudyLanguage.ENGLISH) "language-en" else "language-zh").semantics { contentDescription = language.label }, Alignment.Center) {
-                Text(language.flag(), fontSize = 27.sp)
+                .clickable { onSelect(language) }.testTag(if (language == StudyLanguage.ENGLISH) "language-en" else "language-zh").semantics { this.selected = selected == language }, Alignment.Center) {
+                StudyLanguageFlag(language, Modifier.size(32.dp))
             }
         }
         Box(Modifier.size(48.dp).border(1.dp, studio.border, RoundedCornerShape(12.dp))

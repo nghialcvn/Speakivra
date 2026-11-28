@@ -95,6 +95,9 @@ jobs:
         if: true
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
+          # Pin the previous patched stable engine while investigating native
+          # RenderThread exits in 37.3.10. Keep SwiftShader, Vulkan off and every test.
+          emulator-build: 16740729 # 37.2.13
           api-level: 35
           target: google_apis
           arch: x86_64

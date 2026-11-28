@@ -18,6 +18,8 @@ collect() {
     adb devices -l > ui-diagnostics/adb-devices-final.txt 2>&1
     free -m > ui-diagnostics/host-memory-final.txt
     sudo dmesg -T > ui-diagnostics/host-kernel.txt 2>&1
+    cp -a /tmp/android-runner/emu-crash-* ui-diagnostics/ 2>/dev/null || true
+    ps -eo pid,ppid,stat,rss,args > ui-diagnostics/host-processes-final.txt
     if [[ "$(adb get-state 2>/dev/null)" == device ]]; then
         adb logcat -d -v threadtime > ui-diagnostics/logcat-final.txt 2>&1
         adb shell dumpsys meminfo > ui-diagnostics/device-memory-final.txt 2>&1

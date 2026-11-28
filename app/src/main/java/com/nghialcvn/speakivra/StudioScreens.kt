@@ -675,7 +675,7 @@ internal fun wordFeedback(text: String, result: WordMatch?): androidx.compose.ui
 }
 
 @Composable
-internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = null, reference: String? = null, footer: (@Composable () -> Unit)? = null) {
+internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = null, reference: String? = null, highlighted: androidx.compose.ui.text.AnnotatedString? = null, footer: (@Composable () -> Unit)? = null) {
     val p = studio
     val replay = LocalSpeechReplay.current
     Column(Modifier.fillMaxWidth()
@@ -690,7 +690,7 @@ internal fun SpokenResult(learner: Learner, text: String, passed: Boolean? = nul
         }
         val display = text.ifBlank { "Chưa có lời nói nhận dạng" }
         val words = if (passed != null && reference != null && text.isNotBlank()) matchWords(text, reference) else null
-        Text(wordFeedback(display, words), fontSize = if (p == NeonStudio) 14.sp else 15.sp,
+        Text(highlighted ?: wordFeedback(display, words), fontSize = if (p == NeonStudio) 14.sp else 15.sp,
             fontStyle = if (p == NeonStudio) FontStyle.Italic else FontStyle.Normal,
             fontWeight = if (p == NeonStudio) FontWeight.Normal else FontWeight.Bold,
             lineHeight = 20.sp, modifier = Modifier.weight(1f))

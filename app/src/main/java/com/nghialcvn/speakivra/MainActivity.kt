@@ -143,7 +143,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
             ChineseCurriculum.topics
             learners.forEach { store.preferences(it).getString("study_language", null) }
         }
-        kotlinx.coroutines.delay(1500)
+        kotlinx.coroutines.delay(5000)
         ready.await()
         splashFinished = true
     }

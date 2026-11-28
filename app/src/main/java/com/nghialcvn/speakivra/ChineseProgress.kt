@@ -4,6 +4,16 @@ import android.content.SharedPreferences
 
 internal data class ChineseResume(val mode: String, val packId: String, val index: Int)
 
+/** Same retained/current reward rule, without running the progress migration on a picker read. */
+internal fun chineseSummaryDiamonds(prefs: SharedPreferences, topic: ChineseTopic): Int {
+    val key = "lesson.${topic.id}.diamonds_earned"
+    val achievements = TopicAchievements(prefs)
+    val retained = if (prefs.contains(key)) prefs.getInt(key, 0)
+        else ChineseStarterCurriculum.topics.firstOrNull { it.id == topic.id }
+            ?.let { achievements.hearts(it.lesson) } ?: 0
+    return maxOf(retained, achievements.hearts(topic.lesson))
+}
+
 /** Reuse the existing profile file and cloud whitelist, with unique zh_ lesson/content IDs. */
 internal class ChineseProgress(private val prefs: SharedPreferences) {
     init {

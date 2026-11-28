@@ -40,11 +40,50 @@ internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.startLocalSt
     }
 }
 
-/** Legacy English journeys still enter through the public language selector. */
+/** Wait for local startup readiness before entering an existing learner journey. */
 internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.selectEnglishAreaIfNeeded() {
-    waitForIdle()
-    if (onAllNodesWithTag("language-en").fetchSemanticsNodes().isNotEmpty()) {
-        onNodeWithTag("language-en").performClick()
-        onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
+    waitUntil(10000) { onAllNodesWithText("Ai học hôm nay?").fetchSemanticsNodes().isNotEmpty() }
+    onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
+}
+
+/** Capture the real display without Compose's two-second force-redraw/PixelCopy path. */
+internal fun captureNativeDisplay(): android.graphics.Bitmap {
+    val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+    instrumentation.waitForIdleSync()
+    dismissUnrelatedLauncherAnr(instrumentation)
+    // Compose instrumentation may disable HardwareRenderer drawing between checks.
+    // Match AndroidX's withDrawingEnabled contract, but wait for the real frame
+    // commit and capture the display (including dialog windows) instead of PixelCopy.
+    val enabled = androidx.test.platform.graphics.HardwareRendererCompat.isDrawingEnabled()
+    try {
+        androidx.test.platform.graphics.HardwareRendererCompat.setDrawingEnabled(true)
+        val committed = java.util.concurrent.CountDownLatch(1)
+        instrumentation.runOnMainSync {
+            val windows = android.view.inspector.WindowInspector.getGlobalWindowViews()
+                .filter { it.isShown && it.isAttachedToWindow }
+            check(windows.isNotEmpty()) { "No visible review window" }
+            windows.last().viewTreeObserver.registerFrameCommitCallback { committed.countDown() }
+            windows.forEach { it.requestLayout(); it.invalidate() }
+        }
+        check(committed.await(10, java.util.concurrent.TimeUnit.SECONDS)) { "Android did not commit the review frame" }
+        // Frame commit submits the buffer; allow SurfaceFlinger to latch it on
+        // the next display tick before capturing the physical display.
+        android.os.SystemClock.sleep(100)
+        return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+    } finally {
+        androidx.test.platform.graphics.HardwareRendererCompat.setDrawingEnabled(enabled)
     }
+}
+
+/** Keep pixel assertions scoped to the same visible node, using display coordinates. */
+internal fun SemanticsNodeInteraction.captureDeviceRegion(): android.graphics.Bitmap {
+    val bounds = fetchSemanticsNode().boundsInWindow
+    val screen = captureNativeDisplay()
+    val left = bounds.left.toInt().coerceIn(0, screen.width - 1)
+    val top = bounds.top.toInt().coerceIn(0, screen.height - 1)
+    val width = bounds.width.toInt().coerceIn(1, screen.width - left)
+    val height = bounds.height.toInt().coerceIn(1, screen.height - top)
+    val cropped = android.graphics.Bitmap.createBitmap(screen, left, top, width, height)
+    if (cropped !== screen) screen.recycle()
+    return cropped
 }

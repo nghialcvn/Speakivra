@@ -85,25 +85,48 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             Text("Chọn hồ sơ để tiếp tục", color = p.muted, modifier = Modifier.align(Alignment.CenterHorizontally))
             learners.forEach { learner ->
                 val chosen = learner.id == selected
-                val (done, total) = store.learned(learner)
-                Row(Modifier.fillMaxWidth().then(if (p == NeonStudio) Modifier.neonGlass(18, chosen)
+                val learnerPrefs = store.preferences(learner)
+                var language by remember(learner.id) { mutableStateOf(savedStudyLanguage(learnerPrefs)) }
+                var revision by remember(learner.id) { mutableIntStateOf(0) }
+                DisposableEffect(learner.id, learnerPrefs) {
+                    val refresh = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                        if (key == "study_language") language = savedStudyLanguage(learnerPrefs)
+                        revision++
+                    }
+                    learnerPrefs.registerOnSharedPreferenceChangeListener(refresh)
+                    val sync = AccountRuntime.get(context).watch(learner)
+                    language = savedStudyLanguage(learnerPrefs)
+                    onDispose {
+                        learnerPrefs.unregisterOnSharedPreferenceChangeListener(refresh)
+                        learnerPrefs.unregisterOnSharedPreferenceChangeListener(sync)
+                    }
+                }
+                val diamonds = remember(learner.id, revision) {
+                    TopicAchievements(learnerPrefs).total() + ChineseCurriculum.topics.sumOf { chineseSummaryDiamonds(learnerPrefs, it) }
+                }
+                Column(Modifier.fillMaxWidth().then(if (p == NeonStudio) Modifier.neonGlass(18, chosen)
                     else Modifier.clip(RoundedCornerShape(18.dp))
                         .background(if (chosen) p.peach.copy(alpha = .35f) else p.card)
                         .border(if (chosen) 1.5.dp else 1.dp, if (chosen) p.coral else p.border, RoundedCornerShape(18.dp)))
                     .clickable(role = Role.RadioButton) { selected = learner.id }.semantics { this.selected = chosen }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    LearnerAvatar(learner.avatar, Modifier.size(112.dp).clickable(role = Role.Button) { onResume(learner) }
-                        .semantics { contentDescription = "Tiếp tục học với ${learner.name}" })
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                        Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-                        GuestIdentityLabel(learner)
-                        StudioProgress(done.toFloat() / total)
-                        SingleLineInfo("Đã học $done/$total câu • ${done * 100 / total}%", fontSize = 12.sp, color = p.muted)
-                        AchievementSummary(TopicAchievements(store.preferences(learner)).total(),
-                            fontSize = 12.sp, fontWeight = FontWeight.Normal)
-                        Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { onResume(learner) },
-                            contentAlignment = Alignment.CenterStart) {
-                            SingleLineInfo("Tiếp tục bài học ›", color = p.coral, fontSize = 14.sp)
+                    .padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        LearnerAvatar(learner.avatar, Modifier.size(72.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(learner.name, Modifier.weight(1f, fill = false), maxLines = 2, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                                LearnerAccountMark(learner)
+                            }
+                            AchievementSummary(diamonds,
+                                fontSize = 12.sp, fontWeight = FontWeight.Normal, horizontalArrangement = Arrangement.Start)
+                        }
+                    }
+                    Text("Chọn ngôn ngữ học", Modifier.align(Alignment.CenterHorizontally), fontWeight = FontWeight.Bold)
+                    Box(Modifier.align(Alignment.CenterHorizontally)) {
+                        StudyLanguageTiles(language) {
+                            language = it
+                            saveStudyLanguage(learnerPrefs, it)
+                            selected = learner.id
                         }
                     }
                 }
@@ -113,7 +136,6 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             }
         }
         TextButton(onClick = onAccount, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Tài khoản & đồng bộ") }
-        Text("Không cần mật khẩu • Tiến độ lưu riêng trên máy", color = p.muted, fontSize = 12.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
         CoralButton("Bắt đầu học", onClick = {
             learners.firstOrNull { it.id == selected }?.let { learner ->
                 // A signed-in session alone is not proof that this learner is linked.

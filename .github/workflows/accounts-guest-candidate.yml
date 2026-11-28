@@ -1,7 +1,7 @@
 name: Verify Spark accounts and guest identity
 on:
   push:
-    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126, feat/chinese-a1-a2-v127, feat/separate-language-full-chinese-v128, feat/approved-entry-typography-v129]
+    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126, feat/chinese-a1-a2-v127, feat/separate-language-full-chinese-v128, feat/approved-entry-typography-v129, feat/profile-first-v130]
   workflow_dispatch:
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -95,6 +95,9 @@ jobs:
         if: true
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
+          # Pin the previous patched stable engine while investigating native
+          # RenderThread exits in 37.3.10. Keep SwiftShader, Vulkan off and every test.
+          emulator-build: 16740729 # 37.2.13
           api-level: 35
           target: google_apis
           arch: x86_64

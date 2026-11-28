@@ -32,7 +32,7 @@ class ChineseCourseFlowTest {
                 CompositionLocalProvider(LocalDensity provides Density(density, font)) {
                     Surface(color = studio.background, contentColor = studio.ink) {
                         var selected by remember { mutableStateOf<StudyLanguage?>(if (chinese) StudyLanguage.CHINESE else StudyLanguage.ENGLISH) }
-                        if (selected == null) LanguageEntryScreen { selected = it }
+                        if (selected == null) StudyLanguageDialog(StudyLanguage.CHINESE, {}, { selected = it })
                         else Column(Modifier.fillMaxSize()) {
                             StudyLanguageBar(selected!!) { selected = null }
                             Box(Modifier.weight(1f)) {
@@ -47,7 +47,7 @@ class ChineseCourseFlowTest {
     }
     private fun shot(name: String) {
         ui.waitForIdle()
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = captureNativeDisplay()
         val path = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         path.parentFile!!.mkdirs()
         path.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -55,7 +55,7 @@ class ChineseCourseFlowTest {
     }
     @Test fun languageSelectionAndBothLevelsUseRealCounts() {
         render(chinese = false)
-        ui.onNodeWithText("Tiếng Anh ⌄").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Tiếng Anh").assertIsDisplayed()
         ui.onNodeWithText("A1 • Cơ bản").assertIsDisplayed()
         ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()

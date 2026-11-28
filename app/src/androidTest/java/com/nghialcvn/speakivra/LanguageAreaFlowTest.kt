@@ -43,19 +43,18 @@ class LanguageAreaFlowTest {
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private fun shot(name: String) {
         ui.waitForIdle()
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = captureNativeDisplay()
         val path = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         path.parentFile!!.mkdirs()
         path.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }
     @Test fun actualStartupSeparatesAreasAndKeepsSharedProfileAttendanceAndBothResumes() {
-        ui.onNodeWithText("Hôm nay bạn muốn học gì?").assertIsDisplayed()
+        ui.selectEnglishAreaIfNeeded()
         shot("170-language-entry-approved")
-        ui.onNodeWithTag("language-en").performClick()
         ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Tiếng Anh ⌄").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Tiếng Anh").assertIsDisplayed()
         ui.onNodeWithText("Chào Nghia!").assertIsDisplayed()
         ui.onNodeWithText("Câu 4/20").assertIsDisplayed()
         shot("171-english-area-home-approved")
@@ -64,7 +63,7 @@ class LanguageAreaFlowTest {
         val days = prefs.getStringSet(CHECK_IN_DATES, emptySet())!!.toSet()
         ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()
-        ui.onNodeWithText("Tiếng Trung ⌄").assertIsDisplayed()
+        ui.onNodeWithContentDescription("Tiếng Trung").assertIsDisplayed()
         ui.onNodeWithText("Chào Nghia!").assertIsDisplayed()
         ui.onNodeWithText("Câu 4/20").assertIsDisplayed()
         ui.onNodeWithText("认识新朋友").assertIsDisplayed()

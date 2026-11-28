@@ -29,8 +29,7 @@ class FreshInstallLearnerTest {
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
 
     @Test fun cleanInstallRequiresUserToCreateRealProfile() {
-        ui.onNodeWithText("Hôm nay bạn muốn học gì?").assertIsDisplayed()
-        ui.onNodeWithTag("language-en").performClick()
+        ui.selectEnglishAreaIfNeeded()
         ui.onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
         ui.onNodeWithText("Chưa có hồ sơ người học").assertIsDisplayed()
         ui.onNodeWithText("Nghĩa", substring = false).assertDoesNotExist()
@@ -38,6 +37,7 @@ class FreshInstallLearnerTest {
         ui.onNodeWithText("Tạo hồ sơ", substring = false).assertIsDisplayed()
         ui.onNode(hasSetTextAction()).performTextInput("Lan")
         ui.onNodeWithText("Lưu và bắt đầu").performClick()
+        ui.startLocalStudy()
         ui.onNodeWithText("Chào Lan!").assertIsDisplayed()
         val registry = LearnerStore(ui.activity).all()
         assertEquals(1, registry.size)

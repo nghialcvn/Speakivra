@@ -18,6 +18,8 @@ collect() {
     adb devices -l > ui-diagnostics/adb-devices-final.txt 2>&1
     free -m > ui-diagnostics/host-memory-final.txt
     sudo dmesg -T > ui-diagnostics/host-kernel.txt 2>&1
+    cp -a /tmp/android-runner/emu-crash-* ui-diagnostics/ 2>/dev/null || true
+    ps -eo pid,ppid,stat,rss,args > ui-diagnostics/host-processes-final.txt
     if [[ "$(adb get-state 2>/dev/null)" == device ]]; then
         adb logcat -d -v threadtime > ui-diagnostics/logcat-final.txt 2>&1
         adb shell dumpsys meminfo > ui-diagnostics/device-memory-final.txt 2>&1
@@ -28,8 +30,8 @@ collect() {
 trap collect EXIT
 free -m > ui-diagnostics/host-memory-start.txt
 adb wait-for-device
-adb shell wm size 864x1872
-adb shell wm density 336
+adb shell wm size 720x1560
+adb shell wm density 280
 adb shell wm size | tee ui-diagnostics/display.txt
 adb shell wm density | tee -a ui-diagnostics/display.txt
 adb install -r dist/*.apk
@@ -95,7 +97,7 @@ assert rows[6][0] == "EntryTypographyUiTest" and int(rows[6][1]) == 2, rows
 assert rows[7][0] == "ChineseCloudSyncIntegrationTest" and int(rows[7][1]) == 2, rows
 assert sum(int(count) for _, count in rows[8:]) >= 27, rows
 files = list(Path("ui-review").rglob("*.png"))
-missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 177)) + list(range(180, 185)) if not any(f.name.startswith(f"{n}-") for f in files)]
+missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 177)) + list(range(180, 185)) + list(range(190, 199)) if not any(f.name.startswith(f"{n}-") for f in files)]
 assert not missing, f"Missing required new screenshots: {missing}"
-print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all thirty-two review screenshots")
+print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all forty-one review screenshots")
 PY

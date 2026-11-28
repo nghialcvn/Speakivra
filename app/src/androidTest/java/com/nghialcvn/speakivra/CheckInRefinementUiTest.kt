@@ -26,7 +26,7 @@ class CheckInRefinementUiTest {
     private val learner = Learner(ORIGINAL_LEARNER, "Nghĩa", 0)
     private fun shot(name: String) {
         ui.waitForIdle()
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = captureNativeDisplay()
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
     }
@@ -53,19 +53,19 @@ class CheckInRefinementUiTest {
         val logo = ui.onNodeWithTag("picker-brand-logo").fetchSemanticsNode().boundsInRoot
         val word = ui.onNodeWithTag("picker-brand-wordmark").fetchSemanticsNode().boundsInRoot
         assertEquals(2f, logo.height / word.height, .02f)
-        val first = ui.onNodeWithTag("picker-brand-wordmark").captureToImage().asAndroidBitmap()
-        val logoFirst = ui.onNodeWithTag("picker-brand-logo").captureToImage().asAndroidBitmap()
+        val first = ui.onNodeWithTag("picker-brand-wordmark").captureDeviceRegion()
+        val logoFirst = ui.onNodeWithTag("picker-brand-logo").captureDeviceRegion()
         shot("140-picker-shine-left")
         ui.runOnIdle { phase = .75f }
-        val second = ui.onNodeWithTag("picker-brand-wordmark").captureToImage().asAndroidBitmap()
-        val logoSecond = ui.onNodeWithTag("picker-brand-logo").captureToImage().asAndroidBitmap()
+        shot("141-picker-shine-right")
+        val second = ui.onNodeWithTag("picker-brand-wordmark").captureDeviceRegion()
+        val logoSecond = ui.onNodeWithTag("picker-brand-logo").captureDeviceRegion()
         assertTrue("Light band must move within the wordmark", !first.sameAs(second))
         assertTrue("Logo must stand still", logoFirst.sameAs(logoSecond))
         // The corners are outside the letter silhouettes and must keep the surface colour.
         assertEquals(first.getPixel(0, 0), second.getPixel(0, 0))
         assertEquals(first.getPixel(first.width - 1, first.height - 1), second.getPixel(second.width - 1, second.height - 1))
         first.recycle(); second.recycle(); logoFirst.recycle(); logoSecond.recycle()
-        shot("141-picker-shine-right")
     }
     @Test fun grayStripPersistsCheckInAndAvatarHandsOverlapItsTop() {
         val prefs = ui.activity.getSharedPreferences("checkin-refinement-test", 0)

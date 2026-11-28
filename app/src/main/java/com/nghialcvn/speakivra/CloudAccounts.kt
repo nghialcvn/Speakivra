@@ -70,7 +70,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
     }
     fun watch(learner: Learner): SharedPreferences.OnSharedPreferenceChangeListener {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (!applyingCloud && key != null && (key.startsWith("lesson.") || key.startsWith("achievement.") || key == "extra.completed_ids" || key == CHECK_IN_DATES || key == "active_lesson" || key == "zh.active_lesson") && identities.peek(learner)?.ownerUid == uid) {
+            if (!applyingCloud && key != null && (key.startsWith("lesson.") || key.startsWith("achievement.") || key == "extra.completed_ids" || key == CHECK_IN_DATES || key == "active_lesson" || key == "zh.active_lesson" || key == "study_language") && identities.peek(learner)?.ownerUid == uid) {
                 syncPrefs.edit().putBoolean("pending.${learner.id}", true).apply(); schedule()
             }
         }

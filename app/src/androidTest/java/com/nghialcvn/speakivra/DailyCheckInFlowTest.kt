@@ -56,7 +56,8 @@ class DailyCheckInFlowTest {
         ui.onNodeWithText("✓ Đã điểm danh").assertIsNotEnabled()
     }
     @Test fun resumeWorksByRealTouchAfterLeavingAndReturningToPicker() {
-        ui.onNodeWithText("Tiếp tục bài học ›").performTouchInput { click() }
+        ui.startLocalStudy()
+        ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithText(personalizeLesson(Lessons.a1.first(), "Nghĩa").phrases[2].english, substring = false).assertExists()
         ui.onNodeWithText("Cài đặt", substring = false).performClick()
@@ -64,27 +65,28 @@ class DailyCheckInFlowTest {
         ui.onNodeWithText("Chạm để mở một nhóm cài đặt. Nhóm trước tự thu lại.").assertIsDisplayed()
         ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Đổi người học").performScrollTo().performClick()
-        ui.onNodeWithContentDescription("Tiếp tục học với Nghĩa").performTouchInput { click() }
+        ui.startLocalStudy()
+        ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithText(personalizeLesson(Lessons.a1.first(), "Nghĩa").phrases[2].english, substring = false).assertExists()
         shot("112-profile-resumed")
     }
-    @Test fun linkedLabelFitsOneLineAndResumeActionHasATouchTarget() {
+    @Test fun linkedPickerRetainsIdentityAndOffersStartWithoutVerboseLabel() {
         val learner = Learner(ORIGINAL_LEARNER, "Nghĩa", 0)
-        val identities = GuestIdentityStore(ui.activity); val id = identities.ensure(learner)
+        val identities = GuestIdentityStore(ui.activity)
+        val id = identities.ensure(learner)
         identities.recordServerReceipt(learner, GuestClaimReceipt(id.profileId, "owner-test"), "owner-test")
-        var resumed = false
+        var started = false
         ui.runOnUiThread { ui.activity.setContent { SpeakivraTheme(false) {
-            LearnerPicker(LearnerStore(ui.activity), listOf(learner), learner.id, {}, {}, onResume = { resumed = true })
+            LearnerPicker(LearnerStore(ui.activity), listOf(learner), learner.id, {}, { started = true })
         } } }
-        val text = "Hồ sơ đã liên kết tài khoản"
-        ui.waitUntil(10000) { ui.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
-        val results = mutableListOf<TextLayoutResult>()
-        ui.onNodeWithText(text, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
+        ui.onNodeWithText("Hồ sơ đã liên kết tài khoản").assertDoesNotExist()
+        ui.onNodeWithText(id.serial).assertDoesNotExist()
+        ui.onNodeWithText("Chọn ngôn ngữ học").assertIsDisplayed()
         shot("113-profile-linked-single-line")
-        Assert.assertEquals(1, results.single().lineCount)
-        Assert.assertFalse("Label overflow: width=${results.single().didOverflowWidth}, height=${results.single().didOverflowHeight}, size=${results.single().size}, input=${results.single().layoutInput}", results.single().hasVisualOverflow)
-        ui.onNodeWithText("Tiếp tục bài học ›").performTouchInput { click() }
-        ui.runOnIdle { Assert.assertTrue(resumed) }
+        ui.onNodeWithText("Bắt đầu học").performClick()
+        ui.runOnIdle { Assert.assertTrue(started) }
+        Assert.assertEquals("owner-test", identities.peek(learner)?.ownerUid)
+        Assert.assertEquals(id.profileId, identities.peek(learner)?.profileId)
     }
 }

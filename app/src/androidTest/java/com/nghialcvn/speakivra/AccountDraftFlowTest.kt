@@ -57,13 +57,22 @@ class AccountDraftFlowTest {
         Assert.assertEquals(1, concurrent.toSet().size)
         val identity = identityStore.ensure(person)
         Assert.assertEquals(concurrent.first(), identity)
+        Assert.assertEquals(before, store.preferences(person).all)
+        ui.onNodeWithText(identity.serial).assertDoesNotExist()
+        ui.startLocalStudy()
+        ui.onNodeWithText("Cài đặt", substring = false).performClick()
+        ui.onNodeWithText("Hồ sơ", substring = false).performScrollTo().performClick()
         ui.waitUntil(10000) { ui.onAllNodesWithText(identity.serial).fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText(identity.serial).performScrollTo().assertIsDisplayed()
         ui.onNodeWithText("Hồ sơ khách • Chưa liên kết").assertExists()
         shot("80-guest-profile-serial")
         Assert.assertEquals(identity, GuestIdentityStore(ui.activity).ensure(person))
         store.update(person.id, "Nghĩa An", 3)
         Assert.assertEquals(identity, identityStore.ensure(store.all().single()))
-        Assert.assertEquals(before, store.preferences(person).all)
+        // The serial now lives in profile details. Entering study also runs the
+        // existing playback calibration; identity creation itself was checked above.
+        Assert.assertEquals(before + mapOf("playback_speed" to 100, "speed_calibration" to 2),
+            store.preferences(person).all)
         val proof = identityStore.proof(person, "account-A")
         Assert.assertEquals(identity.profileId, guestProfileId(proof))
         Assert.assertEquals(64, proof.size)

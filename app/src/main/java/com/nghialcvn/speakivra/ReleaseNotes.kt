@@ -3,6 +3,9 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.3.3" to listOf(
+            "speaker" to "Micro minh họa 3D cho màn luyện nói tiếng Anh và tiếng Trung",
+            "layers" to "Năm biểu tượng điều hướng phóng lớn và sáng lên khi chọn"),
         "1.3.2" to listOf(
             "speaker" to "Phần luyện nói tiếng Trung hiển thị chữ nhận dạng, tỷ lệ khớp và mẹo khi cần nói lại",
             "layers" to "Màn chào giữ slogan ít nhất 5 giây trước khi chuyển trang"),

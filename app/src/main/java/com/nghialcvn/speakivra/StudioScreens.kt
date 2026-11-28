@@ -1,5 +1,7 @@
 package com.nghialcvn.speakivra
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -147,11 +149,11 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
         .padding(horizontal = 4.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceEvenly) {
         listOf(
-            Triple("home", "home", "Trang chủ"),
-            Triple("lessons", "book", "Bài học"),
-            Triple("repeat", "tab-mic", "Luyện nói"),
-            Triple("progress", "progress", "Tiến độ"),
-            Triple("profile", "settings", "Cài đặt")
+            Triple("home", R.drawable.studio_tab_home, "Trang chủ"),
+            Triple("lessons", R.drawable.studio_tab_book, "Bài học"),
+            Triple("repeat", R.drawable.studio_tab_mic, "Luyện nói"),
+            Triple("progress", R.drawable.studio_tab_progress, "Tiến độ"),
+            Triple("profile", R.drawable.studio_tab_settings, "Cài đặt")
         ).forEach { (id, icon, label) ->
             val selected = active == id
             Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
@@ -160,10 +162,20 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
                 .padding(vertical = 5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (icon == "tab-mic" && p == NeonStudio) {
-                    NeonVintageTabMicrophone(Modifier.size(24.dp))
-                } else StudioIcon(if (selected && icon == "home" && p != NeonStudio) "home-filled" else icon, Modifier.size(22.dp),
-                    if (selected) brandNavigationAccent(p) else p.muted)
+                val emphasis by animateFloatAsState(
+                    targetValue = if (selected) 1f else 0f,
+                    animationSpec = tween(180), label = "Tab emphasis"
+                )
+                Box(Modifier.size(width = 56.dp, height = 42.dp), contentAlignment = Alignment.BottomCenter) {
+                    Box(Modifier.fillMaxSize().background(Brush.radialGradient(
+                        listOf(BrandLook.cyan.copy(alpha = .32f * emphasis), Color.Transparent))))
+                    Image(painterResource(icon), contentDescription = null,
+                        modifier = Modifier.size((27 + 15 * emphasis).dp),
+                        alpha = .68f + .32f * emphasis,
+                        colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                            setToSaturation(.40f + .60f * emphasis)
+                        }))
+                }
                 Text(label, color = if (selected) brandNavigationAccent(p) else p.ink,
                     fontSize = 10.sp, maxLines = 1,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
@@ -410,6 +422,20 @@ internal fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier 
     }
 }
 @Composable
+internal fun IllustratedRecordingButton(onClick: () -> Unit, active: Boolean) {
+    Box(Modifier.size(110.dp).clip(CircleShape)
+        .clickable(role = Role.Button, onClick = onClick)
+        .semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" },
+        contentAlignment = Alignment.Center) {
+        Image(painterResource(R.drawable.studio_record_mic), null, Modifier.fillMaxSize())
+        if (active) Box(Modifier.size(38.dp).background(Color(0xDD101A36), CircleShape),
+            contentAlignment = Alignment.Center) {
+            Box(Modifier.size(18.dp).background(Color.White, RoundedCornerShape(4.dp)))
+        }
+    }
+}
+
+@Composable
 internal fun Microphone(onClick: () -> Unit, modifier: Modifier = Modifier, large: Boolean = false, active: Boolean = false) {
     val size = if (large) 96.dp else 64.dp
     Box(modifier.size(size + 14.dp).background(studio.peach.copy(alpha = 0.7f), CircleShape).padding(7.dp)
@@ -498,7 +524,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    DecorativeWave(); Microphone(onSpeak, large = true, active = capturePhase == "listening"); DecorativeWave()
+                    IllustratedRecordingButton(onSpeak, active = capturePhase == "listening")
                 }
                 Text(captureLabel(capturePhase, if (wordMatch.hasResult) "Chạm để nói lại" else "Chạm để nói"), fontSize = 15.sp, color = p.muted)
             }

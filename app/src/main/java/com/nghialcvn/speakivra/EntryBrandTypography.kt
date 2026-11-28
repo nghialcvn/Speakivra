@@ -36,20 +36,10 @@ internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.d
                 Modifier.fillMaxWidth().height(height).offset(x = (-depth * .5f).dp, y = depth.dp),
                 colorFilter = ColorFilter.tint(if (depth == 3) Color(0xFF32116A) else Color(0xFF6022D8)))
         }
-        Image(painterResource(R.drawable.brand_wordmark), "Speakivra",
-            Modifier.fillMaxWidth().height(height).testTag(tag)
-                .brandMask {
-                    drawRect(Brush.verticalGradient(if (light) listOf(
-                        Color(0xFF101744), Color(0xFF253264), Color(0xFF101744)) else listOf(
-                        Color.White, Color(0xFFDDE4F4), Color.White, Color(0xFFB8C5DD))),
-                        blendMode = BlendMode.SrcAtop)
-                    val center = size.width * phase.value
-                    drawRect(Brush.horizontalGradient(listOf(Color.Transparent,
-                        Color(0xFF00D5E5).copy(alpha = .7f), Color(0xFF70BFFF).copy(alpha = .6f),
-                        Color(0xFFB75CFF).copy(alpha = .65f), Color.Transparent),
-                        startX = center - size.width * .18f, endX = center + size.width * .18f),
-                        blendMode = BlendMode.SrcAtop)
-                })
+        BrandSweepArtwork(R.drawable.brand_wordmark, "Speakivra",
+            Modifier.fillMaxWidth().height(height).testTag(tag), phase,
+            if (light) listOf(Color(0xFF101744), Color(0xFF253264), Color(0xFF101744))
+            else listOf(Color.White, Color(0xFFDDE4F4), Color.White, Color(0xFFB8C5DD)))
     }
 }
 
@@ -67,13 +57,39 @@ internal fun rememberBrandSweepPhase(cycleMillis: Int = 6000): State<Float> {
     } else rememberUpdatedState(fixed)
 }
 
-internal fun Modifier.brandShine(phase: State<Float>): Modifier =
-    brandMask {
-        val center = size.width * phase.value
-        drawRect(Brush.horizontalGradient(listOf(Color.Transparent, Color(0xFF00D5E5).copy(alpha = .45f),
-            Color(0xFF70BFFF).copy(alpha = .45f), Color(0xFFB75CFF).copy(alpha = .45f), Color.Transparent),
-            startX = center - size.width * .18f, endX = center + size.width * .18f), blendMode = BlendMode.SrcAtop)
+/** Rasterize the small brand artwork before uploading it. This avoids emulator
+ * GLES alpha-layer readback crashes while retaining the original transparent mask. */
+@Composable
+internal fun BrandSweepArtwork(resource: Int, description: String?, modifier: Modifier,
+    phase: State<Float>, face: List<Color>? = null) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val source = remember(resource) { android.graphics.BitmapFactory.decodeResource(context.resources, resource) }
+    // Quantize the sweep, avoiding redundant bitmap uploads during the pause.
+    val frame = (phase.value * 100).toInt()
+    val bitmap = remember(source, frame, face) {
+        val result = android.graphics.Bitmap.createBitmap(source.width, source.height, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(result)
+        canvas.drawBitmap(source, 0f, 0f, null)
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_ATOP)
+        }
+        if (face != null) {
+            paint.shader = android.graphics.LinearGradient(0f, 0f, 0f, source.height.toFloat(),
+                face.map { it.toArgb() }.toIntArray(), null, android.graphics.Shader.TileMode.CLAMP)
+            canvas.drawRect(0f, 0f, source.width.toFloat(), source.height.toFloat(), paint)
+        }
+        val center = source.width * frame / 100f
+        val strength = if (face == null) .45f else .65f
+        paint.shader = android.graphics.LinearGradient(center - source.width * .18f, 0f,
+            center + source.width * .18f, 0f,
+            listOf(Color.Transparent, Color(0xFF00D5E5).copy(alpha = strength),
+                Color(0xFF70BFFF).copy(alpha = strength), Color(0xFFB75CFF).copy(alpha = strength),
+                Color.Transparent).map { it.toArgb() }.toIntArray(), null, android.graphics.Shader.TileMode.CLAMP)
+        canvas.drawRect(0f, 0f, source.width.toFloat(), source.height.toFloat(), paint)
+        result.asImageBitmap()
     }
+    Image(bitmap, description, modifier)
+}
 
 /** Scope alpha blending to the artwork without a persistent resized render layer. */
 internal fun Modifier.brandMask(overlay: ContentDrawScope.() -> Unit): Modifier = drawWithContent {

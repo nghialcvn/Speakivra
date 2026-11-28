@@ -43,7 +43,7 @@ internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage
     val shine = rememberBrandSweepPhase(cycleMillis = 1800)
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
-        Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(240.dp, 196.dp).testTag("splash-brand-logo").brandShine(shine))
+        BrandSweepArtwork(R.drawable.brand_logo_clear, "Logo Speakivra", Modifier.size(240.dp, 196.dp).testTag("splash-brand-logo"), shine)
         EntryBrandWordmark(sweep = shine)
         Spacer(Modifier.height(36.dp))
         Text("Every language, a new horizon.", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, textAlign = TextAlign.Center)

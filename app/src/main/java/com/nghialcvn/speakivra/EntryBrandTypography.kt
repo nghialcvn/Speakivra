@@ -63,13 +63,20 @@ internal fun EntryLanguageTitle(label: String) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val base = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Black, fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = 0.sp)
+        fontWeight = FontWeight.Black, fontSize = 32.sp, lineHeight = 40.sp, letterSpacing = 0.sp)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val natural = measurer.measure(label, style = base, maxLines = 1, softWrap = false)
         val room = with(density) { (maxWidth - 3.dp).toPx() }.coerceAtLeast(1f)
-        val fit = minOf(1f, room / natural.size.width.coerceAtLeast(1))
-        val style = base.copy(fontSize = (22 * fit).sp, lineHeight = (28 * fit).sp)
-        val layout = measurer.measure(label, style = style, maxLines = 1, softWrap = false)
+        var fit = minOf(1f, room / natural.size.width.coerceAtLeast(1))
+        fun fittedStyle() = base.copy(fontSize = (32 * fit).sp, lineHeight = (40 * fit).sp)
+        var layout = measurer.measure(label, style = fittedStyle(), maxLines = 1, softWrap = false)
+        // Font hinting rounds at the final pixel size. A proportional estimate alone
+        // can still overflow by a pixel, so measure the actual fitted glyphs as well.
+        while (layout.size.width > room && fit > .05f) {
+            fit = (fit - .01f).coerceAtLeast(.05f)
+            layout = measurer.measure(label, style = fittedStyle(), maxLines = 1, softWrap = false)
+        }
+        val style = fittedStyle()
         val face = Brush.verticalGradient(if (light) listOf(Color(0xFF354876),
             Color(0xFF101744), Color(0xFF344A78)) else listOf(Color.White,
             Color(0xFFF2F5FF), Color(0xFFB9BDDB)), endY = layout.size.height.toFloat())

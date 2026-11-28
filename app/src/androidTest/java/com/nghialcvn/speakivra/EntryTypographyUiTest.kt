@@ -110,8 +110,11 @@ class EntryTypographyUiTest {
                 title.performScrollTo().assertIsDisplayed()
                 val results = mutableListOf<TextLayoutResult>()
                 title.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(results) }
+                if (results.single().hasVisualOverflow) shot("185-overflow-${w}-$scale")
                 assertEquals(1, results.single().lineCount)
-                assertFalse(results.single().hasVisualOverflow)
+                assertFalse("$label at ${w}dp / font $scale: ${results.single().size}, " +
+                    "width overflow=${results.single().didOverflowWidth}, height overflow=${results.single().didOverflowHeight}",
+                    results.single().hasVisualOverflow)
                 val bounds = title.fetchSemanticsNode().boundsInRoot
                 val parent = ui.onNodeWithTag(card).fetchSemanticsNode().boundsInRoot
                 assertTrue(bounds.left >= parent.left && bounds.right + 2 <= parent.right)

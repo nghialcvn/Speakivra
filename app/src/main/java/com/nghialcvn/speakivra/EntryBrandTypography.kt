@@ -19,12 +19,13 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /** Only the entry wordmark changes; the learner picker keeps its approved lockup. */
 @Composable
-internal fun EntryBrandWordmark() {
+internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.dp, tag: String = "entry-brand-wordmark") {
     val fixed = LocalBrandSweepPhase.current
     val phase = if (fixed == null) {
         rememberInfiniteTransition(label = "Entry wordmark light").animateFloat(
@@ -36,9 +37,14 @@ internal fun EntryBrandWordmark() {
             }), label = "Entry left to right sweep")
     } else rememberUpdatedState(fixed)
     val light = studio == LightStudio
-    Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
+    Box(modifier.fillMaxWidth().height(height), contentAlignment = Alignment.Center) {
+        for (depth in 3 downTo 1) {
+            Image(painterResource(R.drawable.brand_wordmark), null,
+                Modifier.fillMaxWidth().height(height).offset(x = (-depth * .5f).dp, y = depth.dp),
+                colorFilter = ColorFilter.tint(if (depth == 3) Color(0xFF32116A) else Color(0xFF6022D8)))
+        }
         Image(painterResource(R.drawable.brand_wordmark), "Speakivra",
-            Modifier.fillMaxWidth().height(64.dp).testTag("entry-brand-wordmark")
+            Modifier.fillMaxWidth().height(height).testTag(tag)
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                 .drawWithContent {
                     drawContent()

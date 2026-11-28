@@ -9,7 +9,7 @@ internal fun mergeCloudProgress(local: JSONObject, remote: JSONObject): JSONObje
     (local.keys().asSequence().toSet() + remote.keys().asSequence().toSet()).sorted().forEach { key ->
         val a = local.opt(key); val b = remote.opt(key)
         when {
-            key in setOf("active_lesson", "zh.active_lesson") -> result.put(key, (a as? String) ?: (b as? String))
+            key in setOf("active_lesson", "zh.active_lesson", "study_language") -> result.put(key, (a as? String) ?: (b as? String))
             key == CHECK_IN_DATES -> {
                 fun dates(v: Any?) = (v as? JSONArray)?.let { (0 until it.length()).mapNotNull { n -> it.opt(n) as? String } }.orEmpty()
                 result.put(key, JSONArray(validCheckInDates(dates(a) + dates(b)).sorted()))

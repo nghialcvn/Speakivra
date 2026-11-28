@@ -130,7 +130,11 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     val cloudRevision by cloud.revision.collectAsState()
     var learners by remember { mutableStateOf(store.visible(cloud.uid)) }
     LaunchedEffect(cloudRevision) { learners = store.visible(cloud.uid) }
-    var studyLanguage by rememberSaveable { mutableStateOf<StudyLanguage?>(null) }
+    var studyLanguage by rememberSaveable { mutableStateOf<StudyLanguage?>(StudyLanguage.ENGLISH) }
+    var splashFinished by rememberSaveable { mutableStateOf(false) }
+    var choosingLanguage by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) { kotlinx.coroutines.delay(1500); splashFinished = true }
+
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }
     var accountEntry by rememberSaveable { mutableStateOf(false) }
@@ -142,7 +146,8 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         updates.check()
     }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(splashFinished) {
+        if (!splashFinished) return@LaunchedEffect
         val settings = context.getSharedPreferences("speakivra_update_notifications", 0)
         if (android.os.Build.VERSION.SDK_INT >= 33 && !StudyReminders.hasPermission(context) &&
             !settings.getBoolean("permission_requested", false)) {
@@ -154,7 +159,16 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     }
     val available = learners.filter { GuestIdentityStore(context).peek(it)?.canOpen(cloud.uid) != false }
     val active = available.firstOrNull { it.id == activeId }
-    BackHandler(enabled = studyLanguage != null && active == null && !creating && !accountEntry) { studyLanguage = null }
+    if (choosingLanguage && active != null) {
+        val appearance = context.getSharedPreferences("speakivra_progress", 0)
+        SpeakivraTheme(appearance.getBoolean("dark_theme", false), neon = appearance.getBoolean("neon_theme", false)) {
+            StudyLanguageDialog(studyLanguage ?: StudyLanguage.ENGLISH,
+                onDismiss = { choosingLanguage = false }, onSelect = {
+                    saveStudyLanguage(store.preferences(active), it)
+                    studyLanguage = it; choosingLanguage = false; resumeLearning = false; entryPage = "home"
+                })
+        }
+    }
     DisposableEffect(active?.id, cloud.uid) {
         val person = active
         val listener = person?.let { cloud.watch(it) }
@@ -162,7 +176,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
-        if (studyLanguage == null) {
+        if (!splashFinished) {
             val appearance = context.getSharedPreferences("speakivra_progress", 0)
             val dark = appearance.getBoolean("dark_theme", false)
             val neon = appearance.getBoolean("neon_theme", false)
@@ -171,14 +185,14 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                     Box(Modifier.fillMaxSize()) {
                         if (neon) NeonWaveBackground(Modifier.matchParentSize())
                         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                            LanguageEntryScreen { studyLanguage = it }
+                            ProfileSplashScreen()
                         }
                     }
                 }
             }
         } else if (active != null) {
             key(active.id, studyLanguage) {
-                LearnerApp(updates, active, studyLanguage!!, { studyLanguage = null; resumeLearning = false; entryPage = "home" }, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
+                LearnerApp(updates, active, studyLanguage!!, { choosingLanguage = true }, resumeLearning, updateRequested, onUpdateHandled, onResumeConsumed = { resumeLearning = false }, initialPage = entryPage, onSwitchLearner = { lastId = active.id; activeId = null }, onChooseLearner = { selected -> entryPage = "home"; studyLanguage = savedStudyLanguage(store.preferences(selected)); activeId = selected.id; lastId = selected.id; resumeLearning = false }, onUpdateLearner = { name, avatar ->
                     try { store.update(active.id, name, avatar); learners = store.visible(cloud.uid); null }
                     catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                     catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
@@ -200,12 +214,12 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                                 Box(Modifier.weight(1f)) {
                                     AccountFlow(available.firstOrNull { it.id == lastId } ?: available.firstOrNull(), linkOnEntry = linkOnEntry,
                                         onBack = { accountEntry = false }, onAuthScreen = { accountAuthScreen = it },
-                                        onChooseLearner = { selected -> accountEntry = false; entryPage = "home"; activeId = selected.id; lastId = selected.id; resumeLearning = false })
+                                        onChooseLearner = { selected -> accountEntry = false; entryPage = "home"; studyLanguage = savedStudyLanguage(store.preferences(selected)); activeId = selected.id; lastId = selected.id; resumeLearning = false })
                                 }
                                 if (!accountAuthScreen) StudioBottomNavigation("profile") { destination ->
                                     val selected = available.firstOrNull { it.id == lastId } ?: available.firstOrNull()
                                     if (selected != null) {
-                                        entryPage = destination; activeId = selected.id; lastId = selected.id; resumeLearning = false
+                                        entryPage = destination; studyLanguage = savedStudyLanguage(store.preferences(selected)); activeId = selected.id; lastId = selected.id; resumeLearning = false
                                     }
                                     accountEntry = false
                                 }
@@ -213,15 +227,15 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                             else if (creating) CreateLearnerScreen(onBack = { creating = false }, onSave = { name, avatar ->
                             try {
                                 val learner = store.add(name, avatar)
-                                learners = store.visible(cloud.uid); creating = false; entryPage = "home"; activeId = learner.id; lastId = learner.id
+                                learners = store.visible(cloud.uid); creating = false; entryPage = "home"; activeId = null; lastId = learner.id
                                 null
                             } catch (e: IllegalArgumentException) { e.message ?: "Tên không hợp lệ. Hãy thử lại." }
                             catch (_: Exception) { "Chưa lưu được hồ sơ. Hãy thử lại." }
                             }) else LearnerPicker(store, available, lastId,
                                 onAdd = { creating = true }, onAccount = { linkOnEntry = false; accountAuthScreen = true; accountEntry = true },
                                 onLink = { lastId = it.id; linkOnEntry = true; accountAuthScreen = true; accountEntry = true },
-                                onStart = { entryPage = "home"; resumeLearning = false; activeId = it.id; lastId = it.id },
-                                onResume = { entryPage = "home"; resumeLearning = true; activeId = it.id; lastId = it.id })
+                                onStart = { entryPage = "home"; resumeLearning = false; studyLanguage = savedStudyLanguage(store.preferences(it)); activeId = it.id; lastId = it.id },
+                                onResume = { entryPage = "home"; resumeLearning = false; studyLanguage = savedStudyLanguage(store.preferences(it)); activeId = it.id; lastId = it.id })
                         }
                     }
                 }

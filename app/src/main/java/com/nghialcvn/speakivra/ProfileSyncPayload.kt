@@ -10,6 +10,7 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
     values.forEach { (key, value) ->
         if (key in setOf("active_lesson", "zh.active_lesson") && value is String && value in allowedLessons &&
             ((key == "zh.active_lesson") == value.startsWith("zh_"))) progress.put(key, value)
+        else if (key == "study_language" && value is String && value in setOf("ENGLISH", "CHINESE")) progress.put(key, value)
         else if (key == CHECK_IN_DATES && value is Set<*>) {
             progress.put(key, JSONArray(validCheckInDates(value.filterIsInstance<String>()).sorted()))
         } else if (key == "extra.completed_ids" && value is Set<*>) {

@@ -61,7 +61,7 @@ internal fun StudyLanguageBar(language: StudyLanguage, onSwitch: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Surface(onClick = onSwitch, color = studio.peach, shape = RoundedCornerShape(50)) {
-            Text(language.label + " ⌄", Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Text(language.flag() + " ⌄", Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 14.sp, fontWeight = FontWeight.Bold)
         }
         TextButton(onClick = onSwitch, modifier = Modifier.testTag("switch-study-language")) { Text("Đổi ngôn ngữ") }
     }

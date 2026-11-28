@@ -75,6 +75,23 @@ class LanguageAreaFlowTest {
         assertEquals(days, prefs.getStringSet(CHECK_IN_DATES, emptySet()))
         assertEquals(learner.id, LearnerStore(ui.activity).all().single().id)
     }
+    @Test fun bookAndMicSwitchContentAndSelection() {
+        val prefs = LearnerStore(ui.activity).preferences(learner)
+        ui.runOnUiThread { ui.activity.setContent { SpeakivraTheme(false) {
+            ChineseLearningArea(prefs, learner, "home", {}, {})
+        } } }
+        val tab = SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role,
+            androidx.compose.ui.semantics.Role.Tab)
+        val book = ui.onNode(tab and hasText("Bài học"))
+        val mic = ui.onNode(tab and hasText("Luyện nói"))
+        repeat(3) {
+            book.performClick().assertIsSelected()
+            ui.onNodeWithTag("zh-level-A1").assertExists()
+            ui.onNodeWithTag("zh-practice").assertDoesNotExist()
+            mic.performClick().assertIsSelected()
+            ui.onNodeWithTag("zh-practice").assertIsDisplayed()
+        }
+    }
     @Test fun completeChineseCatalogueHasAllLevelsHotelRolesReadingsAndExercises() {
         val prefs = LearnerStore(ui.activity).preferences(learner)
         ui.runOnUiThread { ui.activity.setContent { SpeakivraTheme(false) {

@@ -111,6 +111,8 @@ internal fun DailyCheckInCard(learner: Learner, preferences: SharedPreferences, 
                     }
                 }
                 Button(onClick = onCheckIn, enabled = !state.checkedToday,
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 1.dp, disabledElevation = 2.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = .24f)),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.White,
                         disabledContainerColor = Color(0xFF0BA757), disabledContentColor = Color.White),

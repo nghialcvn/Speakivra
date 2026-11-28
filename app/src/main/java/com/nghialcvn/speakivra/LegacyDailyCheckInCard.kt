@@ -81,7 +81,9 @@ internal fun LegacyDailyCheckInCard(learner: Learner, preferences: SharedPrefere
                         error = !preferences.edit().putStringSet(CHECK_IN_DATES, updated).commit()
                         if (!error) dates = updated
                     }
-                }, enabled = !state.checkedToday, shape = RoundedCornerShape(14.dp),
+                }, enabled = !state.checkedToday,
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 1.dp, disabledElevation = 2.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = .24f)), shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = if (p == NeonStudio) p.coral else Color.Transparent,
                         contentColor = if (p == NeonStudio) p.background else Color.White,
                         disabledContainerColor = p.mint, disabledContentColor = p.green),

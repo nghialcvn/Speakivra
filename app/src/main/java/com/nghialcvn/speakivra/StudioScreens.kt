@@ -1,5 +1,9 @@
 package com.nghialcvn.speakivra
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -427,7 +431,13 @@ internal fun IllustratedRecordingButton(onClick: () -> Unit, active: Boolean) {
         .clickable(role = Role.Button, onClick = onClick)
         .semantics { contentDescription = if (active) "Kết thúc lượt nói" else "Nói và nhận dạng" },
         contentAlignment = Alignment.Center) {
-        Image(painterResource(R.drawable.studio_record_mic), null, Modifier.fillMaxSize())
+        val tilt = if (active) {
+            val motion = rememberInfiniteTransition(label = "Recording")
+            motion.animateFloat(-2f, 2f, infiniteRepeatable(tween(140), RepeatMode.Reverse),
+                label = "Microphone tilt")
+        } else null
+        Image(painterResource(R.drawable.studio_record_mic), null, Modifier.fillMaxSize()
+            .graphicsLayer { rotationZ = tilt?.value ?: 0f })
         if (active) Box(Modifier.size(38.dp).background(Color(0xDD101A36), CircleShape),
             contentAlignment = Alignment.Center) {
             Box(Modifier.size(18.dp).background(Color.White, RoundedCornerShape(4.dp)))

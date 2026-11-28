@@ -49,9 +49,9 @@ internal fun ChineseLearningArea(preferences: SharedPreferences, learner: Learne
                         lessonNote = "Pinyin • Nghĩa tiếng Việt",
                         courseSummary = "A1 • A2 • B1 • B2 • C1 • C2 • Hội thoại • Đọc hiểu • Bài tập • Khách sạn")
                 }
-                "course", "lessons", "repeat" -> ChineseCourseScreen(preferences, learner, onBack = { page = "home" },
+                "course", "lessons", "repeat" -> key(page) { ChineseCourseScreen(preferences, learner, onBack = { page = "home" },
                     initialTopic = if (page == "repeat") active.id else courseTopic,
-                    initialMode = if (page == "repeat") courseMode.ifEmpty { "repeat" } else courseMode, initialPackId = coursePack)
+                    initialMode = if (page == "repeat") "repeat" else courseMode, initialPackId = coursePack) }
                 "progress" -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     PageHeading("Tiến độ học tập", "Tiếng Trung • Lưu riêng theo hồ sơ", onBack = { page = "home" })
                     StudioCard {
@@ -73,11 +73,11 @@ internal fun ChineseLearningArea(preferences: SharedPreferences, learner: Learne
                 }
             }
         }
-        StudioBottomNavigation(if (page == "course") "lessons" else page) { destination ->
+        StudioBottomNavigation(if (page == "course") (if (courseMode.isEmpty()) "lessons" else "repeat") else page) { destination ->
             if (destination == "profile") onSettings()
             else {
                 if (destination == "lessons") { courseTopic = null; courseMode = ""; coursePack = "" }
-                if (destination == "repeat") { resume(); return@StudioBottomNavigation }
+                if (destination == "repeat") { courseMode = "repeat"; coursePack = "" }
                 page = destination
             }
         }

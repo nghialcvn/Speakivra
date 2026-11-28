@@ -332,12 +332,78 @@ internal fun TwoChoices(first: String, second: String, selectedFirst: Boolean, o
     }
 }
 @Composable
-internal fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun PracticePlaybackControls(speed: Int, translation: Boolean, onListen: () -> Unit,
+    onSpeed: (Int) -> Unit, onTranslation: () -> Unit, sampleEnabled: Boolean = true) {
+    val p = studio
+    // Approved compact row: sample audio, current speed dropdown and translation.
+    // Only wrap for very narrow layouts or accessibility font scaling.
+    var speedMenuOpen by remember { mutableStateOf(false) }
+    BoxWithConstraints {
+        val split = maxWidth < 290.dp || androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+        val controls: @Composable () -> Unit = {
+            Box {
+                Row(
+                    Modifier.clip(RoundedCornerShape(9.dp))
+                        .border(1.dp, p.border, RoundedCornerShape(9.dp))
+                        .clickable(role = Role.Button, onClick = { speedMenuOpen = true })
+                        .semantics { contentDescription = "Tốc độ đọc: ${speedLabel(speed)}" }
+                        .heightIn(min = 44.dp).padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(speedLabel(speed), color = p.ink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("⌄", color = p.coral, fontSize = 16.sp)
+                }
+                DropdownMenu(expanded = speedMenuOpen, onDismissRequest = { speedMenuOpen = false }) {
+                    listOf(75, 100, 125).forEach { value ->
+                        DropdownMenuItem(
+                            text = { Text(speedLabel(value), color = p.ink) },
+                            onClick = {
+                                speedMenuOpen = false
+                                onSpeed(value)
+                            },
+                            modifier = Modifier.semantics { selected = speed == value }
+                        )
+                    }
+                }
+            }
+            Box(Modifier.clip(RoundedCornerShape(9.dp))
+                .border(1.dp, p.border, RoundedCornerShape(9.dp))
+                .clickable(role = Role.Button, onClick = onTranslation)
+                .heightIn(min = 44.dp).padding(horizontal = 12.dp), Alignment.Center) {
+                Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 12.sp)
+            }
+        }
+        if (split) {
+            Column(
+                Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SpeakerChip("Nghe mẫu", onListen, enabled = sampleEnabled)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    controls()
+                }
+            }
+        } else {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SpeakerChip("Nghe mẫu", onListen, enabled = sampleEnabled)
+                controls()
+            }
+        }
+    }
+}
+@Composable
+internal fun SpeakerChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Row(modifier.clip(RoundedCornerShape(12.dp))
         .background(if (studio == NeonStudio) NeonLook.glossyPanel
             else Brush.linearGradient(listOf(studio.card, studio.card)))
         .then(if (studio != NeonStudio) Modifier.border(1.dp, studio.border, RoundedCornerShape(12.dp)) else Modifier)
-        .clickable(role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp, vertical = 8.dp),
+        .clickable(enabled = enabled, role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         StudioIcon("speaker", Modifier.size(19.dp), studio.coral)
         Text(label, color = studio.coral, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
@@ -428,67 +494,7 @@ internal fun PracticeScreen(lesson: Lesson, progress: LessonProgress, automatic:
                 if (translation) Text(if (englishOnly) EnglishStudy.explanation(phrase.english) else phrase.vietnamese,
                     textAlign = TextAlign.Center, color = p.muted,
                     fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
-                // Approved compact row: sample audio, current speed dropdown and translation.
-                // Only wrap for very narrow layouts or accessibility font scaling.
-                var speedMenuOpen by remember { mutableStateOf(false) }
-                BoxWithConstraints {
-                    val split = maxWidth < 290.dp || androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
-                    val controls: @Composable () -> Unit = {
-                        Box {
-                            Row(
-                                Modifier.clip(RoundedCornerShape(9.dp))
-                                    .border(1.dp, p.border, RoundedCornerShape(9.dp))
-                                    .clickable(role = Role.Button, onClick = { speedMenuOpen = true })
-                                    .semantics { contentDescription = "Tốc độ đọc: ${speedLabel(speed)}" }
-                                    .heightIn(min = 44.dp).padding(horizontal = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(speedLabel(speed), color = p.ink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                Text("⌄", color = p.coral, fontSize = 16.sp)
-                            }
-                            DropdownMenu(expanded = speedMenuOpen, onDismissRequest = { speedMenuOpen = false }) {
-                                listOf(75, 100, 125).forEach { value ->
-                                    DropdownMenuItem(
-                                        text = { Text(speedLabel(value), color = p.ink) },
-                                        onClick = {
-                                            speedMenuOpen = false
-                                            onSpeed(value)
-                                        },
-                                        modifier = Modifier.semantics { selected = speed == value }
-                                    )
-                                }
-                            }
-                        }
-                        Box(Modifier.clip(RoundedCornerShape(9.dp))
-                            .border(1.dp, p.border, RoundedCornerShape(9.dp))
-                            .clickable(role = Role.Button, onClick = onTranslation)
-                            .heightIn(min = 44.dp).padding(horizontal = 12.dp), Alignment.Center) {
-                            Text(if (translation) "Ẩn dịch" else "Hiện dịch", fontSize = 12.sp)
-                        }
-                    }
-                    if (split) {
-                        Column(
-                            Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            SpeakerChip("Nghe mẫu", onListen)
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                controls()
-                            }
-                        }
-                    } else {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            SpeakerChip("Nghe mẫu", onListen)
-                            controls()
-                        }
-                    }
-                }
+                PracticePlaybackControls(speed, translation, onListen, onSpeed, onTranslation)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {

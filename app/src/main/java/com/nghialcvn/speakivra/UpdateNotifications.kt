@@ -16,9 +16,9 @@ internal object UpdateNotifications {
     const val ID = 302
     private const val CHANNEL = "speakivra-app-updates"
     fun schedule(context: Context) {
-        val request = PeriodicWorkRequestBuilder<AppUpdateWorker>(1, TimeUnit.HOURS)
+        val request = PeriodicWorkRequestBuilder<AppUpdateWorker>(15, TimeUnit.MINUTES)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()).build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork("speakivra-check-updates", ExistingPeriodicWorkPolicy.KEEP, request)
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("speakivra-check-updates", ExistingPeriodicWorkPolicy.UPDATE, request)
     }
     @android.annotation.SuppressLint("MissingPermission")
     @Synchronized fun deliver(context: Context, release: AppRelease?, current: Installation) {

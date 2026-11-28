@@ -13,6 +13,13 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import java.util.Locale
 
+/** Some engines advertise Mandarin without a country or with the ISO 639-3 tag cmn. */
+internal fun isMandarinLocale(locale: Locale): Boolean = when (locale.language) {
+    "cmn" -> true
+    "zh" -> locale.country in setOf("", "CN", "SG", "TW")
+    else -> false
+}
+
 /** Bundled neural clips first; installed US-English TTS is an offline fallback. */
 internal class SpeechPlayback(context: Context, private val onStatus: (String) -> Unit) {
     private val app = context.applicationContext
@@ -48,11 +55,25 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             .map { InstalledSpeechVoice(it.name, accent, it.quality) }
     }
 
-    fun mandarinVoices(): List<InstalledSpeechVoice> = engine?.voices.orEmpty()
-        .filter { it.locale.language == "zh" && it.locale.country == "CN" &&
-            !it.isNetworkConnectionRequired && TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features.orEmpty() }
-        .sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.latency }.thenBy { it.name })
-        .map { InstalledSpeechVoice(it.name, "CN", it.quality) }
+    private fun localMandarinVoice(voice: Voice): Boolean = isMandarinLocale(voice.locale) &&
+        !voice.isNetworkConnectionRequired && TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
+
+    private fun mandarinCandidates() = engine?.voices.orEmpty().filter(::localMandarinVoice)
+        .sortedWith(compareByDescending<Voice> { it.locale.country == "CN" }
+            .thenByDescending { it.quality }.thenBy { it.latency }.thenBy { it.name })
+
+    fun mandarinVoices(): List<InstalledSpeechVoice> = mandarinCandidates()
+        .map { InstalledSpeechVoice(it.name, it.locale.country, it.quality) }
+
+    private fun prepareMandarin(tts: TextToSpeech, preferred: String?): Boolean {
+        val candidates = mandarinCandidates().sortedByDescending { it.name == preferred }
+        if (candidates.any { tts.setVoice(it) == TextToSpeech.SUCCESS }) return true
+        // Engines with incomplete voice lists may still implement language-based selection.
+        if (tts.setLanguage(Locale.SIMPLIFIED_CHINESE) < TextToSpeech.LANG_AVAILABLE) return false
+        val active = tts.voice
+        return if (active != null) localMandarinVoice(active)
+        else tts.getFeatures(Locale.SIMPLIFIED_CHINESE).orEmpty().contains(TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS)
+    }
 
     fun speakMandarin(text: String, speed: Int, voiceId: String? = null, repeatCount: Int = 1) {
         if (closed || text.isBlank()) return
@@ -287,18 +308,15 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             return
         }
         val chinese = request.language == "zh-CN"
-        val selected = if (chinese) {
-            val voices = mandarinVoices()
-            val chosen = if (request.choice.voiceId == null) voices.firstOrNull() else voices.firstOrNull { it.id == request.choice.voiceId }
-            tts.voices.orEmpty().firstOrNull { it.name == chosen?.id }
-        } else if (request.choice.usesBundledAudio) defaultVoice
+        val selected = if (chinese) null else if (request.choice.usesBundledAudio) defaultVoice
             else tts.voices.orEmpty().firstOrNull { voice ->
                 voice.name == request.choice.voiceId &&
                     voice.locale.language == "en" && voice.locale.country == request.choice.accent &&
                     !voice.isNetworkConnectionRequired &&
                     TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
             }
-        if (selected == null || (!chinese && request.choice.usesBundledAudio && !fallbackAvailable)) {
+        if (if (chinese) !runCatching { prepareMandarin(tts, request.choice.voiceId) }.getOrDefault(false)
+            else selected == null || (request.choice.usesBundledAudio && !fallbackAvailable)) {
             releaseFocus()
             status(if (chinese) "Chưa có giọng tiếng Trung ngoại tuyến phù hợp. Hãy cài dữ liệu giọng Trung Quốc trong cài đặt Chuyển văn bản thành giọng nói của Android, rồi mở lại Speakivra." else "Chưa chọn giọng ngoại tuyến phù hợp. Vào Giọng đọc & Ngôn ngữ để nghe thử.", request.session)
             return
@@ -307,7 +325,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
             val prefix = "speech-${request.session}-"
             lastUtterance = prefix + "repeat-" + (request.repeats - 1) + "-" + request.profile.parts.lastIndex
             tts.stop()
-            check(tts.setVoice(selected) == TextToSpeech.SUCCESS)
+            if (!chinese) check(tts.setVoice(selected) == TextToSpeech.SUCCESS)
             repeat(request.repeats) { round ->
                 request.profile.parts.forEachIndexed { index, part ->
                     check(tts.setPitch(part.pitch) == TextToSpeech.SUCCESS)

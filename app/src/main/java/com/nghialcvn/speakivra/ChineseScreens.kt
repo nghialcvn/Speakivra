@@ -133,7 +133,15 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                 }
                 TextButton(onClick = { voiceId = null; preferences.edit().remove("zh_voice_id").remove("zh_voice_$voiceGender").apply(); voiceDialog = false }) { Text("Tự chọn giọng phổ thông Trung Quốc") }
                 val voices = playback.mandarinVoices()
-                if (voices.isEmpty()) Text("Chưa tìm thấy giọng ngoại tuyến. Cài dữ liệu tiếng Trung (Trung Quốc) trong cài đặt giọng nói Android, rồi mở lại ứng dụng.")
+                if (voices.isEmpty()) {
+                    Text("Nếu chưa nghe được mẫu, hãy tải giọng tiếng Trung (Trung Quốc) trong cài đặt giọng nói của máy.")
+                    TextButton(onClick = {
+                        val install = android.content.Intent(android.speech.tts.TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+                        if (runCatching { context.startActivity(install) }.isFailure) {
+                            runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_SETTINGS)) }
+                        }
+                    }) { Text("Cài dữ liệu giọng đọc") }
+                }
                 voices.forEachIndexed { index, voice ->
                     Text("Giọng ${index + 1}" + if (voiceId == voice.id || (voiceId == null && index == 0)) " • Đang chọn" else "", fontSize = 14.sp)
                     Row {
@@ -346,11 +354,13 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         PageHeading(modeTitle(mode), "${topic.title} • ${index + 1}/${lines.size}", ::back)
                         StudioProgress((index + 1f) / lines.size)
-                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            listOf(75, 100, 125).forEach { value -> FilterChip(selected = speed == value, onClick = {
-                                clearSpeech(); speed = value; preferences.edit().putInt("zh_playback_speed", value).apply()
-                            }, label = { Text(speedLabel(value)) }) }
-                            TextButton(onClick = { clearSpeech(); voiceDialog = true }) { Text("Giọng đọc") }
+                        if (mode == "repeat" || mode == "chat") {
+                            TwoChoices("Tự động", "Thủ công", automatic, { selected ->
+                                if (automatic != selected) {
+                                    clearSpeech(); automatic = selected
+                                    preferences.edit().putBoolean("zh_automatic_mode", selected).apply()
+                                }
+                            }, Modifier.fillMaxWidth())
                         }
                         if (mode == "read") {
                             Text(topic.readingTitle, fontWeight = FontWeight.Bold)
@@ -388,20 +398,28 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                                 if (showPinyin) Text(referencePinyin, fontSize = 18.sp, lineHeight = 26.sp, color = studio.purple)
                                 if (showMeaning && mode != "exercise") Text(line.vietnamese)
                             }
+                            if (mode != "exercise") PracticePlaybackControls(speed, showMeaning, { speak(line.hanzi) }, { value ->
+                                playback.stop(); speed = value
+                                preferences.edit().putInt("zh_playback_speed", value).apply()
+                            }, { showMeaning = !showMeaning }, sampleEnabled = phase == "idle")
                         }
-                        if (mode in listOf("repeat", "chat")) FilterChip(automatic, onClick = {
-                            clearSpeech(); automatic = !automatic; preferences.edit().putBoolean("zh_automatic_mode", automatic).apply()
-                        }, label = { Text("Tự động nghe mẫu") })
-                        if (mode != "exercise") Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(selected = showPinyin, onClick = { showPinyin = !showPinyin }, label = { Text("Pinyin") })
-                            FilterChip(selected = showMeaning, onClick = { showMeaning = !showMeaning }, label = { Text("Nghĩa tiếng Việt") })
+                        if (mode == "exercise") Row(verticalAlignment = Alignment.CenterVertically) {
+                            SpeakerChip("Nghe mẫu", { speak(line.hanzi) }, enabled = phase == "idle")
+                            listOf(75, 100, 125).forEach { value -> TextButton(onClick = {
+                                speed = value; preferences.edit().putInt("zh_playback_speed", value).apply()
+                            }) { Text(speedLabel(value)) } }
+                        }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            TextButton(onClick = { showPinyin = !showPinyin }) { Text(if (showPinyin) "Ẩn Pinyin" else "Hiện Pinyin") }
+                            TextButton(onClick = { clearSpeech(); voiceDialog = true }) { Text("Giọng đọc") }
+                        }
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                                DecorativeWave(); Microphone(onClick = ::listen, large = true, active = phase == "listening"); DecorativeWave()
+                            }
+                            Text(captureLabel(phase, "Chạm để nói"), color = studio.muted)
                         }
                         Text(topic.tip, color = studio.muted, fontSize = 13.sp)
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedButton(onClick = { speak(line.hanzi) }, enabled = phase == "idle") { Text("Nghe mẫu") }
-                            Microphone(onClick = ::listen, active = phase == "listening")
-                            Text(captureLabel(phase, "Nói"), fontSize = 13.sp)
-                        }
                         Text(status, color = studio.muted, fontSize = 12.sp)
                         if (finalTranscript != null) {
                             StudioCard {

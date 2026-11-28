@@ -4,6 +4,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class VoiceChoicesTest {
+    @Test fun mandarinVoicesAcceptRegionalAndGenericTags() {
+        for (tag in listOf("zh-CN", "zh-Hans", "zh-SG", "cmn-Hans-CN", "zh-TW"))
+            assertTrue(tag, isMandarinLocale(java.util.Locale.forLanguageTag(tag)))
+        for (tag in listOf("yue-HK", "zh-HK", "en-US", "vi-VN"))
+            assertFalse(tag, isMandarinLocale(java.util.Locale.forLanguageTag(tag)))
+    }
+
     @Test fun defaultRetainsOriginalBundledNeuralAudio() {
         val original = VoiceChoice()
         assertEquals("en-US", original.languageTag)

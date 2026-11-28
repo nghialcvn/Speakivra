@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.3.1-beta",
+    "tag_name": "v1.3.2-beta",
     "draft": false,
-    "body": "# Speakivra V1.3.1 Beta\n\n## Có gì mới\n\n- Màn luyện nghe và nói tiếng Trung có thanh Tự động / Thủ công, cụm Nghe mẫu, tốc độ và Ẩn/Hiện dịch đồng bộ với tiếng Anh.\n- Giữ lựa chọn Pinyin và giọng đọc, căn giữa câu học và micro.\n- Cải thiện chọn giọng tiếng Trung ngoại tuyến với các mã ngôn ngữ Phổ thông khác nhau. Tự thử giọng còn cài khi giọng đã lưu không còn khả dụng.\n- Có nút mở trình cài dữ liệu giọng nói nếu thiết bị thiếu giọng tiếng Trung.\n- Kiểm tra cập nhật nền theo chu kỳ 15 phút khi có mạng. Android quyết định thời điểm chạy và thông báo cần được cấp quyền.\n\n## Cài đặt\n\nVersionName 1.3.1, versionCode 51. APK release dùng application ID com.nghialcvn.speakivra và khóa ký gốc. Cài đè bản hiện tại để giữ hồ sơ và tiến độ.\n\n## Kiểm chứng\n\nMã chức năng đã kiểm thử tại commit 4675ab8aede0cb5c230e075f088132518ce70670.\n\n124 kiểm thử logic, lint, 13 kiểm tra Firebase và 44 kiểm thử Android đã đạt. Đã xem ảnh chụp cụm nút từ APK chạy trên máy ảo.\n\nhttps://github.com/nghialcvn/Speakivra/actions/runs/46126134829\n\nChưa xác nhận âm thanh trực tiếp trên Xiaomi Note 14. Máy cần có giọng tiếng Trung ngoại tuyến phù hợp để phát mẫu.\n",
+    "body": "# Speakivra 1.3.2 Beta\n\n- Phần luyện nói tiếng Trung hiển thị thẻ kết quả như tiếng Anh, có nút nghe lại, màu chữ nhận dạng và tỷ lệ khớp. Khi cần nói lại, ứng dụng hiển thị mẹo luyện âm.\n- Màn chào giữ slogan ít nhất 5 giây trước khi chuyển trang.\n\nAPK phiên bản 1.3.2 (52) dùng khóa ký hiện hành để cập nhật từ bản trước.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.3.1-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.3.1-beta/Speakivra-v1.3.1-release.apk",
-        "size": 22146782,
-        "digest": "sha256:fde9dbe14984a323506acff9c52061690fdd2596c2dd8d751d8ccc5938651fdb"
+        "name": "Speakivra-v1.3.2-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.3.2-beta/Speakivra-v1.3.2-release.apk",
+        "size": 22146769,
+        "digest": "sha256:a0ebdaf083027f153849b10a0a5ec9f8326aa7cb2ad28c4405f475cac6dcd345"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 51,
-    "versionName": "1.3.1",
-    "apkName": "Speakivra-v1.3.1-release.apk",
-    "apkSha256": "fde9dbe14984a323506acff9c52061690fdd2596c2dd8d751d8ccc5938651fdb",
+    "versionCode": 52,
+    "versionName": "1.3.2",
+    "apkName": "Speakivra-v1.3.2-release.apk",
+    "apkSha256": "a0ebdaf083027f153849b10a0a5ec9f8326aa7cb2ad28c4405f475cac6dcd345",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

@@ -345,7 +345,7 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                 var reveal by remember(topic.id, mode, item) { mutableStateOf(false) }
                 Column(Modifier.fillMaxSize().testTag("zh-practice")) {
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        PageHeading(if (mode == "repeat") "Luyện nghe & nói" else modeTitle(mode), "${topic.title} • Câu ${index + 1}/${lines.size}", ::back)
+                        PageHeading(if (mode == "repeat") "Luyện nghe & nói" else modeTitle(mode), "${topic.title} • ${index + 1}/${lines.size}", ::back)
                         StudioProgress((index + 1f) / lines.size)
                         if (mode == "repeat") {
                             TwoChoices("Tự động", "Thủ công", automatic, { selected ->

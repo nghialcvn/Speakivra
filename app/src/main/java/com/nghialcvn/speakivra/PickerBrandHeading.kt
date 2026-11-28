@@ -20,16 +20,14 @@ internal fun PickerBrandHeading(modifier: Modifier = Modifier) {
     val logo = ImageBitmap.imageResource(R.drawable.brand_logo_clear)
     BoxWithConstraints(modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
         val scale = minOf(1f, maxWidth.value / 260.2f)
-        // Keep the masked wordmark's backing layer size stable while the lockup scales.
-        Row(Modifier.requiredWidth(260.2.dp).graphicsLayer { scaleX = scale; scaleY = scale },
-            horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Canvas(Modifier.size(82.53.dp, 64.dp).testTag("picker-brand-logo")
+        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.size((82.53f * scale).dp, (64f * scale).dp).testTag("picker-brand-logo")
                 .semantics { contentDescription = "Logo Speakivra" }) {
                 drawImage(logo, srcOffset = IntOffset(50, 36), srcSize = IntSize(668, 518),
                     dstSize = IntSize(size.width.toInt(), size.height.toInt()), filterQuality = FilterQuality.High)
             }
-            Spacer(Modifier.width(8.dp))
-            EntryBrandWordmark(Modifier.width(169.67.dp), 32.dp, "picker-brand-wordmark")
+            Spacer(Modifier.width((8f * scale).dp))
+            EntryBrandWordmark(Modifier.width((169.67f * scale).dp), (32f * scale).dp, "picker-brand-wordmark")
         }
     }
 }

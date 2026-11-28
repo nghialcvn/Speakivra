@@ -28,8 +28,8 @@ collect() {
 trap collect EXIT
 free -m > ui-diagnostics/host-memory-start.txt
 adb wait-for-device
-adb shell wm size 864x1872
-adb shell wm density 336
+adb shell wm size 720x1560
+adb shell wm density 280
 adb shell wm size | tee ui-diagnostics/display.txt
 adb shell wm density | tee -a ui-diagnostics/display.txt
 adb install -r dist/*.apk

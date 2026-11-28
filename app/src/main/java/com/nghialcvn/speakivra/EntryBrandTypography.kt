@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -36,9 +38,7 @@ internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.d
         }
         Image(painterResource(R.drawable.brand_wordmark), "Speakivra",
             Modifier.fillMaxWidth().height(height).testTag(tag)
-                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                .drawWithContent {
-                    drawContent()
+                .brandMask {
                     drawRect(Brush.verticalGradient(if (light) listOf(
                         Color(0xFF101744), Color(0xFF253264), Color(0xFF101744)) else listOf(
                         Color.White, Color(0xFFDDE4F4), Color.White, Color(0xFFB8C5DD))),
@@ -68,10 +68,21 @@ internal fun rememberBrandSweepPhase(cycleMillis: Int = 6000): State<Float> {
 }
 
 internal fun Modifier.brandShine(phase: State<Float>): Modifier =
-    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }.drawWithContent {
-        drawContent()
+    brandMask {
         val center = size.width * phase.value
         drawRect(Brush.horizontalGradient(listOf(Color.Transparent, Color(0xFF00D5E5).copy(alpha = .45f),
             Color(0xFF70BFFF).copy(alpha = .45f), Color(0xFFB75CFF).copy(alpha = .45f), Color.Transparent),
             startX = center - size.width * .18f, endX = center + size.width * .18f), blendMode = BlendMode.SrcAtop)
     }
+
+/** Scope alpha blending to the artwork without a persistent resized render layer. */
+internal fun Modifier.brandMask(overlay: ContentDrawScope.() -> Unit): Modifier = drawWithContent {
+    val canvas = drawContext.canvas
+    canvas.saveLayer(Rect(Offset.Zero, size), Paint())
+    try {
+        drawContent()
+        overlay()
+    } finally {
+        canvas.restore()
+    }
+}

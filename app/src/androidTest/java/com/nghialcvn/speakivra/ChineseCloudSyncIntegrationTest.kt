@@ -94,6 +94,7 @@ class ChineseCloudSyncIntegrationTest {
     private fun exported(d: Device, learner: Learner) = profileSyncPayload(learner, requireNotNull(d.identities.peek(learner)),
         d.store.preferences(learner).all).getJSONObject("progress")
     private fun fullValues(): Map<String, Any> = buildMap {
+        put("study_language", "CHINESE")
         (Lessons.catalogue + ChineseCurriculum.lessons).forEach { lesson ->
             put("lesson.${lesson.id}.learned_phrases", lesson.phrases.map { it.id }.sorted().joinToString("|"))
             put("lesson.${lesson.id}.learned_turns", lesson.conversation.map { it.id }.sorted().joinToString("|"))
@@ -138,6 +139,7 @@ class ChineseCloudSyncIntegrationTest {
         val restored = second.store.visible(owner).single()
         assertNotEquals(learner.id, restored.id); assertEquals(identity.profileId, second.identities.peek(restored)!!.profileId)
         assertEquals("Lan", restored.name); assertEquals(2, restored.avatar)
+        assertEquals(StudyLanguage.CHINESE, savedStudyLanguage(second.store.preferences(restored)))
         assertEquals(cloudProgressValues(expected), cloudProgressValues(exported(second, restored)))
         assertTrue(second.runtime.isSynced(restored))
         val revision = ref.get(Source.SERVER).cloudAwait().getLong("revision")

@@ -63,9 +63,10 @@ internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage
     var upcoming by remember { mutableStateOf(false) }
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         StudyLanguage.entries.forEach { language ->
-            Box(Modifier.size(48.dp).border(if (selected == language) 2.dp else 1.dp,
-                if (selected == language) studio.purple else studio.border, RoundedCornerShape(12.dp))
-                .then(if (selected == language) Modifier.border(2.dp, Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), RoundedCornerShape(12.dp)) else Modifier)
+            Box(Modifier.size(48.dp)
+                .then(if (selected == language) Modifier.border(2.dp,
+                    Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), RoundedCornerShape(12.dp))
+                    else Modifier.border(1.dp, studio.border, RoundedCornerShape(12.dp)))
                 .clickable { onSelect(language) }.testTag(if (language == StudyLanguage.ENGLISH) "language-en" else "language-zh").semantics { this.selected = selected == language }, Alignment.Center) {
                 StudyLanguageFlag(language, Modifier.size(32.dp))
             }
@@ -79,9 +80,7 @@ internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage
         Surface(modifier = Modifier.border(1.dp, Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), RoundedCornerShape(24.dp)), shape = RoundedCornerShape(24.dp), color = studio.card, contentColor = studio.ink) {
             Column(Modifier.padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 StudioIcon("globe", Modifier.size(48.dp)
-                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                    .drawWithContent {
-                        drawContent()
+                    .brandMask {
                         drawRect(Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), blendMode = BlendMode.SrcAtop)
                     }, studio.purple)
                 Text("Ngôn ngữ mới sắp ra mắt", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, textAlign = TextAlign.Center)

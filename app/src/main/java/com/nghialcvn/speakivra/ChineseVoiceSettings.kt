@@ -47,7 +47,7 @@ internal fun ChineseVoiceSettings(preferences: SharedPreferences, onBack: () -> 
             TextButton(onClick = { selected = null; preferences.edit().remove("zh_voice_id").remove("zh_voice_$gender").apply() }) { Text("Tự chọn giọng phổ thông Trung Quốc") }
         }
         val voices = playback.mandarinVoices()
-        if (voices.isEmpty()) Text("Cài dữ liệu giọng tiếng Trung (Trung Quốc) trong cài đặt TTS Android để nghe ngoại tuyến, rồi mở lại ứng dụng.")
+        if (voices.isEmpty()) MandarinVoiceInstall()
         voices.forEachIndexed { n, voice -> StudioCard {
             Text("Giọng ${n + 1}" + if (selected == voice.id) " • Đang chọn" else "")
             Row {
@@ -57,4 +57,16 @@ internal fun ChineseVoiceSettings(preferences: SharedPreferences, onBack: () -> 
         } }
         Text(status, color = studio.muted)
     }
+}
+
+@Composable
+internal fun MandarinVoiceInstall() {
+    val context = LocalContext.current
+    Text("Nếu chưa nghe được mẫu, hãy tải giọng tiếng Trung (Trung Quốc) trong cài đặt giọng nói của máy.")
+    TextButton(onClick = {
+        val install = android.content.Intent(android.speech.tts.TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+        if (runCatching { context.startActivity(install) }.isFailure) {
+            runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_SETTINGS)) }
+        }
+    }) { Text("Cài dữ liệu giọng đọc") }
 }

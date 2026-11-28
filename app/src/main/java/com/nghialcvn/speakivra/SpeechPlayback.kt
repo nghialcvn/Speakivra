@@ -12,6 +12,8 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import java.util.Locale
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /** Some engines advertise Mandarin without a country or with the ISO 639-3 tag cmn. */
 internal fun isMandarinLocale(locale: Locale): Boolean = when (locale.language) {
@@ -34,7 +36,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
     private var hasFocus = false
     private var player: MediaPlayer? = null
     private var engine: TextToSpeech? = null
-    private var initialized = false
+    private var initialized by androidx.compose.runtime.mutableStateOf(false)
     private var fallbackAvailable = false
     private var closed = false
     private var session = 0L
@@ -62,7 +64,7 @@ internal class SpeechPlayback(context: Context, private val onStatus: (String) -
         .sortedWith(compareByDescending<Voice> { it.locale.country == "CN" }
             .thenByDescending { it.quality }.thenBy { it.latency }.thenBy { it.name })
 
-    fun mandarinVoices(): List<InstalledSpeechVoice> = mandarinCandidates()
+    fun mandarinVoices(): List<InstalledSpeechVoice> = if (!initialized || closed) emptyList() else mandarinCandidates()
         .map { InstalledSpeechVoice(it.name, it.locale.country, it.quality) }
 
     private fun prepareMandarin(tts: TextToSpeech, preferred: String?): Boolean {

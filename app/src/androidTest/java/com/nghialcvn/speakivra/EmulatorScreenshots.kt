@@ -51,23 +51,25 @@ internal fun captureNativeDisplay(): android.graphics.Bitmap {
     val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
     instrumentation.waitForIdleSync()
     dismissUnrelatedLauncherAnr(instrumentation)
-    // Semantics can be idle before SurfaceFlinger presents the new phase.
-    // Wait for two real display frames instead of returning the previous buffer.
-    val presented = java.util.concurrent.CountDownLatch(1)
-    instrumentation.runOnMainSync {
-        // A test-clock composition can update semantics before its window is dirty.
-        // Explicitly schedule the real window traversal, including dialog windows.
-        android.view.inspector.WindowInspector.getGlobalWindowViews().forEach {
-            it.requestLayout()
-            it.invalidate()
+    // Compose instrumentation may disable HardwareRenderer drawing between checks.
+    // Match AndroidX's withDrawingEnabled contract, but wait for the real frame
+    // commit and capture the display (including dialog windows) instead of PixelCopy.
+    val enabled = androidx.test.platform.graphics.HardwareRendererCompat.isDrawingEnabled()
+    try {
+        androidx.test.platform.graphics.HardwareRendererCompat.setDrawingEnabled(true)
+        val committed = java.util.concurrent.CountDownLatch(1)
+        instrumentation.runOnMainSync {
+            val windows = android.view.inspector.WindowInspector.getGlobalWindowViews()
+                .filter { it.isShown && it.isAttachedToWindow }
+            check(windows.isNotEmpty()) { "No visible review window" }
+            windows.last().viewTreeObserver.registerFrameCommitCallback { committed.countDown() }
+            windows.forEach { it.requestLayout(); it.invalidate() }
         }
-        android.view.Choreographer.getInstance().postFrameCallback {
-            android.view.Choreographer.getInstance().postFrameCallback { presented.countDown() }
-        }
+        check(committed.await(10, java.util.concurrent.TimeUnit.SECONDS)) { "Android did not commit the review frame" }
+        return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+    } finally {
+        androidx.test.platform.graphics.HardwareRendererCompat.setDrawingEnabled(enabled)
     }
-    check(presented.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "Android did not present a frame" }
-    instrumentation.uiAutomation.waitForIdle(200, 5000)
-    return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
 }
 
 /** Keep pixel assertions scoped to the same visible node, using display coordinates. */

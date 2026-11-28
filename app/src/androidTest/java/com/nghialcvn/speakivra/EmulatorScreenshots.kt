@@ -66,6 +66,9 @@ internal fun captureNativeDisplay(): android.graphics.Bitmap {
             windows.forEach { it.requestLayout(); it.invalidate() }
         }
         check(committed.await(10, java.util.concurrent.TimeUnit.SECONDS)) { "Android did not commit the review frame" }
+        // Frame commit submits the buffer; allow SurfaceFlinger to latch it on
+        // the next display tick before capturing the physical display.
+        android.os.SystemClock.sleep(100)
         return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
     } finally {
         androidx.test.platform.graphics.HardwareRendererCompat.setDrawingEnabled(enabled)

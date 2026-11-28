@@ -113,6 +113,7 @@ class EntryTypographyUiTest {
                 if (results.single().hasVisualOverflow) shot("185-overflow-${w}-$scale")
                 assertEquals(1, results.single().lineCount)
                 assertFalse("$label at ${w}dp / font $scale: ${results.single().size}, " +
+                    "line right=${results.single().getLineRight(0)}, " +
                     "width overflow=${results.single().didOverflowWidth}, height overflow=${results.single().didOverflowHeight}",
                     results.single().hasVisualOverflow)
                 val bounds = title.fetchSemanticsNode().boundsInRoot

@@ -81,7 +81,9 @@ internal fun EntryLanguageTitle(label: String) {
             Color(0xFF101744), Color(0xFF344A78)) else listOf(Color.White,
             Color(0xFFF2F5FF), Color(0xFFB9BDDB)), endY = layout.size.height.toFloat())
         Text(label, maxLines = 1, softWrap = false, style = style.copy(brush = face),
-            modifier = Modifier.testTag("entry-title-$label").drawBehind {
+            // Use the allocated column width, rather than re-rounding the fitted
+            // text's fractional intrinsic width into a tight, potentially clipped box.
+            modifier = Modifier.fillMaxWidth().testTag("entry-title-$label").drawBehind {
                 drawText(layout, color = Color(0xFF20133F), topLeft = Offset(1.dp.toPx(), 2.dp.toPx()))
                 drawText(layout, color = Color(0xFF7141A8), topLeft = Offset(.5.dp.toPx(), 1.3.dp.toPx()))
                 drawText(layout, color = Color(0xFF5DE5F0), topLeft = Offset(0f, (-.5).dp.toPx()))

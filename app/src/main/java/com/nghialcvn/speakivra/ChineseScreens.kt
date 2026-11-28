@@ -408,7 +408,7 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                             }
                             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                                    DecorativeWave(); Microphone(onClick = ::listen, large = true, active = phase == "listening"); DecorativeWave()
+                                    IllustratedRecordingButton(::listen, active = phase == "listening")
                                 }
                                 Text(captureLabel(phase, if (finalTranscript == null) "Chạm để nói" else "Chạm để nói lại"), color = studio.muted)
                             }

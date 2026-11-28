@@ -32,7 +32,7 @@ class ChineseCourseFlowTest {
                 CompositionLocalProvider(LocalDensity provides Density(density, font)) {
                     Surface(color = studio.background, contentColor = studio.ink) {
                         var selected by remember { mutableStateOf<StudyLanguage?>(if (chinese) StudyLanguage.CHINESE else StudyLanguage.ENGLISH) }
-                        if (selected == null) LanguageEntryScreen { selected = it }
+                        if (selected == null) StudyLanguageDialog(StudyLanguage.CHINESE, {}, { selected = it })
                         else Column(Modifier.fillMaxSize()) {
                             StudyLanguageBar(selected!!) { selected = null }
                             Box(Modifier.weight(1f)) {
@@ -55,7 +55,7 @@ class ChineseCourseFlowTest {
     }
     @Test fun languageSelectionAndBothLevelsUseRealCounts() {
         render(chinese = false)
-        ui.onNodeWithText("Tiếng Anh ⌄").assertIsDisplayed()
+        ui.onNodeWithText("🇺🇸 ⌄").assertIsDisplayed()
         ui.onNodeWithText("A1 • Cơ bản").assertIsDisplayed()
         ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()

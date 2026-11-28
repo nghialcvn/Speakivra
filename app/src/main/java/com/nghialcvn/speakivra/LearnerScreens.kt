@@ -98,7 +98,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                         LearnerAvatar(learner.avatar, Modifier.size(72.dp))
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(learner.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                                Text(learner.name, Modifier.weight(1f, fill = false), maxLines = 2, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                                 LearnerAccountMark(learner)
                             }
                             AchievementSummary(TopicAchievements(learnerPrefs).total() +

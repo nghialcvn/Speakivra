@@ -75,9 +75,10 @@ class ApprovedUiTest {
         shot("50-profile-diamond-achievements")
         assertSingleLine(courseTotal)
         val achievementBounds = ui.onNodeWithText(courseTotal, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
-        val continueBounds = ui.onNodeWithText("Tiếp tục bài học ›", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val continueBounds = ui.onNodeWithTag("language-en", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         org.junit.Assert.assertTrue(achievementBounds.bottom < continueBounds.top)
-        ui.onNodeWithText("Tiếp tục bài học ›").performClick()
+        ui.startLocalStudy()
+        ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
         ui.onNodeWithText("Luyện nghe & nói").assertIsDisplayed()
         ui.onNodeWithContentDescription("Quay lại").performClick()
         ui.onNodeWithText("Tiến độ", substring = false).performClick()

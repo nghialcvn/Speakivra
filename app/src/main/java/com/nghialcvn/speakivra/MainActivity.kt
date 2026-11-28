@@ -1,5 +1,6 @@
 package com.nghialcvn.speakivra
 
+import androidx.compose.animation.Crossfade
 import android.Manifest
 import android.app.Activity
 import androidx.activity.compose.BackHandler
@@ -176,7 +177,8 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     }
     val avatars = ImageBitmap.imageResource(R.drawable.learner_avatars)
     CompositionLocalProvider(LocalLearnerArtwork provides avatars) {
-        if (!splashFinished) {
+        Crossfade(targetState = splashFinished, label = "Startup transition") { ready ->
+        if (!ready) {
             val appearance = context.getSharedPreferences("speakivra_progress", 0)
             val dark = appearance.getBoolean("dark_theme", false)
             val neon = appearance.getBoolean("neon_theme", false)
@@ -241,6 +243,7 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
                 }
             }
         }
+    }
     }
 }
 

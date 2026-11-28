@@ -50,12 +50,11 @@ class LanguageAreaFlowTest {
         bitmap.recycle()
     }
     @Test fun actualStartupSeparatesAreasAndKeepsSharedProfileAttendanceAndBothResumes() {
-        ui.onNodeWithText("Hôm nay bạn muốn học gì?").assertIsDisplayed()
+        ui.selectEnglishAreaIfNeeded()
         shot("170-language-entry-approved")
-        ui.onNodeWithTag("language-en").performClick()
         ui.onNodeWithText("Bắt đầu học").performClick()
         ui.onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
-        ui.onNodeWithText("Tiếng Anh ⌄").assertIsDisplayed()
+        ui.onNodeWithText("🇺🇸 ⌄").assertIsDisplayed()
         ui.onNodeWithText("Chào Nghia!").assertIsDisplayed()
         ui.onNodeWithText("Câu 4/20").assertIsDisplayed()
         shot("171-english-area-home-approved")
@@ -64,7 +63,7 @@ class LanguageAreaFlowTest {
         val days = prefs.getStringSet(CHECK_IN_DATES, emptySet())!!.toSet()
         ui.onNodeWithTag("switch-study-language").performClick()
         ui.onNodeWithTag("language-zh").performClick()
-        ui.onNodeWithText("Tiếng Trung ⌄").assertIsDisplayed()
+        ui.onNodeWithText("🇨🇳 ⌄").assertIsDisplayed()
         ui.onNodeWithText("Chào Nghia!").assertIsDisplayed()
         ui.onNodeWithText("Câu 4/20").assertIsDisplayed()
         ui.onNodeWithText("认识新朋友").assertIsDisplayed()

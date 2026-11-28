@@ -40,11 +40,8 @@ internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.startLocalSt
     }
 }
 
-/** Legacy English journeys still enter through the public language selector. */
+/** Wait for local startup readiness before entering an existing learner journey. */
 internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.selectEnglishAreaIfNeeded() {
-    waitForIdle()
-    if (onAllNodesWithTag("language-en").fetchSemanticsNodes().isNotEmpty()) {
-        onNodeWithTag("language-en").performClick()
-        onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
-    }
+    waitUntil(10000) { onAllNodesWithText("Ai học hôm nay?").fetchSemanticsNodes().isNotEmpty() }
+    onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
 }

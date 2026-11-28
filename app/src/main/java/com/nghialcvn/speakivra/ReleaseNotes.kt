@@ -3,6 +3,9 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.2.9" to listOf(
+            "layers" to "Chữ Speakivra nghiêng đậm, ánh sáng cyan–tím chạy trong nét chữ",
+            "book" to "Tiêu đề Tiếng Anh và Tiếng Trung nổi 3D theo mẫu đã duyệt"),
         "1.2.8" to listOf(
             "layers" to "Chọn tiếng Anh hoặc tiếng Trung khi mở ứng dụng; mỗi ngôn ngữ có khu học riêng",
             "book" to "Mở rộng tiếng Trung A1–C2, Lễ tân và Buồng phòng theo cấu trúc tiếng Anh",

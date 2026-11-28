@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,11 +24,8 @@ internal fun LanguageEntryScreen(onSelect: (StudyLanguage) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(224.dp, 180.dp))
-            BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                val scale = LocalDensity.current.fontScale
-                Text("Speakivra", fontSize = minOf(44f, maxWidth.value / (5.4f * scale)).sp, maxLines = 1, fontWeight = FontWeight.ExtraBold)
-            }
+            Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(224.dp, 180.dp).testTag("entry-brand-logo"))
+            EntryBrandWordmark()
         }
         Spacer(Modifier.height(12.dp))
         Text("Hôm nay bạn muốn học gì?", fontSize = 23.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
@@ -45,7 +41,7 @@ internal fun LanguageEntryScreen(onSelect: (StudyLanguage) -> Unit) {
                         Text(if (chinese) "汉" else "Aa", fontSize = 32.sp, color = accent, fontWeight = FontWeight.Bold)
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(language.label, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                        EntryLanguageTitle(language.label)
                         Text(if (language == StudyLanguage.ENGLISH) "English" else "中文", color = studio.muted)
                         Surface(color = badge, shape = RoundedCornerShape(16.dp)) {
                             Text("A1 → C2 • Khách sạn", Modifier.padding(horizontal = 8.dp, vertical = 2.dp), color = accent, fontSize = 12.sp)

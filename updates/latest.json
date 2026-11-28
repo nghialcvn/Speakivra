@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.3.3-beta",
+    "tag_name": "v1.3.4-beta",
     "draft": false,
-    "body": "# Speakivra 1.3.3 Beta\n\n- Micro minh họa 3D cho màn luyện nói tiếng Anh và tiếng Trung.\n- Năm biểu tượng điều hướng dùng hình minh họa. Tab đang chọn phóng lớn và sáng lên, các tab còn lại thu nhỏ và dịu màu.\n\nAPK 1.3.3 (53) dùng khóa ký hiện hành để cài đè và giữ tiến độ học.\n",
+    "body": "# Speakivra 1.3.4 Beta\n\n- Sửa chuyển tab Bài học và Luyện nói tiếng Trung.\n- Micro rung nhẹ trên màn hình trong lúc ghi âm.\n- Hai trạng thái điểm danh có viền và bóng nổi nhẹ.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.3.3-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.3.3-beta/Speakivra-v1.3.3-release.apk",
-        "size": 22198767,
-        "digest": "sha256:fdc1373a0563d4141d4fb661762e1abf3a80caca396cb09bfe22e7523c31edfb"
+        "name": "Speakivra-v1.3.4-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.3.4-beta/Speakivra-v1.3.4-release.apk",
+        "size": 22198784,
+        "digest": "sha256:444d7adec7ce4596a9eac9a9daf6b1c06f71b86810e795af06a3fd833dd8dc2c"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 53,
-    "versionName": "1.3.3",
-    "apkName": "Speakivra-v1.3.3-release.apk",
-    "apkSha256": "fdc1373a0563d4141d4fb661762e1abf3a80caca396cb09bfe22e7523c31edfb",
+    "versionCode": 54,
+    "versionName": "1.3.4",
+    "apkName": "Speakivra-v1.3.4-release.apk",
+    "apkSha256": "444d7adec7ce4596a9eac9a9daf6b1c06f71b86810e795af06a3fd833dd8dc2c",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

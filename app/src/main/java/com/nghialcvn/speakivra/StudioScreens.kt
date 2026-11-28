@@ -174,7 +174,8 @@ internal fun StudioBottomNavigation(page: String, onNavigate: (String) -> Unit) 
 @Composable
 internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, completed: Int, learnerName: String,
                         learner: Learner, preferences: android.content.SharedPreferences,
-                        onContinue: () -> Unit, onLessons: () -> Unit, onProfile: () -> Unit) {
+                        onContinue: () -> Unit, onLessons: () -> Unit, onProfile: () -> Unit,
+                        lessonHeading: String? = null, lessonNote: String? = null, courseSummary: String = "A1 • A2 • B1 • B2 • C1 • C2 • Hội thoại • Đoạn văn • Bài tập") {
     val p = studio
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(if (p == NeonStudio) 16.dp else 14.dp)) {
@@ -199,8 +200,9 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                     StudioIcon("chat", Modifier.size(30.dp), p.purple)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(if (HotelCurriculum.isHotel(lesson)) "Khách sạn • ${lessonLabel(lesson)}" else "Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(lessonHeading ?: if (HotelCurriculum.isHotel(lesson)) "Khách sạn • ${lessonLabel(lesson)}" else "Bài ${Lessons.all.indexOfFirst { it.id == lesson.id } + 1} • ${lessonLabel(lesson)}", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
                     Text(lesson.title, fontSize = 14.sp)
+                    lessonNote?.let { Text(it, color = p.muted, fontSize = 11.sp) }
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -217,7 +219,7 @@ internal fun HomeScreen(lesson: Lesson, progress: LessonProgress, goal: Int, com
                 StudioIcon("book", Modifier.size(28.dp), p.coral)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Bài học", fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("A1 • A2 • B1 • B2 • C1 • C2 • Hội thoại • Đoạn văn • Bài tập", color = p.muted,
+                    Text(courseSummary, color = p.muted,
                         fontSize = 12.sp, lineHeight = 17.sp)
                 }
                 StudioIcon("chevron", Modifier.size(17.dp), p.coral)
@@ -627,7 +629,7 @@ internal fun ProfileScreen(
     onBack: () -> Unit = {}, onAccent: (String) -> Unit = {},
     onGender: (String) -> Unit = {}, onExplanationLanguage: (String) -> Unit = {},
     onStudyOptions: () -> Unit = {}, onReminderToggle: (Boolean) -> Unit = {},
-    onSound: () -> Unit = {}, onAbout: () -> Unit = {}, onAccount: () -> Unit = {}
+    onSound: () -> Unit = {}, onAbout: () -> Unit = {}, onAccount: () -> Unit = {}, chinese: Boolean = false
 ) {
     // No second Dark/Light tree: identical component structure across all themes.
     UnifiedSettingsScreen(
@@ -640,7 +642,7 @@ internal fun ProfileScreen(
         onLanguage = onExplanationLanguage,
         onStudy = onStudyOptions, onReminder = onReminderToggle,
         onSpeed = onSpeed, onGoal = onGoal, onSound = onSound,
-        onUpdates = onUpdates, onAbout = onAbout, onAccount = onAccount
+        onUpdates = onUpdates, onAbout = onAbout, onAccount = onAccount, chinese = chinese
     )
 }
 

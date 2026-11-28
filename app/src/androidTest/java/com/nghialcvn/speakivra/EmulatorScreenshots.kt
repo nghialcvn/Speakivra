@@ -39,3 +39,12 @@ internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.startLocalSt
         onNodeWithText("Tiếp tục học", substring = false).performScrollTo().performClick()
     }
 }
+
+/** Legacy English journeys still enter through the public language selector. */
+internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.selectEnglishAreaIfNeeded() {
+    waitForIdle()
+    if (onAllNodesWithTag("language-en").fetchSemanticsNodes().isNotEmpty()) {
+        onNodeWithTag("language-en").performClick()
+        onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
+    }
+}

@@ -1,0 +1,92 @@
+{
+  "sourceMain": "4c353a2c69d10a7f48dc3183c9862f704d7e9910",
+  "core": [
+    {
+      "level": "A1",
+      "topics": 10,
+      "phrases": 200,
+      "turns": 70,
+      "readings": 5,
+      "readingSentences": 20,
+      "exercises": 5,
+      "exerciseQuestions": 30
+    },
+    {
+      "level": "A2",
+      "topics": 15,
+      "phrases": 450,
+      "turns": 150,
+      "readings": 10,
+      "readingSentences": 100,
+      "exercises": 20,
+      "exerciseQuestions": 100
+    },
+    {
+      "level": "B1",
+      "topics": 20,
+      "phrases": 700,
+      "turns": 300,
+      "readings": 10,
+      "readingSentences": 100,
+      "exercises": 20,
+      "exerciseQuestions": 100
+    },
+    {
+      "level": "B2",
+      "topics": 20,
+      "phrases": 700,
+      "turns": 300,
+      "readings": 10,
+      "readingSentences": 100,
+      "exercises": 20,
+      "exerciseQuestions": 100
+    },
+    {
+      "level": "C1",
+      "topics": 20,
+      "phrases": 700,
+      "turns": 300,
+      "readings": 10,
+      "readingSentences": 100,
+      "exercises": 20,
+      "exerciseQuestions": 100
+    },
+    {
+      "level": "C2",
+      "topics": 20,
+      "phrases": 700,
+      "turns": 300,
+      "readings": 10,
+      "readingSentences": 100,
+      "exercises": 20,
+      "exerciseQuestions": 100
+    },
+    {
+      "level": "FO",
+      "topics": 20,
+      "phrases": 500,
+      "turns": 120,
+      "readings": 0,
+      "readingSentences": 0,
+      "exercises": 20,
+      "exerciseQuestions": 500
+    },
+    {
+      "level": "HK",
+      "topics": 20,
+      "phrases": 500,
+      "turns": 120,
+      "readings": 0,
+      "readingSentences": 0,
+      "exercises": 20,
+      "exerciseQuestions": 500
+    }
+  ],
+  "retainedStarterExtras": {
+    "readings": 25,
+    "readingSentences": 100,
+    "exercisePacks": 25,
+    "exerciseQuestions": 100,
+    "meaningChecks": 75
+  }
+}

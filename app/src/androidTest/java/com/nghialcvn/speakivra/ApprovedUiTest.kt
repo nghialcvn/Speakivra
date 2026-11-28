@@ -58,6 +58,7 @@ class ApprovedUiTest {
         }
     }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @org.junit.Before fun enterEnglishArea() { ui.selectEnglishAreaIfNeeded() }
     @Test fun approvedDiamondRewardsAndResume() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val prefs = context.getSharedPreferences("speakivra_progress", 0)

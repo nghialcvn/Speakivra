@@ -8,7 +8,8 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
     val allowedLessons = (Lessons.catalogue + ChineseCurriculum.lessons).associateBy { it.id }
     val progress = JSONObject()
     values.forEach { (key, value) ->
-        if (key == "active_lesson" && value is String && value in allowedLessons) progress.put(key, value)
+        if (key in setOf("active_lesson", "zh.active_lesson") && value is String && value in allowedLessons &&
+            ((key == "zh.active_lesson") == value.startsWith("zh_"))) progress.put(key, value)
         else if (key == CHECK_IN_DATES && value is Set<*>) {
             progress.put(key, JSONArray(validCheckInDates(value.filterIsInstance<String>()).sorted()))
         } else if (key == "extra.completed_ids" && value is Set<*>) {
@@ -24,6 +25,7 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
                     val known = if (parts[2] == "learned_phrases") lesson.phrases.map { it.id } else lesson.conversation.map { it.id }
                     progress.put(key, value.split('|').filter { it in known }.distinct().joinToString("|"))
                 }
+                "diamonds_earned" -> if (lesson.id.startsWith("zh_") && value is Int && value in 0..3) progress.put(key, value)
                 "phrase" -> if (value is Int && value in 0..lesson.phrases.size) progress.put(key, value)
                 "turn" -> if (value is Int && value in 0..lesson.conversation.size) progress.put(key, value)
                 "review", "correct" -> if (value is Int && value in 0..3) progress.put(key, value)
@@ -35,6 +37,15 @@ internal fun profileSyncPayload(learner: Learner, identity: GuestIdentity, value
             val parts = key.split('.', limit = 3)
             val lesson = allowedLessons[parts.getOrNull(1)]
             if (lesson != null && lesson.phrases.any { it.id == parts.getOrNull(2) }) progress.put(key, value)
+        }
+    }
+    // A v1.2.7 cloud snapshot has no reward-history key. Preserve its old denominator
+    // before merging into a v1.2.8 device that may already have a zero-valued baseline.
+    ChineseStarterCurriculum.topics.forEach { old ->
+        val key = "lesson.${old.id}.diamonds_earned"
+        if (!values.containsKey(key)) {
+            val reward = achievementHearts(topicAccuracy(old.lesson) { id -> (values["achievement.${old.id}.$id"] as? Int) ?: 0 })
+            if (reward > 0) progress.put(key, reward)
         }
     }
     // Export stable completion IDs even for old preferences that only stored indices.

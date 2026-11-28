@@ -54,6 +54,7 @@ class SparkAccountIntegrationTest {
         }
     } }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @org.junit.Before fun enterEnglishArea() { ui.selectEnglishAreaIfNeeded() }
     private fun request(path: String, body: JSONObject? = null): JSONObject {
         val connection = URL("http://10.0.2.2:9099/$path").openConnection() as HttpURLConnection
         connection.connectTimeout=10000; connection.readTimeout=10000

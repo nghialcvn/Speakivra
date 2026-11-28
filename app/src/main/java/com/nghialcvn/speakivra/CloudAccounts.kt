@@ -70,7 +70,7 @@ internal class AccountRuntime private constructor(private val context: Context, 
     }
     fun watch(learner: Learner): SharedPreferences.OnSharedPreferenceChangeListener {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (!applyingCloud && key != null && (key.startsWith("lesson.") || key.startsWith("achievement.") || key == "extra.completed_ids" || key == CHECK_IN_DATES || key == "active_lesson") && identities.peek(learner)?.ownerUid == uid) {
+            if (!applyingCloud && key != null && (key.startsWith("lesson.") || key.startsWith("achievement.") || key == "extra.completed_ids" || key == CHECK_IN_DATES || key == "active_lesson" || key == "zh.active_lesson") && identities.peek(learner)?.ownerUid == uid) {
                 syncPrefs.edit().putBoolean("pending.${learner.id}", true).apply(); schedule()
             }
         }
@@ -113,7 +113,14 @@ internal class AccountRuntime private constructor(private val context: Context, 
             val local = learnerStore.findCloud(document.id)
             if (local == null || identities.peek(local)?.ownerUid == null) {
                 val value = validateSnapshot(document)
-                applyImported(document.id, expectedUid, value.first, value.second, sanitizedCloudProgress(document.id, JSONObject(document.getString("progressJson") ?: "{}")))
+                var progress = sanitizedCloudProgress(document.id, JSONObject(document.getString("progressJson") ?: "{}"))
+                for (level in ChineseCloudPartitions.levels) {
+                    val part = document.reference.collection("languageProgress").document(ChineseCloudPartitions.documentId(level))
+                        .get(Source.SERVER).cloudAwait()
+                    progress = mergeCloudProgress(progress, validateLanguageSnapshot(part, document.id, level))
+                }
+                requireUser(expectedUid)
+                applyImported(document.id, expectedUid, value.first, value.second, sanitizedCloudProgress(document.id, progress))
             }
         }
         for (person in learnerStore.all().filter { identities.peek(it)?.ownerUid == expectedUid }) syncOne(person, expectedUid)
@@ -136,28 +143,78 @@ internal class AccountRuntime private constructor(private val context: Context, 
         check((doc.getString("progressJson") ?: error("Thiếu tiến độ.")).length <= 524288)
         return name to avatar
     }
+    private fun validateLanguageSnapshot(doc: DocumentSnapshot, profileId: String, level: String): JSONObject {
+        if (!doc.exists()) return JSONObject()
+        check(doc.id == ChineseCloudPartitions.documentId(level) && doc.getLong("schema") == 1L &&
+            doc.getString("profileId") == profileId && doc.getString("language") == "zh" && doc.getString("level") == level)
+        val text = requireNotNull(doc.getString("progressJson"))
+        check(text.toByteArray(Charsets.UTF_8).size <= ChineseCloudPartitions.MAX_BYTES)
+        check((doc.getLong("revision") ?: 0) in 1L..1000000000L)
+        return ChineseCloudPartitions.levelProgress(sanitizedCloudProgress(profileId, JSONObject(text)), level)
+    }
+    private suspend fun <T : Any> profileTransaction(owner: String, ref: DocumentReference,
+        update: (Transaction, DocumentSnapshot, Map<String, DocumentSnapshot>) -> T): T {
+        for (attempt in 0 until 3) {
+            val observed = java.util.concurrent.atomic.AtomicReference<List<DocumentSnapshot>>(emptyList())
+            try {
+                return db.runTransaction { transaction ->
+                    requireUser(owner)
+                    val old = transaction.get(ref)
+                    val parts = ChineseCloudPartitions.levels.associateWith { level ->
+                        transaction.get(ref.collection("languageProgress").document(ChineseCloudPartitions.documentId(level)))
+                    }
+                    observed.set(listOf(old) + parts.values)
+                    update(transaction, old, parts)
+                }.cloudAwait()
+            } catch (failure: FirebaseFirestoreException) {
+                // A stale revision/create can be rejected by rules before the SDK's ABORTED
+                // retry. Re-read only our owned paths; stable denials are never retried here.
+                if (failure.code != FirebaseFirestoreException.Code.PERMISSION_DENIED || attempt == 2 || observed.get().isEmpty()) throw failure
+                requireUser(owner)
+                var changedOnServer = false
+                for (old in observed.get()) {
+                    val fresh = old.reference.get(Source.SERVER).cloudAwait()
+                    if (fresh.data != old.data) { changedOnServer = true; break }
+                }
+                requireUser(owner)
+                if (!changedOnServer) throw failure
+            }
+        }
+        error("Không thể hoàn tất giao dịch đồng bộ.")
+    }
     private suspend fun syncOne(person: Learner, owner: String) {
         requireUser(owner)
         val identity = requireNotNull(identities.peek(person)); check(identity.ownerUid == owner)
         val input = profileSyncPayload(person, identity, learnerStore.preferences(person).all).getJSONObject("progress")
         val dirtyName = syncPrefs.getBoolean("metadataDirty.${person.id}", false)
         val ref = db.collection("accounts").document(owner).collection("profiles").document(identity.profileId)
-        val merged = db.runTransaction { transaction ->
-            requireUser(owner)
-            val old = transaction.get(ref)
+        // All reads precede writes. Migration and all eight level snapshots commit atomically.
+        val merged = profileTransaction(owner, ref) { transaction, old, parts ->
             val oldMeta = if (old.exists()) validateSnapshot(old) else person.name to person.avatar
             val name = if (dirtyName) person.name else oldMeta.first
             val avatar = if (dirtyName) person.avatar else oldMeta.second
-            val remote = if (old.exists()) sanitizedCloudProgress(identity.profileId, JSONObject(old.getString("progressJson") ?: "{}")) else JSONObject()
+            var remote = if (old.exists()) sanitizedCloudProgress(identity.profileId, JSONObject(old.getString("progressJson") ?: "{}")) else JSONObject()
+            parts.forEach { (level, part) -> remote = mergeCloudProgress(remote, validateLanguageSnapshot(part, identity.profileId, level)) }
             val combined = sanitizedCloudProgress(identity.profileId, mergeCloudProgress(input, remote))
-            val text = combined.toString(); check(text.length <= 524288) { "Tiến độ quá lớn để đồng bộ." }
+            val root = ChineseCloudPartitions.rootProgress(combined)
+            val text = root.toString(); check(text.length <= 524288) { "Tiến độ quá lớn để đồng bộ." }
+            // Validate every size before queuing any mutation. A denied level write aborts the root migration too.
+            val levelTexts = parts.keys.associateWith { ChineseCloudPartitions.checkedText(ChineseCloudPartitions.levelProgress(combined, it)) }
+            parts.forEach { (level, part) ->
+                val levelText = levelTexts.getValue(level)
+                if ((!part.exists() && levelText != "{}") || (part.exists() && levelText != part.getString("progressJson"))) {
+                    transaction.set(part.reference, mapOf("schema" to 1, "profileId" to identity.profileId, "language" to "zh", "level" to level,
+                        "progressJson" to levelText, "revision" to ((part.getLong("revision") ?: 0) + 1),
+                        "createdAt" to (part.getTimestamp("createdAt") ?: FieldValue.serverTimestamp()), "updatedAt" to FieldValue.serverTimestamp()))
+                }
+            }
             if (!old.exists() || name != oldMeta.first || avatar != oldMeta.second || text != old.getString("progressJson")) {
                 transaction.set(ref, mapOf("schema" to 1, "profileId" to identity.profileId, "name" to name, "avatar" to avatar,
                     "progressJson" to text, "revision" to ((old.getLong("revision") ?: 0) + 1),
                     "createdAt" to (old.getTimestamp("createdAt") ?: FieldValue.serverTimestamp()), "updatedAt" to FieldValue.serverTimestamp()))
             }
             Triple(name, avatar, combined)
-        }.cloudAwait()
+        }
         requireUser(owner)
         // Learning or editing may have continued during network I/O. Keep those newer local changes.
         val current = learnerStore.all().first { it.id == person.id }

@@ -41,6 +41,16 @@ service cloud.firestore {
   function ownsClaim(uid,id) {
    return isOwner(uid) && get(/databases/$(database)/documents/claims/$(id)).data.ownerUid == uid;
   }
+  function validLanguageId(part) { return part in ['zh_A1','zh_A2','zh_B1','zh_B2','zh_C1','zh_C2','zh_FO','zh_HK']; }
+  function isValidLanguageProgress(data,id,part) {
+   return data.keys().hasAll(['schema','profileId','language','level','progressJson','revision','createdAt','updatedAt']) &&
+    data.keys().hasOnly(['schema','profileId','language','level','progressJson','revision','createdAt','updatedAt']) &&
+    data.schema is int && data.schema == 1 && data.profileId == id && validId(id) &&
+    data.language == 'zh' && data.level is string && part == 'zh_' + data.level && validLanguageId(part) &&
+    data.progressJson is string && data.progressJson.toUtf8().size() <= 131072 &&
+    data.revision is int && data.revision > 0 && data.revision <= 1000000000 &&
+    data.createdAt is timestamp && data.updatedAt is timestamp && data.updatedAt == request.time;
+  }
   match /claims/{id} {
    // Exact missing-ID check permitted; no listing or foreign owner disclosure.
    allow get: if verified() && validId(id) &&
@@ -67,6 +77,19 @@ service cloud.firestore {
    allow update: if ownsClaim(uid,id) && isValidProfile(request.resource.data,id) &&
     request.resource.data.createdAt == resource.data.createdAt && request.resource.data.revision == resource.data.revision + 1;
    allow delete: if ownsClaim(uid,id);
+   match /languageProgress/{part} {
+    // Exact gets include missing documents so a new profile can migrate atomically.
+    // No listing or foreign account/profile access is opened by this subcollection.
+    allow get: if validLanguageId(part) && ownsClaim(uid,id);
+    allow list: if false;
+    allow create: if ownsClaim(uid,id) && isValidLanguageProgress(request.resource.data,id,part) &&
+     getAfter(/databases/$(database)/documents/accounts/$(uid)/profiles/$(id)).data.profileId == id &&
+     request.resource.data.revision == 1 && request.resource.data.createdAt == request.time;
+    allow update: if ownsClaim(uid,id) && isValidLanguageProgress(request.resource.data,id,part) &&
+     getAfter(/databases/$(database)/documents/accounts/$(uid)/profiles/$(id)).data.profileId == id &&
+     request.resource.data.createdAt == resource.data.createdAt && request.resource.data.revision == resource.data.revision + 1;
+    allow delete: if validLanguageId(part) && ownsClaim(uid,id);
+   }
   }
   match /{document=**} { allow read, write: if false; }
  }

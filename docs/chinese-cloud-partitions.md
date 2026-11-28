@@ -1,0 +1,60 @@
+# Chinese progress storage (1.2.8)
+
+Approved by the user after review of PR #15. This changes storage only; no approved
+screen, profile identity, attendance behaviour or achievement formula changes.
+
+The original `accounts/{uid}/profiles/{profileId}` document retains schema 1,
+English progress, shared attendance, both resume keys and a compatibility copy of
+the original 1.2.7 Chinese A1/A2 subset. Full Chinese progress is divided into eight
+private `languageProgress/zh_<level>` documents: A1, A2, B1, B2, C1, C2, FO and HK.
+Each has schema 1, profileId, language=`zh`, level, progressJson, revision and
+server timestamps. Both client and rules cap each JSON string at 131,072 UTF-8
+bytes. Empty levels are not created until they contain progress.
+
+One Firestore transaction reads the parent and the eight fixed document paths
+before writing. It unions stable completion IDs, keeps best scores/rewards and
+earned rounds, and sanitizes all imported fields. The root compatibility copy is
+trimmed only in the same atomic commit that persists the full level snapshots.
+Any rejected write aborts the entire migration. An old client may still update the
+root; later sync unions its legacy progress with the level documents, preserving
+new content. The shared Chinese resume key stays in the root so stale resumes in
+different levels cannot compete.
+
+Rules may reject a stale revision/create as PERMISSION_DENIED before the SDK can
+classify it as an ABORTED transaction. After that error, the client re-reads only
+the same owned paths and retries up to three attempts only if a server snapshot
+has changed since the failed attempt. Stable permission failures and foreign
+account access are not retried by this path. Every retry still performs the full
+ownership/schema/revision checks and unions the fresh progress before committing.
+
+Fresh restores fetch the eight exact level paths from the server before importing
+the profile. Offline failures leave local progress pending. Study changes made
+during a sync are merged back and scheduled for the next sync. Every document
+requires the existing verified account and immutable profile claim. There are no
+collection-list permissions for languageProgress; writes require the same parent
+profile, including a parent created in the atomic transaction. Voice IDs, audio,
+device settings and auth credentials remain outside progress payloads.
+
+Tests cover complete English + Chinese payloads, legacy starter migration, old
+client compatibility, UTF-8 limits, failed atomic writes, independent Android SDK
+clients with isolated preferences, offline retry, concurrent merge and foreign
+account denial. Existing UI tests and screenshot requirements remain mandatory.
+The outage check uses an unreachable emulator endpoint with the same local device
+preferences, then retries through the healthy SDK client. It does not assume that
+Firestore's stream-level disableNetwork switch blocks transaction RPCs.
+
+## Deployment
+
+The new Firestore rules and the languageProgress progressJson index exemption must
+be deployed to the existing Firebase project before this client is released. The additive rules preserve the current parent profile
+schema and old-client access. Deploying the APK without the matching rules will
+cause level reads/writes to be denied and leave progress pending; it does not
+permit an unsafe fallback that discards Chinese progress.
+
+On 2026-11-28 the matching rules and index exemptions were applied to
+`speakivra-nghialcvn` / `(default)` through Firebase Console. The published rules
+were reloaded and their SHA-256 matched the tested source. Both progressJson
+exemptions were confirmed with all index modes disabled. The database remains
+Standard, asia-southeast1, on Spark. No learner documents were edited. The
+deployment receipt is `docs/releases/v1.2.8-firebase.json`; APK publication is a
+separate verified workflow.

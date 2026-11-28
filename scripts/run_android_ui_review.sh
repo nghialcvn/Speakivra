@@ -72,6 +72,8 @@ run_check 'CheckInRefinementUiTest#grayStripPersistsCheckInAndAvatarHandsOverlap
 run_check 'CheckInRefinementUiTest#allSixSelectedAvatarsKeepTheirHandsOnTheDarkStrip' 1
 run_check 'CheckInRefinementUiTest#compactRowStaysAlignedAtNarrowWidthsAndLargeFont' 1
 run_check ChineseCourseFlowTest 6
+run_check LanguageAreaFlowTest 3
+run_check ChineseCloudSyncIntegrationTest 2
 run_check BrandRefreshUiTest 1
 run_check ProperNameFeedbackTest 1
 run_check DailyCheckInFlowTest 1
@@ -84,12 +86,14 @@ run_check SparkAccountIntegrationTest 1
 python3 - <<'PY'
 from pathlib import Path
 rows = [line.split() for line in Path("ui-diagnostics/counts.txt").read_text().splitlines()]
-assert len(rows) == 14, rows
+assert len(rows) == 16, rows
 assert all(int(count) == 1 for _, count in rows[:4]), rows
 assert rows[4][0] == "ChineseCourseFlowTest" and int(rows[4][1]) >= 6, rows
-assert sum(int(count) for _, count in rows[5:]) >= 27, rows
+assert rows[5][0] == "LanguageAreaFlowTest" and int(rows[5][1]) >= 3, rows
+assert rows[6][0] == "ChineseCloudSyncIntegrationTest" and int(rows[6][1]) == 2, rows
+assert sum(int(count) for _, count in rows[7:]) >= 27, rows
 files = list(Path("ui-review").rglob("*.png"))
-missing = [n for n in list(range(140, 153)) + list(range(160, 167)) if not any(f.name.startswith(f"{n}-") for f in files)]
+missing = [n for n in list(range(140, 153)) + list(range(160, 167)) + list(range(170, 177)) if not any(f.name.startswith(f"{n}-") for f in files)]
 assert not missing, f"Missing required new screenshots: {missing}"
-print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all twenty review screenshots")
+print(f"Verified {sum(int(count) for _, count in rows)} Android tests and all twenty-seven review screenshots")
 PY

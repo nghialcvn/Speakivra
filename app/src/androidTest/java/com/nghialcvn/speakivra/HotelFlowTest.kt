@@ -31,6 +31,7 @@ class HotelFlowTest {
         }
     } }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @org.junit.Before fun enterEnglishArea() { ui.selectEnglishAreaIfNeeded() }
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private fun shell(cmd: String) = instrumentation.uiAutomation.executeShellCommand(cmd).use {
         java.io.FileInputStream(it.fileDescriptor).bufferedReader().readText().trim()

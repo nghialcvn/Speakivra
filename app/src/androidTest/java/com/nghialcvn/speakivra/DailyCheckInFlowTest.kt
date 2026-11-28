@@ -30,6 +30,7 @@ class DailyCheckInFlowTest {
         }
     } }
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
+    @org.junit.Before fun enterEnglishArea() { ui.selectEnglishAreaIfNeeded() }
     private fun shot(name: String) {
         ui.waitForIdle()
         val i = InstrumentationRegistry.getInstrumentation(); dismissUnrelatedLauncherAnr(i)

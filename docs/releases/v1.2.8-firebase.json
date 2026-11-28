@@ -1,0 +1,17 @@
+{
+  "projectId": "speakivra-nghialcvn",
+  "databaseId": "(default)",
+  "edition": "STANDARD",
+  "location": "asia-southeast1",
+  "verifiedDate": "2026-11-28",
+  "verified": true,
+  "rulesSha256": "19eee071419ea0e9ab5dfc3286008d95d1c9dc5202125878c8acf42d3fe9b4b4",
+  "indexes": {
+    "indexes": [],
+    "fieldOverrides": [
+      {"collectionGroup": "profiles", "fieldPath": "progressJson", "indexes": []},
+      {"collectionGroup": "languageProgress", "fieldPath": "progressJson", "indexes": []}
+    ]
+  },
+  "verification": "Firebase Console: published rules reloaded and SHA-256 matched; both progressJson exemptions confirmed; Spark plan retained. No learner documents modified."
+}

@@ -1,7 +1,7 @@
 name: Verify Spark accounts and guest identity
 on:
   push:
-    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126, feat/chinese-a1-a2-v127]
+    branches: [feat/accounts-guest, feat/approved-brand-refresh, feat/approved-checkin-refinement, fix/compact-checkin-v126, feat/chinese-a1-a2-v127, feat/separate-language-full-chinese-v128]
   workflow_dispatch:
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -112,6 +112,8 @@ jobs:
             ui-test-output.txt
             ui-diagnostics/**
             firebase-emulators.log
+            firestore-debug.log
+            firebase-debug.log
             ui-recognition-provider.txt
             real-speech-provider-probe.txt
             app/build/reports/tests/**

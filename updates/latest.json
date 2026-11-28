@@ -1,23 +1,23 @@
 {
   "release": {
-    "tag_name": "v1.2.8-beta",
+    "tag_name": "v1.2.9-beta",
     "draft": false,
-    "body": "# Speakivra V1.2.8 Beta\n\n## Có gì mới\n\n- Mở app bằng màn chọn **Tiếng Anh / Tiếng Trung** theo demo đã duyệt. Có nút **Đổi ngôn ngữ** trên trang chủ.\n- Mỗi ngôn ngữ có khu bài học, luyện tập, tiến độ và vị trí tiếp tục riêng; hồ sơ, tài khoản và điểm danh dùng chung.\n- Mở rộng tiếng Trung đủ **A1–C2, Lễ tân và Buồng phòng**, theo số lượng và cấu trúc chương trình tiếng Anh: **145 chủ đề, 4.450 câu luyện nói, 1.660 lượt hội thoại, 55 bài đọc với 520 câu, 145 bộ Việt → Trung với 1.530 câu hỏi**.\n- Giữ các bài đọc, bài tập ngắn A1/A2 đã có cùng tiến độ và kim cương cũ. Học tiếp nội dung mới chưa hoàn thành; cấp đã mở vẫn được giữ khi học lại.\n- Chữ giản thể đi cùng **Pinyin và nghĩa tiếng Việt**. Có tốc độ nghe 0,75 / 1,0 / 1,25 và lựa chọn giọng đọc phổ thông Trung Quốc trên thiết bị.\n- Chia tiến độ Trung theo từng cấp/chuyên ngành để đồng bộ toàn bộ chương trình; bổ sung hợp nhất dữ liệu cũ, khôi phục và xử lý xung đột khi hai thiết bị học cùng lúc.\n- Giữ giao diện Sáng / Tối / Neon, Nunito, logo chính thức và khung điểm danh đã duyệt.\n\n## Khi cập nhật\n\nCài đè lên bản trước để giữ hồ sơ và tiến độ. Bản APK dùng application ID và khóa ký gốc. Với hồ sơ đã liên kết, phần chuyển dữ liệu đồng bộ chạy khi app kết nối Firebase; học ngoại tuyến vẫn lưu trên máy.\n\nNghe ngoại tuyến cần dữ liệu giọng Trung đã cài trên thiết bị. Nhận dạng có thể cần mạng; tỷ lệ khớp phản ánh chữ được nhận dạng, chưa đánh giá độ đúng thanh điệu. Micro và giọng đọc cần tiếp tục kiểm tra trên điện thoại thực tế.\n\nBản ghi giọng nói chỉ lưu tạm, phát khi nhấn loa và xóa khi đổi câu hoặc rời ngữ cảnh luyện tập.\n\n**Phiên bản:** 1.2.8 Beta · **versionCode:** 48.\n",
+    "body": "# Speakivra V1.2.9 Beta\n\n## Có gì mới\n\n- Chữ Speakivra nghiêng đậm theo mẫu đã duyệt, ánh sáng cyan–xanh dương–tím chạy từ trái sang phải bên trong nét chữ.\n- Tiêu đề Tiếng Anh và Tiếng Trung nổi 3D, mặt bạc trên nền tối, viền cyan và chiều sâu tím; nền sáng dùng mặt chữ navy dễ đọc.\n- Tiêu đề tự co để nằm trong thẻ khi màn hình hẹp hoặc tăng cỡ chữ.\n\nGiữ nguyên logo, nội dung, thứ tự hai khu học, trang chủ, khung điểm danh và toàn bộ chương trình học đã duyệt.\n\n## Cài đặt và dữ liệu\n\n- VersionName: 1.2.9; versionCode: 49.\n- APK release dùng application ID và khóa ký gốc. Cài đè lên bản trước để giữ hồ sơ, tiến độ và thành tích.\n- Kiểm tra SHA-256 và chữ ký qua file speakivra-update.json đính kèm.\n\n## Kiểm chứng\n\nMã ứng dụng: ab09b6552d4f65d860478c7ddfd19d2177097867.\n\nWorkflow kiểm thử: https://github.com/nghialcvn/Speakivra/actions/runs/46095421343\n\n121 kiểm thử logic, lint, kiểm tra Firebase và 44 kiểm thử Android đã thành công; đủ 32 ảnh kiểm tra giao diện bắt buộc. Đã đối chiếu ảnh APK trên máy ảo ở Sáng, Tối, Neon, hai pha ánh sáng và cỡ chữ lớn. Hình thức trên Galaxy S24 Ultra cần xác nhận sau khi cài bản này.\n",
     "assets": [
       {
-        "name": "Speakivra-v1.2.8-release.apk",
-        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.8-beta/Speakivra-v1.2.8-release.apk",
-        "size": 22107154,
-        "digest": "sha256:8f39fb435c78498b337a2d2b729d82bf193a9814abf4ed961d509f3ba9899f49"
+        "name": "Speakivra-v1.2.9-release.apk",
+        "browser_download_url": "https://github.com/nghialcvn/Speakivra/releases/download/v1.2.9-beta/Speakivra-v1.2.9-release.apk",
+        "size": 22107143,
+        "digest": "sha256:ac818718b896667dfb48a1b9efad8c7003736c880c5089c3dbcc8091c50e88d0"
       }
     ]
   },
   "metadata": {
     "applicationId": "com.nghialcvn.speakivra",
-    "versionCode": 48,
-    "versionName": "1.2.8",
-    "apkName": "Speakivra-v1.2.8-release.apk",
-    "apkSha256": "8f39fb435c78498b337a2d2b729d82bf193a9814abf4ed961d509f3ba9899f49",
+    "versionCode": 49,
+    "versionName": "1.2.9",
+    "apkName": "Speakivra-v1.2.9-release.apk",
+    "apkSha256": "ac818718b896667dfb48a1b9efad8c7003736c880c5089c3dbcc8091c50e88d0",
     "signingCertificateSha256": "e9268f42fed4c706722c249111e5db91b21d5c3da7f16d5b4c98b9d257ae2b35"
   }
 }

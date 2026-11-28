@@ -28,10 +28,7 @@ class EntryTypographyUiTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()
     private fun shot(name: String) {
         ui.waitForIdle()
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        dismissUnrelatedLauncherAnr(instrumentation)
-        instrumentation.uiAutomation.waitForIdle(500, 5000)
-        val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+        val bitmap = captureNativeDisplay()
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs()
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

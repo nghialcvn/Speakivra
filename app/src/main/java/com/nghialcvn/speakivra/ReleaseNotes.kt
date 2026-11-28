@@ -3,6 +3,11 @@ package com.nghialcvn.speakivra
 /** Installed-version notes are bundled with that APK, independent of a newer online release. */
 internal object InstalledReleaseNotes {
     private val notes = mapOf(
+        "1.3.1" to listOf(
+            "speaker" to "Cải thiện chọn giọng tiếng Trung ngoại tuyến và tự chọn lại khi giọng đã lưu không còn khả dụng",
+            "layers" to "Màn luyện nói tiếng Trung dùng cùng bố cục Tự động / Thủ công và cụm nút nghe mẫu với tiếng Anh",
+            "bell" to "Kiểm tra cập nhật nền theo chu kỳ 15 phút khi có mạng; thời điểm thông báo phụ thuộc Android",
+            "info" to "Mở phần cài dữ liệu giọng đọc khi thiết bị chưa có giọng tiếng Trung"),
         "1.3.0" to listOf(
             "profile" to "Chọn hồ sơ trước, ghi nhớ ngôn ngữ học riêng của từng người",
             "globe" to "Đổi tiếng Anh hoặc tiếng Trung ngay trong hồ sơ và trang chủ",

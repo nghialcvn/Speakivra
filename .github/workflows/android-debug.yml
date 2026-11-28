@@ -15,7 +15,7 @@ on:
         type: boolean
         default: true
   push:
-    branches: [main]
+    branches: [release/v1.3.2-approved]
     paths:
       - 'app/**'
       - 'scripts/apk_metadata.py'
@@ -34,11 +34,11 @@ jobs:
     permissions:
       contents: write
     env:
-      VARIANT: ${{ inputs.release && 'release' || 'debug' }}
+      VARIANT: ${{ (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved') && 'release' || 'debug' }}
     steps:
       - uses: actions/checkout@v4
       - name: Validate release secrets
-        if: inputs.release
+        if: (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         env:
           KEYSTORE: ${{ secrets.SPEAKIVRA_KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
@@ -60,7 +60,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Check fixed signing certificate before building
-        if: inputs.release
+        if: (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         env:
           SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
           SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
@@ -94,7 +94,7 @@ jobs:
           SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
           SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
           SPEAKIVRA_KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
-          UI_CHECK: ${{ inputs.ui_check && inputs.release }}
+          UI_CHECK: ${{ inputs.ui_check && (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved') }}
         run: |
           UI_TASKS=()
           if [ "$UI_CHECK" = true ]; then UI_TASKS=(:app:assembleReleaseAndroidTest); fi
@@ -123,17 +123,17 @@ jobs:
           if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
           python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
       - name: Prepare real microphone probe dependencies
-        if: inputs.ui_check && inputs.release
+        if: inputs.ui_check && (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         run: |
           python3 -m pip install grpcio==1.76.0
       - name: Enable emulator acceleration for UI review
-        if: inputs.ui_check && inputs.release
+        if: inputs.ui_check && (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Review approved screens on Android emulator
-        if: inputs.ui_check && inputs.release
+        if: inputs.ui_check && (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 35
@@ -157,7 +157,7 @@ jobs:
             python3 -c 'from pathlib import Path; s=Path("real-speech-provider-probe.txt").read_text(); assert "OK (1 test)" in s and "FAILURES!!!" not in s, s'
             python3 -c 'from pathlib import Path; import re; s=Path("ui-test-output.txt").read_text(); m=re.search(r"OK \((\d+) tests?\)", s); assert m and int(m.group(1)) >= 2 and "FAILURES!!!" not in s, s'
       - name: Upload UI review screenshots and reports
-        if: always() && inputs.ui_check && inputs.release
+        if: always() && inputs.ui_check && (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved')
         uses: actions/upload-artifact@v4
         with:
           name: Speakivra-ui-review
@@ -178,7 +178,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Publish verified beta APK directly
-        if: inputs.release && !inputs.ui_check
+        if: (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved') && !inputs.ui_check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -192,7 +192,7 @@ jobs:
           gh release upload "$TAG" dist/*.apk dist/speakivra-update.json
           gh release edit "$TAG" --draft=false
       - name: Refresh rate-limit-safe Android update index
-        if: inputs.release && !inputs.ui_check
+        if: (inputs.release || github.ref == 'refs/heads/release/v1.3.2-approved') && !inputs.ui_check
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/update_release_index.py

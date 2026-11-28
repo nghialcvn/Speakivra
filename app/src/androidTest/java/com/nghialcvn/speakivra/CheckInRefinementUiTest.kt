@@ -57,6 +57,7 @@ class CheckInRefinementUiTest {
         val logoFirst = ui.onNodeWithTag("picker-brand-logo").captureDeviceRegion()
         shot("140-picker-shine-left")
         ui.runOnIdle { phase = .75f }
+        shot("141-picker-shine-right")
         val second = ui.onNodeWithTag("picker-brand-wordmark").captureDeviceRegion()
         val logoSecond = ui.onNodeWithTag("picker-brand-logo").captureDeviceRegion()
         assertTrue("Light band must move within the wordmark", !first.sameAs(second))
@@ -65,7 +66,6 @@ class CheckInRefinementUiTest {
         assertEquals(first.getPixel(0, 0), second.getPixel(0, 0))
         assertEquals(first.getPixel(first.width - 1, first.height - 1), second.getPixel(second.width - 1, second.height - 1))
         first.recycle(); second.recycle(); logoFirst.recycle(); logoSecond.recycle()
-        shot("141-picker-shine-right")
     }
     @Test fun grayStripPersistsCheckInAndAvatarHandsOverlapItsTop() {
         val prefs = ui.activity.getSharedPreferences("checkin-refinement-test", 0)

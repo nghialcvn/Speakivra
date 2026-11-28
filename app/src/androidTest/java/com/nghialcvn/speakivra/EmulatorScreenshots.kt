@@ -51,6 +51,16 @@ internal fun captureNativeDisplay(): android.graphics.Bitmap {
     val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
     instrumentation.waitForIdleSync()
     dismissUnrelatedLauncherAnr(instrumentation)
+    // Semantics can be idle before SurfaceFlinger presents the new phase.
+    // Wait for two real display frames instead of returning the previous buffer.
+    val presented = java.util.concurrent.CountDownLatch(1)
+    instrumentation.runOnMainSync {
+        android.view.Choreographer.getInstance().postFrameCallback {
+            android.view.Choreographer.getInstance().postFrameCallback { presented.countDown() }
+        }
+    }
+    check(presented.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "Android did not present a frame" }
+    instrumentation.uiAutomation.waitForIdle(200, 5000)
     return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
 }
 

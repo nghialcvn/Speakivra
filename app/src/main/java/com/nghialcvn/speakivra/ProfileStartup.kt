@@ -12,6 +12,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -36,11 +40,11 @@ internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage
 }
 
 @Composable internal fun ProfileSplashScreen() {
-    val shine = rememberBrandSweepPhase()
+    val shine = rememberBrandSweepPhase(cycleMillis = 1800)
     Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Image(painterResource(R.drawable.brand_logo_clear), "Logo Speakivra", Modifier.size(240.dp, 196.dp).testTag("splash-brand-logo").brandShine(shine))
-        EntryBrandWordmark()
+        EntryBrandWordmark(sweep = shine)
         Spacer(Modifier.height(36.dp))
         Text("Every language, a new horizon.", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
@@ -74,7 +78,12 @@ internal fun saveStudyLanguage(prefs: SharedPreferences, language: StudyLanguage
     if (upcoming) Dialog(onDismissRequest = { upcoming = false }) {
         Surface(modifier = Modifier.border(1.dp, Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), RoundedCornerShape(24.dp)), shape = RoundedCornerShape(24.dp), color = studio.card, contentColor = studio.ink) {
             Column(Modifier.padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                StudioIcon("globe", Modifier.size(48.dp), studio.purple)
+                StudioIcon("globe", Modifier.size(48.dp)
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(Brush.linearGradient(listOf(Color(0xFF00D5E5), Color(0xFFB75CFF))), blendMode = BlendMode.SrcAtop)
+                    }, studio.purple)
                 Text("Ngôn ngữ mới sắp ra mắt", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, textAlign = TextAlign.Center)
                 Text("Các ngôn ngữ mới đang được chuẩn bị. Bạn chờ thêm chút nhé!", color = studio.muted, textAlign = TextAlign.Center)
                 CoralButton("Đã hiểu", chevron = false) { upcoming = false }

@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 
 /** Only the entry wordmark changes; the learner picker keeps its approved lockup. */
 @Composable
-internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.dp, tag: String = "entry-brand-wordmark") {
-    val phase = rememberBrandSweepPhase()
+internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.dp, tag: String = "entry-brand-wordmark", sweep: State<Float>? = null) {
+    val phase = sweep ?: rememberBrandSweepPhase()
     val light = studio == LightStudio
     Box(modifier.fillMaxWidth().height(height), contentAlignment = Alignment.Center) {
         for (depth in 3 downTo 1) {
@@ -54,15 +54,15 @@ internal fun EntryBrandWordmark(modifier: Modifier = Modifier, height: Dp = 64.d
 }
 
 @Composable
-internal fun rememberBrandSweepPhase(): State<Float> {
+internal fun rememberBrandSweepPhase(cycleMillis: Int = 6000): State<Float> {
     val fixed = LocalBrandSweepPhase.current
     return if (fixed == null) {
         rememberInfiniteTransition(label = "Entry wordmark light").animateFloat(
             -.4f, 1.4f, infiniteRepeatable(keyframes {
-                durationMillis = 6000
+                durationMillis = cycleMillis
                 -.4f at 0 using LinearEasing
-                1.4f at 3600 using LinearEasing
-                1.4f at 6000
+                1.4f at (cycleMillis * .6f).toInt() using LinearEasing
+                1.4f at cycleMillis
             }), label = "Entry left to right sweep")
     } else rememberUpdatedState(fixed)
 }

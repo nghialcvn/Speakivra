@@ -10,6 +10,8 @@ import androidx.compose.ui.res.imageResource
 import androidx.core.view.WindowCompat
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -134,7 +136,17 @@ private fun SpeakivraApp(updates: InAppUpdates, updateRequested: Boolean, onUpda
     var studyLanguage by rememberSaveable { mutableStateOf<StudyLanguage?>(StudyLanguage.ENGLISH) }
     var splashFinished by rememberSaveable { mutableStateOf(false) }
     var choosingLanguage by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(Unit) { kotlinx.coroutines.delay(1500); splashFinished = true }
+    LaunchedEffect(Unit) {
+        if (splashFinished) return@LaunchedEffect
+        val ready = async(Dispatchers.Default) {
+            Lessons.catalogue
+            ChineseCurriculum.topics
+            learners.forEach { store.preferences(it).getString("study_language", null) }
+        }
+        kotlinx.coroutines.delay(1500)
+        ready.await()
+        splashFinished = true
+    }
 
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var lastId by rememberSaveable { mutableStateOf<String?>(null) }

@@ -13,23 +13,31 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
+import org.junit.FixMethodOrder
+import org.junit.runners.MethodSorters
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EntryTypographyUiTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()
     private fun shot(name: String) {
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        ui.waitForIdle()
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        dismissUnrelatedLauncherAnr(instrumentation)
+        instrumentation.uiAutomation.waitForIdle(500, 5000)
+        val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs()
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }
-    @Test fun approvedSplashPickerAndPopupMatchAllThreeAppearances() {
+    @Test fun a_approvedSplashPickerAndPopupMatchAllThreeAppearances() {
         var phase by mutableStateOf(-.4f)
         var appearance by mutableStateOf(1)
         var splash by mutableStateOf(true)
@@ -38,6 +46,8 @@ class EntryTypographyUiTest {
         store.preferences(learner).edit().clear().commit()
         ui.runOnUiThread { ui.activity.setContent {
             SpeakivraTheme(dark = appearance == 1, neon = appearance == 2) {
+                val palette = studio
+                SideEffect { updateSystemBars(ui.activity, appearance != 0, palette.background) }
                 Surface(color = studio.background, contentColor = studio.ink) {
                     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                         if (appearance == 2) NeonWaveBackground(Modifier.matchParentSize())
@@ -81,7 +91,7 @@ class EntryTypographyUiTest {
             ui.onNodeWithText("Đã hiểu").performClick()
         }
     }
-    @Test fun compactProfileKeepsIndependentLanguagesAtLargeFontsAndAfterRecreation() {
+    @Test fun b_compactProfileKeepsIndependentLanguagesAtLargeFontsAndAfterRecreation() {
         var width by mutableStateOf(360)
         var fontScale by mutableStateOf(1f)
         val store = LearnerStore(ui.activity)
@@ -100,6 +110,7 @@ class EntryTypographyUiTest {
             }
         } }
         for (w in listOf(284, 360)) for (scale in listOf(1f, 1.5f)) {
+            android.util.Log.i("ProfileStartupReview", "width=$w fontScale=$scale")
             ui.runOnIdle { width = w; fontScale = scale }
             val english = ui.onNodeWithTag("language-en")
             val chinese = ui.onNodeWithTag("language-zh")

@@ -86,7 +86,6 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
             learners.forEach { learner ->
                 val chosen = learner.id == selected
                 val learnerPrefs = store.preferences(learner)
-                val chineseProgress = remember(learner.id) { ChineseProgress(learnerPrefs) }
                 var language by remember(learner.id) { mutableStateOf(savedStudyLanguage(learnerPrefs)) }
                 var revision by remember(learner.id) { mutableIntStateOf(0) }
                 DisposableEffect(learner.id, learnerPrefs) {
@@ -103,7 +102,7 @@ internal fun LearnerPicker(store: LearnerStore, learners: List<Learner>, initial
                     }
                 }
                 val diamonds = remember(learner.id, revision) {
-                    TopicAchievements(learnerPrefs).total() + ChineseCurriculum.topics.sumOf { chineseProgress.diamonds(it) }
+                    TopicAchievements(learnerPrefs).total() + ChineseCurriculum.topics.sumOf { chineseSummaryDiamonds(learnerPrefs, it) }
                 }
                 Column(Modifier.fillMaxWidth().then(if (p == NeonStudio) Modifier.neonGlass(18, chosen)
                     else Modifier.clip(RoundedCornerShape(18.dp))

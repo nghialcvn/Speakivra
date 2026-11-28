@@ -61,11 +61,11 @@ class EntryTypographyUiTest {
         } }
         val logo = ui.onNodeWithTag("splash-brand-logo")
         val word = ui.onNodeWithTag("entry-brand-wordmark")
-        val beforeLogo = logo.captureToImage().asAndroidBitmap()
-        val beforeWord = word.captureToImage().asAndroidBitmap()
+        val beforeLogo = logo.captureDeviceRegion()
+        val beforeWord = word.captureDeviceRegion()
         ui.runOnIdle { phase = .35f }
-        val afterLogo = logo.captureToImage().asAndroidBitmap()
-        val afterWord = word.captureToImage().asAndroidBitmap()
+        val afterLogo = logo.captureDeviceRegion()
+        val afterWord = word.captureDeviceRegion()
         assertFalse(beforeLogo.sameAs(afterLogo))
         assertFalse(beforeWord.sameAs(afterWord))
         assertEquals(beforeWord.getPixel(0, 0), afterWord.getPixel(0, 0))

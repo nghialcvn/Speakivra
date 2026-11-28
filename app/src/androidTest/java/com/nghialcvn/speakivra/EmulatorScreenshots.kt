@@ -45,3 +45,24 @@ internal fun androidx.compose.ui.test.junit4.ComposeContentTestRule.selectEnglis
     waitUntil(10000) { onAllNodesWithText("Ai học hôm nay?").fetchSemanticsNodes().isNotEmpty() }
     onNodeWithText("Ai học hôm nay?").assertIsDisplayed()
 }
+
+/** Capture the real display without Compose's two-second force-redraw/PixelCopy path. */
+internal fun captureNativeDisplay(): android.graphics.Bitmap {
+    val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+    instrumentation.waitForIdleSync()
+    dismissUnrelatedLauncherAnr(instrumentation)
+    return requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+}
+
+/** Keep pixel assertions scoped to the same visible node, using display coordinates. */
+internal fun SemanticsNodeInteraction.captureDeviceRegion(): android.graphics.Bitmap {
+    val bounds = fetchSemanticsNode().boundsInWindow
+    val screen = captureNativeDisplay()
+    val left = bounds.left.toInt().coerceIn(0, screen.width - 1)
+    val top = bounds.top.toInt().coerceIn(0, screen.height - 1)
+    val width = bounds.width.toInt().coerceIn(1, screen.width - left)
+    val height = bounds.height.toInt().coerceIn(1, screen.height - top)
+    val cropped = android.graphics.Bitmap.createBitmap(screen, left, top, width, height)
+    if (cropped !== screen) screen.recycle()
+    return cropped
+}

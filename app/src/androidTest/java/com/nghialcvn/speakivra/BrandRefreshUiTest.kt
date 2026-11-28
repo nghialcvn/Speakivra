@@ -30,7 +30,7 @@ class BrandRefreshUiTest {
         ui.waitForIdle()
         val i = InstrumentationRegistry.getInstrumentation(); dismissUnrelatedLauncherAnr(i)
         i.uiAutomation.waitForIdle(500, 5000)
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = captureNativeDisplay()
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
     }

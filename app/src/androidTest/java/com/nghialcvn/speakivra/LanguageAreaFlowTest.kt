@@ -43,7 +43,7 @@ class LanguageAreaFlowTest {
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private fun shot(name: String) {
         ui.waitForIdle()
-        val bitmap = ui.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = captureNativeDisplay()
         val path = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         path.parentFile!!.mkdirs()
         path.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

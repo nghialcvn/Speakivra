@@ -29,6 +29,15 @@ class EntryTypographyUiTest {
     private fun shot(name: String) {
         ui.waitForIdle()
         val bitmap = captureNativeDisplay()
+        if (name.contains("-picker-")) {
+            val flag = ui.onNodeWithTag("language-en").fetchSemanticsNode().boundsInWindow
+            var red = 0
+            for (y in flag.top.toInt() until flag.bottom.toInt()) for (x in flag.left.toInt() until flag.right.toInt()) {
+                val pixel = bitmap.getPixel(x, y)
+                if (android.graphics.Color.red(pixel) > 120 && android.graphics.Color.green(pixel) < 90 && android.graphics.Color.blue(pixel) < 100) red++
+            }
+            assertTrue("The display must show the US flag, not a stale splash buffer", red > 20)
+        }
         val file = File(ui.activity.getExternalFilesDir(null), "ui-screenshots/$name.png")
         file.parentFile!!.mkdirs()
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

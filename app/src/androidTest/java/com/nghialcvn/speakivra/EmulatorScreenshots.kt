@@ -55,6 +55,12 @@ internal fun captureNativeDisplay(): android.graphics.Bitmap {
     // Wait for two real display frames instead of returning the previous buffer.
     val presented = java.util.concurrent.CountDownLatch(1)
     instrumentation.runOnMainSync {
+        // A test-clock composition can update semantics before its window is dirty.
+        // Explicitly schedule the real window traversal, including dialog windows.
+        android.view.inspector.WindowInspector.getGlobalWindowViews().forEach {
+            it.requestLayout()
+            it.invalidate()
+        }
         android.view.Choreographer.getInstance().postFrameCallback {
             android.view.Choreographer.getInstance().postFrameCallback { presented.countDown() }
         }

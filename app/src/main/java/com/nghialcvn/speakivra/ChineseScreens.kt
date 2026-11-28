@@ -410,9 +410,32 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                                     DecorativeWave(); Microphone(onClick = ::listen, large = true, active = phase == "listening"); DecorativeWave()
                                 }
-                                Text(captureLabel(phase, "Chạm để nói"), color = studio.muted)
+                                Text(captureLabel(phase, if (finalTranscript == null) "Chạm để nói" else "Chạm để nói lại"), color = studio.muted)
                             }
-                            Text(topic.tip, color = studio.muted, fontSize = 13.sp)
+                            val result = finalTranscript
+                            SpokenResult(learner, transcript, if (result != null && phase == "idle") accepted else null,
+                                highlighted = result?.let { chineseFeedback(it, matchChinese(it, reference)) }) {
+                                if (result != null) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Text("Khớp ${match.correct}/${match.tokens.size} đơn vị · ${match.matchPercent}%" +
+                                        if (match.extra > 0) " · Thêm ${match.extra} đơn vị" else "",
+                                        color = if (accepted) studio.correctWord else studio.incorrectWord,
+                                        fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                    Text(when {
+                                        match.negationMismatch -> "Khác từ phủ định · Cần nói lại để giữ đúng nghĩa"
+                                        accepted -> "✓ Có thể chuyển câu"
+                                        else -> "Hãy nghe mẫu và nói lại nhé"
+                                    }, color = if (accepted) studio.correctWord else studio.ink, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                }
+                            }
+                            if (!accepted) StudioCard(color = studio.mint, border = studio == NeonStudio) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    StudioIcon("bulb", Modifier.size(27.dp), studio.green)
+                                    Column {
+                                        Text("Mẹo luyện âm", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                                        Text(topic.tip, fontSize = 14.sp)
+                                    }
+                                }
+                            }
                         } else {
                             if (mode == "chat") FilterChip(automatic, onClick = {
                                 clearSpeech(); automatic = !automatic; preferences.edit().putBoolean("zh_automatic_mode", automatic).apply()
@@ -428,8 +451,8 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                                 Text(captureLabel(phase, "Nói"), fontSize = 13.sp)
                             }
                         }
-                        Text(status, color = studio.muted, fontSize = 12.sp)
-                        if (finalTranscript != null) {
+                        if (mode != "repeat" || phase != "idle" || finalTranscript == null) Text(status, color = studio.muted, fontSize = 12.sp)
+                        if (mode != "repeat" && finalTranscript != null) {
                             StudioCard {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     LearnerAvatar(learner.avatar, Modifier.size(28.dp), square = true)
@@ -445,11 +468,12 @@ internal fun ChineseCourseScreen(preferences: SharedPreferences, learner: Learne
                                 }
                             }
                         }
-                        Text("Đối chiếu chữ Hán và tên Latin; chưa chấm thanh điệu. Nghe/nói cần sai dưới 60% và giữ đúng từ phủ định. Bài dịch cần khớp toàn bộ đáp án mẫu.", fontSize = 12.sp, color = studio.muted)
+                        if (mode == "repeat") Text("Đối chiếu chữ nhận dạng, chưa chấm thanh điệu.", fontSize = 12.sp, color = studio.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        else Text("Đối chiếu chữ Hán và tên Latin; chưa chấm thanh điệu. Nghe/nói cần sai dưới 60% và giữ đúng từ phủ định. Bài dịch cần khớp toàn bộ đáp án mẫu.", fontSize = 12.sp, color = studio.muted)
                     }
                     CoralButton(if (mode == "repeat" && !accepted) "Cần nói lại" else if (index == lines.lastIndex) "Hoàn thành phần này" else "Câu tiếp theo",
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp).testTag("zh-next"),
-                        enabled = accepted || (phase == "idle" && typedResult == true), onClick = {
+                        chevron = mode == "repeat" && accepted, enabled = accepted || (phase == "idle" && typedResult == true), onClick = {
                             val result = if (typedResult == true && mode == "exercise") (listOf(line.hanzi) + line.alternatives).map { matchChinese(it, typed) }.first { it.exact } else match
                             if (if (mode == "read" && wholeReading) lines.indices.all { store.complete(topic, mode, it, result) } else store.complete(topic, mode, index, result)) {
                                 clearSpeech()

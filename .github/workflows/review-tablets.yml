@@ -1,0 +1,39 @@
+name: Review released APK on tablets
+on:
+  push:
+    branches: [review/tablet-v129]
+jobs:
+  tablet:
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [800x1280, 600x960]
+        rotation: [0, 1]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified public release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v1.2.9-beta -p Speakivra-v1.2.9-release.apk
+          echo 'ac818718b896667dfb48a1b9efad8c7003736c880c5089c3dbcc8091c50e88d0  Speakivra-v1.2.9-release.apk' | sha256sum -c -
+          sudo chmod 666 /dev/kvm
+      - uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        env:
+          TABLET_SIZE: ${{ matrix.size }}
+          ROT: ${{ matrix.rotation }}
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          emulator-options: -no-window -gpu swiftshader -feature -Vulkan -no-snapshot -no-boot-anim -camera-back none
+          disable-animations: true
+          script: python3 scripts/review_tablet.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tablet-${{ matrix.size }}-${{ matrix.rotation }}
+          path: tablet-review/

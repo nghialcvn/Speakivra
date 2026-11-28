@@ -1,0 +1,210 @@
+name: Publish approved Speakivra V1.2.8 beta
+on:
+  push:
+    branches: [release/v1.2.8-approved]
+    paths: ['.github/workflows/publish-v128-approved-beta.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-reviewed-apk
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      actions: read
+    env:
+      VARIANT: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify explicitly approved V1.2.8 candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_SOURCE: b0857d5778281aa26947c4880fb3bd8179068e6b
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/release/v1.2.8-approved
+          grep -Fq 'val approvedVersion = "1.2.8"' app/build.gradle.kts
+          grep -Eq 'versionCode = 48$' app/build.gradle.kts
+          git fetch --no-tags --depth=1 origin "$REVIEWED_SOURCE"
+          git diff --name-only "$REVIEWED_SOURCE" "$GITHUB_SHA" > "$RUNNER_TEMP/release-diff.txt"
+          python3 - <<'PYDIFF'
+          import os, pathlib
+          changes = set((pathlib.Path(os.environ['RUNNER_TEMP']) / 'release-diff.txt').read_text().splitlines())
+          assert changes == {'.github/workflows/publish-v128-approved-beta.yml', 'docs/releases/v1.2.8-beta.md', 'docs/releases/v1.2.8-firebase.json', 'docs/chinese-cloud-partitions.md'}, changes
+          PYDIFF
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/46083309569" > "$RUNNER_TEMP/reviewed.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/46083309569/jobs" > "$RUNNER_TEMP/reviewed-jobs.json"
+          gh run download 46083309569 --name Speakivra-ui-review --dir reviewed-ui
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          run = json.loads((root / 'reviewed.json').read_text())
+          assert run['head_sha'] == os.environ['REVIEWED_SOURCE'] and run['conclusion'] == 'success'
+          assert run['path'].split('@')[0] == '.github/workflows/accounts-guest-candidate.yml'
+          jobs = json.loads((root / 'reviewed-jobs.json').read_text())['jobs']
+          for name in ['Test, lint and build once', 'Verify APK and create update metadata', 'Start isolated Firebase emulators and check ownership rules', 'Review approved screens on Android emulator']:
+              assert any(s['name'] == name and s['conclusion'] == 'success' for j in jobs for s in j['steps']), name
+          review = pathlib.Path('reviewed-ui')
+          rows = [line.split() for line in (review / 'ui-diagnostics/counts.txt').read_text().splitlines()]
+          assert len(rows) == 16 and sum(int(r[1]) for r in rows) == 42
+          assert all(int(r[1]) == 1 for r in rows[:4])
+          assert rows[4][0] == "ChineseCourseFlowTest" and int(rows[4][1]) >= 6
+          assert rows[5][0] == 'LanguageAreaFlowTest' and int(rows[5][1]) == 3
+          assert rows[6][0] == 'ChineseCloudSyncIntegrationTest' and int(rows[6][1]) == 2
+          assert sum(int(r[1]) for r in rows[7:]) >= 27
+          files = list(review.rglob('*.png'))
+          assert all(any(f.name.startswith(str(n) + '-') for f in files) for n in list(range(140,153)) + list(range(160,167)) + list(range(170,177)))
+          import xml.etree.ElementTree as ET
+          suites = [ET.parse(f).getroot() for f in review.rglob('TEST-*.xml')]
+          assert sum(int(s.attrib['tests']) for s in suites) == 121
+          assert all(int(s.attrib.get(k, 0)) == 0 for s in suites for k in ['failures','errors','skipped'])
+          import hashlib
+          receipt = json.loads(pathlib.Path('docs/releases/v1.2.8-firebase.json').read_text())
+          assert receipt['projectId'] == 'speakivra-nghialcvn' and receipt['databaseId'] == '(default)'
+          assert receipt['verified'] is True
+          assert hashlib.sha256(pathlib.Path('firestore.rules').read_bytes()).hexdigest() == receipt['rulesSha256']
+          assert json.loads(pathlib.Path('firestore.indexes.json').read_text()) == receipt['indexes']
+          PY
+          if gh release view v1.2.8-beta >/dev/null 2>&1; then
+            echo "::error::Version already exists; never overwrite a published APK."
+            exit 1
+          fi
+      - name: Validate release secrets
+        env:
+          KEYSTORE: ${{ secrets.SPEAKIVRA_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+          CERTIFICATE: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          for value in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD CERTIFICATE; do
+            if [ -z "${!value}" ]; then
+              echo "::error::Missing signing secret: $value. Configure the fixed key before publishing."
+              exit 1
+            fi
+          done
+          umask 077
+          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/speakivra-release.jks"
+          echo "SPEAKIVRA_KEYSTORE_PATH=$RUNNER_TEMP/speakivra-release.jks" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check fixed signing certificate before building
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          keytool -exportcert -keystore "$SPEAKIVRA_KEYSTORE_PATH" -alias "$SPEAKIVRA_KEY_ALIAS" -storepass:env SPEAKIVRA_STORE_PASSWORD -file "$RUNNER_TEMP/speakivra-cert.der"
+          python3 - <<'PY'
+          import hashlib, os, pathlib, re
+          expected = os.environ['SPEAKIVRA_SIGNING_SHA256'].lower().replace(':', '')
+          actual = hashlib.sha256((pathlib.Path(os.environ['RUNNER_TEMP']) / 'speakivra-cert.der').read_bytes()).hexdigest()
+          if not re.fullmatch(r'[0-9a-f]{64}', expected) or actual != expected:
+              raise SystemExit('Signing certificate mismatch. Keep the original release key; do not generate a replacement.')
+          print('Fixed signing certificate verified.')
+          PY
+      - name: Prepare Android SDK
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          fi
+          test -n "$SDKMANAGER" && test -x "$SDKMANAGER"
+          "$SDKMANAGER" --install "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Test, lint and build once
+        env:
+          SPEAKIVRA_STORE_PASSWORD: ${{ secrets.SPEAKIVRA_STORE_PASSWORD }}
+          SPEAKIVRA_KEY_ALIAS: ${{ secrets.SPEAKIVRA_KEY_ALIAS }}
+          SPEAKIVRA_KEY_PASSWORD: ${{ secrets.SPEAKIVRA_KEY_PASSWORD }}
+          UI_CHECK: false
+        run: |
+          UI_TASKS=()
+          if [ "$UI_CHECK" = true ]; then UI_TASKS=(:app:assembleReleaseAndroidTest); fi
+          # Maven Central can intermittently return HTTP 429 on fresh runners.
+          # Retry only that transient infrastructure error, not compilation or tests.
+          for attempt in 1 2 3; do
+            if gradle --no-daemon ":app:test${VARIANT^}UnitTest" ":app:lint${VARIANT^}" ":app:assemble${VARIANT^}" "${UI_TASKS[@]}" > build-attempt.log 2>&1; then
+              cat build-attempt.log
+              break
+            fi
+            cat build-attempt.log
+            if ! grep -Eq 'status code 429|Too Many Requests' build-attempt.log || [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 12))
+          done
+      - name: Verify APK and create update metadata
+        env:
+          SPEAKIVRA_SIGNING_SHA256: ${{ secrets.SPEAKIVRA_SIGNING_SHA256 }}
+        run: |
+          mkdir -p dist
+          VERSION=$(python3 -c 'import json,os; print(json.load(open("app/build/outputs/apk/"+os.environ["VARIANT"]+"/output-metadata.json"))["elements"][0]["versionName"])')
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          cp "app/build/outputs/apk/$VARIANT/app-$VARIANT.apk" "dist/Speakivra-v$VERSION-$VARIANT.apk"
+          RELEASE_FLAG=()
+          if [ "$VARIANT" = release ]; then RELEASE_FLAG=(--release); fi
+          python3 scripts/apk_metadata.py "dist/Speakivra-v$VERSION-$VARIANT.apk" dist "${RELEASE_FLAG[@]}"
+      - name: Verify signed upgrade from the current published beta
+        run: |
+          python3 - <<'PYUPGRADE'
+          import json, pathlib, zipfile
+          meta = json.loads(pathlib.Path('dist/speakivra-update.json').read_text())
+          prior = json.loads(pathlib.Path('updates/latest.json').read_text())['metadata']
+          assert meta['versionName'] == '1.2.8' and meta['versionCode'] == 48
+          assert meta['versionCode'] > prior['versionCode']
+          assert meta['applicationId'] == prior['applicationId'] == 'com.nghialcvn.speakivra'
+          assert meta['signingCertificateSha256'] == prior['signingCertificateSha256'], 'Signing certificate changed; do not publish an incompatible update'
+          with zipfile.ZipFile(pathlib.Path('dist') / meta['apkName']) as apk:
+              assert apk.read('curriculum/chinese.json.gz') == pathlib.Path('app/src/main/resources/curriculum/chinese.json.gz').read_bytes(), 'Full Mandarin curriculum missing or changed in release APK'
+          print('Verified same application ID, original release certificate, full Mandarin corpus and versionCode 48.')
+          PYUPGRADE
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: Speakivra-${{ env.VARIANT }}-verification
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Synchronize verified source onto main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/merges" --method POST -f base=main -f head="$GITHUB_SHA" -f commit_message="Merge verified Speakivra V1.2.8 source before publication" > "$RUNNER_TEMP/main-merge.json"
+          git fetch --no-tags origin main
+          git diff --exit-code "$GITHUB_SHA" origin/main -- app scripts firestore.rules firestore.indexes.json
+          git show origin/main:app/build.gradle.kts | grep -Fq 'val approvedVersion = "1.2.8"'
+          git show origin/main:app/build.gradle.kts | grep -Eq 'versionCode = 48$'
+      - name: Publish verified beta APK directly
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$APP_VERSION-beta"
+          test "$TAG" = v1.2.8-beta
+          test -f "docs/releases/$TAG.md"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::This version already exists. Increase versionCode/versionName; never replace a published APK."
+            exit 1
+          fi
+          gh release create "$TAG" --target "$GITHUB_SHA" --prerelease --draft --title "Speakivra $TAG" --notes-file "docs/releases/$TAG.md"
+          gh release upload "$TAG" dist/*.apk dist/speakivra-update.json
+          gh release edit "$TAG" --draft=false
+      - name: Refresh rate-limit-safe Android update index
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update_release_index.py
+      - name: Remove temporary release key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/speakivra-release.jks" "$RUNNER_TEMP/speakivra-cert.der"

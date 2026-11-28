@@ -49,5 +49,12 @@ The new Firestore rules and the languageProgress progressJson index exemption mu
 be deployed to the existing Firebase project before this client is released. The additive rules preserve the current parent profile
 schema and old-client access. Deploying the APK without the matching rules will
 cause level reads/writes to be denied and leave progress pending; it does not
-permit an unsafe fallback that discards Chinese progress. Rule deployment and APK
-publication have not been performed by this development change.
+permit an unsafe fallback that discards Chinese progress.
+
+On 2026-11-28 the matching rules and index exemptions were applied to
+`speakivra-nghialcvn` / `(default)` through Firebase Console. The published rules
+were reloaded and their SHA-256 matched the tested source. Both progressJson
+exemptions were confirmed with all index modes disabled. The database remains
+Standard, asia-southeast1, on Spark. No learner documents were edited. The
+deployment receipt is `docs/releases/v1.2.8-firebase.json`; APK publication is a
+separate verified workflow.
